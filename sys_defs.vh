@@ -143,6 +143,7 @@ typedef struct{
   PHYS_REG     T,
   PHYS_REG     T1,
   PHYS_REG     T2,
+  logic        occupied // to dispatch an instruction, we need to find the first non-occupied RS index
 } RS_ROW_T;
 
 typedef struct {
