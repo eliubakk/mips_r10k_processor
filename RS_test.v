@@ -49,6 +49,55 @@ module testbench;
 
 	// -------Testing for scalar pipeline-------
 	
+	// RESET
+	@(negedge clock);
+	reset = 1;
+	@(negedge clock);
+	reset = 0;	
+
+	// Simple test for two instruction flow (ADD r1 r2 r3, ADD r3 r4 r5)
+		// Dispatch - Execute - Commit - Retire
+	$display("-----Simple test for one instruction-----\n");
+
+		//-------- Dispatch
+	enable = 1; //enable only when write / read RS
+	CAM_in = 0;
+	inst_in = ; // structure of Decoded instruction
+	fu_idx = ;  // What is ALU1, ALU2, ALU3? 
+	dest_tag_in = 7'h3; // 
+	tag1_in = 7'h1;
+	tag2_in = 7'h2;
+
+	
+	@(negedge clock);
+
+		//--------- Issue
+
+	enable = 0;
+		
+
+	@(negedge clock);
+	
+		//------ Execute	
+
+	@(negedge clock);
+		
+		//--------- Commit
+
+	enable = 1;
+	CAM_in = 1;
+	inst_in = ;	// Some random instructio
+	fu_idx = ;	// Some random stuff	
+	dest_tag_in = ; // Some random stuff 
+	tag1_in = 7'h1;
+	tag2_in = 7'h2;
+	
+	@(negedge clock);
+
+		//---------Retire
+
+	@(negedge clock);
+	
 	// Test for reset
 	$display("-------RESET------\n");
 	@(negedge clock);
@@ -56,53 +105,18 @@ module testbench;
 	@(negedge clock);
 	reset = 0;	
 
-	// Test for Dispatch
-	
-
-	enable = 1;
-	CAM_in = 0;
-	inst_in = ;
-	fu_idx = ;
-	dest_tag_in = ;
-	tag1_in = ;
-	tag2_in = ;
-	
-	@(negedge clock);
-
-	// Test for Issue
-	// How can we test whether it is issued?
-
-	// Test for Execute	
-	// How can we test whether the RS is cleared?
-
-	// Test for Commit
-
-
-	enable = 1;
-	CAM_in = 1;
-	inst_in = ;
-	fu_idx = ;
-	dest_tag_in = ;
-	tag1_in = ;
-	tag2_in = ;
-	
-	
-	@(negedge clock);
-
-	// Test for Retire
-	// '
-	
-
-	// Test for enable
-	$display("-------Enable------\n");
-	
-
 	
 
 	// Test for simple pipeline
 
 
-	// Test for complicated pipeline 
+	// Test for complicated pipeline
+	
+
+	// Test for corner cases 
+	
+
+	// Test when fu_busy_out
 
 	
 	// -------Testing for 3 way super-scalar pipeline-------
