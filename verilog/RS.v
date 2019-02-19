@@ -8,6 +8,7 @@ module RS(
 	input  PHYS_REG 		dest_tag_in,
 	input  PHYS_REG 		tag1_in,
 	input  PHYS_REG 		tag2_in,
+
 	output OPCODE   		inst_out,
 	output PHYS_REG 		dest_tag_out,
 	output PHYS_REG 		tag1_out,
