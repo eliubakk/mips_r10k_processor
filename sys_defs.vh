@@ -40,6 +40,14 @@
 
 //////////////////////////////////////////////
 //
+// Register Parameters
+//
+//////////////////////////////////////////////
+`define NUM_PHYS_REG 64
+typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
+
+//////////////////////////////////////////////
+//
 // Error codes
 //
 //////////////////////////////////////////////
@@ -142,6 +150,12 @@ typedef enum logic [1:0] {
 //
 `define FALSE	1'h0
 `define TRUE	1'h1
+
+typedef enum logic [1:0] {
+  PAL_OPCODE,
+  LDA_OPCODE,
+  LDAH_OPCODE
+} OPCODE;
 
 //
 // Basic NOOP instruction.  Allows pipline registers to clearly be reset with
