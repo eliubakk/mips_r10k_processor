@@ -120,6 +120,7 @@ typedef enum logic [4:0] {
 } ALU_FUNC;
 
 `define NUM_FU 6
+`define RS_SIZE 6
 
 typedef enum logic [1:0]{
   FU_ALU
@@ -138,19 +139,18 @@ typedef enum logic [2:0]{
 } FU_IDX;
 
 typedef struct{
-  wire         busy,
   DECODED_INST inst,
   PHYS_REG     T,
   PHYS_REG     T1,
-  PHYS_REG     T2,
-  logic        occupied // to dispatch an instruction, we need to find the first non-occupied RS index
+  PHYS_REG     T2
 } RS_ROW_T;
 
 typedef struct {
-  ALU_OPA_SELECT opa_select,
-  ALU_OPB_SELECT opb_select,
-  DEST_REG_SEL   dest_reg, // mux selects
+  ALU_OPA_SELECT opa_select, // use this for T1 valid
+  ALU_OPB_SELECT opb_select, // use this for T2 valid
+  DEST_REG_SEL   dest_reg, // mux selects use this for T valid
   ALU_FUNC       alu_func,
+  FU_NAME        fu_name,
   logic rd_mem, wr_mem, ldl_mem, stc_mem, cond_branch, uncond_branch,
   logic halt,      // non-zero on a halt
   logic cpuid,     // get CPUID instruction
