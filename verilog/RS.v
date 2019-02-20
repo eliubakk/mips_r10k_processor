@@ -3,6 +3,7 @@ module RS(
 	input 		    		reset,
 	input 		    		enable,
 	input 		    		CAM_in,
+	input  PHYS_REG			CDB_in, // What heewoo and Morteza added
 	input  DECODED_INST		inst_in,
 	input  FU_IDX			fu_idx,
 	input  PHYS_REG 		dest_tag_in,
