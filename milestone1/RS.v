@@ -4,8 +4,8 @@ module issue_selector(
 		input RS_ROW_T [(`RS_SIZE - 1):0] 					rs_table,
 
 		// OUTPUTS
-		output logic [$clog2(`SS_SIZE)-1:0] 				issue_cnt,
-		output logic [`SS_SIZE-1:0] [$clog2(`RS_SIZE)-1:0]	issue_idx
+		output logic [$clog2(`NUM_FU)-1:0] 					issue_cnt,
+		output logic [`NUM_FU-1:0] [$clog2(`RS_SIZE)-1:0]	issue_idx
 	);
 	// TODO, use priority encoders
 endmodule
@@ -27,7 +27,11 @@ module RS(
 
 	output [`NUM_FU - 1:0] RS_ROW_T 	inst_out, 
 	output logic [`NUM_FU - 1:0]		issue,
-	output logic [$clog2(`RS_SIZE)-1:0]	busy_rows
+	// output logic [$clog2(`RS_SIZE)-1:0]	busy_rows,
+	output logic [$clog2(`SS_SIZE)-1:0] num_can_dispatch
+	// busy_rows tells previous stage how many entries are available
+	// therefore, the previous stage will only try to dispatch as 
+	// many instructions as rows are available
 	);
 	
 	//next state comb variables
@@ -35,6 +39,10 @@ module RS(
 	RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_next;
 	logic [`NUM_FU-1:0] 			issue_next;
 	logic [$clog2(`RS_SIZE)-1:0] 	busy_rows_next;
+	// busy_rows_next is a synchronous register that outputs 
+	// how many rows are in use minus num inst issued
+
+	logic [$clog2(`RS_SIZE)-1:0]	busy_rows_new;
 
 	//table to store internal state
 	RS_ROW_T [(`RS_SIZE - 1):0] 	rs_table;
@@ -51,33 +59,37 @@ module RS(
 
 	logic [1:0] inst_in_cnt;
 
-	always_comb
-	begin
-		if (enable & (busy_rows < `RS_SIZE))
-		begin
-			if (inst_in[2])
-			inst_in_cnt = inst_in[2].inst.valid_inst + inst_in[1].inst.valid_inst + inst_in[0].inst.valid_inst;
+	always_comb begin
+		if (enable) begin
+			rs_table_next = rs_table;
+			busy_rows_next = busy_rows;
+			// inst_in[2], inst_in[1], inst_in[0], inst_in_cnt
+			//    0            0		   0           00
+			//    1            0		   0           01
+			//    1            1		   0           10
+			//    1            1		   1           11
+			inst_in_cnt[0] = inst_in[0].inst.valid_inst | 
+							(inst_in[2].inst.valid_inst ^ inst_in[1].inst.valid_inst);
+			inst_in_cnt[1] = inst_in[1].inst.valid_inst;
+
+			// busy rows - issue count -> num_dispatch 
+			num_can_dispatch = busy_rows - issue_cnt;
+
 			// during dispatch, if RS gets a valid instruction
 			// insert instruction to end of rs_table
 			// increase busy_rows to keep track of the end of rs_table array
 			// as instructions get issued, we shift occupied registers up
-			if (inst_in_cnt == 3) begin 
-
-			if (inst_in[2].inst.valid_inst) begin
-				rs_table_next[busy_rows] = inst_in[2];
-				busy_rows_next = busy_rows + 1;
+			if (inst_in_cnt == `SS_SIZE) begin
+				rs_table_next[busy_rows+:`SS_SIZE] = inst_in[2-:`SS_SIZE];
+				busy_rows_next = busy_rows + `SS_SIZE;
+			end else if (inst_in_cnt == `SS_SIZE - 1) begin
+				rs_table_next[busy_rows+:(`SS_SIZE - 1)] = inst_in[2-:(`SS_SIZE - 1)];
+				busy_rows_next = busy_rows + `SS_SIZE - 1;
+			end else if (inst_in_cnt == `SS_SIZE - 2) begin
+				rs_table_next[busy_rows+:(`SS_SIZE - 2)] = inst_in[2-:(`SS_SIZE - 2)];
+				busy_rows_next = busy_rows + `SS_SIZE - 2;
 			end
-			if (inst_in[1].inst.valid_inst) begin
-				rs_table_next[busy_rows] = inst_in[1];
-				busy_rows_next = busy_rows + 1;				
-			end
-			if (inst_in[0].inst.valid_inst) begin
-				rs_table_next[busy_rows] = inst_in[0];
-				busy_rows_next = busy_rows + 1;				
-			end
-		end
-		else
-		begin
+		end else begin
 			// even if RS is disabled, output the previous output for RS READ
 			rs_table_next = rs_table;
 			busy_rows_next = busy_rows;
@@ -109,7 +121,6 @@ module RS(
 		.rs_table(rs_table),
 		.issue_idx(issue_idx),
 		.issue_cnt(issue_cnt)
-
 	);
 
 
