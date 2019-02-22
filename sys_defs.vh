@@ -138,7 +138,9 @@ typedef enum logic [2:0]{
   FU_ALU3_IDX,
   FU_LD_IDX,
   FU_ST_IDX,
-  FU_MULT_IDX
+  FU_MULT_IDX,
+  FU_MULT_IDX,
+  FU_BR_IDX
 } FU_IDX;
 
 typedef struct{
