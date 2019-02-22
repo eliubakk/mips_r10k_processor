@@ -10,7 +10,6 @@ module issue_selector(
 	// TODO, use priority encoders
 endmodule
 
-
 module RS(
 	// INPUTS
 	input 		    					clock,
@@ -19,6 +18,10 @@ module RS(
 	input  [`SS_SIZE-1:0] 	    		CAM_en,
 	input  [`SS_SIZE-1:0] PHYS_REG		CDB_in, // What heewoo and Morteza added
 	input  [`SS_SIZE-1:0] RS_ROW_T		inst_in,
+	input 								dispatch_hazard, // global dispatch hazard
+	input 								safe_dispatch,
+
+	input 								min_rob_fr,
 
 	// OUTPUTS
 	`ifdef DEBUG 
@@ -29,6 +32,8 @@ module RS(
 	output logic [`NUM_FU - 1:0]		issue,
 	// output logic [$clog2(`RS_SIZE)-1:0]	busy_rows,
 	output logic [$clog2(`SS_SIZE)-1:0] num_can_dispatch
+	// num_can_dispatch tells decoder how many instr can be 
+	// dispatched in the following cycle
 	// busy_rows tells previous stage how many entries are available
 	// therefore, the previous stage will only try to dispatch as 
 	// many instructions as rows are available
@@ -58,9 +63,11 @@ module RS(
 	//////////////////////////////////////////////////
 
 	logic [1:0] inst_in_cnt;
+	logic min = (num_can_dispatch < safe_dispatch) ? num_can_dispatch 
+												   : safe_dispatch;
 
 	always_comb begin
-		if (enable) begin
+		if (enable & ~dispatch_hazard) begin
 			rs_table_next = rs_table;
 			busy_rows_next = busy_rows;
 			// inst_in[2], inst_in[1], inst_in[0], inst_in_cnt

@@ -1,0 +1,6 @@
+List of Dispatch Hazards
+
+- Structural Hazard
+	- Free List
+	- ROB
+	- RS
