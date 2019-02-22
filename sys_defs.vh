@@ -45,6 +45,8 @@
 //////////////////////////////////////////////
 `define NUM_PHYS_REG 64
 typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
+`define DUMMY_REG {1'b1, $clog2(`NUM_PHYS_REG){1}}
+
 
 //////////////////////////////////////////////
 //
