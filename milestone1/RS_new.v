@@ -47,7 +47,16 @@ module issue_selector(
 endmodule
 */
 
+module max_finder(
+		input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
 
+		output logic [3:0] cnt_out 
+	);
+
+	cnt_out = 0;
+	cnt_out = (rs_table[0].waiting_cnt > rs_table[1].waiting_cnt) ? rs_table[0].waiting_cnt : rs_table[1].waiting_cnt;
+
+endmodule
 
 module index_finder(
 	// inputs
@@ -115,7 +124,8 @@ module RS(
 
 	output  RS_ROW_T 	inst_out [`NUM_FU - 1:0], 
 	output logic [`NUM_FU - 1:0]		issue,
-	output logic [$clog2(`SS_SIZE)-1:0] num_can_dispatch
+	output logic [$clog2(`SS_SIZE)-1:0] num_can_dispatch,
+	output logic [1:0]					inst_decode
 	// num_can_dispatch tells decoder how many instr can be 
 	// dispatched in the following cycle
 	// rs_busy_cnt tells previous stage how many entries are available
@@ -173,7 +183,7 @@ module RS(
 
 	// Need to modify decode stage by with num_can_dispatch
 	assign num_can_dispatch = ((`RS_SIZE - rs_busy_cnt_next) < `SS_SIZE) ? `RS_SIZE - rs_busy_cnt_next : `SS_SIZE; // rs_busy_cnt - issue_cnt;
-
+	assign inst_decode = (num_can_dispatch < min_rob_fr) ? num_can_dispatch : min_rob_fr;	
 	// CAM
 	// Initiate three RS_CAM modules, parallelly process CDB broadcasting & CAM
 	RS_CAM rscam [`SS_SIZE-1:0] ( 

@@ -12,12 +12,26 @@ module pe(
 	output logic [`RS_SIZE-1:0] gnt
 );
 
+
+
+endmodule
+
+
+module max_finder(
+		input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
+
+		output logic [3:0] cnt_out 
+	);
+
+	cnt_out = 0;
+	cnt_out = (rs_table[0].waiting_cnt > rs_table[1].waiting_cnt) ? rs_table[0].waiting_cnt : rs_table[1].waiting_cnt;
+
 endmodule
 
 
 module issue_selector(
 		// INPUTS
-		input RS_ROW_T [(`RS_SIZE - 1):0] 					rs_table,
+		input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
 		input [1:0] 								LSQ_busy,
 
 		// OUTPUTS
@@ -32,6 +46,10 @@ module issue_selector(
 	always_comb begin
 		ALU_cnt = 3'b0;
 		MULT_cnt = 2'b0;
+
+
+
+
 
 
 		for(i=0; i<= `RS_SIZE; i=i+1) begin
@@ -87,6 +105,7 @@ module RS_CAM(
 
 endmodule
 
+
 module RS(
 	// INPUTS
 	input 		    					clock,
@@ -108,7 +127,8 @@ module RS(
 
 	output  RS_ROW_T 	inst_out [`NUM_FU - 1:0], 
 	output logic [`NUM_FU - 1:0]		issue,
-	output logic [$clog2(`SS_SIZE)-1:0] num_can_dispatch
+	output logic [$clog2(`SS_SIZE)-1:0] num_can_dispatch,
+	output logic [1:0]					inst_decode
 	// num_can_dispatch tells decoder how many instr can be 
 	// dispatched in the following cycle
 	// busy_rows tells previous stage how many entries are available
@@ -180,7 +200,7 @@ module RS(
 	assign rs_table_next.T1 [-1] = MSB_T1[2] | MSB_T1[1] | MSB_T1[0];
 	assign rs_table_next.T2 [-1] = MSB_T2[2] | MSB_T2[1] | MSB_T2[0]; 
 
-	
+	assign inst_decode = (num_can_dispatch < min_rob_fr) ? num_can_dispatch : min_rob_fr;	
 
 	always_comb begin
 
