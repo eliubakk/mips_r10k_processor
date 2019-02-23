@@ -147,7 +147,9 @@ typedef struct{
   DECODED_INST inst,
   PHYS_REG     T,
   PHYS_REG     T1,
-  PHYS_REG     T2
+  PHYS_REG     T2,
+  logic        busy,
+  logic [3:0]  waiting_cnt
 } RS_ROW_T;
 
 typedef struct {

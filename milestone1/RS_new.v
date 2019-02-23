@@ -46,6 +46,27 @@ module issue_selector(
 	// TODO, use priority encoders
 endmodule
 */
+
+
+
+module index_finder(
+	// inputs
+	input RS_ROW_T  	rs_table 	[(`RS_SIZE - 1):0],
+	input 
+
+	// outputs
+	output logic [$clog2(`RS_SIZE)-1:0] insert_idx [2:0]
+);
+
+	integer i;
+	for (i = 0; i < `RS_SIZE; i += 1) begin
+		if (~rs_table[i].busy) begin
+
+		end
+	end
+
+endmodule
+
 module RS_CAM(
 		input 		CAM_en, 
 		input PHYS_REG  CDB_tag,
@@ -84,7 +105,7 @@ module RS(
 	// input 								dispatch_hazard, // global dispatch hazard
 	// input  [$clog2(`SS_SIZE)-1:0]		safe_dispatch,
 
-	// input 								min_rob_fr,
+	input [1:0]								min_rob_fr,
 	input [1:0]						LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
 
 	// OUTPUTS
@@ -105,13 +126,15 @@ module RS(
 	//current and next state comb variables (Do not need to update the
 	//entire rs_table, rs_table is on sequential logic)
 
-	logic		[`RS_SIZE-1:0][3:0]	rs_waiting_cnt_next;
-	logic  		[`RS_SIZE-1:0] 		rs_busy_idx_next;
+	// logic		[`RS_SIZE-1:0][3:0]	rs_waiting_cnt_next;
+	// logic  		[`RS_SIZE-1:0] 		rs_busy_idx_next;
 	logic [$clog2(`RS_SIZE)-1:0] 		rs_busy_cnt_next;
+	RS_ROW_T  	rs_table_next 	[(`RS_SIZE - 1):0];
+
 
 	//table to store internal state
-	logic		[`RS_SIZE-1:0][3:0]	rs_waiting_cnt;  //Waitng numbers for each row
-	logic  		[`RS_SIZE-1:0] 		rs_busy_idx;	// Busy index
+	// logic		[`RS_SIZE-1:0][3:0]	rs_waiting_cnt;  //Waitng numbers for each row
+	// logic  		[`RS_SIZE-1:0] 		rs_busy_idx;	// Busy index
 	logic [$clog2(`RS_SIZE)-1:0]		rs_busy_cnt;	// The number of busy rows
 	RS_ROW_T  	rs_table 	[(`RS_SIZE - 1):0];	// RS_Table
 	logic [$clog2(`SS_SIZE)-1:0] 	issue_cnt;		// The number of instructions that we will issue
@@ -223,6 +246,15 @@ module RS(
 		if (enable & ~dispatch_hazard) begin
 
 			dispatch_idx = rs_busy_cnt - issue_cnt;
+
+			logic [$clog2(`RS_SIZE)-1:0] insert_idx [2:0];
+
+			index_finder idx0(
+				.rs_table(rs_table),
+				.insert_idx(insert_idx)
+			);
+
+
 			// during dispatch, if RS gets a valid instruction
 			// insert instruction to end of rs_table
 			// increase rs_busy_cnt to keep track of the end of rs_table array

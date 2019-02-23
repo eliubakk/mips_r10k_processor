@@ -4,6 +4,17 @@
 // 2. Issue : guide the output to the proper FU + distribution to rs_table_next
 // & inst_out_next
 // 3. Testing and debugging
+
+
+module pe(
+	input [`RS_SIZE-1:0]	inst,
+
+	output logic [`RS_SIZE-1:0] gnt
+);
+
+endmodule
+
+
 module issue_selector(
 		// INPUTS
 		input RS_ROW_T [(`RS_SIZE - 1):0] 					rs_table,
