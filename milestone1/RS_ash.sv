@@ -11,6 +11,7 @@ module alu_issue_finder(
 	output logic [1:0]							alu_cnt,
 );
 
+	// fix this logic 
 	issue_code = {(`RS_SIZE){0}};
 	alu_cnt = 3'b0;
 	integer i;
