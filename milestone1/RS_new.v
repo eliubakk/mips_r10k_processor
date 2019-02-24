@@ -58,6 +58,71 @@ module max_finder(
 
 endmodule
 
+
+// module partition_finder(
+// 		// inputs
+// 		input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
+
+// 		// outputs
+// 		output logic [`NUM_FU:0] partition_points,
+// 		output logic [$clog2(`NUM_FU)-1:0] partition_count
+// );
+
+// 	integer i;
+// 	for (i = 0; i < `RS_SIZE; i += 1) begin
+// 		if (rs_table[i].issue_code) begin
+// 			partition_points = {partition_points[0:partition_count]}
+// 		end
+// 	end
+
+// endmodule
+
+module next_state_rs(
+	// inputs
+	input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
+
+	// outputs
+	output RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table_next  
+);
+
+	// logic [`NUM_FU:0] partition_points;
+	// logic [$clog2(`NUM_FU)-1:0] partition_count;
+
+
+	// integer i;
+	// for (i = 0; i < `RS_SIZE; i += 1) begin
+	// 	if (rs_table[i].issue_code) begin
+	// 		slice = rs_table[]
+	// 		rs_table_next = {};
+	// 	end
+	// end
+
+	integer i;
+	for (i = 0; i < `RS_SIZE; i += 1) begin
+	end
+
+
+	// partition_finder pf0(
+	// 	// inputs
+	// 	.rs_table(rs_table),
+
+	// 	// outputs
+	// 	.partition_points(partition_points),
+	// 	.partition_count(partition_count)
+	// );
+
+	// rs_slicer rss0(
+	// 	// inputs
+	// 	.rs_table(rs_table),
+	// 	.partition_points(partition_points),
+	// 	.partition_count(partition_count),
+
+	// 	// outputs
+	// 	.rs_table_next(rs_table_next)
+	// );
+
+endmodule
+
 module index_finder(
 	// inputs
 	input RS_ROW_T  	rs_table 	[(`RS_SIZE - 1):0],
@@ -229,9 +294,25 @@ module RS(
 		// ISSUE STAGE // black box
 		if (enable) begin
 			inst_out_next = {`NUM_FU{{$bits(RS_ROW_T}{0}}};
-			rs_table_next = {`RS_SIZE{{$bits(RS_ROW_T}{0}}};
+			// rs_table_next = {`RS_SIZE{{$bits(RS_ROW_T}{0}}};
+			// don't wnat to set rs_table_next to 0 becuase CAM changes are not registered
+			
 	 		/*cnt_inst_out = {($clog2(`NUM_FU)-1){0}};	
 			cnt_rs_next = {($clog2(`NUM_FU)-1){0}};*/ 
+
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				// rs_table[i]
+				if (~rs_table[i].issue_code) begin
+					integer j;
+					for (j = 0; j < `RS_SIZE; j += 1) begin
+						if (~rs_table_next[j].busy) begin
+							rs_table_next[j] = rs_table[i];
+						end
+					end
+				end
+			end
+
 			integer i;
 			for(i=0;i<`RS_SIZE;i=i+1) begin
 				if(issue_code[i]) begin
