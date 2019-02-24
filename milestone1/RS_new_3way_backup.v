@@ -1,4 +1,7 @@
-// This module is for 1 way scalar processor
+// For 3 way superscalar
+// 1. Dispatch : busy bit overwrite solve (use break, and two for)
+// 2. Issue : Use 3 output priority encoder, check FU availability and
+// Issue_idx, and output will be the out of priority encoder
 
 `include "sys_defs.vh"
 `define DEBUG

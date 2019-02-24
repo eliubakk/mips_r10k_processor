@@ -121,9 +121,9 @@ typedef enum logic [4:0] {
   ALU_CMPULE    = 5'h10
 } ALU_FUNC;
 
-`define NUM_FU 8
+`define NUM_FU 5
 `define RS_SIZE 12
-`define SS_SIZE 3 // superscalar size
+`define SS_SIZE 1 // superscalar size
 
 typedef enum logic [2:0]{
   FU_ALU,
@@ -134,13 +134,10 @@ typedef enum logic [2:0]{
 } FU_NAME;
 
 typedef enum logic [2:0]{
-  FU_ALU1_IDX,
-  FU_ALU2_IDX,
-  FU_ALU3_IDX,
+  FU_ALU_IDX,
   FU_LD_IDX,
   FU_ST_IDX,
-  FU_MULT1_IDX,
-  FU_MULT2_IDX,
+  FU_MULT_IDX,
   FU_BR_IDX
 } FU_IDX;
 
@@ -165,7 +162,6 @@ typedef struct{
   PHYS_REG     T1;
   PHYS_REG     T2;
   logic        busy;
-  logic [3:0]  waiting_cnt;
 } RS_ROW_T;
 
 //////////////////////////////////////////////
