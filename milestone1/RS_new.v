@@ -1,4 +1,149 @@
+<<<<<<< HEAD
 // This module is for 1 way scalar processor
+=======
+// Things that are modified : only free the RS table_busy bit, include waiting
+// siganl, Issue only has 8 tables
+/*
+module issue_selector(
+		// INPUTS
+		input RS_ROW_T [(`RS_SIZE - 1):0] 					rs_table,
+		input [1:0] 								LSQ_busy,
+
+		// OUTPUTS
+		//output logic [$clog2(`NUM_FU)-1:0] 					issue_cnt,
+		output logic [`RS_SIZE-1:0]	issue_code
+	);
+	integer i;
+	logic [2:0] ALU_cnt;
+	logic [1:0] MULT_cnt;
+	// check tag1, tag2, only check the LSQ when it is LD/STQ, 
+	//
+	always_comb begin
+		ALU_cnt = 3'b0;
+		MULT_cnt = 2'b0;
+
+
+		for(i=0; i<= `RS_SIZE; i=i+1) begin
+			if ((rs_table.inst.fu_name [i] == FU_LD) | (rs_table.inst.fu_name [i] == FU_ST) ) begin // For LD/Store
+				if( (LSQ_busy == 2'b0) & rs_table[i].T1 [-1] & rs_table[i].T2 [-1] ) begin
+					//LSQ not busy & tag match
+					issue_code[i] = 1'b1;
+				end else begin
+					//LSQ busy or tag not match
+					issue_code[i] = 1'b0;
+				end 
+	
+			end 
+			else begin // For the rest of programs
+				if( rs_table[i].T1 [-1] & rs_table[i].T2 [-1] ) begin
+					issue_code[i] = 1'b1;
+				end else begin
+					issue_code[i] = 1'b0;
+				end
+			end
+
+		end
+
+	end
+	
+	// TODO, use priority encoders
+endmodule
+*/
+
+module max_finder(
+		input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
+
+		output logic [3:0] cnt_out 
+	);
+
+	cnt_out = 0;
+	cnt_out = (rs_table[0].waiting_cnt > rs_table[1].waiting_cnt) ? rs_table[0].waiting_cnt : rs_table[1].waiting_cnt;
+
+endmodule
+
+
+// module partition_finder(
+// 		// inputs
+// 		input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
+
+// 		// outputs
+// 		output logic [`NUM_FU:0] partition_points,
+// 		output logic [$clog2(`NUM_FU)-1:0] partition_count
+// );
+
+// 	integer i;
+// 	for (i = 0; i < `RS_SIZE; i += 1) begin
+// 		if (rs_table[i].issue_code) begin
+// 			partition_points = {partition_points[0:partition_count]}
+// 		end
+// 	end
+
+// endmodule
+
+module next_state_rs(
+	// inputs
+	input RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table,
+
+	// outputs
+	output RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table_next  
+);
+
+	// logic [`NUM_FU:0] partition_points;
+	// logic [$clog2(`NUM_FU)-1:0] partition_count;
+
+
+	// integer i;
+	// for (i = 0; i < `RS_SIZE; i += 1) begin
+	// 	if (rs_table[i].issue_code) begin
+	// 		slice = rs_table[]
+	// 		rs_table_next = {};
+	// 	end
+	// end
+
+	integer i;
+	for (i = 0; i < `RS_SIZE; i += 1) begin
+	end
+
+
+	// partition_finder pf0(
+	// 	// inputs
+	// 	.rs_table(rs_table),
+
+	// 	// outputs
+	// 	.partition_points(partition_points),
+	// 	.partition_count(partition_count)
+	// );
+
+	// rs_slicer rss0(
+	// 	// inputs
+	// 	.rs_table(rs_table),
+	// 	.partition_points(partition_points),
+	// 	.partition_count(partition_count),
+
+	// 	// outputs
+	// 	.rs_table_next(rs_table_next)
+	// );
+
+endmodule
+
+module index_finder(
+	// inputs
+	input RS_ROW_T  	rs_table 	[(`RS_SIZE - 1):0],
+	input 
+
+	// outputs
+	output logic [$clog2(`RS_SIZE)-1:0] insert_idx [2:0]
+);
+
+	integer i;
+	for (i = 0; i < `RS_SIZE; i += 1) begin
+		if (~rs_table[i].busy) begin
+
+		end
+	end
+
+endmodule
+>>>>>>> e4cbe15b30c7cc234ee1ed3c9aec017d6112f9f4
 
 `include "sys_defs.vh"
 `define DEBUG
@@ -142,6 +287,7 @@ module RS(
 
 		// ISSUE STAGE // 
 		if (enable) begin
+<<<<<<< HEAD
 			issue_next = {`NUM_FU{
 				.inst.opa_select = ;
 				.inst.opb_select = ;
@@ -241,6 +387,36 @@ module RS(
 								end 			
 						end
 
+=======
+			inst_out_next = {`NUM_FU{{$bits(RS_ROW_T}{0}}};
+			// rs_table_next = {`RS_SIZE{{$bits(RS_ROW_T}{0}}};
+			// don't wnat to set rs_table_next to 0 becuase CAM changes are not registered
+			
+	 		/*cnt_inst_out = {($clog2(`NUM_FU)-1){0}};	
+			cnt_rs_next = {($clog2(`NUM_FU)-1){0}};*/ 
+
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				// rs_table[i]
+				if (~rs_table[i].issue_code) begin
+					integer j;
+					for (j = 0; j < `RS_SIZE; j += 1) begin
+						if (~rs_table_next[j].busy) begin
+							rs_table_next[j] = rs_table[i];
+						end
+					end
+				end
+			end
+
+			integer i;
+			for(i=0;i<`RS_SIZE;i=i+1) begin
+				if(issue_code[i]) begin
+					inst_out_next = rs_table[i];
+						
+				end else begin
+					rs_table_next[cnt_rs_next] = rs_table[i];
+				end
+>>>>>>> e4cbe15b30c7cc234ee1ed3c9aec017d6112f9f4
 				
 					endcase
 				end
