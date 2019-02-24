@@ -125,11 +125,12 @@ typedef enum logic [4:0] {
 `define RS_SIZE 12
 `define SS_SIZE 3 // superscalar size
 
-typedef enum logic [1:0]{
+typedef enum logic [2:0]{
   FU_ALU
   FU_LD,
   FU_ST,
-  FU_MULT
+  FU_MULT, 
+  FU_BR
 } FU_NAME;
 
 typedef enum logic [2:0]{
@@ -142,6 +143,11 @@ typedef enum logic [2:0]{
   FU_MULT_IDX,
   FU_BR_IDX
 } FU_IDX;
+
+typedef struct {
+  logic     T1,
+  logic     T2,  
+} TAG_UPDATE_T;
 
 typedef struct{
   DECODED_INST inst,
