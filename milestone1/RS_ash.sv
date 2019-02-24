@@ -242,17 +242,32 @@ module next_state_rs(
 	output RS_ROW_T [(`RS_SIZE - 1):0] 			rs_table_next  
 );
 
-	integer i, j;
+	// integer i, j;
+	// for (i = 0; i < `RS_SIZE; i += 1) begin
+	// 	if (~issue_code[i]) begin
+	// 		for (j = 0; j <= i; j += 1) begin
+	// 			if (~rs_table_next[j].busy) begin
+	// 				rs_table_next[j] = rs_table[i];
+	// 				rs_table_next[j].T1[-1] = tags_updated[i].T1;
+	// 				rs_table_next[j].T2[-1] = tags_updated[i].T2;
+	// 				break;
+	// 			end
+	// 		end
+	// 	end
+	// end
+
+
+	integer i;
 	for (i = 0; i < `RS_SIZE; i += 1) begin
-		if (~issue_code[i]) begin
-			for (j = 0; j <= i; j += 1) begin
-				if (~rs_table_next[j].busy) begin
-					rs_table_next[j] = rs_table[i];
-					rs_table_next[j].T1[-1] = tags_updated[i].T1;
-					rs_table_next[j].T2[-1] = tags_updated[i].T2;
-					break;
-				end
-			end
+		if (issue_code[i]) begin
+			rs_table_next[i].busy = 0;
+		end else begin
+			// rs_table_next[i] = rs_table[i];
+			rs_table_next[i].inst = rs_table[i].inst;
+			rs_table_next[i].T = rs_table[i].T;
+			rs_table_next[i].T1[$clog2(`NUM_PHYS_REG)-1:0] = rs_table[i].T1[$clog2(`NUM_PHYS_REG)-1:0];
+			rs_table_next[i].T2[$clog2(`NUM_PHYS_REG)-1:0] = rs_table[i].T2[$clog2(`NUM_PHYS_REG)-1:0];
+			rs_table_next[i].busy = rs_table[i].busy;
 		end
 	end
 
@@ -269,15 +284,14 @@ module RS_CAM(
 		
 	);
 		
-	always_comb
-	begin
+	always_comb begin
 		integer i;
 		T1_hit = {`RS_SIZE{0}};
 		T2_hit = {`RS_SIZE{0}};	
 		if(CAM_en) begin
 			for(i=0;i<`RS_SIZE;i=i+1) begin
 				T1_hit[i] |= (T1[i] == CDB_tag);
-			 	T2_hit[i] |= (T2[i] == CDB_tag);
+				T2_hit[i] |= (T2[i] == CDB_tag);
 			end		
 		end
 	end		
@@ -285,6 +299,28 @@ module RS_CAM(
 		
 
 endmodule
+
+module rs_issue_stage(
+	// inputs
+	input clock,
+	input reset,
+	input enable,
+	input RS_ROW_T  	rs_table 	 [(`RS_SIZE - 1):0],
+	input TAG_UPDATE_T 	tags_updated [`RS_SIZE-1:0],
+
+	// outputs
+	output RS_ROW_T 	inst_out [`NUM_FU - 1:0],
+	output logic [`RS_SIZE-1:0] 				issue_code
+);
+
+
+	
+endmodule
+
+module rs_dispatch_stage(
+);
+endmodule
+
 
 module RS(
 	// INPUTS
@@ -298,7 +334,7 @@ module RS(
 	// input  [$clog2(`SS_SIZE)-1:0]		safe_dispatch,
 
 	input [1:0]								min_rob_fr,
-	input [1:0]						LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
+	input [1:0]								LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
 
 	// OUTPUTS
 	`ifdef DEBUG 
@@ -375,16 +411,16 @@ module RS(
 	// Merge the MSB resultf from 3 CAMS, and update the next rs table,
 	// This will be used for issue stage
 	
-	TAG_UPDATE_T [`RS_SIZE-1:0]			tags_updated;
-	assign tags_updated.T1 = MSB_T1[2] | MSB_T1[1] | MSB_T1[0];
-	assign tags_updated.T2 = MSB_T2[2] | MSB_T2[1] | MSB_T2[0];
+	// TAG_UPDATE_T 			tags_updated [`RS_SIZE-1:0];
+	assign rs_table_next.T1[-1] = MSB_T1[2] | MSB_T1[1] | MSB_T1[0];
+	assign rs_table_next.T2[-1] = MSB_T2[2] | MSB_T2[1] | MSB_T2[0];
 
 	always_comb begin
 
 		// ISSUE STAGE // black box
 		if (enable) begin
 			inst_out_next = {`NUM_FU{{$bits(RS_ROW_T}{0}}};
-			rs_table_next = {`RS_SIZE{{$bits(RS_ROW_T}{0}}};
+			// rs_table_next = {`RS_SIZE{{$bits(RS_ROW_T}{0}}};
 
 
 			issue_selector is0(
@@ -440,7 +476,7 @@ module RS(
 	//////////////////////////////////////////////////
 	always_ff @(posedge clock) begin
 		if (reset) begin
-			rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}};
+			rs_table <= { (RS_ROW_T [(`RS_SIZE - 1):0]) {0}};
 			rs_busy_cnt <= {([$clog2(`RS_SIZE)-1:0]){0}};
 		end
 		rs_table <= rs_table_next;

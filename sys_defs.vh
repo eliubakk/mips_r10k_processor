@@ -126,7 +126,7 @@ typedef enum logic [4:0] {
 `define SS_SIZE 3 // superscalar size
 
 typedef enum logic [2:0]{
-  FU_ALU
+  FU_ALU,
   FU_LD,
   FU_ST,
   FU_MULT, 
@@ -139,36 +139,36 @@ typedef enum logic [2:0]{
   FU_ALU3_IDX,
   FU_LD_IDX,
   FU_ST_IDX,
-  FU_MULT_IDX,
-  FU_MULT_IDX,
+  FU_MULT1_IDX,
+  FU_MULT2_IDX,
   FU_BR_IDX
 } FU_IDX;
 
 typedef struct {
-  logic     T1,
-  logic     T2,  
+  logic     T1;
+  logic     T2;  
 } TAG_UPDATE_T;
 
 typedef struct{
-  DECODED_INST inst,
-  PHYS_REG     T,
-  PHYS_REG     T1,
-  PHYS_REG     T2,
-  logic        busy,
-  logic [3:0]  waiting_cnt
+  DECODED_INST inst;
+  PHYS_REG     T;
+  PHYS_REG     T1;
+  PHYS_REG     T2;
+  logic        busy;
+  // logic [3:0]  waiting_cnt;
 } RS_ROW_T;
 
 typedef struct {
-  ALU_OPA_SELECT opa_select, // use this for T1 valid
-  ALU_OPB_SELECT opb_select, // use this for T2 valid
-  DEST_REG_SEL   dest_reg, // mux selects use this for T valid
-  ALU_FUNC       alu_func,
-  FU_NAME        fu_name,
-  logic rd_mem, wr_mem, ldl_mem, stc_mem, cond_branch, uncond_branch,
-  logic halt,      // non-zero on a halt
-  logic cpuid,     // get CPUID instruction
-  logic illegal,   // non-zero on an illegal instruction
-  logic valid_inst // for counting valid instructions executed
+  ALU_OPA_SELECT opa_select; // use this for T1 valid
+  ALU_OPB_SELECT opb_select; // use this for T2 valid
+  DEST_REG_SEL   dest_reg; // mux selects use this for T valid
+  ALU_FUNC       alu_func;
+  FU_NAME        fu_name;
+  logic rd_mem, wr_mem, ldl_mem, stc_mem, cond_branch, uncond_branch;
+  logic halt;      // non-zero on a halt
+  logic cpuid;     // get CPUID instruction
+  logic illegal;   // non-zero on an illegal instruction
+  logic valid_inst; // for counting valid instructions executed
 } DECODED_INST;
 
 //////////////////////////////////////////////
