@@ -41,8 +41,10 @@ module testbench;
 
 	// need to update this
 
+	typedef RS_ROW_T table_t[];
+
 	// FUNCTIONS
-	function clear_rs_table_test;
+	function table_t clear_rs_table_test;
 		begin
 			for (integer i = 0; i < `RS_SIZE; i += 1) begin
 				// rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
