@@ -106,110 +106,18 @@ module testbench;
 		end
 	endtask
 
-	task entry_exists_in_table;
-		input RS_ROW_T inst_in;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+	task table_out;
 		begin
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					if (rs_table_out[i] == inst_in) begin
-						return;
-					end
-				end
+			#1;
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				$display("RS_Row = %d, busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
 			end
-			#1 exit_on_error;
-		end
-	endtask
-
-	task entry_not_in_table;
-		input RS_ROW_T inst_in;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					if (rs_table_out[i] == inst_in) begin
-						#1 exit_on_error;
-					end
-				end
+				$display("RS full = %d",rs_full);
+			$display("---------------------------------------------");
+			for(integer i=0;i<`NUM_FU;i=i+1) begin
+			$display("Issue_row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[0].T, issue_next[0].T1, issue_next[0].T2 );
+	
 			end
-			return;
-		end
-	endtask
-
-	task table_has_N_entries;
-		input integer count;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer _count = 0;
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					_count += 1;
-				end
-			end
-			assert(count == _count) else #1 exit_on_error;
-		end
-	endtask
-
-	task tags_now_ready;
-		input integer tag;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					if (rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-					if (rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-				end
-			end
-			return;
-		end
-	endtask
-
-	task check_issue_next_correct;
-		input RS_ROW_T issue_next [(`NUM_FU -1 ):0];
-		input RS_ROW_T issue_next_test [(`NUM_FU -1 ):0];
-		begin
-			for (integer i = 0; i < `NUM_FU; i += 1) begin
-				logic found = 1'b0;
-				if (issue_next[i].busy) begin
-					for (integer j = 0; j < `NUM_FU; j += 1) begin
-						if (issue_next_test[j].busy) begin
-							if (issue_next_test[j] == issue_next[i]) begin
-								found = 1'b1;
-								break;
-							end
-						end
-					end
-					if (!found) begin
-						exit_on_error;
-					end
-				end
-			end
-
-			for (integer i = 0; i < `NUM_FU; i += 1) begin
-				logic found = 1'b0;
-				if (issue_next_test[i].busy) begin
-					for (integer j = 0; j < `NUM_FU; j += 1) begin
-						if (issue_next[j].busy) begin
-							if (issue_next_test[i] == issue_next[j]) begin
-								found = 1'b1;
-								break;
-							end
-						end
-					end
-					if (!found) begin
-						exit_on_error;
-					end
-				end
-			end
-			return;
 		end
 	endtask
 	
@@ -226,7 +134,7 @@ module testbench;
 		CAM_en = 0;
 		CDB_in = 0;
 		dispatch_valid = 0;
-		
+	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGC;
@@ -242,9 +150,9 @@ module testbench;
 		inst_in.inst.cpuid = 1'b0;
 		inst_in.inst.illegal = 1'b0;
 		inst_in.inst.valid_inst = 1'b0;
-		inst_in.T = `DUMMY_REG;
-		inst_in.T1 = `DUMMY_REG;
-		inst_in.T2 = `DUMMY_REG;
+		inst_in.T = 7'b1111111;
+		inst_in.T1 = 7'b1111111;
+		inst_in.T2 = 7'b1111111;
 		inst_in.busy = 1'b0;
 
 		LSQ_busy = 0;	
@@ -258,11 +166,54 @@ module testbench;
 	//3. Testing for functionality (enable, reset, dispatch_valid,
 	//LSQ_busy, CAM_en, commit, issue, dispatch) and corner cases (Issue 2 branches at
 	//a same cycle?, input is invalid instruction, etc...)    
+		table_out();
 
+	@(negedge clock);
+//Check reset
+		reset = 1;
+		table_out();
+	@(negedge  clock);
+//Check enable
+		enable = 1;
+		table_out();
+	@(negedge clock);
+//Dispatch
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;	
 
-	// @(negedge clock);	
-	// 	$display("@@@Passed");
-	// 	$finish;
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b0;
+		inst_in.T = 7'd3;
+		inst_in.T1 = 7'b1000001;
+		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b1;
+		
+		
+
+		table_out();
+
+		@(negedge clock);
+		@(negedge clock);
+		@(negedge clock);
+		
+		
+		$display("@@@Passed");
+		$finish;
 
 		/*inst_in = ;
 		fu_idx = ;
