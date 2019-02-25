@@ -225,20 +225,16 @@ module RS(
 			issue_next[i].T2 = `DUMMY_REG;
 			issue_next[i].busy = 1'b0;
 			end
+	
 		// Initialize the issue cnt and inx, gnt table	
 			issue_cnt = {$clog2(`NUM_FU){0}}; 
 			issue_idx = {`RS_SIZE{0}};
 			
 			ALU_issue_idx = {`RS_SIZE{0}};
-			ALU_issue_gnt = {`RS_SIZE{0}};
 			LD_issue_idx = {`RS_SIZE{0}}; 
-			LD_issue_gnt = {`RS_SIZE{0}};
 			ST_issue_idx = {`RS_SIZE{0}}; 
-			ST_issue_gnt = {`RS_SIZE{0}}; 	
 			MULT_issue_idx = {`RS_SIZE{0}}; 
-			MULT_issue_gnt = {`RS_SIZE{0}};
 			BR_issue_idx = {`RS_SIZE{0}}; 
-			BR_issue_gnt = {`RS_SIZE{0}};  	
 	// First of all, check the instructions, tags -> enable FU_issue_idx bits
 	// ISSUE width = FU number
 	// For multiple issue,
@@ -249,7 +245,7 @@ module RS(
 	// 3 : write issue_next table, issue_cnt increase, set issue_next_busy
 	// (valid issue), erase rs_table_next_busy
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				if(rs_table_next[i].T1 [6] & rs_table_next[i].T2 [6] & rs_table[i].busy ) begin
+				if(rs_table_next[i].T1 [6] & rs_table_next[i].T2 [6] & rs_table_next[i].busy ) begin
 					case(rs_table_next[i].inst.fu_name) 
 						FU_ALU : begin
 								ALU_issue_idx[i] = 1'b1;
@@ -373,32 +369,32 @@ module RS(
 		//	rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}}; // Other way to do this?
 			for(integer i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?
 			
-				rs_table[i].inst.opa_select <= `SD ALU_OPA_IS_REGA;
-				rs_table[i].inst.opb_select <= `SD ALU_OPB_IS_REGB;
-				rs_table[i].inst.dest_reg <= `SD DEST_IS_REGC;
-				rs_table[i].inst.alu_func <= `SD ALU_ADDQ;
-				rs_table[i].inst.fu_name <= `SD FU_ALU;
-				rs_table[i].inst.rd_mem <= `SD 1'b0;
-				rs_table[i].inst.wr_mem <= `SD 1'b0;
-				rs_table[i].inst.ldl_mem <= `SD 1'b0;
-				rs_table[i].inst.stc_mem <= `SD 1'b0;
-				rs_table[i].inst.cond_branch <= `SD 1'b0;
-				rs_table[i].inst.uncond_branch <= `SD 1'b0;
-				rs_table[i].inst.halt <= `SD 1'b0;
-				rs_table[i].inst.cpuid <= `SD 1'b0;
-				rs_table[i].inst.illegal <= `SD 1'b0;
-				rs_table[i].inst.valid_inst <= `SD 1'b0;
-				rs_table[i].T <= `SD `DUMMY_REG;
-				rs_table[i].T1 <= `SD `DUMMY_REG;
-				rs_table[i].T2 <= `SD `DUMMY_REG;
-				rs_table[i].busy <= `SD 1'b0;
+				rs_table[i].inst.opa_select <=  ALU_OPA_IS_REGA;
+				rs_table[i].inst.opb_select <=  ALU_OPB_IS_REGB;
+				rs_table[i].inst.dest_reg <=  DEST_IS_REGC;
+				rs_table[i].inst.alu_func <=  ALU_ADDQ;
+				rs_table[i].inst.fu_name <=  FU_ALU;
+				rs_table[i].inst.rd_mem <=  1'b0;
+				rs_table[i].inst.wr_mem <=  1'b0;
+				rs_table[i].inst.ldl_mem <=  1'b0;
+				rs_table[i].inst.stc_mem <=  1'b0;
+				rs_table[i].inst.cond_branch <=  1'b0;
+				rs_table[i].inst.uncond_branch <=  1'b0;
+				rs_table[i].inst.halt <=  1'b0;
+				rs_table[i].inst.cpuid <=  1'b0;
+				rs_table[i].inst.illegal <=  1'b0;
+				rs_table[i].inst.valid_inst <= 1'b0;
+				rs_table[i].T <=  `DUMMY_REG;
+				rs_table[i].T1 <= `DUMMY_REG;
+				rs_table[i].T2 <=  `DUMMY_REG;
+				rs_table[i].busy <=  1'b0;
 			end
 
-			rs_busy_cnt <= `SD {($clog2(`RS_SIZE)){0}};
-		//	rs_busy_cnt <= `SD 0;
+			rs_busy_cnt <=  {($clog2(`RS_SIZE)){0}};
+		//	rs_busy_cnt <=  0;
 		end
-		rs_table <= `SD rs_table_next;
-		rs_busy_cnt <= `SD rs_busy_cnt_next;
+		rs_table <=  rs_table_next;
+		rs_busy_cnt <=  rs_busy_cnt_next;
 	end
 
 

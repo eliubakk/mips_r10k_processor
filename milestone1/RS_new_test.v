@@ -46,7 +46,7 @@ module testbench;
 		CAM_en = 0;
 		CDB_in = 0;
 		dispatch_valid = 0;
-		
+	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGC;
@@ -80,7 +80,51 @@ module testbench;
 	//a same cycle?, input is invalid instruction, etc...)    
 
 
-	@(negedge clock);	
+	@(negedge clock);
+//Check reset
+		reset = 1;
+	@(negedge  clock);
+//Check enable
+		enable = 1;
+	@(negedge clock);
+//Dispatch
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;	
+
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b0;
+		inst_in.T = 7'd3;
+		inst_in.T1 = 7'b1000001;
+		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b1;
+
+		for(integer i=0;i<`RS_SIZE;i=i+1) begin
+		$display("RS_Row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b \n", i, rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
+		end
+		$display("---------------------------------------------\n");
+		for(integer i=0;i<`NUM_FU;i=i+1) begin
+		$display("Issue_row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b \n",i, issue_next[0].T, issue_next[0].T1, issue_next[0].T2 );
+		end
+
+
+		@(negedge clock);
+		
+		
 		$display("@@@Passed");
 		$finish;
 
