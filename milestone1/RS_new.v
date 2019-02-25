@@ -87,10 +87,11 @@ module RS(
 	// OUTPUTS
 	`ifdef DEBUG 
 	output RS_ROW_T  			rs_table_out [(`RS_SIZE - 1):0],
+	output logic [`RS_SIZE-1:0]		issue_idx,			
 	`endif
 	
-	//output	RS_ROW_T		issue_next,
-	output  RS_ROW_T 			issue_next [(`NUM_FU - 1):0], 
+	//output	RS_ROW_T		issue_out,
+	output  RS_ROW_T 			issue_out [(`NUM_FU - 1):0], 
 	output logic [$clog2(`NUM_FU) - 1:0]	issue_cnt,
 	output	logic				rs_full
 	);
@@ -106,8 +107,7 @@ module RS(
 	logic [$clog2(`RS_SIZE)-1:0]		rs_busy_cnt;	// The number of busy rows
 	RS_ROW_T  				rs_table 	[(`RS_SIZE - 1):0];	// RS_Table
 	//logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
-	//RS_ROW_T 				issue_next	[`NUM_FU-1:0];		// The instructions that we will issue next
-	logic	[(`RS_SIZE)-1:0] 		issue_idx;
+	RS_ROW_T 				issue_next	[`NUM_FU-1:0];		// The instructions that we will issue next
 	logic  					dispatch_cnt;					
 
 	// logic for CDB CAM
@@ -118,6 +118,8 @@ module RS(
 	// isue_idx for each of functional unit (before and after priority
 	// encoder)
 	//
+	logic	[`RS_SIZE-1:0] 	 issue_idx_next; // Issued instruction that we issued on last instruction, for remove busy bit on FU 
+	
 	logic	[`RS_SIZE-1:0] ALU_issue_idx, ALU_issue_gnt;
 	logic	[`RS_SIZE-1:0] LD_issue_idx, LD_issue_gnt;
 	logic	[`RS_SIZE-1:0] ST_issue_idx, ST_issue_gnt;
@@ -236,22 +238,36 @@ module RS(
 	
 		// Initialize the issue cnt and inx, gnt table	
 			issue_cnt = {$clog2(`NUM_FU){0}}; 
-			issue_idx = {`RS_SIZE{0}};
+			issue_idx_next = {`RS_SIZE{0}};
 			
-			ALU_issue_idx = {`RS_SIZE{0}};
-			LD_issue_idx = {`RS_SIZE{0}}; 
-			ST_issue_idx = {`RS_SIZE{0}}; 
-			MULT_issue_idx = {`RS_SIZE{0}}; 
-			BR_issue_idx = {`RS_SIZE{0}}; 
+			ALU_issue_idx = 	{`RS_SIZE{0}};
+			LD_issue_idx = 		{`RS_SIZE{0}}; 
+			ST_issue_idx = 		{`RS_SIZE{0}}; 
+			MULT_issue_idx = 	{`RS_SIZE{0}}; 
+			BR_issue_idx = 		{`RS_SIZE{0}}; 
 	// First of all, check the instructions, tags -> enable FU_issue_idx bits
 	// ISSUE width = FU number
 	// For multiple issue,
+	// 0. Update the RS busy bit
 	// 1 : FU_issue_idx[i] = i when row i is ready to issue (tags ready,
 	// no Structural hazard)
 	// 2 : FU_issue_gnt[i] by using priority encoder (only one row per
 	// each FU can be issued)
 	// 3 : write issue_next table, issue_cnt increase, set issue_next_busy
-	// (valid issue), erase rs_table_next_busy
+	// (valid issue)
+	//
+	//
+			
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				if(issue_idx[i]) begin
+					rs_table_next[i].busy = 1'b0;
+						
+				end 
+				else begin
+					rs_table_next[i].busy = rs_table[i].busy;
+				end
+			end
+	
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				if(rs_table_next[i].T1 [6] & rs_table_next[i].T2 [6] & rs_table_next[i].busy ) begin
 					case(rs_table_next[i].inst.fu_name) 
@@ -279,7 +295,7 @@ module RS(
 								BR_issue_idx[i] = 1'b1;
 										
 						end
-
+						
 				
 					endcase
 				end
@@ -297,9 +313,8 @@ module RS(
 			if(ALU_issue_gnt[i] == 1) begin
 				issue_next[0] = rs_table_next[i]; // issue_next[0] for ALU
 				issue_next[0].busy = 1'b1;
-				rs_table_next[i].busy = 1'b0; //Free the RS table
-			end 
-			
+				//rs_table_next[i].busy = 1'b0; //Free the RS table
+			end 			
 		end
 
 		//For LD
@@ -307,8 +322,8 @@ module RS(
 			if(LD_issue_gnt[i] == 1) begin
 				issue_next[1] = rs_table_next[i]; // issue_next[1] for LD
 				issue_next[1].busy = 1'b1;
-				rs_table_next[i].busy = 1'b0; //Free the RS table
-			end
+			//	rs_table_next[i].busy = 1'b0; //Free the RS table
+			end 
 		end
 
 		//For ST
@@ -316,8 +331,8 @@ module RS(
 			if(ST_issue_gnt[i] == 1) begin
 				issue_next[2] = rs_table_next[i]; // issue_next[2] for ST
 				issue_next[2].busy = 1'b1;
-				rs_table_next[i].busy = 1'b0; //Free the RS table
-			end
+				//rs_table_next[i].busy = 1'b0; //Free the RS table
+			end 
 		end
 
 		//For MULT
@@ -325,8 +340,8 @@ module RS(
 			if(MULT_issue_gnt[i] == 1) begin
 				issue_next[3] = rs_table_next[i]; // issue_next[3] for MULT
 				issue_next[3].busy = 1'b1;
-				rs_table_next[i].busy = 1'b0; //Free the RS tableSS
-			end
+				//rs_table_next[i].busy = 1'b0; //Free the RS tableSS
+			end 
 		end
 
 		// For BR
@@ -334,11 +349,12 @@ module RS(
 			if(BR_issue_gnt[i] == 1) begin
 				issue_next[4] = rs_table_next[i]; // issue_next[3] for MULT
 				issue_next[4].busy = 1'b1;
-				rs_table_next[i].busy = 1'b0; //Free the RS table
-			end
+			//	rs_table_next[i].busy = 1'b0; //Free the RS table
+			end 
 		end
 	
 		issue_cnt = | ALU_issue_gnt + | LD_issue_gnt + | ST_issue_gnt + | MULT_issue_gnt + | BR_issue_gnt;
+		issue_idx_next = ALU_issue_gnt | LD_issue_gnt | ST_issue_gnt | MULT_issue_gnt | BR_issue_gnt;
 		// DISPATCH STAGE
 		//
 		// To decide which row to dispatch
@@ -358,10 +374,10 @@ module RS(
 					rs_table_next[i].busy 	= 1'b1;
 					dispatch_cnt		= 1;
 					break;
-				end else begin
+				end /*else begin
 					rs_table_next[i] 	= rs_table[i];
 						
-				end
+				end*/
 					
 				
 			end	
@@ -410,14 +426,44 @@ module RS(
 				rs_table[i].T2 <=  7'b1111111;
 				
 				rs_table[i].busy <=  1'b0;
-			end
+				
+				end
+				for(integer i=0; i<`NUM_FU; i=i+1) begin // Other way to do this?
+			
+				issue_out[i].inst.opa_select <=  ALU_OPA_IS_REGA;
+				issue_out[i].inst.opb_select <=  ALU_OPB_IS_REGB;
+				issue_out[i].inst.dest_reg <=  DEST_IS_REGC;
+				issue_out[i].inst.alu_func <=  ALU_ADDQ;
+				issue_out[i].inst.fu_name <=  FU_ALU;
+				issue_out[i].inst.rd_mem <=  1'b0;
+				issue_out[i].inst.wr_mem <=  1'b0;
+				issue_out[i].inst.ldl_mem <=  1'b0;
+				issue_out[i].inst.stc_mem <=  1'b0;
+				issue_out[i].inst.cond_branch <=  1'b0;
+				issue_out[i].inst.uncond_branch <=  1'b0;
+				issue_out[i].inst.halt <=  1'b0;
+				issue_out[i].inst.cpuid <=  1'b0;
+				issue_out[i].inst.illegal <=  1'b0;
+				issue_out[i].inst.valid_inst <= 1'b0;
+				issue_out[i].T <=  7'b1111111;
+				issue_out[i].T1 <= 7'b1111111;
+				issue_out[i].T2 <=  7'b1111111;
+				issue_out[i].busy <=  1'b0;
+							
+	
+				end
+
 
 			rs_busy_cnt <=  {($clog2(`RS_SIZE)){0}};
+			issue_idx <= {($clog2(`RS_SIZE)){0}};
+
 		//	rs_busy_cnt <=  0;
 		end
 		else begin
 			rs_table <=  rs_table_next;
 			rs_busy_cnt <=  rs_busy_cnt_next;
+			issue_out	<= issue_next;
+			issue_idx <= issue_idx_next;
 		end
 	end
 
