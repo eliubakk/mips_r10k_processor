@@ -205,7 +205,7 @@ module testbench;
 		rs_table_test[i] = {($bits(RS_ROW_T)){0} };
 	end
 	for (integer i = 0; i < `NUM_FU; i += 1) begin
-		issue_next_test[i] = `{($bits(RS_ROW_T)){0}};
+		issue_next_test[i] = {($bits(RS_ROW_T)){0}};
 	end
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == issue_next_test ) else #1 exit_on_error;
