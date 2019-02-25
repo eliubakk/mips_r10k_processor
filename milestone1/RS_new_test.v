@@ -200,7 +200,7 @@ module testbench;
 	// Nothing issued since it is reset
 	$display("-------RESET------\n");
 	reset = 1;
-	assert( rs_table_out == {(`RS_SIZE){$bits(RS_ROW_T){0}}} ) else #1 exit_on_error;
+	assert( rs_table_out == {`RS_SIZE{$bits(RS_ROW_T){0}}} ) else #1 exit_on_error;
 	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
