@@ -41,6 +41,61 @@ module testbench;
 
 	// need to update this
 
+	// FUNCTIONS
+	function clear_rs_table_test;
+		begin
+			for (integer i = 0; i < `RS_SIZE; i += 1) begin
+				// rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
+				clear_rs_table_test[i].inst.opa_select = ALU_OPA_IS_REGA;
+				clear_rs_table_test[i].inst.opb_select = ALU_OPB_IS_REGB;
+				clear_rs_table_test[i].inst.dest_reg = DEST_IS_REGC;
+				clear_rs_table_test[i].inst.alu_func = ALU_ADDQ;
+				clear_rs_table_test[i].inst.fu_name = FU_ALU;
+				clear_rs_table_test[i].inst.rd_mem = 0;
+				clear_rs_table_test[i].inst.wr_mem = 0;
+				clear_rs_table_test[i].inst.ldl_mem = 0;
+				clear_rs_table_test[i].inst.stc_mem = 0;
+				clear_rs_table_test[i].inst.cond_branch = 0;
+				clear_rs_table_test[i].inst.uncond_branch = 0;
+				clear_rs_table_test[i].inst.halt = 0;
+				clear_rs_table_test[i].inst.cpuid = 0;
+				clear_rs_table_test[i].inst.illegal = 0;
+				clear_rs_table_test[i].inst.valid_inst = 0;
+				clear_rs_table_test[i].T = `DUMMY_REG;
+				clear_rs_table_test[i].T1 = `DUMMY_REG;
+				clear_rs_table_test[i].T2 = `DUMMY_REG;
+				clear_rs_table_test[i].busy = 0;
+			end
+		end
+	endfunction
+
+	function clear_issue_next_test;
+	begin
+		for (integer i = 0; i < `NUM_FU; i += 1) begin
+			clear_issue_next_test[i].inst.opa_select = ALU_OPA_IS_REGA;
+			clear_issue_next_test[i].inst.opb_select = ALU_OPB_IS_REGB;
+			clear_issue_next_test[i].inst.dest_reg = DEST_IS_REGC;
+			clear_issue_next_test[i].inst.alu_func = ALU_ADDQ;
+			clear_issue_next_test[i].inst.fu_name = FU_ALU;
+			clear_issue_next_test[i].inst.rd_mem = 0;
+			clear_issue_next_test[i].inst.wr_mem = 0;
+			clear_issue_next_test[i].inst.ldl_mem = 0;
+			clear_issue_next_test[i].inst.stc_mem = 0;
+			clear_issue_next_test[i].inst.cond_branch = 0;
+			clear_issue_next_test[i].inst.uncond_branch = 0;
+			clear_issue_next_test[i].inst.halt = 0;
+			clear_issue_next_test[i].inst.cpuid = 0;
+			clear_issue_next_test[i].inst.illegal = 0;
+			clear_issue_next_test[i].inst.valid_inst = 0;
+			clear_issue_next_test[i].T = `DUMMY_REG;
+			clear_issue_next_test[i].T1 = `DUMMY_REG;
+			clear_issue_next_test[i].T2 = `DUMMY_REG;
+			clear_issue_next_test[i].busy = 0;
+		end
+	end
+	endfunction
+
+	// TASKS
 	task exit_on_error;
 		begin
 			#1;
@@ -245,49 +300,52 @@ module testbench;
 	// Nothing issued since it is reset
 	$display("-------RESET------\n");
 	reset = 1;
-	for (integer i = 0; i < `RS_SIZE; i += 1) begin
-		// rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
-		rs_table_test[i].inst.opa_select = ALU_OPA_IS_REGA;
-		rs_table_test[i].inst.opb_select = ALU_OPB_IS_REGB;
-		rs_table_test[i].inst.dest_reg = DEST_IS_REGC;
-		rs_table_test[i].inst.alu_func = ALU_ADDQ;
-		rs_table_test[i].inst.fu_name = FU_ALU;
-		rs_table_test[i].inst.rd_mem = 0;
-		rs_table_test[i].inst.wr_mem = 0;
-		rs_table_test[i].inst.ldl_mem = 0;
-		rs_table_test[i].inst.stc_mem = 0;
-		rs_table_test[i].inst.cond_branch = 0;
-		rs_table_test[i].inst.uncond_branch = 0;
-		rs_table_test[i].inst.halt = 0;
-		rs_table_test[i].inst.cpuid = 0;
-		rs_table_test[i].inst.illegal = 0;
-		rs_table_test[i].inst.valid_inst = 0;
-		rs_table_test[i].T = `DUMMY_REG;
-		rs_table_test[i].T1 = `DUMMY_REG;
-		rs_table_test[i].T2 = `DUMMY_REG;
-		rs_table_test[i].busy = 0;
-	end
-	for (integer i = 0; i < `NUM_FU; i += 1) begin
-		issue_next_test[i].inst.opa_select = ALU_OPA_IS_REGA;
-		issue_next_test[i].inst.opb_select = ALU_OPB_IS_REGB;
-		issue_next_test[i].inst.dest_reg = DEST_IS_REGC;
-		issue_next_test[i].inst.alu_func = ALU_ADDQ;
-		issue_next_test[i].inst.fu_name = FU_ALU;
-		issue_next_test[i].inst.rd_mem = 0;
-		issue_next_test[i].inst.wr_mem = 0;
-		issue_next_test[i].inst.ldl_mem = 0;
-		issue_next_test[i].inst.stc_mem = 0;
-		issue_next_test[i].inst.cond_branch = 0;
-		issue_next_test[i].inst.uncond_branch = 0;
-		issue_next_test[i].inst.halt = 0;
-		issue_next_test[i].inst.cpuid = 0;
-		issue_next_test[i].inst.illegal = 0;
-		issue_next_test[i].inst.valid_inst = 0;
-		issue_next_test[i].T = `DUMMY_REG;
-		issue_next_test[i].T1 = `DUMMY_REG;
-		issue_next_test[i].T2 = `DUMMY_REG;
-		issue_next_test[i].busy = 0;
-	end
+	rs_table_test = clear_rs_table_test();
+	issue_next_test = clear_issue_next_test();
+
+	// for (integer i = 0; i < `RS_SIZE; i += 1) begin
+	// 	// rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
+	// 	rs_table_test[i].inst.opa_select = ALU_OPA_IS_REGA;
+	// 	rs_table_test[i].inst.opb_select = ALU_OPB_IS_REGB;
+	// 	rs_table_test[i].inst.dest_reg = DEST_IS_REGC;
+	// 	rs_table_test[i].inst.alu_func = ALU_ADDQ;
+	// 	rs_table_test[i].inst.fu_name = FU_ALU;
+	// 	rs_table_test[i].inst.rd_mem = 0;
+	// 	rs_table_test[i].inst.wr_mem = 0;
+	// 	rs_table_test[i].inst.ldl_mem = 0;
+	// 	rs_table_test[i].inst.stc_mem = 0;
+	// 	rs_table_test[i].inst.cond_branch = 0;
+	// 	rs_table_test[i].inst.uncond_branch = 0;
+	// 	rs_table_test[i].inst.halt = 0;
+	// 	rs_table_test[i].inst.cpuid = 0;
+	// 	rs_table_test[i].inst.illegal = 0;
+	// 	rs_table_test[i].inst.valid_inst = 0;
+	// 	rs_table_test[i].T = `DUMMY_REG;
+	// 	rs_table_test[i].T1 = `DUMMY_REG;
+	// 	rs_table_test[i].T2 = `DUMMY_REG;
+	// 	rs_table_test[i].busy = 0;
+	// end
+	// for (integer i = 0; i < `NUM_FU; i += 1) begin
+	// 	issue_next_test[i].inst.opa_select = ALU_OPA_IS_REGA;
+	// 	issue_next_test[i].inst.opb_select = ALU_OPB_IS_REGB;
+	// 	issue_next_test[i].inst.dest_reg = DEST_IS_REGC;
+	// 	issue_next_test[i].inst.alu_func = ALU_ADDQ;
+	// 	issue_next_test[i].inst.fu_name = FU_ALU;
+	// 	issue_next_test[i].inst.rd_mem = 0;
+	// 	issue_next_test[i].inst.wr_mem = 0;
+	// 	issue_next_test[i].inst.ldl_mem = 0;
+	// 	issue_next_test[i].inst.stc_mem = 0;
+	// 	issue_next_test[i].inst.cond_branch = 0;
+	// 	issue_next_test[i].inst.uncond_branch = 0;
+	// 	issue_next_test[i].inst.halt = 0;
+	// 	issue_next_test[i].inst.cpuid = 0;
+	// 	issue_next_test[i].inst.illegal = 0;
+	// 	issue_next_test[i].inst.valid_inst = 0;
+	// 	issue_next_test[i].T = `DUMMY_REG;
+	// 	issue_next_test[i].T1 = `DUMMY_REG;
+	// 	issue_next_test[i].T2 = `DUMMY_REG;
+	// 	issue_next_test[i].busy = 0;
+	// end
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
