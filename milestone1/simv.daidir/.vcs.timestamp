@@ -1,0 +1,108 @@
+0 
+28
++v2k
++vc
+-Mamsrun=
+-Masflags=
+-Mcc=gcc
+-Mcfl= -pipe -fPIC -O -I/usr/caen/vcs-2017.12-SP2-1/include
+-Mcplusplus=g++
+-Mcrt0=
+-Mcrtn=
+-Mcsrc=
+-Mexternalobj=
+-Mldflags= -rdynamic
+-Mobjects= /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvirsim.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/liberrorinf.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsnpsmalloc.so /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvfs.so
+-Mout=simv
+-Msaverestoreobj=/usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o
+-Msyslibs=-ldl
+-Mupdate
+-Mvcsaceobjs=
+-Mxcflags= -pipe -fPIC -I/usr/caen/vcs-2017.12-SP2-1/include
+-full64
+-gen_obj
+-line
+-o simv
+-picarchive
+-sverilog
+/usr/caen/vcs-2017.12-SP2-1/linux64/bin/vcs1
+RS_new.v
+RS_new_test.v
+65
+sysc_uni_pwd=/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1
+__GLX_VENDOR_LIBRARY_NAME=nvidia
+_LMFILES_=/usr/caen/misc/modules/vcs/2017.12-SP2-1
+XMODIFIERS=@im=ibus
+XDG_VTNR=1
+XDG_SESSION_TYPE=x11
+XDG_SESSION_ID=24
+XDG_SESSION_DESKTOP=gnome-classic
+XDG_SEAT=seat0
+XDG_RUNTIME_DIR=/run/user/99486384
+XDG_MENU_PREFIX=gnome-
+XDG_DATA_DIRS=/home/heewoo/.local/share/flatpak/exports/share/:/var/lib/flatpak/exports/share/:/usr/local/share/:/usr/share/:/usr/caen/misc/menus
+XDG_CURRENT_DESKTOP=GNOME-Classic:GNOME
+XAUTHORITY=/run/gdm/auth-for-heewoo-e4PtgD/database
+WINDOWPATH=1:1
+VTE_VERSION=5202
+VMR_MODE_FLAG=64
+VCS_MODE_FLAG=64
+VCS_HOME=/usr/caen/vcs-2017.12-SP2-1
+VCS_DEPTH=0
+VCS_ARG_ADDED_FOR_TMP=1
+VCS_ARCH=linux64
+USERNAME=heewoo
+UNAME=/bin/uname
+TOOL_HOME=/usr/caen/vcs-2017.12-SP2-1/linux64
+SW_VCS=2017.12-SP2-1
+SSH_AUTH_SOCK=/run/user/99486384/keyring/ssh
+SSH_ASKPASS=/usr/libexec/openssh/gnome-ssh-askpass
+SSH_AGENT_PID=19956
+SNPS_VCS_CLANG_PATH=/fs/src/interfaces/LLVM_Project/QSCM/opt/llvm-3.9.1/linux64
+SESSION_MANAGER=local/unix:@/tmp/.ICE-unix/19770,unix/unix:/tmp/.ICE-unix/19770
+SCRNAME=vcs
+SCRIPT_NAME=vcs
+QT_PLUGIN_PATH=/usr/lib64/kde4/plugins:/usr/lib/kde4/plugins
+QT_IM_MODULE=ibus
+QT_GRAPHICSSYSTEM_CHECKED=1
+OVA_UUM=0
+MODULESHOME=/usr/share/Modules
+MODULEPATH=/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/caen/misc/modules:/afs/umich.edu/class/coe/modules
+MFLAGS=
+MAKELEVEL=1
+MAKEFLAGS=
+LOADEDMODULES=vcs/2017.12-SP2-1
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+LC_ALL=C
+LAMMPS_POTENTIALS=/usr/share/lammps/potentials
+KRB5CCNAME=FILE:/tmp/krb5cc_99486384_Aoi7mW
+KDEDIRS=/usr
+IMSETTINGS_MODULE=none
+IMSETTINGS_INTEGRATE_DESKTOP=yes
+ICEAUTHORITY=/run/user/99486384/iceauthority
+HISTCONTROL=ignoredups
+GTK_IM_MODULE=ibus
+GNOME_TERMINAL_SERVICE=:1.95
+GNOME_TERMINAL_SCREEN=/org/gnome/Terminal/screen/1913000b_3353_49ad_9c8a_726c0d293558
+GNOME_SHELL_SESSION_MODE=classic
+GNOME_DESKTOP_SESSION_ID=this-is-deprecated
+GJS_DEBUG_TOPICS=JS ERROR;JS LOG
+GJS_DEBUG_OUTPUT=stderr
+GDM_LANG=en_US.UTF-8
+GDMSESSION=gnome-classic
+DESKTOP_SESSION=gnome-classic
+DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-0U23szjaYh,guid=23fe42135d68adf9ff30f6d35c744088
+COLORTERM=truecolor
+BASH_FUNC_module()=() {  eval `/usr/bin/modulecmd bash $*`_}
+0
+3
+1551117022 sys_defs.vh
+1551136992 RS_new_test.v
+1551137506 RS_new.v
+5
+0 
+1531625631 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvirsim.so
+1531624898 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/liberrorinf.so
+1531624871 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsnpsmalloc.so
+1531625298 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvfs.so
+1551137511 simv.daidir

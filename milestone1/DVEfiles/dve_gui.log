@@ -1,0 +1,1072 @@
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Feb 25 17:39 2019
+VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
+The file '/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/inter.vpd' was opened successfully.
+Clock:    0, reset: 0, enable:0, 
+Clock:    1, reset: 0, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           1, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           2, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           3, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           4, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           5, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           6, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           7, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           8, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           9, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          10, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          11, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           1, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           2, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           3, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           4, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:0, 
+Clock:    1, reset: 1, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+****************************************DISPATCH MULT R1 R2 R3************************************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+**********************************************DISPATCH ADD R1 R2 R4, Issue MULT R1 R2 R3****************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 1, T = 0000011 T1 = 1000001, T2 = 1000010 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH LD R1 DISP R5, ISSUE ADD R1 R2 R4,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 0, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 0000101 T1 = 1111111, T2 = 1000001 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************DISPATCH nothing, Issue nothing *********************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************RESET *********************************
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+@@@Passed
+$finish called from file "RS_new_test.v", line 261.
+$finish at simulation time                   90
+Simulation complete, time is 90.
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Feb 25 17:40 2019
+VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
+The file '/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/inter.vpd' was opened successfully.
+Clock:    0, reset: 0, enable:0, 
+Clock:    1, reset: 0, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           1, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           2, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           3, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           4, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           5, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           6, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           7, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           8, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           9, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          10, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          11, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           1, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           2, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           3, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           4, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:0, 
+Clock:    1, reset: 1, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+****************************************DISPATCH MULT R1 R2 R3************************************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+**********************************************DISPATCH ADD R1 R2 R4, Issue MULT R1 R2 R3****************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 1, T = 0000011 T1 = 1000001, T2 = 1000010 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH LD R1 DISP R5, ISSUE ADD R1 R2 R4,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 0, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 0000101 T1 = 1111111, T2 = 1000001 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************DISPATCH nothing, Issue nothing *********************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************RESET *********************************
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+@@@Passed
+$finish called from file "RS_new_test.v", line 261.
+$finish at simulation time                   90
+Simulation complete, time is 90.
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Feb 25 17:43 2019
+VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
+The file '/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/inter.vpd' was opened successfully.
+Clock:    0, reset: 0, enable:0, 
+Clock:    1, reset: 0, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           1, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           2, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           3, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           4, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           5, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           6, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           7, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           8, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           9, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          10, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          11, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           1, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           2, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           3, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           4, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:0, 
+Clock:    1, reset: 1, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+****************************************DISPATCH MULT R1 R2 R3************************************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+**********************************************DISPATCH ADD R1 R2 R4, Issue MULT R1 R2 R3****************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 1, T = 0000011 T1 = 1000001, T2 = 1000010 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH LD R1 DISP R5, ISSUE ADD R1 R2 R4,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 0, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 0000101 T1 = 1111111, T2 = 1000001 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************DISPATCH nothing, Issue nothing *********************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************RESET *********************************
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+@@@Passed
+$finish called from file "RS_new_test.v", line 261.
+$finish at simulation time                   90
+Simulation complete, time is 90.
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Feb 25 17:47 2019
+VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
+The file '/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/inter.vpd' was opened successfully.
+Clock:    0, reset: 0, enable:0, 
+Clock:    1, reset: 0, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           1, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           2, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           3, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           4, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           5, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           6, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           7, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           8, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =           9, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          10, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS_Row =          11, busy = x, Function = x, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           1, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           2, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           3, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+Issue_row =           4, busy = 0, T = xxxxxxxx T1 = xxxxxxxx, T2 = xxxxxxxx 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:0, 
+Clock:    1, reset: 1, enable:0, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+****************************************DISPATCH MULT R1 R2 R3************************************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+**********************************************DISPATCH ADD R1 R2 R4, Issue MULT R1 R2 R3****************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 1, T = 0000011 T1 = 1000001, T2 = 1000010 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH LD R1 DISP R5, ISSUE ADD R1 R2 R4,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 0, Function = 3, T = 0000011 T1 = 1000001, T2 = 1000010 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5,************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 1, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 0000101 T1 = 1111111, T2 = 1000001 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************DISPATCH nothing, Issue nothing *********************************
+Clock:    0, reset: 0, enable:1, 
+Clock:    1, reset: 0, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 1, T = 0000101 T1 = 1111111, T2 = 1000001 
+RS_Row =          10, busy = 1, Function = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+RS_Row =          11, busy = 1, Function = 2, T = 1111111 T1 = 0000001, T2 = 0000001 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 0000100 T1 = 1000001, T2 = 1000010 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+*************************************RESET *********************************
+Clock:    0, reset: 1, enable:1, 
+Clock:    1, reset: 1, enable:1, 
+**********************************************************
+
+------------------------RS TABLE----------------------------
+
+RS_Row =           0, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           1, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           2, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           3, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           4, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           5, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           6, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           7, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           8, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =           9, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          10, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS_Row =          11, busy = 0, Function = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+RS full = 0
+-----------------------Issue table-----------------------------------
+
+Issue_row =           0, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           1, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           2, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           3, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+Issue_row =           4, busy = 0, T = 1111111 T1 = 1111111, T2 = 1111111 
+*******************************************************************
+
+@@@Passed
+$finish called from file "RS_new_test.v", line 261.
+$finish at simulation time                   90
+Simulation complete, time is 90.
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 90
+CPU Time:      0.100 seconds;       Data structure size:   0.1Mb
+Mon Feb 25 17:50:02 2019
