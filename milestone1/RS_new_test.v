@@ -13,11 +13,26 @@ module testbench;
 	RS_ROW_T   		rs_table_out [(`RS_SIZE - 1):0] ;
 	RS_ROW_T 		issue_next   [(`NUM_FU -1 ):0]; 
 	logic				rs_full;
+	logic [$clog2(`NUM_FU) - 1:0]	issue_cnt;
 
 
 	
-	RS RS0(.clock(clock), .reset(reset), .enable(enable), .CAM_en(CAM_en), .CDB_in(CDB_in), .dispatch_valid(dispatch_valid),.inst_in(inst_in), .LSQ_busy(LSQ_busy),
-	.rs_table_out(rs_table_out), .issue_next(issue_next),  .rs_full(rs_full)
+	RS RS0(
+		// inputs
+		.clock(clock), 
+		.reset(reset), 
+		.enable(enable), 
+		.CAM_en(CAM_en), 
+		.CDB_in(CDB_in), 
+		.dispatch_valid(dispatch_valid),
+		.inst_in(inst_in), 
+		.LSQ_busy(LSQ_busy),
+
+		// outputs
+		.rs_table_out(rs_table_out), 
+		.issue_next(issue_next), 
+		.issue_cnt(issue_cnt), 
+		.rs_full(rs_full)
 	 );
 
 	
@@ -95,6 +110,30 @@ module testbench;
 	// 2. Struct the input and output of the testcases
 	// 3. Dispatch multiple instructions at one cycle, send CDB valid for
 	// multiple instructions at the same time
+
+
+
+	// Test for Reset
+	reset = 0;
+	enable = 1;
+	CAM_en = 0;
+	CDB_in = 7'd31;
+	inst_in =` {ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	tag1_in = 7'h1;
+	tag2_in = 7'h2;
+
+	@(negedge clock);
+	// Nothing issued since it is reset
+	reset = 1;
+	assert(!issue && (fu_busy_out=={(`NUM_FU){0}}) ) else #1 exit_on_error;
+	
+	@(negedge clock);
+	reset = 0;
+	//RS is empty since it is reset
+	assert(!issue && (fu_busy_out=={(`NUM_FU){0}}) ) else #1 exit_on_error;
+
+
+
 
 
 	// -------------Test for reset
