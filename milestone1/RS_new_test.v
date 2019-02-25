@@ -71,7 +71,7 @@ module testbench;
 		end
 	endfunction
 
-	function clear_issue_next_test;
+	function table_t clear_issue_next_test;
 	begin
 		for (integer i = 0; i < `NUM_FU; i += 1) begin
 			clear_issue_next_test[i].inst.opa_select = ALU_OPA_IS_REGA;
