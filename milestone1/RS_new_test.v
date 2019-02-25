@@ -69,6 +69,16 @@ module testbench;
 	
 		LSQ_busy = 0;	
 	
+	///Things to do
+	//For 1-way superscalar, multiple issue
+	//1. Makefile and testbench : make it for synthesizable (for ex,
+	//define DEBUG only for testing)
+	//2. How can we printout, see, and compare the rs_table values? (It is
+	//kind of 2 dimensional matrix structure)
+	//3. Testing for functionality (enable, reset, dispatch_valid,
+	//LSQ_busy, CAM_en, commit, issue, dispatch) and corner cases (Issue 2 branches at
+	//a same cycle?, input is invalid instruction, etc...)    
+
 
 	@(negedge clock);	
 		$display("@@@Passed");
