@@ -126,17 +126,10 @@ typedef enum logic [4:0] {
 `define SS_SIZE 3 // superscalar size
 
 typedef enum logic [2:0]{
-<<<<<<< HEAD
   FU_ALU
   FU_LD,
   FU_ST,
   FU_MULT,
-=======
-  FU_ALU,
-  FU_LD,
-  FU_ST,
-  FU_MULT, 
->>>>>>> e4cbe15b30c7cc234ee1ed3c9aec017d6112f9f4
   FU_BR
 } FU_NAME;
 

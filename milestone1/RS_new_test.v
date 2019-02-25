@@ -47,6 +47,69 @@ module testbench;
 			$finish;
 		end
 	endtask
+
+	task entry_exists_in_table;
+		input RS_ROW_T inst_in,
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		begin
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					if (rs_table_out[i] == inst_in) begin
+						return;
+					end
+				end
+			end
+			#1 exit_on_error;
+		end
+	endtask
+
+	task entry_not_in_table;
+		input RS_ROW_T inst_in,
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		begin
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					if (rs_table_out[i] == inst_in) begin
+						#1 exit_on_error;
+					end
+				end
+			end
+			return;
+		end
+	endtask
+
+	task table_has_N_entries;
+		input integer count,
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		begin
+			integer _count = 0;
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					_count += 1;
+				end
+			end
+			assert(count == _count) else #1 exit_on_error;
+		end
+	endtask
+
+	task tags_now_ready;
+		input integer tag,
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		begin
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					if (rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
+						assert(rs_table_out[i].T1[-1]) else #1 exit_on_error;
+					end
+				end
+			end
+			return;
+		end
+	endtask
 	
 	initial begin
 		
@@ -95,9 +158,9 @@ module testbench;
 	//a same cycle?, input is invalid instruction, etc...)    
 
 
-	@(negedge clock);	
-		$display("@@@Passed");
-		$finish;
+	// @(negedge clock);	
+	// 	$display("@@@Passed");
+	// 	$finish;
 
 		/*inst_in = ;
 		fu_idx = ;
@@ -115,25 +178,88 @@ module testbench;
 
 	// Test for Reset
 	reset = 0;
-	enable = 1;
+	enable = 0;
 	CAM_en = 0;
-	CDB_in = 7'd31;
-	inst_in =` {ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	tag1_in = 7'h1;
-	tag2_in = 7'h2;
+	CDB_in = `DUMMY_REG;
+	// inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+	// inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+	// inst_in.inst.dest_reg = DEST_IS_REGC;
+	// inst_in.inst.alu_func = ALU_ADDQ;
+	// inst_in.inst.fu_name = FU_ALU;
+	// inst_in.inst.rd_mem = 0;
+	inst_in.inst = {ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	inst_in.T = 3;
+	inst_in.T1 = 2;
+	inst_in.T2 = 1;
+	inst_in.busy = 1;
+	dispatch_valid = 1;
+	LSQ_busy = 2'b00;
+
 
 	@(negedge clock);
 	// Nothing issued since it is reset
+	$display("-------RESET------\n");
 	reset = 1;
-	assert(!issue && (fu_busy_out=={(`NUM_FU){0}}) ) else #1 exit_on_error;
+	assert( rs_table_out == {(`RS_SIZE){  ($bits(RS_ROW_T)){0} }} ) else #1 exit_on_error;
+	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( !issue_cnt) else #1 exit_on_error;
+	assert( !rs_full ) else #1 exit_on_error;
+	$display("Reset 1 passed");
 	
 	@(negedge clock);
 	reset = 0;
 	//RS is empty since it is reset
-	assert(!issue && (fu_busy_out=={(`NUM_FU){0}}) ) else #1 exit_on_error;
+	assert( rs_table_out == {(`RS_SIZE){  ($bits(RS_ROW_T)){0} }} ) else #1 exit_on_error;
+	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( !issue_cnt) else #1 exit_on_error;
+	assert( !rs_full ) else #1 exit_on_error;
+	$display("Reset 2 passed");
 
+	@(negedge clock);
+	$display("-------Dispatch One Instruction------\n");
+	// dispatch add p2 p1 p3
+	enable = 1;
+	CAM_en = 0;
+	dispatch_valid = 1;
+	inst_in.inst = {ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	inst_in.T = 3;
+	inst_in.T1 = 2;
+	inst_in.T2 = 1;
+	inst_in.busy = 1;
+	LSQ_busy = 2'b00;
 
+	entry_exists_in_table(inst_in, rs_table_out);
+	table_has_N_entries(1, rs_table_out);
+	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( !issue_cnt) else #1 exit_on_error;
+	assert( !rs_full ) else #1 exit_on_error;
+	$display("Dispatch 1 instruction passed");
 
+	@(negedge clock);
+	$display("-------Issue One Instruction------\n");
+	// issue add p2 p1 p3
+	dispatch_valid = 0;
+
+	entry_not_in_table(inst_in, rs_table_out);
+	table_has_N_entries(0, rs_table_out);
+	assert( issue_next == inst_in ) else #1 exit_on_error;
+	assert( issue_cnt == 1) else #1 exit_on_error;
+	assert( !rs_full ) else #1 exit_on_error;
+	$display("Issue 1 instruction passed");
+
+	@(negedge clock);
+	@(negedge clock);
+	$display("-------Commit One Instruction------\n");
+	// commit add p2 p1 p3
+	CAM_en = 1;
+	CDB_in = 3;
+
+	tags_now_ready(3, rs_table_out);
+	table_has_N_entries(0, rs_table_out);
+	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( !issue_cnt) else #1 exit_on_error;
+	assert( !rs_full ) else #1 exit_on_error;
+	$display("Commit 1 Instruction passed");
 
 
 	// -------------Test for reset
