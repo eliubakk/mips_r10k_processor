@@ -228,7 +228,7 @@ module testbench;
 	enable = 1;
 	CAM_en = 0;
 	dispatch_valid = 1;
-	inst_in.inst = `{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	inst_in.inst = {ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
 	inst_in.T = 3;
 	inst_in.T1 = 2;
 	inst_in.T2 = 1;
