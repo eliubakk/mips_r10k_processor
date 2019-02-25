@@ -11,7 +11,7 @@ module testbench;
 	
 
 	RS_ROW_T   		rs_table_out [(`RS_SIZE - 1):0] ;
-	RS_ROW_T 		issue_next; 
+	RS_ROW_T 		issue_next   [(`NUM_FU -1 ):0]; 
 	logic				rs_full;
 
 
@@ -47,26 +47,26 @@ module testbench;
 		CDB_in = 0;
 		dispatch_valid = 0;
 		
-			inst_in.inst.opa_select = 0;
-			inst_in.inst.opb_select = 0;
-			inst_in.inst.dest_reg = 0;
-			inst_in.inst.alu_func = 0;
-			inst_in.inst.fu_name = 0;
-			inst_in.inst.rd_mem = 0;
-			inst_in.inst.wr_mem = 0;
-			inst_in.inst.ldl_mem = 0;
-			inst_in.inst.stc_mem = 0;
-			inst_in.inst.cond_branch = 0;
-			inst_in.inst.uncond_branch = 0;
-			inst_in.inst.halt = 0;
-			inst_in.inst.cpuid = 0;
-			inst_in.inst.illegal = 0;
-			inst_in.inst.valid_inst = 0;
-			inst_in.T = 0;
-			inst_in.T1 = 0;
-			inst_in.T2 = 0;
-			inst_in.busy = 0;
-	
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b0;
+		inst_in.T = `DUMMY_REG;
+		inst_in.T1 = `DUMMY_REG;
+		inst_in.T2 = `DUMMY_REG;
+		inst_in.busy = 1'b0;
+
 		LSQ_busy = 0;	
 	
 	///Things to do

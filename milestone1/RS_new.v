@@ -1,5 +1,5 @@
 // This module is for 1 way scalar processor
-// Issue width is 1 for simplicity
+// Issue width is NUM_FU
 // RS_SIZE : 12
 // NUM_FU : 5
 
@@ -72,7 +72,7 @@ module PS4(
 	assign req_up = index[3] | index[2] | index[1] | index[0];
 
 endmodule
-
+//-----------------------------------------------------------------------------------------
 module RS(
 	// INPUTS
 	input 		    					clock,
@@ -86,12 +86,12 @@ module RS(
 
 	// OUTPUTS
 	`ifdef DEBUG 
-	output RS_ROW_T  	rs_table_out [(`RS_SIZE - 1):0],
+	output RS_ROW_T  			rs_table_out [(`RS_SIZE - 1):0],
 	`endif
 	
-	output	RS_ROW_T	issue_next,
-	//output  RS_ROW_T 	issue_next [(`NUM_FU - 1):0], 
-	//output logic [`NUM_FU - 1:0]		issue_cnt,
+	//output	RS_ROW_T		issue_next,
+	output  RS_ROW_T 			issue_next [(`NUM_FU - 1):0], 
+	output logic [$clog2(`NUM_FU) - 1:0]	issue_cnt,
 	output	logic				rs_full
 	);
 	
@@ -105,7 +105,7 @@ module RS(
 	//table to store internal state
 	logic [$clog2(`RS_SIZE)-1:0]		rs_busy_cnt;	// The number of busy rows
 	RS_ROW_T  				rs_table 	[(`RS_SIZE - 1):0];	// RS_Table
-	logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
+	//logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
 	//RS_ROW_T 				issue_next	[`NUM_FU-1:0];		// The instructions that we will issue next
 	logic	[(`RS_SIZE)-1:0] 		issue_idx;
 	logic  [($clog2(`RS_SIZE))-1:0]		dispatch_cnt;					
@@ -115,6 +115,14 @@ module RS(
 	logic [(`RS_SIZE -1):0] MSB_T1; // T1 MSB bits for each CAM modules
 	logic [(`RS_SIZE -1):0] MSB_T2; // T2 MSB bits for each CAM modules
 
+	// isue_idx for each of functional unit (before and after priority
+	// encoder)
+	//
+	logic	[`RS_SIZE-1:0] ALU_issue_idx, ALU_issue_gnt;
+	logic	[`RS_SIZE-1:0] LD_issue_idx, LD_issue_gnt;
+	logic	[`RS_SIZE-1:0] ST_issue_idx, ST_issue_gnt;
+	logic	[`RS_SIZE-1:0] MULT_issue_idx, MULT_issue_gnt;
+	logic	[`RS_SIZE-1:0] BR_issue_idx, BR_issue_gnt;
 	// For dispatch
 	logic	[`RS_SIZE-1:0] dispatch_idx, dispatch_gnt;
 
@@ -124,14 +132,46 @@ module RS(
 	assign rs_full = (rs_busy_cnt > (`RS_SIZE - 1)) ? 1:0;
 
 
-
-	
+	// Find which row in RS is used for dispatch	
 	PS ps_dispatch(
 		.enable(enable),
 		.index({{(16-`RS_SIZE){0}},dispatch_idx}),
 		.gnt(dispatch_gnt),
 		.req_up()
 	);
+
+	// Find which row in FU_issue_idx to issue
+		PS ps_alu(
+			.enable(enable),
+			.index({{(16-`RS_SIZE){0}},ALU_issue_idx}),
+			.gnt(ALU_issue_gnt),
+			.req_up()
+		);
+		PS ps_ld(
+			.enable(enable),
+			.index({{(16-`RS_SIZE){0}},LD_issue_idx}),
+			.gnt(LD_issue_gnt),
+			.req_up()
+		);
+		PS ps_st(
+			.enable(enable),
+			.index({{(16-`RS_SIZE){0}},ST_issue_idx}),
+			.gnt(ST_issue_gnt),
+			.req_up()
+		);
+		PS ps_mult(
+			.enable(enable),
+			.index({{(16-`RS_SIZE){0}},MULT_issue_idx}),
+			.gnt(MULT_issue_gnt),
+			.req_up()
+		);
+		PS ps_br(
+			.enable(enable),
+			.index({{(16-`RS_SIZE){0}},BR_issue_idx}),
+			.gnt(BR_issue_gnt),
+			.req_up()
+		);
+
 
 	// CAM
 	// Initiate one RS_CAM modules, parallelly process CDB broadcasting & CAM
@@ -151,7 +191,7 @@ module RS(
 	
 	always_comb begin
 
-			
+		// COMMIT STAGE//	
 		rs_table_next = rs_table;
 		for(integer i=0;i<=`RS_SIZE;i=i+1) begin
 			rs_table_next[i].T1[6] = MSB_T1[i] | rs_table[i].T1[6];
@@ -162,149 +202,142 @@ module RS(
 
 		// ISSUE STAGE // 
 		if (enable) begin
-			issue_next.inst.opa_select = 0;
-			issue_next.inst.opa_select = 0;
-			issue_next.inst.opb_select = 0;
-			issue_next.inst.dest_reg = 0;
-			issue_next.inst.alu_func = 0;
-			issue_next.inst.fu_name = 0;
-			issue_next.inst.rd_mem = 0;
-			issue_next.inst.wr_mem = 0;
-			issue_next.inst.ldl_mem = 0;
-			issue_next.inst.stc_mem = 0;
-			issue_next.inst.cond_branch = 0;
-			issue_next.inst.uncond_branch = 0;
-			issue_next.inst.halt = 0;
-			issue_next.inst.cpuid = 0;
-			issue_next.inst.illegal = 0;
-			issue_next.inst.valid_inst = 0;
+		// Initialize issue_next table
+			for(integer i=0; i<`NUM_FU; i=i+1) begin // Anothe way to do this?
+			issue_next[i].inst.opa_select = ALU_OPA_IS_REGA;
+			issue_next[i].inst.opb_select = ALU_OPB_IS_REGB;
+			issue_next[i].inst.dest_reg = DEST_IS_REGC;
+			issue_next[i].inst.alu_func = ALU_ADDQ;
+			issue_next[i].inst.fu_name = FU_ALU;
+			issue_next[i].inst.rd_mem = 1'b0;
+			issue_next[i].inst.wr_mem = 1'b0;
+			issue_next[i].inst.ldl_mem = 1'b0;
+			issue_next[i].inst.stc_mem = 1'b0;
+			issue_next[i].inst.cond_branch = 1'b0;
+			issue_next[i].inst.uncond_branch = 1'b0;
+			issue_next[i].inst.halt = 1'b0;
+			issue_next[i].inst.cpuid = 1'b0;
+			issue_next[i].inst.illegal = 1'b0;
+			issue_next[i].inst.valid_inst = 1'b0;
 					
-			issue_next.T = 0;
-			issue_next.T1 = 0;
-			issue_next.T2 = 0;
-			issue_next.busy = 0;
-			
+			issue_next[i].T = `DUMMY_REG;
+			issue_next[i].T1 = `DUMMY_REG;
+			issue_next[i].T2 = `DUMMY_REG;
+			issue_next[i].busy = 1'b0;
+			end
+		// Initialize the issue cnt and inx, gnt table	
 			issue_cnt = {$clog2(`NUM_FU){0}}; 
 			issue_idx = {`RS_SIZE{0}};
-	 	
-	// First of all, check the instructions, tags -> enable issue_idx bits
-	// Just issue one instructions per one cycle
+			
+			ALU_issue_idx = {`RS_SIZE{0}};
+			ALU_issue_gnt = {`RS_SIZE{0}};
+			LD_issue_idx = {`RS_SIZE{0}}; 
+			LD_issue_gnt = {`RS_SIZE{0}};
+			ST_issue_idx = {`RS_SIZE{0}}; 
+			ST_issue_gnt = {`RS_SIZE{0}}; 	
+			MULT_issue_idx = {`RS_SIZE{0}}; 
+			MULT_issue_gnt = {`RS_SIZE{0}};
+			BR_issue_idx = {`RS_SIZE{0}}; 
+			BR_issue_gnt = {`RS_SIZE{0}};  	
+	// First of all, check the instructions, tags -> enable FU_issue_idx bits
+	// ISSUE width = FU number
+	// For multiple issue,
+	// 1 : FU_issue_idx[i] = i when row i is ready to issue (tags ready,
+	// no Structural hazard)
+	// 2 : FU_issue_gnt[i] by using priority encoder (only one row per
+	// each FU can be issued)
+	// 3 : write issue_next table, issue_cnt increase, set issue_next_busy
+	// (valid issue), erase rs_table_next_busy
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				if(rs_table_next[i].T1 [6] & rs_table_next[i].T2 [6] & rs_table_next[i].busy ) begin
+				if(rs_table_next[i].T1 [6] & rs_table_next[i].T2 [6] & rs_table[i].busy ) begin
 					case(rs_table_next[i].inst.fu_name) 
 						FU_ALU : begin
-								if(!issue_next.busy) begin	
-									issue_next = rs_table[i];
-									issue_cnt = issue_cnt + 1;
-									issue_idx[i] = 1'b1;
-									rs_table_next[i].busy = 0;
-									end								
+								ALU_issue_idx[i] = 1'b1;
 						end
 
 						FU_LD : begin	
 							if(LSQ_busy!=2'b01) begin
-								if(!issue_next.busy) begin	
-									issue_next = rs_table[i]; //LD
-									issue_cnt = issue_cnt + 1;
-									issue_idx[i] = 1'b1;
-									rs_table_next[i].busy = 0;
-								end 
+								LD_issue_idx[i] = 1'b1;
 							end
 						end
 
 						FU_ST :  begin	
 							if(LSQ_busy!=2'b10)  begin
-								if(!issue_next.busy) begin	
-									issue_next = rs_table[i]; //ST
-									issue_cnt = issue_cnt + 1;
-									issue_idx[i] = 1'b1;
-									rs_table_next[i].busy = 0;
-								end 	
+								ST_issue_idx[i] = 1'b1;
 							end
 						end
 
 						FU_MULT :  begin	
-								if(!issue_next.busy) begin	
-									issue_next = rs_table[i]; //MULT1
-									issue_cnt = issue_cnt + 1;
-									issue_idx[i] = 1'b1;
-									rs_table_next[i].busy = 0;
-								end 
-						end
+								MULT_issue_idx[i] = 1'b1;
+							end
 						FU_BR :  begin	
-								if(!issue_next.busy) begin	
-									issue_next = rs_table[i]; //BR
-									issue_cnt = issue_cnt + 1;
-									issue_idx[i] = 1'b1;
-									rs_table_next[i].busy = 0;
-								end 			
+											
+								BR_issue_idx[i] = 1'b1;
+										
 						end
 
 				
 					endcase
 				end
-				break;
+				
 			end
 					
 
 		end
-		// For multi issue
-		// 1. Select the issued logic by using Priority encoder
-		// 2. Update the issue table, and disable the busy bit in
-		// rs_table_next
-		/*PS ps_alu(
-			.enable(enable),
-			.index(),
-			.gnt(),
-			.req_up()
-		);
 
-		PS ps_ld(
-			.enable(enable),
-			.index(),
-			.gnt(),
-			.req_up()
-		);
-
-
-		PS ps_st(
-			.enable(enable),
-			.index(),
-			.gnt(),
-			.req_up()
-		);
-
-
-		PS ps_mult(
-			.enable(enable),
-			.index(),
-			.gnt(),
-			.req_up()
-		);
-
-
-		PS ps_br(
-			.enable(enable),
-			.index(),
-			.gnt(),
-			.req_up()
-		);
-*/
-
-	/*
-  Redeclaration of ANSI ports not allowed for 'dispatch_valid', this will be 
-  an error in a future release
-
-			integer j,k;
-			for(j=0;j<=`RS_SIZE;j=j+1) begin
-				for(k=0;k<=`NUM_FU;k=k+1) begin
-					if(rs_table[j].busy & issue_idx[j] & issue_next[k].busy) begin
-						rs_table_next[j].busy = 0;
-					end
-				end	
+		// update the issue_next, rs_table_next_busy, issue_cnt by
+		// using FU_index_gnt
+		//
+		//For ALU
+		for(integer i=0; i<`RS_SIZE; i=i+1) begin
+			if(ALU_issue_gnt[i] == 1) begin
+				issue_next[0] = rs_table_next[i]; // issue_next[0] for ALU
+				issue_next[0].busy = 1'b1;
+				rs_table_next[i].busy = 1'b0; //Free the RS table
+				issue_cnt = issue_cnt + 1;	
 			end
-*/
+		end
 
+		//For LD
+		for(integer i=0; i<`RS_SIZE; i=i+1) begin
+			if(ALU_issue_gnt[i] == 1) begin
+				issue_next[1] = rs_table_next[i]; // issue_next[1] for LD
+				issue_next[1].busy = 1'b1;
+				rs_table_next[i].busy = 1'b0; //Free the RS table
+				issue_cnt = issue_cnt + 1;	
+			end
+		end
+
+		//For ST
+		for(integer i=0; i<`RS_SIZE; i=i+1) begin
+			if(ALU_issue_gnt[i] == 1) begin
+				issue_next[2] = rs_table_next[i]; // issue_next[2] for ST
+				issue_next[2].busy = 1'b1;
+				rs_table_next[i].busy = 1'b0; //Free the RS table
+				issue_cnt = issue_cnt + 1;	
+			end
+		end
+
+		//For MULT
+		for(integer i=0; i<`RS_SIZE; i=i+1) begin
+			if(ALU_issue_gnt[i] == 1) begin
+				issue_next[3] = rs_table_next[i]; // issue_next[3] for MULT
+				issue_next[3].busy = 1'b1;
+				rs_table_next[i].busy = 1'b0; //Free the RS table
+				issue_cnt = issue_cnt + 1;	
+			end
+		end
+
+		// For BR
+		for(integer i=0; i<`RS_SIZE; i=i+1) begin
+			if(ALU_issue_gnt[i] == 1) begin
+				issue_next[4] = rs_table_next[i]; // issue_next[3] for MULT
+				issue_next[4].busy = 1'b1;
+				rs_table_next[i].busy = 1'b0; //Free the RS table
+				issue_cnt = issue_cnt + 1;	
+			end
+		end
+	
 
 		// DISPATCH STAGE
 		//
@@ -327,9 +360,6 @@ module RS(
 		end
 
 		
-	// Incresae the waiting index of rs_table_next
-	
-	
 
 	end
 
@@ -340,35 +370,35 @@ module RS(
 	//////////////////////////////////////////////////
 	always_ff @(posedge clock) begin
 		if (reset) begin
-			for(integer i=0; i<`RS_SIZE; i=i+1) begin
-			//rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}};
-			/*rs_table.inst.opa_select <= 0;
-			rs_table.inst.opb_select <= 0;
-			rs_table.inst.dest_reg <= 0;
-			rs_table.inst.alu_func <= 0;
-			rs_table.inst.fu_name <= 0;
-			rs_table.inst.rd_mem <= 0;
-			rs_table.inst.wr_mem <= 0;
-			rs_table.inst.ldl_mem <= 0;
-			rs_table.inst.stc_mem <= 0;
-			rs_table.inst.cond_branch <= 0;
-			rs_table.inst.uncond_branch <= 0;
-			rs_table.inst.halt <= 0;
-			rs_table.inst.cpuid <= 0;
-			rs_table.inst.illegal <= 0;
-			rs_table.inst.valid_inst <= 0;*/
-			rs_table[i].T <= 0;
-			rs_table[i].T1 <= 0;
-			rs_table[i].T2 <= 0;
-			rs_table[i].busy <= 0;
+		//	rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}}; // Other way to do this?
+			for(integer i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?
+			
+				rs_table[i].inst.opa_select <= `SD ALU_OPA_IS_REGA;
+				rs_table[i].inst.opb_select <= `SD ALU_OPB_IS_REGB;
+				rs_table[i].inst.dest_reg <= `SD DEST_IS_REGC;
+				rs_table[i].inst.alu_func <= `SD ALU_ADDQ;
+				rs_table[i].inst.fu_name <= `SD FU_ALU;
+				rs_table[i].inst.rd_mem <= `SD 1'b0;
+				rs_table[i].inst.wr_mem <= `SD 1'b0;
+				rs_table[i].inst.ldl_mem <= `SD 1'b0;
+				rs_table[i].inst.stc_mem <= `SD 1'b0;
+				rs_table[i].inst.cond_branch <= `SD 1'b0;
+				rs_table[i].inst.uncond_branch <= `SD 1'b0;
+				rs_table[i].inst.halt <= `SD 1'b0;
+				rs_table[i].inst.cpuid <= `SD 1'b0;
+				rs_table[i].inst.illegal <= `SD 1'b0;
+				rs_table[i].inst.valid_inst <= `SD 1'b0;
+				rs_table[i].T <= `SD `DUMMY_REG;
+				rs_table[i].T1 <= `SD `DUMMY_REG;
+				rs_table[i].T2 <= `SD `DUMMY_REG;
+				rs_table[i].busy <= `SD 1'b0;
 			end
 
-
-			//rs_busy_cnt <= {([$clog2(`RS_SIZE)-1:0]){0}};
-			rs_busy_cnt <= 0;
+			rs_busy_cnt <= `SD {($clog2(`RS_SIZE)){0}};
+		//	rs_busy_cnt <= `SD 0;
 		end
-		rs_table <= rs_table_next;
-		rs_busy_cnt <= rs_busy_cnt_next;
+		rs_table <= `SD rs_table_next;
+		rs_busy_cnt <= `SD rs_busy_cnt_next;
 	end
 
 
