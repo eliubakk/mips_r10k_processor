@@ -108,7 +108,7 @@ module RS(
 	//logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
 	//RS_ROW_T 				issue_next	[`NUM_FU-1:0];		// The instructions that we will issue next
 	logic	[(`RS_SIZE)-1:0] 		issue_idx;
-	logic  [($clog2(`RS_SIZE))-1:0]		dispatch_cnt;					
+	logic  					dispatch_cnt;					
 
 	// logic for CDB CAM
 	
@@ -228,9 +228,9 @@ module RS(
 			issue_next[i].inst.illegal = 1'b0;
 			issue_next[i].inst.valid_inst = 1'b0;
 					
-			issue_next[i].T = `DUMMY_REG;
-			issue_next[i].T1 = `DUMMY_REG;
-			issue_next[i].T2 = `DUMMY_REG;
+			issue_next[i].T = 7'b1111111;
+			issue_next[i].T1 = 7'b1111111;
+			issue_next[i].T2 = 7'b1111111;
 			issue_next[i].busy = 1'b0;
 			end
 	
@@ -298,55 +298,52 @@ module RS(
 				issue_next[0] = rs_table_next[i]; // issue_next[0] for ALU
 				issue_next[0].busy = 1'b1;
 				rs_table_next[i].busy = 1'b0; //Free the RS table
-				issue_cnt = issue_cnt + 1;	
-			end
+			end 
+			
 		end
 
 		//For LD
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
-			if(ALU_issue_gnt[i] == 1) begin
+			if(LD_issue_gnt[i] == 1) begin
 				issue_next[1] = rs_table_next[i]; // issue_next[1] for LD
 				issue_next[1].busy = 1'b1;
 				rs_table_next[i].busy = 1'b0; //Free the RS table
-				issue_cnt = issue_cnt + 1;	
 			end
 		end
 
 		//For ST
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
-			if(ALU_issue_gnt[i] == 1) begin
+			if(ST_issue_gnt[i] == 1) begin
 				issue_next[2] = rs_table_next[i]; // issue_next[2] for ST
 				issue_next[2].busy = 1'b1;
 				rs_table_next[i].busy = 1'b0; //Free the RS table
-				issue_cnt = issue_cnt + 1;	
 			end
 		end
 
 		//For MULT
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
-			if(ALU_issue_gnt[i] == 1) begin
+			if(MULT_issue_gnt[i] == 1) begin
 				issue_next[3] = rs_table_next[i]; // issue_next[3] for MULT
 				issue_next[3].busy = 1'b1;
 				rs_table_next[i].busy = 1'b0; //Free the RS tableSS
-				issue_cnt = issue_cnt + 1;	
 			end
 		end
 
 		// For BR
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
-			if(ALU_issue_gnt[i] == 1) begin
+			if(BR_issue_gnt[i] == 1) begin
 				issue_next[4] = rs_table_next[i]; // issue_next[3] for MULT
 				issue_next[4].busy = 1'b1;
 				rs_table_next[i].busy = 1'b0; //Free the RS table
-				issue_cnt = issue_cnt + 1;	
 			end
 		end
 	
-
+		issue_cnt = | ALU_issue_gnt + | LD_issue_gnt + | ST_issue_gnt + | MULT_issue_gnt + | BR_issue_gnt;
 		// DISPATCH STAGE
 		//
 		// To decide which row to dispatch
 		dispatch_idx = {`RS_SIZE{0}};
+		dispatch_cnt = 0;
 		
 		
 		for(integer i=0;i<`RS_SIZE;i=i+1) begin
@@ -360,8 +357,13 @@ module RS(
 					rs_table_next[i] 	= inst_in;
 					rs_table_next[i].busy 	= 1'b1;
 					dispatch_cnt		= 1;
+					break;
+				end else begin
+					rs_table_next[i] 	= rs_table[i];
+						
 				end
-				break;
+					
+				
 			end	
 
 		end
@@ -370,7 +372,7 @@ module RS(
 
 		
 
-	// end
+	end
 
 	//CHANGE
 
