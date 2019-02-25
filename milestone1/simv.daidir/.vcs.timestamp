@@ -29,7 +29,7 @@
 RS_new.v
 RS_new_test.v
 65
-sysc_uni_pwd=/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1
+sysc_uni_pwd=/home/heewoo/Desktop/eecs470/FINAL/milestone1
 __GLX_VENDOR_LIBRARY_NAME=nvidia
 _LMFILES_=/usr/caen/misc/modules/vcs/2017.12-SP2-1
 XMODIFIERS=@im=ibus
@@ -96,13 +96,13 @@ COLORTERM=truecolor
 BASH_FUNC_module()=() {  eval `/usr/bin/modulecmd bash $*`_}
 0
 3
-1551117022 sys_defs.vh
-1551136992 RS_new_test.v
-1551137506 RS_new.v
+1551138183 sys_defs.vh
+1551138183 RS_new_test.v
+1551138183 RS_new.v
 5
 0 
 1531625631 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvirsim.so
 1531624898 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/liberrorinf.so
 1531624871 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libsnpsmalloc.so
 1531625298 /usr/caen/vcs-2017.12-SP2-1/linux64/lib/libvfs.so
-1551137511 simv.daidir
+1551138707 simv.daidir

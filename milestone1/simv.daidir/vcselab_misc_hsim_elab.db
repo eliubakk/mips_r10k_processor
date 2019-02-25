@@ -1,6 +1,6 @@
 psSimBaseName                      	simv
 psLogFileName                      	NULL
-pDaiDir                            	/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/simv.daidir
+pDaiDir                            	/home/heewoo/Desktop/eecs470/FINAL/milestone1/simv.daidir
 destPath                           	csrc/
 fSharedMaster                      	0
 fHsimPCSharedLibSpecified          	0
