@@ -14,7 +14,7 @@ module testbench;
 	RS_ROW_T 		issue_next   [(`NUM_FU -1 ):0]; 
 	logic				rs_full;
 	logic [$clog2(`NUM_FU) - 1:0]	issue_cnt;
-
+	RS_ROW_T   		rs_table_test [(`RS_SIZE - 1):0] ;
 
 	
 	RS RS0(
@@ -200,7 +200,10 @@ module testbench;
 	// Nothing issued since it is reset
 	$display("-------RESET------\n");
 	reset = 1;
-	assert( rs_table_out == {`RS_SIZE{$bits(RS_ROW_T){0}}} ) else #1 exit_on_error;
+	for (integer i = 0; i < `RS_SIZE; i += 1) begin
+		rs_table_test[i] = {($bits(RS_ROW_T)){0} };
+	end
+	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
@@ -209,7 +212,7 @@ module testbench;
 	@(negedge clock);
 	reset = 0;
 	//RS is empty since it is reset
-	assert( rs_table_out == {(`RS_SIZE){  ($bits(RS_ROW_T)){0} }} ) else #1 exit_on_error;
+	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
