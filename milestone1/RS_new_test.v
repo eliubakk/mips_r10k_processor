@@ -78,9 +78,9 @@ module testbench;
 		inst_in.inst.cpuid = 1'b0;
 		inst_in.inst.illegal = 1'b0;
 		inst_in.inst.valid_inst = 1'b0;
-		inst_in.T = `DUMMY_REG;
-		inst_in.T1 = `DUMMY_REG;
-		inst_in.T2 = `DUMMY_REG;
+		inst_in.T = 7'b1111111;
+		inst_in.T1 = 7'b1111111;
+		inst_in.T2 = 7'b1111111;
 		inst_in.busy = 1'b0;
 
 		LSQ_busy = 0;	
@@ -103,6 +103,7 @@ module testbench;
 	@(negedge  clock);
 //Check enable
 		enable = 1;
+		table_out();
 	@(negedge clock);
 //Dispatch
 		reset = 0;
@@ -129,8 +130,13 @@ module testbench;
 		inst_in.T1 = 7'b1000001;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b1;
+		
+		
 
+		table_out();
 
+		@(negedge clock);
+		@(negedge clock);
 		@(negedge clock);
 		
 		

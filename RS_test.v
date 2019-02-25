@@ -38,7 +38,7 @@ module testbench;
 
 		// Initial value
 		clock = 0;
-		reset = 0;
+		reset = 1;
 		enable = 0;
 		CAM_in = 0;	
 		

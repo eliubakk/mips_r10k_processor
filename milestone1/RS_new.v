@@ -327,7 +327,7 @@ module RS(
 			if(ALU_issue_gnt[i] == 1) begin
 				issue_next[3] = rs_table_next[i]; // issue_next[3] for MULT
 				issue_next[3].busy = 1'b1;
-				rs_table_next[i].busy = 1'b0; //Free the RS table
+				rs_table_next[i].busy = 1'b0; //Free the RS tableSS
 				issue_cnt = issue_cnt + 1;	
 			end
 		end
@@ -346,6 +346,9 @@ module RS(
 		// DISPATCH STAGE
 		//
 		// To decide which row to dispatch
+		dispatch_idx = {`RS_SIZE{0}};
+		
+		
 		for(integer i=0;i<`RS_SIZE;i=i+1) begin
 			dispatch_idx[i] = (~rs_table[i].busy) & inst_in.inst.valid_inst & dispatch_valid; // disppatch index is all 0 when the instruction is not valid or no structural hazard
 		end
@@ -363,9 +366,13 @@ module RS(
 
 		end
 
+
+
 		
 
-	end
+	// end
+
+	//CHANGE
 
 	//////////////////////////////////////////////////
 	//                                              //
@@ -393,17 +400,23 @@ module RS(
 				rs_table[i].inst.cpuid <=  1'b0;
 				rs_table[i].inst.illegal <=  1'b0;
 				rs_table[i].inst.valid_inst <= 1'b0;
-				rs_table[i].T <=  `DUMMY_REG;
-				rs_table[i].T1 <= `DUMMY_REG;
-				rs_table[i].T2 <=  `DUMMY_REG;
+				//rs_table[i].T <=  `DUMMY_REG;
+				//rs_table[i].T1 <= `DUMMY_REG;
+				//rs_table[i].T2 <=  `DUMMY_REG;
+				rs_table[i].T <=  7'b1111111;
+				rs_table[i].T1 <= 7'b1111111;
+				rs_table[i].T2 <=  7'b1111111;
+				
 				rs_table[i].busy <=  1'b0;
 			end
 
 			rs_busy_cnt <=  {($clog2(`RS_SIZE)){0}};
 		//	rs_busy_cnt <=  0;
 		end
-		rs_table <=  rs_table_next;
-		rs_busy_cnt <=  rs_busy_cnt_next;
+		else begin
+			rs_table <=  rs_table_next;
+			rs_busy_cnt <=  rs_busy_cnt_next;
+		end
 	end
 
 
