@@ -202,7 +202,7 @@ module testbench;
 	$display("-------RESET------\n");
 	reset = 1;
 	for (integer i = 0; i < `RS_SIZE; i += 1) begin
-		rs_table_test[i] = `{($bits(RS_ROW_T)){0} };
+		rs_table_test[i] = {($bits(RS_ROW_T)){0} };
 	end
 	for (integer i = 0; i < `NUM_FU; i += 1) begin
 		issue_next_test[i] = `{($bits(RS_ROW_T)){0}};
