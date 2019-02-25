@@ -106,6 +106,9 @@ module testbench;
 					if (rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
 						assert(rs_table_out[i].T1[-1]) else #1 exit_on_error;
 					end
+					if (rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
+						assert(rs_table_out[i].T2[-1]) else #1 exit_on_error;
+					end
 				end
 			end
 			return;
@@ -188,7 +191,7 @@ module testbench;
 	// inst_in.inst.alu_func = ALU_ADDQ;
 	// inst_in.inst.fu_name = FU_ALU;
 	// inst_in.inst.rd_mem = 0;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
 	inst_in.T = 3;
 	inst_in.T1 = 2;
 	inst_in.T2 = 1;
@@ -202,10 +205,10 @@ module testbench;
 	$display("-------RESET------\n");
 	reset = 1;
 	for (integer i = 0; i < `RS_SIZE; i += 1) begin
-		rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
+		rs_table_test[i] = '{($bits(RS_ROW_T)-1){0} };
 	end
 	for (integer i = 0; i < `NUM_FU; i += 1) begin
-		issue_next_test[i] = '{($bits(RS_ROW_T)){0}};
+		issue_next_test[i] = '{($bits(RS_ROW_T)-1){0}};
 	end
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == issue_next_test ) else #1 exit_on_error;
@@ -228,7 +231,7 @@ module testbench;
 	enable = 1;
 	CAM_en = 0;
 	dispatch_valid = 1;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
 	inst_in.T = 3;
 	inst_in.T1 = 2;
 	inst_in.T2 = 1;
