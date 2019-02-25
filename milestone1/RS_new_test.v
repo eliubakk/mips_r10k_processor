@@ -15,6 +15,7 @@ module testbench;
 	logic				rs_full;
 	logic [$clog2(`NUM_FU) - 1:0]	issue_cnt;
 	RS_ROW_T   		rs_table_test [(`RS_SIZE - 1):0] ;
+	RS_ROW_T 		issue_next_test   [(`NUM_FU -1 ):0]; 
 
 	
 	RS RS0(
@@ -203,8 +204,11 @@ module testbench;
 	for (integer i = 0; i < `RS_SIZE; i += 1) begin
 		rs_table_test[i] = {($bits(RS_ROW_T)){0} };
 	end
+	for (integer i = 0; i < `NUM_FU; i += 1) begin
+		issue_next_test[i] = {($bits(RS_ROW_T)){0}};
+	end
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
-	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Reset 1 passed");
@@ -213,7 +217,7 @@ module testbench;
 	reset = 0;
 	//RS is empty since it is reset
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
-	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Reset 2 passed");
@@ -233,7 +237,7 @@ module testbench;
 
 	entry_exists_in_table(inst_in, rs_table_out);
 	table_has_N_entries(1, rs_table_out);
-	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Dispatch 1 instruction passed");
@@ -245,7 +249,8 @@ module testbench;
 
 	entry_not_in_table(inst_in, rs_table_out);
 	table_has_N_entries(0, rs_table_out);
-	assert( issue_next == inst_in ) else #1 exit_on_error;
+	assert( issue_next[0] == inst_in ) else #1 exit_on_error;
+	assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
 	assert( issue_cnt == 1) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Issue 1 instruction passed");
@@ -259,7 +264,7 @@ module testbench;
 
 	tags_now_ready(3, rs_table_out);
 	table_has_N_entries(0, rs_table_out);
-	assert( issue_next == { (`NUM_FU){($bits(RS_ROW_T)){0}} } ) else #1 exit_on_error;
+	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Commit 1 Instruction passed");
