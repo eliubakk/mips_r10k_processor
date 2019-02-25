@@ -49,8 +49,8 @@ module testbench;
 	endtask
 
 	task entry_exists_in_table;
-		input RS_ROW_T inst_in,
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		input RS_ROW_T inst_in;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
 		begin
 			integer i;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
@@ -65,8 +65,8 @@ module testbench;
 	endtask
 
 	task entry_not_in_table;
-		input RS_ROW_T inst_in,
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		input RS_ROW_T inst_in;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
 		begin
 			integer i;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
@@ -81,8 +81,8 @@ module testbench;
 	endtask
 
 	task table_has_N_entries;
-		input integer count,
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		input integer count;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
 		begin
 			integer _count = 0;
 			integer i;
@@ -96,8 +96,8 @@ module testbench;
 	endtask
 
 	task tags_now_ready;
-		input integer tag,
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0]
+		input integer tag;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
 		begin
 			integer i;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
