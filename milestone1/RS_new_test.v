@@ -104,10 +104,10 @@ module testbench;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
 				if (rs_table_out[i].busy) begin
 					if (rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rs_table_out[i].T1[-1]) else #1 exit_on_error;
+						assert(rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
 					end
 					if (rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rs_table_out[i].T2[-1]) else #1 exit_on_error;
+						assert(rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
 					end
 				end
 			end
