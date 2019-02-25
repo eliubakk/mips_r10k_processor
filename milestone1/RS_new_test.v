@@ -32,6 +32,22 @@ module testbench;
 			$finish;
 		end
 	endtask
+
+	task table_out;
+		begin
+			#1;
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				$display("RS_Row = %d, busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
+			end
+				$display("RS full = %d",rs_full);
+			$display("---------------------------------------------");
+			for(integer i=0;i<`NUM_FU;i=i+1) begin
+			$display("Issue_row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[0].T, issue_next[0].T1, issue_next[0].T2 );
+	
+			end
+		end
+	endtask
+
 	
 	initial begin
 		
@@ -78,11 +94,12 @@ module testbench;
 	//3. Testing for functionality (enable, reset, dispatch_valid,
 	//LSQ_busy, CAM_en, commit, issue, dispatch) and corner cases (Issue 2 branches at
 	//a same cycle?, input is invalid instruction, etc...)    
-
+		table_out();
 
 	@(negedge clock);
 //Check reset
 		reset = 1;
+		table_out();
 	@(negedge  clock);
 //Check enable
 		enable = 1;
@@ -112,14 +129,6 @@ module testbench;
 		inst_in.T1 = 7'b1000001;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b1;
-
-		for(integer i=0;i<`RS_SIZE;i=i+1) begin
-		$display("RS_Row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b \n", i, rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
-		end
-		$display("---------------------------------------------\n");
-		for(integer i=0;i<`NUM_FU;i=i+1) begin
-		$display("Issue_row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b \n",i, issue_next[0].T, issue_next[0].T1, issue_next[0].T2 );
-		end
 
 
 		@(negedge clock);

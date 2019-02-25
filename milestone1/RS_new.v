@@ -126,6 +126,14 @@ module RS(
 	// For dispatch
 	logic	[`RS_SIZE-1:0] dispatch_idx, dispatch_gnt;
 
+	//------------------------------------------------------
+	//For testing
+	//
+	`ifdef DEBUG 
+	assign  	rs_table_out = rs_table;
+	`endif
+
+
 	
 	// Dispatch signal
 	assign rs_busy_cnt_next = rs_busy_cnt - issue_cnt + (dispatch_valid) & (dispatch_cnt) & (inst_in.inst.valid_inst);
@@ -135,7 +143,7 @@ module RS(
 	// Find which row in RS is used for dispatch	
 	PS ps_dispatch(
 		.enable(enable),
-		.index({{(16-`RS_SIZE){0}},dispatch_idx}),
+		.index({{(16-`RS_SIZE){1'b0}},dispatch_idx}),
 		.gnt(dispatch_gnt),
 		.req_up()
 	);
@@ -143,31 +151,31 @@ module RS(
 	// Find which row in FU_issue_idx to issue
 		PS ps_alu(
 			.enable(enable),
-			.index({{(16-`RS_SIZE){0}},ALU_issue_idx}),
+			.index({{(16-`RS_SIZE){1'b0}},ALU_issue_idx}),
 			.gnt(ALU_issue_gnt),
 			.req_up()
 		);
 		PS ps_ld(
 			.enable(enable),
-			.index({{(16-`RS_SIZE){0}},LD_issue_idx}),
+			.index({{(16-`RS_SIZE){1'b0}},LD_issue_idx}),
 			.gnt(LD_issue_gnt),
 			.req_up()
 		);
 		PS ps_st(
 			.enable(enable),
-			.index({{(16-`RS_SIZE){0}},ST_issue_idx}),
+			.index({{(16-`RS_SIZE){1'b0}},ST_issue_idx}),
 			.gnt(ST_issue_gnt),
 			.req_up()
 		);
 		PS ps_mult(
 			.enable(enable),
-			.index({{(16-`RS_SIZE){0}},MULT_issue_idx}),
+			.index({{(16-`RS_SIZE){1'b0}},MULT_issue_idx}),
 			.gnt(MULT_issue_gnt),
 			.req_up()
 		);
 		PS ps_br(
 			.enable(enable),
-			.index({{(16-`RS_SIZE){0}},BR_issue_idx}),
+			.index({{(16-`RS_SIZE){1'b0}},BR_issue_idx}),
 			.gnt(BR_issue_gnt),
 			.req_up()
 		);
@@ -367,7 +375,8 @@ module RS(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 		//	rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}}; // Other way to do this?
-			for(integer i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?
+			
+				for(integer i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?
 			
 				rs_table[i].inst.opa_select <=  ALU_OPA_IS_REGA;
 				rs_table[i].inst.opb_select <=  ALU_OPB_IS_REGB;
