@@ -3,22 +3,21 @@
 
 module testbench;
 	logic clock, reset, enable;
-	logic    [`SS_SIZE-1:0]	CAM_en;
-	PHYS_REG [`SS_SIZE-1:0]	CDB_in;
+	logic    		CAM_en;
+	PHYS_REG 		CDB_in;
 	logic			dispatch_valid;
 	RS_ROW_T		inst_in;
 	logic	 [1:0]		LSQ_busy;
 	
 
 	RS_ROW_T   		rs_table_out [(`RS_SIZE - 1):0] ;
-	RS_ROW_T 		issue_next [(`NUM_FU - 1):0];
-	logic    [(`NUM_FU -1):0]	issue_cnt;
+	RS_ROW_T 		issue_next; 
 	logic				rs_full;
 
 
 	
 	RS RS0(.clock(clock), .reset(reset), .enable(enable), .CAM_en(CAM_en), .CDB_in(CDB_in), .dispatch_valid(dispatch_valid),.inst_in(inst_in), .LSQ_busy(LSQ_busy),
-	.rs_table_out(rs_table_out), .issue_next(issue_next), .issue_cnt(issue_cnt), .rs_full(rs_full)
+	.rs_table_out(rs_table_out), .issue_next(issue_next),  .rs_full(rs_full)
 	 );
 
 	
@@ -36,16 +35,38 @@ module testbench;
 	
 	initial begin
 		
-		$monitor("Clock: %4.0f, reset: $b, enable:%b, CAM_en:%b, CDB_in:%h, .dispatch_valid:%b, inst_in:%h, LSQ_busy : %b, \n rs_table_out:%h", clock, reset, enable, CAM_en, CDB_in,dispatch_valid, inst_in, LSQ_busy, rs_table_out);	
+	/*	$monitor("Clock: %4.0f, reset: $b, enable:%b, CAM_en:%b, CDB_in:%h, .dispatch_valid:%b, inst_in:%h, LSQ_busy : %b, \n rs_table_out:%h", clock, reset, enable, CAM_en, CDB_in,dispatch_valid, inst_in, LSQ_busy, rs_table_out);	
+ 	*/
+		$monitor("Clock: %4.0f, reset: %b, enable:%b, ", clock, reset, enable);	
 
 		// Initial value
 		clock = 0;
 		reset = 0;
 		enable = 0;
-		CAM_en = {`SS_SIZE{0}};
+		CAM_en = 0;
 		CDB_in = 0;
 		dispatch_valid = 0;
-		inst_in = 0;	
+		
+			inst_in.inst.opa_select = 0;
+			inst_in.inst.opb_select = 0;
+			inst_in.inst.dest_reg = 0;
+			inst_in.inst.alu_func = 0;
+			inst_in.inst.fu_name = 0;
+			inst_in.inst.rd_mem = 0;
+			inst_in.inst.wr_mem = 0;
+			inst_in.inst.ldl_mem = 0;
+			inst_in.inst.stc_mem = 0;
+			inst_in.inst.cond_branch = 0;
+			inst_in.inst.uncond_branch = 0;
+			inst_in.inst.halt = 0;
+			inst_in.inst.cpuid = 0;
+			inst_in.inst.illegal = 0;
+			inst_in.inst.valid_inst = 0;
+			inst_in.T = 0;
+			inst_in.T1 = 0;
+			inst_in.T2 = 0;
+			inst_in.busy = 0;
+	
 		LSQ_busy = 0;	
 	
 
