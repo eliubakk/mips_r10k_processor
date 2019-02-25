@@ -106,7 +106,6 @@ module testbench;
 		end
 	endtask
 
-<<<<<<< HEAD
 	task entry_exists_in_table;
 		input RS_ROW_T inst_in;
 		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
@@ -213,23 +212,6 @@ module testbench;
 			return;
 		end
 	endtask
-=======
-	task table_out;
-		begin
-			#1;
-			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				$display("RS_Row = %d, busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
-			end
-				$display("RS full = %d",rs_full);
-			$display("---------------------------------------------");
-			for(integer i=0;i<`NUM_FU;i=i+1) begin
-			$display("Issue_row = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[0].T, issue_next[0].T1, issue_next[0].T2 );
-	
-			end
-		end
-	endtask
-
->>>>>>> 70f616b33c59ae742d83844d862a60ac53d30795
 	
 	initial begin
 		
@@ -293,11 +275,6 @@ module testbench;
 		dispatch_valid = 1;
 		LSQ_busy = 0;	
 
-<<<<<<< HEAD
-	// @(negedge clock);	
-	// 	$display("@@@Passed");
-	// 	$finish;
-=======
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGC;
@@ -329,7 +306,6 @@ module testbench;
 		
 		$display("@@@Passed");
 		$finish;
->>>>>>> 70f616b33c59ae742d83844d862a60ac53d30795
 
 		/*inst_in = ;
 		fu_idx = ;
