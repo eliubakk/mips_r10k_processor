@@ -109,6 +109,17 @@ module testbench;
 		end
 	endtask
 
+	task print_rs_entry;
+		input RS_ROW_T rs_entry;
+		begin
+			$display("\tBusy = %b", rs_entry.busy);
+			$display("\tFU_Name = %d", rs_entry.inst.fu_name);
+			$display("\tT = %7.0b", rs_entry.T);
+			$display("\tT1 = %7.0b", rs_entry.T1);
+			$display("\tT2 = %7.0b", rs_entry.T2);
+		end
+	endtask
+
 	task print_rs_table;
 		input RS_ROW_T rs_table [(`RS_SIZE - 1):0];
 		begin
@@ -117,11 +128,7 @@ module testbench;
 
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				$display("Entry: %d", i);
-				$display("\tBusy = %b", rs_table[i].busy);
-				$display("\tFU_Name = %d", rs_table[i].inst.fu_name);
-				$display("\tT = %7.0b", rs_table[i].T);
-				$display("\tT1 = %7.0b", rs_table[i].T1);
-				$display("\tT2 = %7.0b", rs_table[i].T2);
+				print_rs_entry(rs_table[i]);
 			end
 			$display("*******************************************************************\n");
 
@@ -133,7 +140,11 @@ module testbench;
 		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
 		begin
 			integer i;
+			$display("checking for inst_in...");
+			print_rs_entry(inst_in);
 			for (i = 0; i < `RS_SIZE; i += 1) begin
+				$display("At entry %d", i);
+				print_rs_entry(rs_table[i]);
 				if (rs_table_out[i].busy) begin
 					if (rs_table_out[i] == inst_in) begin
 						return;
