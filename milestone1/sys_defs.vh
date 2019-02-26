@@ -143,7 +143,7 @@ typedef enum logic [2:0]{
 
 
 
-typedef struct {
+typedef struct packed {
   ALU_OPA_SELECT opa_select; // use this for T1 valid
   ALU_OPB_SELECT opb_select; // use this for T2 valid
   DEST_REG_SEL   dest_reg; // mux selects use this for T valid
@@ -156,7 +156,7 @@ typedef struct {
   logic valid_inst; // for counting valid instructions executed
 } DECODED_INST;
 
-typedef struct{
+typedef struct packed{
   DECODED_INST inst;
   PHYS_REG     T;
   PHYS_REG     T1;

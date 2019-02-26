@@ -3,20 +3,20 @@
 
 module testbench;
 	logic clock, reset, enable;
-	logic    		CAM_en;
-	PHYS_REG 		CDB_in;
-	logic			dispatch_valid;
-	RS_ROW_T		inst_in;
-	logic	 [1:0]		LSQ_busy;
-	logic 				branch_not_taken;
+	logic    				CAM_en;
+	PHYS_REG 				CDB_in;
+	logic					dispatch_valid;
+	RS_ROW_T				inst_in;
+	logic	 [1:0]				LSQ_busy;
+	logic 					branch_not_taken;
 
-	RS_ROW_T   		rs_table_out [(`RS_SIZE - 1):0] ;
-	logic [`RS_SIZE-1:0] 	issue_idx;
-	RS_ROW_T 		issue_out   [(`NUM_FU -1 ):0]; 
-	logic				rs_full;
-	logic [$clog2(`NUM_FU) - 1:0]	issue_cnt;
-	RS_ROW_T   		rs_table_test [(`RS_SIZE - 1):0] ;
-	RS_ROW_T 		issue_out_test   [(`NUM_FU -1 ):0]; 
+	RS_ROW_T   	 [(`RS_SIZE - 1):0]	rs_table_out;
+	logic 		[`RS_SIZE-1:0] 		issue_idx;
+	RS_ROW_T 	 [(`NUM_FU -1 ):0]	issue_out  ; 
+	logic					rs_full;
+	logic [$clog2(`NUM_FU) - 1:0]		issue_cnt;
+	RS_ROW_T   	[(`RS_SIZE - 1):0] 	rs_table_test ;
+	RS_ROW_T 	 [(`NUM_FU -1 ):0]	issue_out_test  ; 
 
 	
 	RS RS0(
@@ -62,7 +62,7 @@ module testbench;
 				$display("------------------------RS TABLE----------------------------\n");
 
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				$display("RS_Row = %d, issue_idx = %b, busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, issue_idx[i],rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
+				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, issue_idx[i],rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
 			end
 				$display("RS full = %d",rs_full);
 				$display("-----------------------Issue table-----------------------------------\n");
@@ -76,113 +76,6 @@ module testbench;
 	endtask
 
 
-	task entry_exists_in_table;
-		input RS_ROW_T inst_in;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					if (rs_table_out[i] == inst_in) begin
-						return;
-					end
-				end
-			end
-			#1 exit_on_error;
-		end
-	endtask
-
-	task entry_not_in_table;
-		input RS_ROW_T inst_in;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					if (rs_table_out[i] == inst_in) begin
-						#1 exit_on_error;
-					end
-				end
-			end
-			return;
-		end
-	endtask
-
-	task table_has_N_entries;
-		input integer count;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer _count = 0;
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					_count += 1;
-				end
-			end
-			assert(count == _count) else #1 exit_on_error;
-		end
-	endtask
-
-	task tags_now_ready;
-		input integer tag;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
-		begin
-			integer i;
-			for (i = 0; i < `RS_SIZE; i += 1) begin
-				if (rs_table_out[i].busy) begin
-					if (rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-					if (rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-				end
-			end
-			return;
-		end
-	endtask
-
-	task check_issue_next_correct;
-		input RS_ROW_T issue_next [(`NUM_FU -1 ):0];
-		input RS_ROW_T issue_next_test [(`NUM_FU -1 ):0];
-		begin
-			for (integer i = 0; i < `NUM_FU; i += 1) begin
-				logic found = 1'b0;
-				if (issue_next[i].busy) begin
-					for (integer j = 0; j < `NUM_FU; j += 1) begin
-						if (issue_next_test[j].busy) begin
-							if (issue_next_test[j] == issue_next[i]) begin
-								found = 1'b1;
-								break;
-							end
-						end
-					end
-					if (!found) begin
-						exit_on_error;
-					end
-				end
-			end
-
-			for (integer i = 0; i < `NUM_FU; i += 1) begin
-				logic found = 1'b0;
-				if (issue_next_test[i].busy) begin
-					for (integer j = 0; j < `NUM_FU; j += 1) begin
-						if (issue_next[j].busy) begin
-							if (issue_next_test[i] == issue_next[j]) begin
-								found = 1'b1;
-								break;
-							end
-						end
-					end
-					if (!found) begin
-						exit_on_error;
-					end
-				end
-			end
-			return;
-		end
-	endtask
-	
 	initial begin
 		
 	/*	$monitor("Clock: %4.0f, reset: $b, enable:%b, CAM_en:%b, CDB_in:%h, .dispatch_valid:%b, inst_in:%h, LSQ_busy : %b, \n rs_table_out:%h", clock, reset, enable, CAM_en, CDB_in,dispatch_valid, inst_in, LSQ_busy, rs_table_out);	
@@ -196,6 +89,7 @@ module testbench;
 		CAM_en = 0;
 		CDB_in = 0;
 		dispatch_valid = 0;
+		branch_not_taken = 0;
 	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
@@ -216,6 +110,7 @@ module testbench;
 		inst_in.T1 = 7'b1111111;
 		inst_in.T2 = 7'b1111111;
 		inst_in.busy = 1'b0;
+
 
 		LSQ_busy = 0;	
 	

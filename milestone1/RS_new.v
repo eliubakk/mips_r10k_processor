@@ -6,26 +6,26 @@
 `include "sys_defs.vh"
 `define DEBUG
 module RS_CAM(
-		input		enable,
-		input 		CAM_en, 
-		input PHYS_REG  CDB_tag,
-		input RS_ROW_T  rs_table [`RS_SIZE-1:0],
+		input				enable,
+		input 				CAM_en, 
+		input PHYS_REG  		CDB_tag,
+		input RS_ROW_T  [`RS_SIZE-1:0] rs_table,
 		output 	 logic [`RS_SIZE-1:0] T1_hit,
 		output 	 logic [`RS_SIZE-1:0] T2_hit
 		
 	);
 		
 	always_comb begin
-		T1_hit = {`RS_SIZE{0}};
-		T2_hit = {`RS_SIZE{0}};	
+		T1_hit = {`RS_SIZE{1'b0}};
+		T2_hit = {`RS_SIZE{1'b0}};	
 		if(CAM_en & enable) begin
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				T1_hit[i] = (rs_table[i].T1[5:0] == CDB_tag[5:0]);
 			 	T2_hit[i] = (rs_table[i].T2[5:0] == CDB_tag[5:0]);
 			end		
 		end else begin
-			T1_hit = {`RS_SIZE{0}};
-			T2_hit = {`RS_SIZE{0}};	
+			T1_hit = {`RS_SIZE{1'b0}};
+			T2_hit = {`RS_SIZE{1'b0}};	
 		end	
 	end		
 
@@ -78,37 +78,37 @@ module RS(
 	input 		    					clock,
 	input 		    					reset,
 	input 		    					enable, // enable input comes from ROB's "dispatch" output
-	input  [`SS_SIZE-1:0] 	    		CAM_en,
-	input   PHYS_REG			CDB_in, 
-	input					dispatch_valid,        // FU from ROB or Free list
-	input   RS_ROW_T			inst_in,
-	input [1:0]				LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
-	input					branch_not_taken, // signal to mention the status of the branch
+	input  [`SS_SIZE-1:0] 		    			CAM_en,
+	input   PHYS_REG					CDB_in, 
+	input							dispatch_valid,        // FU from ROB or Free list
+	input   RS_ROW_T					inst_in,
+	input [1:0]						LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
+	input							branch_not_taken, // signal to mention the status of the branch
 	// OUTPUTS
 	`ifdef DEBUG 
-	output RS_ROW_T  			rs_table_out [(`RS_SIZE - 1):0],
+	output RS_ROW_T  	[(`RS_SIZE - 1):0]		rs_table_out,
 	//output logic [`RS_SIZE-1:0]		issue_idx,			
 	`endif
 	
 	//output	RS_ROW_T		issue_out,
-	output  RS_ROW_T 			issue_next [(`NUM_FU - 1):0], 
-	output logic [$clog2(`NUM_FU) - 1:0]	issue_cnt,
-	output	logic				rs_full
+	output  RS_ROW_T 	[(`NUM_FU - 1):0]		issue_next , 
+	output logic [$clog2(`NUM_FU) - 1:0]			issue_cnt,
+	output	logic						rs_full
 	);
 	
 	//current and next state comb variables (Do not need to update the
 	//entire rs_table, rs_table is on sequential logic)
 	
-	logic [$clog2(`RS_SIZE)-1:0] 		rs_busy_cnt_next;
-	RS_ROW_T  				rs_table_next 	[(`RS_SIZE - 1):0];
+	logic [$clog2(`RS_SIZE)-1:0] 				rs_busy_cnt_next;
+	RS_ROW_T  		[(`RS_SIZE - 1):0]		rs_table_next; 
 
 
 	//table to store internal state
-	logic [$clog2(`RS_SIZE)-1:0]		rs_busy_cnt;	// The number of busy rows
-	RS_ROW_T  				rs_table 	[(`RS_SIZE - 1):0];	// RS_Table
+	logic [$clog2(`RS_SIZE)-1:0]				rs_busy_cnt;	// The number of busy rows
+	RS_ROW_T  		[(`RS_SIZE - 1):0]		rs_table;	// RS_Table
 	//logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
-	RS_ROW_T 				issue_out	[`NUM_FU-1:0];		// The instructions that we will issue next
-	logic  					dispatch_cnt;					
+	RS_ROW_T 		[`NUM_FU-1:0]			issue_out;		// The instructions that we will issue next
+	logic  							dispatch_cnt;					
 
 	// logic for CDB CAM
 	
@@ -155,7 +155,7 @@ module RS(
 			.enable(enable),
 			.index({{(16-`RS_SIZE){1'b0}},ALU_issue_idx}),
 			.gnt(ALU_issue_gnt),
-			.req_up()
+			.req_up() 
 		);
 		PS ps_ld(
 			.enable(enable),
@@ -202,7 +202,7 @@ module RS(
 	always_comb begin
 
 		//checks for the branch not taken
-	if (branch_not_taken) begin
+	/*if (branch_not_taken) begin
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin 
 				rs_table_next[i].inst.opa_select =  ALU_OPA_IS_REGA;
 				rs_table_next[i].inst.opb_select =  ALU_OPB_IS_REGB;
@@ -254,10 +254,10 @@ module RS(
 
 
 		
-		issue_idx_next = {($clog2(`RS_SIZE)){0}};
+		issue_idx_next = {($clog2(`RS_SIZE)){1'b0}};
 
 	end
-	else begin
+	else begin*/
 			
 	
 		
@@ -298,15 +298,15 @@ module RS(
 			end
 	
 		// Initialize the issue cnt and inx, gnt table	
-			issue_cnt = {$clog2(`NUM_FU){0}}; 
-			issue_idx_next = {`RS_SIZE{0}};
+			issue_cnt = {$clog2(`NUM_FU){1'b0}}; 
+			issue_idx_next = {`RS_SIZE{1'b0}};
 			
-			ALU_issue_idx = 	{`RS_SIZE{0}};
-			LD_issue_idx = 		{`RS_SIZE{0}}; 
-			ST_issue_idx = 		{`RS_SIZE{0}}; 
-			MULT_issue_idx = 	{`RS_SIZE{0}}; 
+			ALU_issue_idx = 	{`RS_SIZE{1'b0}};
+			LD_issue_idx = 		{`RS_SIZE{1'b0}}; 
+			ST_issue_idx = 		{`RS_SIZE{1'b0}}; 
+			MULT_issue_idx = 	{`RS_SIZE{1'b0}}; 
 
-			BR_issue_idx = 		{`RS_SIZE{0}};
+			BR_issue_idx = 		{`RS_SIZE{1'b0}};
 		if (enable) begin
 		// Initialize issue_out table
 			 
@@ -425,8 +425,8 @@ module RS(
 		// DISPATCH STAGE
 		//
 		// To decide which row to dispatch
-		dispatch_idx = {`RS_SIZE{0}};
-		dispatch_cnt = 0;
+		dispatch_idx = {`RS_SIZE{1'b0}};
+		dispatch_cnt = 1'b0;
 		
 		
 		for(integer i=0;i<`RS_SIZE;i=i+1) begin
@@ -460,7 +460,7 @@ module RS(
 		
 
 	end
-	end
+//	end
 
 	//CHANGE
 
@@ -526,8 +526,8 @@ module RS(
 				end
 
 
-			rs_busy_cnt <=  {($clog2(`RS_SIZE)){0}};
-			issue_idx <= {($clog2(`RS_SIZE)){0}};
+			rs_busy_cnt <=  {($clog2(`RS_SIZE)){1'b0}};
+			issue_idx <= {($clog2(`RS_SIZE)){1'b0}};
 
 		//	rs_busy_cnt <=  0;
 		end
