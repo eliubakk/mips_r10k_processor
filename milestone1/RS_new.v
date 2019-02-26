@@ -83,7 +83,7 @@ module RS(
 	input					dispatch_valid,        // FU from ROB or Free list
 	input   RS_ROW_T			inst_in,
 	input [1:0]				LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
-
+	input					branch_not_taken, // signal to mention the status of the branch
 	// OUTPUTS
 	`ifdef DEBUG 
 	output RS_ROW_T  			rs_table_out [(`RS_SIZE - 1):0],
@@ -201,6 +201,67 @@ module RS(
 	
 	always_comb begin
 
+		//checks for the branch not taken
+	if (branch_not_taken) begin
+		for(integer i=0; i<`RS_SIZE; i=i+1) begin 
+				rs_table_next[i].inst.opa_select =  ALU_OPA_IS_REGA;
+				rs_table_next[i].inst.opb_select =  ALU_OPB_IS_REGB;
+				rs_table_next[i].inst.dest_reg =  DEST_IS_REGC;
+				rs_table_next[i].inst.alu_func =  ALU_ADDQ;
+				rs_table_next[i].inst.fu_name =  FU_ALU;
+				rs_table_next[i].inst.rd_mem =  1'b0;
+				rs_table_next[i].inst.wr_mem =  1'b0;
+				rs_table_next[i].inst.ldl_mem =  1'b0;
+				rs_table_next[i].inst.stc_mem =  1'b0;
+				rs_table_next[i].inst.cond_branch =  1'b0;
+				rs_table_next[i].inst.uncond_branch =  1'b0;
+				rs_table_next[i].inst.halt =  1'b0;
+				rs_table_next[i].inst.cpuid =  1'b0;
+				rs_table_next[i].inst.illegal =  1'b0;
+				rs_table_next[i].inst.valid_inst = 1'b0;
+				//rs_table[i].T =  `DUMMY_REG;
+				//rs_table[i].T1 = `DUMMY_REG;
+				//rs_table[i].T2 =  `DUMMY_REG;
+				rs_table_next[i].T =  7'b1111111;
+				rs_table_next[i].T1 = 7'b1111111;
+				rs_table_next[i].T2 =  7'b1111111;
+				
+				rs_table_next[i].busy <=  1'b0;
+				
+				end
+		for(integer i=0; i<`NUM_FU; i=i+1) begin // Other way to do this?
+			
+				issue_out[i].inst.opa_select =  ALU_OPA_IS_REGA;
+				issue_out[i].inst.opb_select =  ALU_OPB_IS_REGB;
+				issue_out[i].inst.dest_reg =  DEST_IS_REGC;
+				issue_out[i].inst.alu_func =  ALU_ADDQ;
+				issue_out[i].inst.fu_name =  FU_ALU;
+				issue_out[i].inst.rd_mem =  1'b0;
+				issue_out[i].inst.wr_mem =  1'b0;
+				issue_out[i].inst.ldl_mem =  1'b0;
+				issue_out[i].inst.stc_mem =  1'b0;
+				issue_out[i].inst.cond_branch =  1'b0;
+				issue_out[i].inst.uncond_branch =  1'b0;
+				issue_out[i].inst.halt =  1'b0;
+				issue_out[i].inst.cpuid =  1'b0;
+				issue_out[i].inst.illegal =  1'b0;
+				issue_out[i].inst.valid_inst = 1'b0;
+				issue_out[i].T =  7'b1111111;
+				issue_out[i].T1 = 7'b1111111;
+				issue_out[i].T2 =  7'b1111111;
+				issue_out[i].busy =  1'b0;
+				end
+
+
+		
+		issue_idx_next = {($clog2(`RS_SIZE)){0}};
+
+	end
+	else begin
+			
+	
+		
+		
 		// COMMIT STAGE//	
 		rs_table_next = rs_table;
 		for(integer i=0;i<=`RS_SIZE;i=i+1) begin
@@ -398,6 +459,7 @@ module RS(
 
 		
 
+	end
 	end
 
 	//CHANGE

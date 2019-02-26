@@ -8,7 +8,7 @@ module testbench;
 	logic			dispatch_valid;
 	RS_ROW_T		inst_in;
 	logic	 [1:0]		LSQ_busy;
-	
+	logic 				branch_not_taken;
 
 	RS_ROW_T   		rs_table_out [(`RS_SIZE - 1):0] ;
 	logic [`RS_SIZE-1:0] 	issue_idx;
@@ -29,6 +29,7 @@ module testbench;
 		.dispatch_valid(dispatch_valid),
 		.inst_in(inst_in), 
 		.LSQ_busy(LSQ_busy),
+		.branch_not_taken(branch_not_taken),
 
 		// outputs
 		.rs_table_out(rs_table_out),
@@ -264,6 +265,7 @@ module testbench;
 			inst_in.T1 = 7'b1000001;
 			inst_in.T2 = 7'b1000010;
 			inst_in.busy = 1'b0;
+			branch_not_taken=0;
 		
 		table_out();
 
@@ -315,6 +317,7 @@ module testbench;
 			inst_in.T1 = 7'b1111111;
 			inst_in.T2 = 7'b1000001;
 			inst_in.busy = 1'b0;
+			branch_not_taken= 1;
 
 
 		table_out();
@@ -340,6 +343,7 @@ module testbench;
 			inst_in.T1 = 7'b0000001;
 			inst_in.T2 = 7'b0000110;
 			inst_in.busy = 1'b0;
+			branch_not_taken= 0;
 
 
 
