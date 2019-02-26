@@ -303,7 +303,7 @@ module testbench;
 		
 		
 		$display("@@@Passed");
-		$finish;
+		// $finish;
 
 		/*inst_in = ;
 		fu_idx = ;
