@@ -266,7 +266,7 @@ module RS(
 		rs_table_next = rs_table;
 		for(integer i=0;i<=`RS_SIZE;i=i+1) begin
 			rs_table_next[i].T1[6] = MSB_T1[i] | rs_table[i].T1[6];
-			rs_table_next[i].T2[6] = MSB_T2[i] | rs_table[i].T1[6];
+			rs_table_next[i].T2[6] = MSB_T2[i] | rs_table[i].T2[6];
 		end 
 	
 
