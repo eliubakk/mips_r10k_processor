@@ -74,6 +74,7 @@ module testbench;
 		end
 	endtask
 
+
 	task entry_exists_in_table;
 		input RS_ROW_T inst_in;
 		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
