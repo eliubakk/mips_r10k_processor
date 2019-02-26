@@ -122,7 +122,7 @@ typedef enum logic [4:0] {
 } ALU_FUNC;
 
 `define NUM_FU 5
-`define RS_SIZE 12
+`define RS_SIZE 16
 `define SS_SIZE 1 // superscalar size
 
 typedef enum logic [2:0]{

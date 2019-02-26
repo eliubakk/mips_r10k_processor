@@ -22,7 +22,7 @@ TESTBENCH = RS_new_test.v
 SIMFILES = RS_new.v
 SYNFILES = RS.vg 
 
-RS.vg: RS_new.v RS.vg RS.tcl
+RS.vg: RS_new.v RS.tcl
 	dc_shell-t -f ./RS.tcl | tee RS_synth.out
 
 #####
