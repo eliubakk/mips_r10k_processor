@@ -406,20 +406,14 @@ module testbench;
 	inst_in.T2 = {1, 6'd1};
 	inst_in.busy = 1;
 	LSQ_busy = 2'b00;
+	assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	assert( !issue_cnt) else #1 exit_on_error;
+	assert( !rs_full ) else #1 exit_on_error;
 
 
 	@(negedge clock);
-	// $display("testing dispatch...");
 	entry_exists_in_table(inst_in, rs_table_out);
-	// $display("entry exists in table!");
 	table_has_N_entries(1, rs_table_out);
-	// $display("table has 1 entry");
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	// $display("assert 1");
-	$display("issue_cnt: %d", issue_cnt);
-	assert( !issue_cnt) else #1 exit_on_error;
-	// $display("assert 2");
-	assert( !rs_full ) else #1 exit_on_error;
 	$display("Dispatch 1 instruction passed");
 
 	$display("-------Issue One Instruction------\n");
