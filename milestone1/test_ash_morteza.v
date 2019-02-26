@@ -41,7 +41,7 @@ module testbench;
 
 	// need to update this
 
-	typedef RS_ROW_T table_t[];
+	typedef RS_ROW_T table_t[`RS_SIZE];
 
 	// FUNCTIONS
 	function table_t clear_rs_table_test;
