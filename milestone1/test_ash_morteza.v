@@ -337,18 +337,18 @@ module testbench;
 	LSQ_busy = 2'b00;
 
 
-	@(negedge clock);
-	// Nothing issued since it is reset
-	$display("-------RESET------\n");
-	reset = 1;
-	rs_table_test = clear_rs_table_test();
-	issue_next_test = clear_issue_next_test();
+	// @(negedge clock);
+	// // Nothing issued since it is reset
+	// $display("-------RESET------\n");
+	// reset = 1;
+	// rs_table_test = clear_rs_table_test();
+	// issue_next_test = clear_issue_next_test();
 
-	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Reset 1 passed");
+	// assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Reset 1 passed");
 	
 	// @(negedge clock);
 	// reset = 0;
