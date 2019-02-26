@@ -48,7 +48,7 @@ module testbench;
 	task exit_on_error;
 		begin
 			@(posedge clock);
-			#1;
+			#2;
 			$display("@@@Failed at time %f", $time);
 			$finish;
 		end
@@ -57,7 +57,7 @@ module testbench;
 	task table_out;
 		begin
 			@(posedge clock);
-			#1;
+			#2;
 				$display("**********************************************************\n");
 				$display("------------------------RS TABLE----------------------------\n");
 
@@ -166,7 +166,7 @@ module testbench;
 		@(negedge clock);
 		
 
-		$display("**********************************************DISPATCH ADD R1 R2 R4, Issue MULT R1 R2 R3****************************");	
+		$display("**********************************************DISPATCH BR R1 R2 R4, Issue MULT R1 R2 R3****************************");	
 			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 			inst_in.inst.dest_reg = DEST_IS_REGC;
@@ -191,7 +191,7 @@ module testbench;
 		table_out();
 
 		@(negedge clock);
-		$display("*******************************************DISPATCH LD R1 DISP R5, ISSUE ADD R1 R2 R4,EXECUTE MULT R1 R2 R3************************");	
+		$display("**********************************Branch taken************DISPATCH LD R1 DISP R5, ISSUE BR R1 R2 R4,EXECUTE MULT R1 R2 R3************************");	
 			inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
 			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 			inst_in.inst.dest_reg = DEST_IS_REGA;
@@ -211,13 +211,13 @@ module testbench;
 			inst_in.T1 = 7'b1111111;
 			inst_in.T2 = 7'b1000001;
 			inst_in.busy = 1'b0;
-			branch_not_taken= 1;
+			branch_not_taken= 1'b1;
 
 
 		table_out();
 
 		@(negedge clock);
-			$display("*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5, EXECUTE ADD R1 R2 R4************************");	
+			$display("*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5, EXECUTE BR R1 R2 R4************************");	
 			inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
 			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 			inst_in.inst.dest_reg = DEST_IS_REGA;
@@ -237,7 +237,7 @@ module testbench;
 			inst_in.T1 = 7'b0000001;
 			inst_in.T2 = 7'b0000110;
 			inst_in.busy = 1'b0;
-			branch_not_taken= 0;
+			branch_not_taken= 1'b0;
 
 
 

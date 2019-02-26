@@ -15,7 +15,7 @@ read_file -f sverilog [list "RS_new.v"]
 set design_name RS
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 15
+set CLK_PERIOD 10
 
 
 
