@@ -505,6 +505,8 @@ module testbench;
 	// clear issue_next_test
 	issue_next_test = clear_issue_next_test();
 
+	$finish;
+
 	// -------------Test for reset
 /*	$display("-------RESET------\n");
 	reset = 0;
