@@ -66,7 +66,7 @@ module testbench;
 				clear_rs_table_test[i].T = `DUMMY_REG;
 				clear_rs_table_test[i].T1 = `DUMMY_REG;
 				clear_rs_table_test[i].T2 = `DUMMY_REG;
-				$display("dummy reg: %b", `DUMMY_REG);
+				// $display("dummy reg: %b", `DUMMY_REG);
 				clear_rs_table_test[i].busy = 0;
 			end
 		end
@@ -366,8 +366,8 @@ module testbench;
 	rs_table_test = clear_rs_table_test();
 	issue_next_test = clear_issue_next_test();
 
-	print_rs_table(rs_table_out);
-	print_rs_table(rs_table_test);
+	// print_rs_table(rs_table_out);
+	// print_rs_table(rs_table_test);
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
