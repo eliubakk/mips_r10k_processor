@@ -140,11 +140,11 @@ module testbench;
 		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
 		begin
 			integer i;
-			$display("checking for inst_in...");
-			print_rs_entry(inst_in);
+			// $display("checking for inst_in...");
+			// print_rs_entry(inst_in);
 			for (i = 0; i < `RS_SIZE; i += 1) begin
-				$display("At entry %d", i);
-				print_rs_entry(rs_table_out[i]);
+				// $display("At entry %d", i);
+				// print_rs_entry(rs_table_out[i]);
 				if (rs_table_out[i].busy) begin
 					if (rs_table_out[i] == inst_in) begin
 						return;
@@ -409,15 +409,16 @@ module testbench;
 
 
 	@(negedge clock);
-	$display("testing dispatch...");
+	// $display("testing dispatch...");
 	entry_exists_in_table(inst_in, rs_table_out);
-	$display("entry exists in table!");
+	// $display("entry exists in table!");
 	table_has_N_entries(1, rs_table_out);
-	$display("table has 1 entry");
+	// $display("table has 1 entry");
 	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	$display("assert 1");
+	// $display("assert 1");
+	$display("issue_cnt: %d", issue_cnt);
 	assert( !issue_cnt) else #1 exit_on_error;
-	$display("assert 2");
+	// $display("assert 2");
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Dispatch 1 instruction passed");
 
