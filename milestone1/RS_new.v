@@ -210,14 +210,9 @@ module RS(
 	
 
 
-<<<<<<< HEAD
-		// ISSUE STAGE // 
-		if (enable) begin
-		// Initialize issue_next table
-=======
+
 		// ISSUE STAGE //
 		//Initiaalization to prevent latch
->>>>>>> heewoo
 			for(integer i=0; i<`NUM_FU; i=i+1) begin // Anothe way to do this?
 			issue_next[i].inst.opa_select = ALU_OPA_IS_REGA;
 			issue_next[i].inst.opb_select = ALU_OPB_IS_REGB;
@@ -249,14 +244,11 @@ module RS(
 			LD_issue_idx = 		{`RS_SIZE{0}}; 
 			ST_issue_idx = 		{`RS_SIZE{0}}; 
 			MULT_issue_idx = 	{`RS_SIZE{0}}; 
-<<<<<<< HEAD
-			BR_issue_idx = 		{`RS_SIZE{0}}; 
-=======
+
 			BR_issue_idx = 		{`RS_SIZE{0}};
 		if (enable) begin
 		// Initialize issue_next table
 			 
->>>>>>> heewoo
 	// First of all, check the instructions, tags -> enable FU_issue_idx bits
 	// ISSUE width = FU number
 	// For multiple issue,
@@ -310,11 +302,8 @@ module RS(
 						
 				
 					endcase
-<<<<<<< HEAD
-				end
-=======
+
 				end 
->>>>>>> heewoo
 				
 			end
 					
@@ -330,11 +319,8 @@ module RS(
 				issue_next[0] = rs_table_next[i]; // issue_next[0] for ALU
 				issue_next[0].busy = 1'b1;
 				//rs_table_next[i].busy = 1'b0; //Free the RS table
-<<<<<<< HEAD
-			end 			
-=======
+
 			end			
->>>>>>> heewoo
 		end
 
 		//For LD
@@ -384,27 +370,7 @@ module RS(
 		
 		for(integer i=0;i<`RS_SIZE;i=i+1) begin
 			dispatch_idx[i] = (~rs_table[i].busy) & inst_in.inst.valid_inst & dispatch_valid; // disppatch index is all 0 when the instruction is not valid or no structural hazard
-<<<<<<< HEAD
-		end
-		if (enable & dispatch_valid) begin
-			
-			integer i;
-			for(i = 0;i<`RS_SIZE;i=i+1) begin
-				if(dispatch_gnt[i]) begin
-					rs_table_next[i] 	= inst_in;
-					rs_table_next[i].busy 	= 1'b1;
-					dispatch_cnt		= 1;
-					break;
-				end /*else begin
-					rs_table_next[i] 	= rs_table[i];
-						
-				end*/
-					
-				
-			end	
 
-=======
->>>>>>> heewoo
 		end
 		if (enable & dispatch_valid) begin
 			
