@@ -11,12 +11,12 @@ module testbench;
 	logic 					branch_not_taken;
 
 	RS_ROW_T   	 [(`RS_SIZE - 1):0]	rs_table_out;
-	logic 		[`RS_SIZE-1:0] 		issue_idx;
+	//logic 		[`RS_SIZE-1:0] 		issue_idx;
 	RS_ROW_T 	 [(`NUM_FU -1 ):0]	issue_out  ; 
-	logic					rs_full;
 	logic [$clog2(`NUM_FU) - 1:0]		issue_cnt;
-	RS_ROW_T   	[(`RS_SIZE - 1):0] 	rs_table_test ;
-	RS_ROW_T 	 [(`NUM_FU -1 ):0]	issue_out_test  ; 
+	logic					rs_full;
+	//RS_ROW_T   	[(`RS_SIZE - 1):0] 	rs_table_test ;
+	//RS_ROW_T 	 [(`NUM_FU -1 ):0]	issue_out_test  ; 
 
 	
 	RS RS0(
@@ -40,7 +40,7 @@ module testbench;
 	 );
 
 	
-	always #10 clock = ~clock;
+	always #5 clock = ~clock;
 
 	// need to update this
 
@@ -89,6 +89,7 @@ module testbench;
 		CAM_en = 0;
 		CDB_in = 0;
 		dispatch_valid = 0;
+			LSQ_busy = 0;	
 		branch_not_taken = 0;
 	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -112,7 +113,7 @@ module testbench;
 		inst_in.busy = 1'b0;
 
 
-		LSQ_busy = 0;	
+	
 	
 	///Things to do
 	//For 1-way superscalar, multiple issue
@@ -123,8 +124,7 @@ module testbench;
 	//3. Testing for functionality (enable, reset, dispatch_valid,
 	//LSQ_busy, CAM_en, commit, issue, dispatch) and corner cases (Issue 2 branches at
 	//a same cycle?, input is invalid instruction, etc...)    
-		table_out();
-
+	
 	@(negedge clock);
 //Check reset
 		reset = 1;
@@ -132,7 +132,6 @@ module testbench;
 	@(negedge  clock);
 //Check enable
 		enable = 1;
-		table_out();
 	@(negedge clock);
 //Dispatch
 		reset = 0;
@@ -160,7 +159,7 @@ module testbench;
 			inst_in.T1 = 7'b1000001;
 			inst_in.T2 = 7'b1000010;
 			inst_in.busy = 1'b0;
-			branch_not_taken=0;
+			branch_not_taken=1'b0;
 		
 		table_out();
 
