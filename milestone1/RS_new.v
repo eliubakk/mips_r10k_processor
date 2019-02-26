@@ -202,7 +202,7 @@ module RS(
 	always_comb begin
 
 		//checks for the branch not taken
-	/*if (branch_not_taken) begin
+/*	if (branch_not_taken) begin
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin 
 				rs_table_next[i].inst.opa_select =  ALU_OPA_IS_REGA;
 				rs_table_next[i].inst.opb_select =  ALU_OPB_IS_REGB;
@@ -226,7 +226,7 @@ module RS(
 				rs_table_next[i].T1 = 7'b1111111;
 				rs_table_next[i].T2 =  7'b1111111;
 				
-				rs_table_next[i].busy <=  1'b0;
+				rs_table_next[i].busy =  1'b0;
 				
 				end
 		for(integer i=0; i<`NUM_FU; i=i+1) begin // Other way to do this?
@@ -459,8 +459,8 @@ module RS(
 
 		
 
-	end
 //	end
+	end
 
 	//CHANGE
 
@@ -470,7 +470,7 @@ module RS(
 	//                                              //
 	//////////////////////////////////////////////////
 	always_ff @(posedge clock) begin
-		if (reset) begin
+		if (reset | branch_not_taken) begin
 		//	rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}}; // Other way to do this?
 			
 				for(integer i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?

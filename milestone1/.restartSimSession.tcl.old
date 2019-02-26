@@ -1,15 +1,15 @@
 # Begin_DVE_Session_Save_Info
 # DVE restart session
-# Saved on Mon Feb 25 17:47:15 2019
+# Saved on Tue Feb 26 16:15:42 2019
 # Designs open: 1
 #   Sim: /home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/dve
 # Toplevel windows open: 2
 # 	TopLevel.1
 # 	TopLevel.2
 #   Source.1: _vcs_unit__918271579
-#   Wave.1: 15 signals
-#   Group count = 6
-#   Group Group1 signal count = 10
+#   Wave.1: 6 signals
+#   Group count = 1
+#   Group Group1 signal count = 6
 # End_DVE_Session_Save_Info
 
 # DVE version: N-2017.12-SP2-1_Full64
@@ -59,7 +59,7 @@ gui_sync_global -id ${TopLevel.2} -option true
 
 # MDI window settings
 set Wave.1 Wave.1
-gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 999} {child_wave_right 2435} {child_wave_colname 501} {child_wave_colvalue 494} {child_wave_col1 0} {child_wave_col2 1}}
+gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 743} {child_wave_right 1811} {child_wave_colname 369} {child_wave_colvalue 369} {child_wave_col1 0} {child_wave_col2 1}}
 
 # End MDI window settings
 
@@ -86,61 +86,13 @@ gui_set_time_units 1s
 # Global: Signal Compare
 
 # Global: Signal Groups
-gui_load_child_values {testbench.RS0.ps_ld}
-gui_load_child_values {testbench.RS0.ps_alu}
-gui_load_child_values {testbench.RS0.ps_st}
-gui_load_child_values {testbench.RS0.ps_br}
-gui_load_child_values {testbench.RS0.ps_mult}
 
 
-set _session_group_15 Group1
-gui_sg_create "$_session_group_15"
-set Group1 "$_session_group_15"
+set _session_group_1 Group1
+gui_sg_create "$_session_group_1"
+set Group1 "$_session_group_1"
 
-gui_sg_addsignal -group "$_session_group_15" { testbench.clock testbench.reset testbench.enable testbench.inst_in testbench.issue_out }
-
-set _session_group_16 $_session_group_15|
-append _session_group_16 ps_alu
-gui_sg_create "$_session_group_16"
-set Group1|ps_alu "$_session_group_16"
-
-gui_sg_addsignal -group "$_session_group_16" { testbench.RS0.ps_alu.gnt testbench.RS0.ps_alu.index }
-
-gui_sg_move "$_session_group_16" -after "$_session_group_15" -pos 4 
-
-set _session_group_17 $_session_group_15|
-append _session_group_17 ps_br
-gui_sg_create "$_session_group_17"
-set Group1|ps_br "$_session_group_17"
-
-gui_sg_addsignal -group "$_session_group_17" { testbench.RS0.ps_br.gnt testbench.RS0.ps_br.index }
-
-gui_sg_move "$_session_group_17" -after "$_session_group_15" -pos 3 
-
-set _session_group_18 $_session_group_15|
-append _session_group_18 ps_ld
-gui_sg_create "$_session_group_18"
-set Group1|ps_ld "$_session_group_18"
-
-gui_sg_addsignal -group "$_session_group_18" { testbench.RS0.ps_ld.gnt testbench.RS0.ps_ld.index }
-
-gui_sg_move "$_session_group_18" -after "$_session_group_15" -pos 2 
-
-set _session_group_19 $_session_group_15|
-append _session_group_19 ps_mult
-gui_sg_create "$_session_group_19"
-set Group1|ps_mult "$_session_group_19"
-
-gui_sg_addsignal -group "$_session_group_19" { testbench.RS0.ps_mult.gnt testbench.RS0.ps_mult.index }
-
-gui_sg_move "$_session_group_19" -after "$_session_group_15" -pos 1 
-
-set _session_group_20 $_session_group_15|
-append _session_group_20 ps_st
-gui_sg_create "$_session_group_20"
-set Group1|ps_st "$_session_group_20"
-
-gui_sg_addsignal -group "$_session_group_20" { testbench.RS0.ps_st.gnt testbench.RS0.ps_st.index }
+gui_sg_addsignal -group "$_session_group_1" { testbench.clock testbench.reset testbench.enable testbench.inst_in testbench.branch_not_taken testbench.rs_table_out }
 
 # Global: Highlighting
 
@@ -177,9 +129,9 @@ gui_view_scroll -id ${Hier.1} -horizontal -set 0
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
 gui_list_set_filter -id ${Data.1} -text {*}
 gui_list_show_data -id ${Data.1} {testbench}
-gui_list_expand -id ${Data.1} testbench.issue_out
+gui_list_expand -id ${Data.1} testbench.rs_table_out
 gui_show_window -window ${Data.1}
-catch { gui_list_select -id ${Data.1} {testbench.issue_out }}
+catch { gui_list_select -id ${Data.1} {testbench.rs_table_out }}
 gui_view_scroll -id ${Data.1} -vertical -set 0
 gui_view_scroll -id ${Data.1} -horizontal -set 0
 gui_view_scroll -id ${Hier.1} -vertical -set 0
@@ -204,13 +156,6 @@ set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
 gui_wv_zoom_timerange -id ${Wave.1} 0 90
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group1}
-gui_list_add_group -id ${Wave.1}  -after Group1 {Group1|ps_st}
-gui_list_add_group -id ${Wave.1} -after Group1|ps_st {Group1|ps_mult}
-gui_list_add_group -id ${Wave.1} -after Group1|ps_mult {Group1|ps_ld}
-gui_list_add_group -id ${Wave.1} -after Group1|ps_ld {Group1|ps_br}
-gui_list_add_group -id ${Wave.1} -after Group1|ps_br {Group1|ps_alu}
-gui_list_expand -id ${Wave.1} testbench.inst_in
-gui_list_expand -id ${Wave.1} testbench.inst_in.inst
 gui_seek_criteria -id ${Wave.1} {Any Edge}
 
 

@@ -40,7 +40,7 @@ module testbench;
 	 );
 
 	
-	always #5 clock = ~clock;
+	always #10 clock = ~clock;
 
 	// need to update this
 
@@ -62,7 +62,7 @@ module testbench;
 				$display("------------------------RS TABLE----------------------------\n");
 
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, issue_idx[i],rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
+				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
 			end
 				$display("RS full = %d",rs_full);
 				$display("-----------------------Issue table-----------------------------------\n");
