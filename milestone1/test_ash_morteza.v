@@ -419,6 +419,8 @@ module testbench;
 	$display("-------Issue One Instruction------\n");
 	// issue add p2 p1 p3
 	dispatch_valid = 0;
+	print_rs_entry(issue_next[0]);
+	print_rs_entry(inst_in);
 	assert( issue_next[0] == inst_in ) else #1 exit_on_error;
 	assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
 	assert( issue_cnt == 1) else #1 exit_on_error;
