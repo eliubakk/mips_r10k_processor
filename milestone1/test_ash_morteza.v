@@ -350,61 +350,61 @@ module testbench;
 	assert( !rs_full ) else #1 exit_on_error;
 	$display("Reset 1 passed");
 	
-	@(negedge clock);
-	reset = 0;
-	//RS is empty since it is reset
-	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Reset 2 passed");
+	// @(negedge clock);
+	// reset = 0;
+	// //RS is empty since it is reset
+	// assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Reset 2 passed");
 
-	@(negedge clock);
-	$display("-------Dispatch One Instruction------\n");
-	// dispatch add p2 p1 p3
-	enable = 1;
-	CAM_en = 0;
-	dispatch_valid = 1;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd3};
-	inst_in.T1 = {1, 6'd2};
-	inst_in.T2 = {1, 6'd1};
-	inst_in.busy = 1;
-	LSQ_busy = 2'b00;
+	// @(negedge clock);
+	// $display("-------Dispatch One Instruction------\n");
+	// // dispatch add p2 p1 p3
+	// enable = 1;
+	// CAM_en = 0;
+	// dispatch_valid = 1;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd3};
+	// inst_in.T1 = {1, 6'd2};
+	// inst_in.T2 = {1, 6'd1};
+	// inst_in.busy = 1;
+	// LSQ_busy = 2'b00;
 
-	entry_exists_in_table(inst_in, rs_table_out);
-	table_has_N_entries(1, rs_table_out);
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Dispatch 1 instruction passed");
+	// entry_exists_in_table(inst_in, rs_table_out);
+	// table_has_N_entries(1, rs_table_out);
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Dispatch 1 instruction passed");
 
-	@(negedge clock);
-	$display("-------Issue One Instruction------\n");
-	// issue add p2 p1 p3
-	dispatch_valid = 0;
+	// @(negedge clock);
+	// $display("-------Issue One Instruction------\n");
+	// // issue add p2 p1 p3
+	// dispatch_valid = 0;
 
-	entry_not_in_table(inst_in, rs_table_out);
-	table_has_N_entries(0, rs_table_out);
-	assert( issue_next[0] == inst_in ) else #1 exit_on_error;
-	assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
-	assert( issue_cnt == 1) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Issue 1 instruction passed");
+	// entry_not_in_table(inst_in, rs_table_out);
+	// table_has_N_entries(0, rs_table_out);
+	// assert( issue_next[0] == inst_in ) else #1 exit_on_error;
+	// assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
+	// assert( issue_cnt == 1) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Issue 1 instruction passed");
 
-	@(negedge clock);
-	@(negedge clock);
-	$display("-------Commit One Instruction------\n");
-	// commit add p2 p1 p3
-	CAM_en = 1;
-	CDB_in = {1, 6'd3};
+	// @(negedge clock);
+	// @(negedge clock);
+	// $display("-------Commit One Instruction------\n");
+	// // commit add p2 p1 p3
+	// CAM_en = 1;
+	// CDB_in = {1, 6'd3};
 
-	tags_now_ready(3, rs_table_out);
-	table_has_N_entries(0, rs_table_out);
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Commit 1 Instruction passed");
+	// tags_now_ready(3, rs_table_out);
+	// table_has_N_entries(0, rs_table_out);
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Commit 1 Instruction passed");
 
 	// @(negedge clock);
 	// $display("-------Issue Multiple Instructions------\n");
