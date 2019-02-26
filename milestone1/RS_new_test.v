@@ -127,6 +127,114 @@ module testbench;
 
 		end
 	endtask
+
+
+	task entry_exists_in_table;
+		input RS_ROW_T inst_in;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		begin
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					if (rs_table_out[i] == inst_in) begin
+						return;
+					end
+				end
+			end
+			#1 exit_on_error;
+		end
+	endtask
+
+	task entry_not_in_table;
+		input RS_ROW_T inst_in;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		begin
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					if (rs_table_out[i] == inst_in) begin
+						#1 exit_on_error;
+					end
+				end
+			end
+			return;
+		end
+	endtask
+
+	task table_has_N_entries;
+		input integer count;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		begin
+			integer _count = 0;
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					_count += 1;
+				end
+			end
+			assert(count == _count) else #1 exit_on_error;
+		end
+	endtask
+
+	task tags_now_ready;
+		input integer tag;
+		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		begin
+			integer i;
+			for (i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table_out[i].busy) begin
+					if (rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
+						assert(rs_table_out[i].T1[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
+					end
+					if (rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
+						assert(rs_table_out[i].T2[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
+					end
+				end
+			end
+			return;
+		end
+	endtask
+
+	task check_issue_next_correct;
+		input RS_ROW_T issue_next [(`NUM_FU -1 ):0];
+		input RS_ROW_T issue_next_test [(`NUM_FU -1 ):0];
+		begin
+			for (integer i = 0; i < `NUM_FU; i += 1) begin
+				logic found = 1'b0;
+				if (issue_next[i].busy) begin
+					for (integer j = 0; j < `NUM_FU; j += 1) begin
+						if (issue_next_test[j].busy) begin
+							if (issue_next_test[j] == issue_next[i]) begin
+								found = 1'b1;
+								break;
+							end
+						end
+					end
+					if (!found) begin
+						exit_on_error;
+					end
+				end
+			end
+
+			for (integer i = 0; i < `NUM_FU; i += 1) begin
+				logic found = 1'b0;
+				if (issue_next_test[i].busy) begin
+					for (integer j = 0; j < `NUM_FU; j += 1) begin
+						if (issue_next[j].busy) begin
+							if (issue_next_test[i] == issue_next[j]) begin
+								found = 1'b1;
+								break;
+							end
+						end
+					end
+					if (!found) begin
+						exit_on_error;
+					end
+				end
+			end
+			return;
+		end
+	endtask
 	
 	initial begin
 		
