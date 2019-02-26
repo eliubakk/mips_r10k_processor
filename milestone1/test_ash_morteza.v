@@ -115,7 +115,12 @@ module testbench;
 			$display("------------------------RS TABLE----------------------------\n");
 
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				$display("RS_Row = %d, busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, ,rs_table[i].busy, rs_table[i].inst.fu_name,rs_table[i].T, rs_table[i].T1, rs_table[i].T2);
+				$display("Entry: %d", i);
+				$display("\tBusy = %b", rs_table[i].busy);
+				$display("\tFU_Name = %d", rs_table[i].inst.fu_name);
+				$display("\tT = %7.0b", rs_table[i].T);
+				$display("\tT1 = %7.0b", rs_table[i].T1);
+				$display("\tT2 = %7.0b", rs_table[i].T2);
 			end
 			$display("*******************************************************************\n");
 
