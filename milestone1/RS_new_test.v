@@ -64,7 +64,7 @@ module testbench;
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
 			end
-				$display("RS full = %d",rs_full);
+				$display("RS full = %b, issue_cnt = %d",rs_full, issue_cnt);
 				$display("-----------------------Issue table-----------------------------------\n");
 			for(integer i=0;i<`NUM_FU;i=i+1) begin
 				$display("Issue_row = %d, busy = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_out[i].busy, issue_out[i].T, issue_out[i].T1, issue_out[i].T2 );
@@ -259,7 +259,7 @@ table_out();
 
 		// Additional test
 
-		$display("###########################################################################\n");
+		$display("###########################################################################");
 		$display("***********************TEST2 : Multiple issue and CAM*********************");
 		$display("###########################################################################\n");
 	
@@ -379,8 +379,262 @@ table_out();
 		$display("**************************************** Issue Add R1 R2 R5, Execute MULT R1 R2 R3, Issue ADD R1 R2 R4,************************************************");
 
 				inst_in.inst.valid_inst = 1'b0;
-		
+			CAM_en = 0;
+			CDB_in = 7'b0000001;
+
 			
+		table_out();
+
+		$display("###########################################################################");
+		$display("***********************TEST3 : Do not dispatch when RS is full*********************");
+		$display("###########################################################################\n");
+	
+
+	$display("****************************************DISPATCH MULT R1(Xready) R2 R3 for 16 several times / ADD R1 R2 R4 should not be dispatched************************************************");
+
+	for(integer i=0; i<`RS_SIZE-5; i=i+1) begin
+
+		@(negedge clock); 
+		
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_MULQ;
+			inst_in.inst.fu_name = FU_MULT;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd3;
+			inst_in.T1 = 7'b0000001;
+			inst_in.T2 = 7'b1000010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+		
+		
+
+		end
+
+		@(negedge clock); 
+		
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_MULQ;
+			inst_in.inst.fu_name = FU_MULT;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd3;
+			inst_in.T1 = 7'b0001001;
+			inst_in.T2 = 7'b1001010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+		
+
+
+		@(negedge clock); 
+		
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_ADDQ;
+			inst_in.inst.fu_name = FU_BR;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd7;
+			inst_in.T1 = 7'b0001001;
+			inst_in.T2 = 7'b1001010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+
+			@(negedge clock); 
+		
+			reset = 0;
+			enable = 1;
+			dispatch_valid = 1;
+			LSQ_busy = 0;
+			branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_ADDQ;
+			inst_in.inst.fu_name = FU_ALU;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd7;
+			inst_in.T1 = 7'b0001001;
+			inst_in.T2 = 7'b1001010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+
+			@(negedge clock); 
+		
+			reset = 0;
+			enable = 1;
+			dispatch_valid = 1;
+			LSQ_busy = 0;
+			branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_ADDQ;
+			inst_in.inst.fu_name = FU_LD;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd7;
+			inst_in.T1 = 7'b0001001;
+			inst_in.T2 = 7'b1001010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+
+			$display("--------------------------1 empty rows, not full---10 MULT / 1 MULT 1BR 1ALU 1LD----------------");
+			table_out();
+
+			@(negedge clock); 
+		
+			reset = 0;
+			enable = 1;
+			dispatch_valid = 1;
+			LSQ_busy = 0;
+			branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_ADDQ;
+			inst_in.inst.fu_name = FU_ST;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd7;
+			inst_in.T1 = 7'b0001001;
+			inst_in.T2 = 7'b1001010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+
+
+			$display("--------------------------10 MULT / 1 MULT 1BR 1ALU 1LD 1ST-----------------");
+			table_out();
+
+
+
+
+		@(negedge clock);
+
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_ADDQ;
+			inst_in.inst.fu_name = FU_ALU;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd4;
+			inst_in.T1 = 7'b1001111;
+			inst_in.T2 = 7'b1001111;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+		
+		
+
+			$display("------------------------ALU should not dispatched----------");
+		table_out();
+
+
+		@(negedge clock);
+			inst_in.inst.valid_inst = 1'b0;
+			CAM_en = 1;
+			CDB_in = 7'b0001001;
+	
+			$display("------------------------Issue 5 instructions----------");
+		table_out();
+
+
+
+		@(negedge clock);
+			inst_in.inst.valid_inst = 1'b0;
+			CAM_en = 0;
+			CDB_in = 7'b0001001;
+	
+			$display("------------------------Execute 5 instructions----------");
 		table_out();
 
 		@(negedge clock);

@@ -99,16 +99,19 @@ module RS(
 	//current and next state comb variables (Do not need to update the
 	//entire rs_table, rs_table is on sequential logic)
 	
-	logic [$clog2(`RS_SIZE)-1:0] 				rs_busy_cnt_next;
 	RS_ROW_T  		[(`RS_SIZE - 1):0]		rs_table_next; 
 
 
 	//table to store internal state
-	logic [$clog2(`RS_SIZE)-1:0]				rs_busy_cnt;	// The number of busy rows
+	logic [$clog2(`RS_SIZE):0]				rs_busy_cnt, rs_busy_cnt_next;	// The number of busy rows
 	RS_ROW_T  		[(`RS_SIZE - 1):0]		rs_table;	// RS_Table
 	//logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
 	RS_ROW_T 		[`NUM_FU-1:0]			issue_out;		// The instructions that we will issue next
-	logic  							dispatch_cnt;					
+	logic			[$clog2(`NUM_FU) - 1:0]		issue_cnt_next;
+
+	logic  							dispatch_cnt;
+
+				
 
 	// logic for CDB CAM
 	
@@ -137,10 +140,6 @@ module RS(
 
 
 	
-	// Dispatch signal
-	assign rs_busy_cnt_next = rs_busy_cnt - issue_cnt + (dispatch_valid) & (dispatch_cnt) & (inst_in.inst.valid_inst);
-	assign rs_full = (rs_busy_cnt > (`RS_SIZE - 1)) ? 1:0;
-
 
 	// Find which row in RS is used for dispatch	
 	PS ps_dispatch(
@@ -201,63 +200,8 @@ module RS(
 	
 	always_comb begin
 
-		//checks for the branch not taken
-/*	if (branch_not_taken) begin
-		for(integer i=0; i<`RS_SIZE; i=i+1) begin 
-				rs_table_next[i].inst.opa_select =  ALU_OPA_IS_REGA;
-				rs_table_next[i].inst.opb_select =  ALU_OPB_IS_REGB;
-				rs_table_next[i].inst.dest_reg =  DEST_IS_REGC;
-				rs_table_next[i].inst.alu_func =  ALU_ADDQ;
-				rs_table_next[i].inst.fu_name =  FU_ALU;
-				rs_table_next[i].inst.rd_mem =  1'b0;
-				rs_table_next[i].inst.wr_mem =  1'b0;
-				rs_table_next[i].inst.ldl_mem =  1'b0;
-				rs_table_next[i].inst.stc_mem =  1'b0;
-				rs_table_next[i].inst.cond_branch =  1'b0;
-				rs_table_next[i].inst.uncond_branch =  1'b0;
-				rs_table_next[i].inst.halt =  1'b0;
-				rs_table_next[i].inst.cpuid =  1'b0;
-				rs_table_next[i].inst.illegal =  1'b0;
-				rs_table_next[i].inst.valid_inst = 1'b0;
-				//rs_table[i].T =  `DUMMY_REG;
-				//rs_table[i].T1 = `DUMMY_REG;
-				//rs_table[i].T2 =  `DUMMY_REG;
-				rs_table_next[i].T =  7'b1111111;
-				rs_table_next[i].T1 = 7'b1111111;
-				rs_table_next[i].T2 =  7'b1111111;
-				
-				rs_table_next[i].busy =  1'b0;
-				
-				end
-		for(integer i=0; i<`NUM_FU; i=i+1) begin // Other way to do this?
-			
-				issue_out[i].inst.opa_select =  ALU_OPA_IS_REGA;
-				issue_out[i].inst.opb_select =  ALU_OPB_IS_REGB;
-				issue_out[i].inst.dest_reg =  DEST_IS_REGC;
-				issue_out[i].inst.alu_func =  ALU_ADDQ;
-				issue_out[i].inst.fu_name =  FU_ALU;
-				issue_out[i].inst.rd_mem =  1'b0;
-				issue_out[i].inst.wr_mem =  1'b0;
-				issue_out[i].inst.ldl_mem =  1'b0;
-				issue_out[i].inst.stc_mem =  1'b0;
-				issue_out[i].inst.cond_branch =  1'b0;
-				issue_out[i].inst.uncond_branch =  1'b0;
-				issue_out[i].inst.halt =  1'b0;
-				issue_out[i].inst.cpuid =  1'b0;
-				issue_out[i].inst.illegal =  1'b0;
-				issue_out[i].inst.valid_inst = 1'b0;
-				issue_out[i].T =  7'b1111111;
-				issue_out[i].T1 = 7'b1111111;
-				issue_out[i].T2 =  7'b1111111;
-				issue_out[i].busy =  1'b0;
-				end
 
 
-		
-		issue_idx_next = {($clog2(`RS_SIZE)){1'b0}};
-
-	end
-	else begin*/
 			
 	
 		
@@ -298,7 +242,7 @@ module RS(
 			end
 	
 		// Initialize the issue cnt and inx, gnt table	
-			issue_cnt = {$clog2(`NUM_FU){1'b0}}; 
+			issue_cnt_next = {$clog2(`NUM_FU){1'b0}}; 
 			issue_idx_next = {`RS_SIZE{1'b0}};
 			
 			ALU_issue_idx = 	{`RS_SIZE{1'b0}};
@@ -420,8 +364,22 @@ module RS(
 			end 
 		end
 	
-		issue_cnt = | ALU_issue_gnt + | LD_issue_gnt + | ST_issue_gnt + | MULT_issue_gnt + | BR_issue_gnt;
+		issue_cnt_next = | ALU_issue_gnt + | LD_issue_gnt + | ST_issue_gnt + | MULT_issue_gnt + | BR_issue_gnt;
 		issue_idx_next = ALU_issue_gnt | LD_issue_gnt | ST_issue_gnt | MULT_issue_gnt | BR_issue_gnt;
+
+		// Update rs_busy and rs_full
+
+	//	rs_full = & rs_table_next.busy;
+		rs_full = rs_table[0].busy & rs_table[1].busy & rs_table[2].busy & rs_table[3].busy & rs_table[4].busy 
+			& rs_table[5].busy & rs_table[6].busy & rs_table[7].busy & rs_table[8].busy & rs_table[9].busy 
+			& rs_table[10].busy & rs_table[11].busy &  rs_table[12].busy & rs_table[13].busy & rs_table[14].busy & rs_table[15].busy; 
+
+
+
+		rs_busy_cnt_next = rs_table_next[0].busy + rs_table_next[1].busy + rs_table_next[2].busy + rs_table_next[3].busy +  rs_table_next[4].busy + rs_table_next[5].busy + rs_table_next[6].busy + rs_table_next[7].busy + rs_table_next[8].busy + rs_table_next[9].busy + rs_table_next[10].busy + rs_table_next[11].busy +  rs_table_next[12].busy + rs_table_next[13].busy + rs_table_next[14].busy + rs_table_next[15].busy; 
+
+
+			
 		// DISPATCH STAGE
 		//
 		// To decide which row to dispatch
@@ -528,14 +486,16 @@ module RS(
 
 			rs_busy_cnt <=  {($clog2(`RS_SIZE)){1'b0}};
 			issue_idx <= {($clog2(`RS_SIZE)){1'b0}};
-
-		//	rs_busy_cnt <=  0;
+			issue_cnt <= {($clog2(`NUM_FU)){1'b0}};
+								//	rs_busy_cnt <=  0;
 		end
 		else begin
 			rs_table <=  rs_table_next;
 			rs_busy_cnt <=  rs_busy_cnt_next;
 			issue_next	<= issue_out;
 			issue_idx <= issue_idx_next;
+			issue_cnt <= issue_cnt_next;
+			
 		end
 	end
 

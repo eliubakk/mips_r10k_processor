@@ -10,12 +10,12 @@ module testbench;
 	logic	 [1:0]		LSQ_busy;
 	
 
-	RS_ROW_T   		rs_table_out [(`RS_SIZE - 1):0] ;
-	RS_ROW_T 		issue_next   [(`NUM_FU -1 ):0]; 
+	RS_ROW_T   	 [(`RS_SIZE - 1):0] 	rs_table_out;
+	RS_ROW_T 	 [(`NUM_FU -1 ):0] issue_next  ; 
 	logic				rs_full;
 	logic [$clog2(`NUM_FU) - 1:0]	issue_cnt;
-	RS_ROW_T   		rs_table_test [(`RS_SIZE - 1):0] ;
-	RS_ROW_T 		issue_next_test   [(`NUM_FU -1 ):0]; 
+	RS_ROW_T   	[(`RS_SIZE - 1):0] 	rs_table_test ;
+	RS_ROW_T 	[(`NUM_FU -1 ):0]	issue_next_test   ; 
 
 	
 	RS RS0(
