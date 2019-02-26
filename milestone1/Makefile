@@ -18,7 +18,7 @@ all:    simv
 # Modify starting here
 #####
 
-TESTBENCH = test_ash_morteza.v
+TESTBENCH = RS_new_test.v # test_ash_morteza.v
 SIMFILES = RS_new.v
 SYNFILES = RS.vg 
 
