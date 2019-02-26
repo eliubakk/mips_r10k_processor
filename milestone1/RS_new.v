@@ -87,11 +87,11 @@ module RS(
 	// OUTPUTS
 	`ifdef DEBUG 
 	output RS_ROW_T  			rs_table_out [(`RS_SIZE - 1):0],
-	output logic [`RS_SIZE-1:0]		issue_idx,			
+	//output logic [`RS_SIZE-1:0]		issue_idx,			
 	`endif
 	
 	//output	RS_ROW_T		issue_out,
-	output  RS_ROW_T 			issue_out [(`NUM_FU - 1):0], 
+	output  RS_ROW_T 			issue_next [(`NUM_FU - 1):0], 
 	output logic [$clog2(`NUM_FU) - 1:0]	issue_cnt,
 	output	logic				rs_full
 	);
@@ -107,7 +107,7 @@ module RS(
 	logic [$clog2(`RS_SIZE)-1:0]		rs_busy_cnt;	// The number of busy rows
 	RS_ROW_T  				rs_table 	[(`RS_SIZE - 1):0];	// RS_Table
 	//logic [$clog2(`SS_SIZE)-1:0] 		issue_cnt;		// The number of instructions that we will issue
-	RS_ROW_T 				issue_next	[`NUM_FU-1:0];		// The instructions that we will issue next
+	RS_ROW_T 				issue_out	[`NUM_FU-1:0];		// The instructions that we will issue next
 	logic  					dispatch_cnt;					
 
 	// logic for CDB CAM
@@ -118,7 +118,7 @@ module RS(
 	// isue_idx for each of functional unit (before and after priority
 	// encoder)
 	//
-	logic	[`RS_SIZE-1:0] 	 issue_idx_next; // Issued instruction that we issued on last instruction, for remove busy bit on FU 
+	logic	[`RS_SIZE-1:0] 	issue_idx, issue_idx_next; // Issued instruction that we issued on last instruction, for remove busy bit on FU 
 	
 	logic	[`RS_SIZE-1:0] ALU_issue_idx, ALU_issue_gnt;
 	logic	[`RS_SIZE-1:0] LD_issue_idx, LD_issue_gnt;
@@ -214,26 +214,26 @@ module RS(
 		// ISSUE STAGE //
 		//Initiaalization to prevent latch
 			for(integer i=0; i<`NUM_FU; i=i+1) begin // Anothe way to do this?
-			issue_next[i].inst.opa_select = ALU_OPA_IS_REGA;
-			issue_next[i].inst.opb_select = ALU_OPB_IS_REGB;
-			issue_next[i].inst.dest_reg = DEST_IS_REGC;
-			issue_next[i].inst.alu_func = ALU_ADDQ;
-			issue_next[i].inst.fu_name = FU_ALU;
-			issue_next[i].inst.rd_mem = 1'b0;
-			issue_next[i].inst.wr_mem = 1'b0;
-			issue_next[i].inst.ldl_mem = 1'b0;
-			issue_next[i].inst.stc_mem = 1'b0;
-			issue_next[i].inst.cond_branch = 1'b0;
-			issue_next[i].inst.uncond_branch = 1'b0;
-			issue_next[i].inst.halt = 1'b0;
-			issue_next[i].inst.cpuid = 1'b0;
-			issue_next[i].inst.illegal = 1'b0;
-			issue_next[i].inst.valid_inst = 1'b0;
+			issue_out[i].inst.opa_select = ALU_OPA_IS_REGA;
+			issue_out[i].inst.opb_select = ALU_OPB_IS_REGB;
+			issue_out[i].inst.dest_reg = DEST_IS_REGC;
+			issue_out[i].inst.alu_func = ALU_ADDQ;
+			issue_out[i].inst.fu_name = FU_ALU;
+			issue_out[i].inst.rd_mem = 1'b0;
+			issue_out[i].inst.wr_mem = 1'b0;
+			issue_out[i].inst.ldl_mem = 1'b0;
+			issue_out[i].inst.stc_mem = 1'b0;
+			issue_out[i].inst.cond_branch = 1'b0;
+			issue_out[i].inst.uncond_branch = 1'b0;
+			issue_out[i].inst.halt = 1'b0;
+			issue_out[i].inst.cpuid = 1'b0;
+			issue_out[i].inst.illegal = 1'b0;
+			issue_out[i].inst.valid_inst = 1'b0;
 					
-			issue_next[i].T = 7'b1111111;
-			issue_next[i].T1 = 7'b1111111;
-			issue_next[i].T2 = 7'b1111111;
-			issue_next[i].busy = 1'b0;
+			issue_out[i].T = 7'b1111111;
+			issue_out[i].T1 = 7'b1111111;
+			issue_out[i].T2 = 7'b1111111;
+			issue_out[i].busy = 1'b0;
 			end
 	
 		// Initialize the issue cnt and inx, gnt table	
@@ -247,7 +247,7 @@ module RS(
 
 			BR_issue_idx = 		{`RS_SIZE{0}};
 		if (enable) begin
-		// Initialize issue_next table
+		// Initialize issue_out table
 			 
 	// First of all, check the instructions, tags -> enable FU_issue_idx bits
 	// ISSUE width = FU number
@@ -257,7 +257,7 @@ module RS(
 	// no Structural hazard)
 	// 2 : FU_issue_gnt[i] by using priority encoder (only one row per
 	// each FU can be issued)
-	// 3 : write issue_next table, issue_cnt increase, set issue_next_busy
+	// 3 : write issue_out table, issue_cnt increase, set issue_out_busy
 	// (valid issue)
 	//
 	//
@@ -310,14 +310,14 @@ module RS(
 
 		end
 
-		// update the issue_next, rs_table_next_busy, issue_cnt by
+		// update the issue_out, rs_table_next_busy, issue_cnt by
 		// using FU_index_gnt
 		//
 		//For ALU
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
 			if(ALU_issue_gnt[i] == 1) begin
-				issue_next[0] = rs_table_next[i]; // issue_next[0] for ALU
-				issue_next[0].busy = 1'b1;
+				issue_out[0] = rs_table_next[i]; // issue_out[0] for ALU
+				issue_out[0].busy = 1'b1;
 				//rs_table_next[i].busy = 1'b0; //Free the RS table
 
 			end			
@@ -326,8 +326,8 @@ module RS(
 		//For LD
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
 			if(LD_issue_gnt[i] == 1) begin
-				issue_next[1] = rs_table_next[i]; // issue_next[1] for LD
-				issue_next[1].busy = 1'b1;
+				issue_out[1] = rs_table_next[i]; // issue_out[1] for LD
+				issue_out[1].busy = 1'b1;
 			//	rs_table_next[i].busy = 1'b0; //Free the RS table
 			end 
 		end
@@ -335,8 +335,8 @@ module RS(
 		//For ST
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
 			if(ST_issue_gnt[i] == 1) begin
-				issue_next[2] = rs_table_next[i]; // issue_next[2] for ST
-				issue_next[2].busy = 1'b1;
+				issue_out[2] = rs_table_next[i]; // issue_out[2] for ST
+				issue_out[2].busy = 1'b1;
 				//rs_table_next[i].busy = 1'b0; //Free the RS table
 			end 
 		end
@@ -344,8 +344,8 @@ module RS(
 		//For MULT
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
 			if(MULT_issue_gnt[i] == 1) begin
-				issue_next[3] = rs_table_next[i]; // issue_next[3] for MULT
-				issue_next[3].busy = 1'b1;
+				issue_out[3] = rs_table_next[i]; // issue_out[3] for MULT
+				issue_out[3].busy = 1'b1;
 				//rs_table_next[i].busy = 1'b0; //Free the RS tableSS
 			end 
 		end
@@ -353,8 +353,8 @@ module RS(
 		// For BR
 		for(integer i=0; i<`RS_SIZE; i=i+1) begin
 			if(BR_issue_gnt[i] == 1) begin
-				issue_next[4] = rs_table_next[i]; // issue_next[3] for MULT
-				issue_next[4].busy = 1'b1;
+				issue_out[4] = rs_table_next[i]; // issue_out[3] for MULT
+				issue_out[4].busy = 1'b1;
 			//	rs_table_next[i].busy = 1'b0; //Free the RS table
 			end 
 		end
@@ -440,25 +440,25 @@ module RS(
 				end
 				for(integer i=0; i<`NUM_FU; i=i+1) begin // Other way to do this?
 			
-				issue_out[i].inst.opa_select <=  ALU_OPA_IS_REGA;
-				issue_out[i].inst.opb_select <=  ALU_OPB_IS_REGB;
-				issue_out[i].inst.dest_reg <=  DEST_IS_REGC;
-				issue_out[i].inst.alu_func <=  ALU_ADDQ;
-				issue_out[i].inst.fu_name <=  FU_ALU;
-				issue_out[i].inst.rd_mem <=  1'b0;
-				issue_out[i].inst.wr_mem <=  1'b0;
-				issue_out[i].inst.ldl_mem <=  1'b0;
-				issue_out[i].inst.stc_mem <=  1'b0;
-				issue_out[i].inst.cond_branch <=  1'b0;
-				issue_out[i].inst.uncond_branch <=  1'b0;
-				issue_out[i].inst.halt <=  1'b0;
-				issue_out[i].inst.cpuid <=  1'b0;
-				issue_out[i].inst.illegal <=  1'b0;
-				issue_out[i].inst.valid_inst <= 1'b0;
-				issue_out[i].T <=  7'b1111111;
-				issue_out[i].T1 <= 7'b1111111;
-				issue_out[i].T2 <=  7'b1111111;
-				issue_out[i].busy <=  1'b0;
+				issue_next[i].inst.opa_select <=  ALU_OPA_IS_REGA;
+				issue_next[i].inst.opb_select <=  ALU_OPB_IS_REGB;
+				issue_next[i].inst.dest_reg <=  DEST_IS_REGC;
+				issue_next[i].inst.alu_func <=  ALU_ADDQ;
+				issue_next[i].inst.fu_name <=  FU_ALU;
+				issue_next[i].inst.rd_mem <=  1'b0;
+				issue_next[i].inst.wr_mem <=  1'b0;
+				issue_next[i].inst.ldl_mem <=  1'b0;
+				issue_next[i].inst.stc_mem <=  1'b0;
+				issue_next[i].inst.cond_branch <=  1'b0;
+				issue_next[i].inst.uncond_branch <=  1'b0;
+				issue_next[i].inst.halt <=  1'b0;
+				issue_next[i].inst.cpuid <=  1'b0;
+				issue_next[i].inst.illegal <=  1'b0;
+				issue_next[i].inst.valid_inst <= 1'b0;
+				issue_next[i].T <=  7'b1111111;
+				issue_next[i].T1 <= 7'b1111111;
+				issue_next[i].T2 <=  7'b1111111;
+				issue_next[i].busy <=  1'b0;
 							
 	
 				end
@@ -472,7 +472,7 @@ module RS(
 		else begin
 			rs_table <=  rs_table_next;
 			rs_busy_cnt <=  rs_busy_cnt_next;
-			issue_out	<= issue_next;
+			issue_next	<= issue_out;
 			issue_idx <= issue_idx_next;
 		end
 	end

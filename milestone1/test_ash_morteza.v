@@ -258,16 +258,13 @@ module testbench;
 	//3. Testing for functionality (enable, reset, dispatch_valid,
 	//LSQ_busy, CAM_en, commit, issue, dispatch) and corner cases (Issue 2 branches at
 	//a same cycle?, input is invalid instruction, etc...)    
-		table_out();
 
 	@(negedge clock);
 //Check reset
 		reset = 1;
-		table_out();
 	@(negedge  clock);
 //Check enable
 		enable = 1;
-		table_out();
 	@(negedge clock);
 //Dispatch
 		reset = 0;
@@ -297,7 +294,6 @@ module testbench;
 		
 		
 
-		table_out();
 
 		@(negedge clock);
 		@(negedge clock);
