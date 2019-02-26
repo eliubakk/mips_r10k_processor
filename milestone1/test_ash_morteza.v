@@ -342,7 +342,7 @@ module testbench;
 	$display("-------RESET------\n");
 	reset = 1;
 	rs_table_test = clear_rs_table_test();
-	issue_next_test = clear_issue_next_test();
+	// issue_next_test = clear_issue_next_test();
 
 	// assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
