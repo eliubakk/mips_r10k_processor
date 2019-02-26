@@ -1,93 +1,167 @@
+
+                           Design Compiler Graphical 
+                                 DC Ultra (TM)
+                                  DFTMAX (TM)
+                              Power Compiler (TM)
+                                 DesignWare (R)
+                                 DC Expert (TM)
+                               Design Vision (TM)
+                               HDL Compiler (TM)
+                               VHDL Compiler (TM)
+                                  DFT Compiler
+                               Design Compiler(R)
+
+                 Version O-2018.06 for linux64 - May 21, 2018 
+
+                    Copyright (c) 1988 - 2018 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+Initializing...
 #/***********************************************************/
 #/*   FILE        : ISR.tcl                          */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
 #/***********************************************************/
-
 #/***********************************************************/
 #/* The following five lines must be updated for every      */
 #/* new design                                              */
 #/***********************************************************/
-
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
+./ /afs/umich.edu/class/eecs470/lib/synopsys/
 read_file -f sverilog [list "RS_new.v"]
-set design_name RS
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/gtech.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/standard.sldb'
+  Loading link library 'gtech'
+Loading sverilog file '/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_new.v'
+Detecting input file type automatically (-rtl or -netlist).
+Reading with Presto HDL Compiler (equivalent to -rtl option).
+Running PRESTO HDLC
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+Compiling source file /home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_new.v
+Opening include file sys_defs.vh
+Warning:  /home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_new.v:44: Redeclaration of port 'req_up'. (VER-331)
+Warning:  /home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_new.v:142: signed to unsigned conversion occurs. (VER-318)
+
+Statistics for case statements in always block at line 202 in file
+	'/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_new.v'
+===============================================
+|           Line           |  full/ parallel  |
+===============================================
+|           275            |     no/auto      |
+===============================================
+
+Inferred memory devices in process
+	in routine RS line 402 in file
+		'/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_new.v'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|    issue_idx_reg    | Flip-flop |  12   |  Y  | N  | N  | N  | N  | N  | N  |
+|    rs_table_reg     | Flip-flop |  588  |  Y  | N  | N  | N  | N  | N  | N  |
+|    issue_out_reg    | Flip-flop |  245  |  Y  | N  | N  | N  | N  | N  | N  |
+|   rs_busy_cnt_reg   | Flip-flop |   4   |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Presto compilation completed successfully.
+Current design is now '/home/heewoo/Desktop/eecs470/FINAL/group10w19/milestone1/RS_CAM.db:RS_CAM'
+Loaded 4 designs.
+Current design is 'RS_CAM'.
+RS_CAM PS PS4 RS
+set design_name RS RS_CAM PS PS4
+Error: wrong # args: should be "set varName ?newValue?"
+	Use error_info for more info. (CMD-013)
 set clock_name clock
+clock
 set reset_name reset
+reset
 set CLK_PERIOD 15
-
-
-
-
-
+15
 #/***********************************************************/
 #/* The rest of this file may be left alone for most small  */
 #/* to moderate sized designs.  You may need to alter it    */
 #/* when synthesizing your final project.                   */
 #/***********************************************************/
 set SYN_DIR ./
+./
 set search_path "/afs/umich.edu/class/eecs470/lib/synopsys/"
+/afs/umich.edu/class/eecs470/lib/synopsys/
 set target_library "lec25dscc25_TT.db"
+lec25dscc25_TT.db
 set link_library [concat  "*" $target_library]
-
+* lec25dscc25_TT.db
 #/***********************************************************/
 #/* Set some flags for optimisation */
-
 set compile_top_all_paths "true"
+true
 set auto_wire_load_selection "false"
-
-
+false
 #/***********************************************************/
 #/*  Clk Periods/uncertainty/transition                     */
-
 set CLK_TRANSITION 0.1
+0.1
 set CLK_UNCERTAINTY 0.1
+0.1
 set CLK_LATENCY 0.1
-
+0.1
 #/* Input/output Delay values */
 set AVG_INPUT_DELAY 0.1
+0.1
 set AVG_OUTPUT_DELAY 0.1
-
+0.1
 #/* Critical Range (ns) */
 set CRIT_RANGE 1.0
-
+1.0
 #/***********************************************************/
 #/* Design Constrains: Not all used                         */
 set MAX_TRANSITION 1.0
+1.0
 set FAST_TRANSITION 0.1
+0.1
 set MAX_FANOUT 32
+32
 set MID_FANOUT 8
+8
 set LOW_FANOUT 1
+1
 set HIGH_DRIVE 0
+0
 set HIGH_LOAD 1.0
+1.0
 set AVG_LOAD 0.1
+0.1
 set AVG_FANOUT_LOAD 10
-
+10
 #/***********************************************************/
 #/*BASIC_INPUT = cb18os120_tsmc_max/nd02d1/A1
 #BASIC_OUTPUT = cb18os120_tsmc_max/nd02d1/ZN*/
-
 set DRIVING_CELL dffacs1
-
+dffacs1
 #/* DONT_USE_LIST = {   } */
-
 #/*************operation cons**************/
 #/*OP_WCASE = WCCOM;
 #OP_BCASE = BCCOM;*/
 set WIRE_LOAD "tsmcwire"
+tsmcwire
 set LOGICLIB lec25dscc25_TT
+lec25dscc25_TT
 #/*****************************/
-
 #/* Sourcing the file that sets the Search path and the libraries(target,link) */
-
 set sys_clk $clock_name
-
+clock
 set netlist_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".vg"]
+Error: can't read "design_name": no such variable
+	Use error_info for more info. (CMD-013)
 set ddc_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".ddc"]
+Error: can't read "design_name": no such variable
+	Use error_info for more info. (CMD-013)
 set rep_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".rep"]
+Error: can't read "design_name": no such variable
+	Use error_info for more info. (CMD-013)
 set dc_shell_status [ set chk_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".chk"] ]
-
+Error: can't read "design_name": no such variable
+	Use error_info for more info. (CMD-013)
 #/* if we didnt find errors at this point, run */
 if {  $dc_shell_status != [list] } {
    current_design $design_name
@@ -132,5 +206,12 @@ if {  $dc_shell_status != [list] } {
 } else {
    quit
 }
-
-
+Error: can't read "dc_shell_status": no such variable
+	Use error_info for more info. (CMD-013)
+dc_shell> make clean
+Error: unknown command 'make' (CMD-005)
+dc_shell> make nuke
+Error: unknown command 'make' (CMD-005)
+dc_shell> '
+Error: unknown command ''' (CMD-005)
+dc_shell> 

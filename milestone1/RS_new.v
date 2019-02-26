@@ -210,9 +210,8 @@ module RS(
 	
 
 
-		// ISSUE STAGE // 
-		if (enable) begin
-		// Initialize issue_next table
+		// ISSUE STAGE //
+		//Initiaalization to prevent latch
 			for(integer i=0; i<`NUM_FU; i=i+1) begin // Anothe way to do this?
 			issue_next[i].inst.opa_select = ALU_OPA_IS_REGA;
 			issue_next[i].inst.opb_select = ALU_OPB_IS_REGB;
@@ -244,7 +243,10 @@ module RS(
 			LD_issue_idx = 		{`RS_SIZE{0}}; 
 			ST_issue_idx = 		{`RS_SIZE{0}}; 
 			MULT_issue_idx = 	{`RS_SIZE{0}}; 
-			BR_issue_idx = 		{`RS_SIZE{0}}; 
+			BR_issue_idx = 		{`RS_SIZE{0}};
+		if (enable) begin
+		// Initialize issue_next table
+			 
 	// First of all, check the instructions, tags -> enable FU_issue_idx bits
 	// ISSUE width = FU number
 	// For multiple issue,
@@ -298,7 +300,7 @@ module RS(
 						
 				
 					endcase
-				end
+				end 
 				
 			end
 					
@@ -314,7 +316,7 @@ module RS(
 				issue_next[0] = rs_table_next[i]; // issue_next[0] for ALU
 				issue_next[0].busy = 1'b1;
 				//rs_table_next[i].busy = 1'b0; //Free the RS table
-			end 			
+			end			
 		end
 
 		//For LD
