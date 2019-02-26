@@ -144,7 +144,7 @@ module testbench;
 			print_rs_entry(inst_in);
 			for (i = 0; i < `RS_SIZE; i += 1) begin
 				$display("At entry %d", i);
-				print_rs_entry(rs_table[i]);
+				print_rs_entry(rs_table_out[i]);
 				if (rs_table_out[i].busy) begin
 					if (rs_table_out[i] == inst_in) begin
 						return;
