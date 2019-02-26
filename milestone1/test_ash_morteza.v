@@ -66,6 +66,7 @@ module testbench;
 				clear_rs_table_test[i].T = `DUMMY_REG;
 				clear_rs_table_test[i].T1 = `DUMMY_REG;
 				clear_rs_table_test[i].T2 = `DUMMY_REG;
+				$display("dummy reg: %b", `DUMMY_REG);
 				clear_rs_table_test[i].busy = 0;
 			end
 		end
