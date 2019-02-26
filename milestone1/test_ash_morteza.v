@@ -108,6 +108,20 @@ module testbench;
 		end
 	endtask
 
+	task print_rs_table;
+		input RS_ROW_T rs_table [(`RS_SIZE - 1):0];
+		begin
+			$display("**********************************************************\n");
+			$display("------------------------RS TABLE----------------------------\n");
+
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				$display("RS_Row = %d, busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, ,rs_table[i].busy, rs_table[i].inst.fu_name,rs_table[i].T, rs_table[i].T1, rs_table[i].T2);
+			end
+			$display("*******************************************************************\n");
+
+		end
+	endtask
+
 	task entry_exists_in_table;
 		input RS_ROW_T inst_in;
 		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
@@ -346,6 +360,8 @@ module testbench;
 	rs_table_test = clear_rs_table_test();
 	issue_next_test = clear_issue_next_test();
 
+	print_rs_table(rs_table_out);
+	print_rs_table(rs_table_test);
 	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
 	assert( issue_next == issue_next_test ) else #1 exit_on_error;
 	assert( !issue_cnt) else #1 exit_on_error;
