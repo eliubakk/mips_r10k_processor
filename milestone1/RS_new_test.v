@@ -32,8 +32,8 @@ module testbench;
 
 		// outputs
 		.rs_table_out(rs_table_out),
-		.issue_idx(issue_idx), 
-		.issue_out(issue_out), 
+		// .issue_idx(issue_idx), 
+		.issue_next(issue_out), 
 		.issue_cnt(issue_cnt), 
 		.rs_full(rs_full)
 	 );
