@@ -899,6 +899,7 @@ module testbench;
 		branch_not_taken=1'b0;
 
 		@(posedge clock);
+		`DELAY;
 
 		table_has_N_entries(15, rs_table_out);
 
