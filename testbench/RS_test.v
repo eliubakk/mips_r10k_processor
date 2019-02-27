@@ -732,6 +732,10 @@ module testbench;
 		end else begin
 			// if we exit here, it's because none of the ready
 			// add instructions were issued
+			$display("issue_next[0]");
+			print_rs_entry(issue_next[0]);
+			print_rs_entry(inst_1);
+			print_rs_entry(inst_2);
 			$display("here?");
 			exit_on_error;
 		end
