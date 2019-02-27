@@ -692,7 +692,6 @@ module testbench;
 		// table_out();
 		// print_issue_table(issue_next);
 
-		$display("second");
 		// check that just one of the alu inst was issued
 		if (issue_next[0] == inst_1) begin
 			first = 1'b1;
@@ -703,13 +702,8 @@ module testbench;
 		end else begin
 			// if we exit here, it's because none of the ready
 			// add instructions were issued
-			print_issue_table(issue_next);
-			print_rs_entry(inst_1);
-			print_rs_entry(inst_2);
-			$display("here?");
 			exit_on_error;
 		end
-		$display("third");
 
 		`DELAY;		
 
@@ -720,19 +714,14 @@ module testbench;
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
 		if (first) begin
-			$display("fourth");
 			assert(issue_next[0] == inst_2) else #1 exit_on_error;
 		end else if (second) begin
-			$display("fifth");
-			table_out();
-			print_issue_table(issue_next);
-			print_rs_entry(inst_1);
 			assert(issue_next[0] == inst_1) else #1 exit_on_error;
-			$display("sixth");
 		end else begin
 			// if we got here, that means there is a bigger problem
 			// than we know
 			$display("uh oh");
+			$display("first: %b second: %b", first, second);
 			exit_on_error;
 		end
 
