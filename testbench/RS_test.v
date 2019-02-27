@@ -137,6 +137,21 @@ module testbench;
 		end
 	endtask
 
+	task print_issue_table;
+		input RS_ROW_T [`NUM_FU-1:0] issue_table;
+		begin
+			$display("**********************************************************\n");
+			$display("------------------------ISSUE TABLE----------------------------\n");
+
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				$display("Entry: %d", i);
+				print_rs_entry(rs_table[i]);
+			end
+			$display("*******************************************************************\n");
+
+		end
+	endtask
+
 	task table_out;
 		begin
 				$display("**********************************************************\n");
@@ -414,7 +429,10 @@ module testbench;
 		table_has_N_entries(1, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
 		issue_next_test = clear_issue_next_test();
+		$display("check here");
+		print_issue_table(issue_next);
 		issue_next_test[4] = inst_in;
+		print_issue_table(issue_next_test);
 		check_issue_next_correct(issue_next, issue_next_test);
 
 		// Dispatch an instruction when branch is taken.
