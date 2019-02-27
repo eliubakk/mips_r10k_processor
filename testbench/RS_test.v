@@ -1003,6 +1003,9 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
+		$display("check here");
+		table_out();
+		print_rs_table(rs_table_test);
 		assert(rs_table_test == rs_table_out) else #1 exit_on_error;
 		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
