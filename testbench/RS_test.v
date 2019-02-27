@@ -683,9 +683,6 @@ module testbench;
 		first = 1'b0;
 		second = 1'b0;
 
-		inst_1;
-		inst_2;
-
 		inst_1.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_1.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_1.inst.dest_reg = DEST_IS_REGC;
