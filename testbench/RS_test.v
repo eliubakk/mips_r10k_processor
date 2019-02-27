@@ -1104,8 +1104,10 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
+		$display("hi");
 		inst_in.busy = 1'b1;
 		entry_not_in_table(inst_in, rs_table_out);
+		$display("bye");
 
 		@(negedge clock);
 
