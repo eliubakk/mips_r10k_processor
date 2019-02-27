@@ -1106,7 +1106,6 @@ module testbench;
 		`DELAY;
 		inst_in.busy = 1'b1;
 		entry_exists_in_table(inst_in, rs_table_out);
-		print_issue_table(issue_next);
 		assert(!issue_next[1].busy) else #1 exit_on_error;
 		assert(!issue_cnt);
 
