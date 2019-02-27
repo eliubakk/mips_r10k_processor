@@ -44,8 +44,8 @@
 //
 //////////////////////////////////////////////
 `define NUM_PHYS_REG 64
-typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
-`define DUMMY_REG {1'b1, $clog2(`NUM_PHYS_REG){1}}
+typedef logic [$clog2(`NUM_PHYS_REG)+1:0] PHYS_REG;
+`define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
 
 
 //////////////////////////////////////////////
@@ -121,12 +121,12 @@ typedef enum logic [4:0] {
   ALU_CMPULE    = 5'h10
 } ALU_FUNC;
 
-`define NUM_FU 8
-`define RS_SIZE 12
-`define SS_SIZE 3 // superscalar size
+`define NUM_FU 5
+`define RS_SIZE 16
+`define SS_SIZE 1 // superscalar size
 
 typedef enum logic [2:0]{
-  FU_ALU
+  FU_ALU,
   FU_LD,
   FU_ST,
   FU_MULT,
@@ -134,31 +134,16 @@ typedef enum logic [2:0]{
 } FU_NAME;
 
 typedef enum logic [2:0]{
-  FU_ALU1_IDX,
-  FU_ALU2_IDX,
-  FU_ALU3_IDX,
+  FU_ALU_IDX,
   FU_LD_IDX,
   FU_ST_IDX,
-  FU_MULT1_IDX,
-  FU_MULT2_IDX,
+  FU_MULT_IDX,
   FU_BR_IDX
 } FU_IDX;
 
-typedef struct {
-  logic     T1;
-  logic     T2;  
-} TAG_UPDATE_T;
 
-typedef struct{
-  DECODED_INST inst;
-  PHYS_REG     T;
-  PHYS_REG     T1;
-  PHYS_REG     T2;
-  logic        busy;
-  // logic [3:0]  waiting_cnt;
-} RS_ROW_T;
 
-typedef struct {
+typedef struct packed {
   ALU_OPA_SELECT opa_select; // use this for T1 valid
   ALU_OPB_SELECT opb_select; // use this for T2 valid
   DEST_REG_SEL   dest_reg; // mux selects use this for T valid
@@ -170,6 +155,14 @@ typedef struct {
   logic illegal;   // non-zero on an illegal instruction
   logic valid_inst; // for counting valid instructions executed
 } DECODED_INST;
+
+typedef struct packed{
+  DECODED_INST inst;
+  PHYS_REG     T;
+  PHYS_REG     T1;
+  PHYS_REG     T2;
+  logic        busy;
+} RS_ROW_T;
 
 //////////////////////////////////////////////
 //

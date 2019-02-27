@@ -39,8 +39,15 @@ ASSEMBLER = vs-asm
 # SIMULATION CONFIG
 
 HEADERS     = $(wildcard *.vh)
-TESTBENCH   = $(wildcard testbench/*.v)
-TESTBENCH  += $(wildcard testbench/*.c)
+#TESTBENCH = testbench/RS_new_test.v
+#SIMFILES = verilog/RS.v
+#SYNFILES = synth/RS.vg 
+
+#RS.vg: RS.v RS.vg synth/RS.tcl
+#	dc_shell-t -f ./synth/RS.tcl | tee RS_synth.out
+#TESTBENCH   = $(wildcard testbench/*.v)
+#TESTBENCH  += $(wildcard testbench/*.c)
+TESTBENCH = testbench/RS_new_test.v
 PIPEFILES   = $(wildcard verilog/*.v)
 CACHEFILES  = $(wildcard verilog/cache/*.v)
 
