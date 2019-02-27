@@ -387,8 +387,11 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 
+		$display("here");
 		table_has_N_entries(1, rs_table_out);
+		$display("hi");
 		entry_exists_in_table(inst_in, rs_table_out);
+		$display("check");
 
 		inst_in.busy = 1'b1;
 		issue_next_test = clear_issue_next_test();
