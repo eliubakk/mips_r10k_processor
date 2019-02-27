@@ -989,6 +989,7 @@ module testbench;
 		`DELAY;
 		$display("------------------------Issue 5 instructions----------");
 		table_has_N_entries(11, rs_table_out);
+		`DELAY;
 		// check all of the previously issued instructions are
 		// no longer in the table
 		for (int i = 0; i < `NUM_FU; i += 1) begin
