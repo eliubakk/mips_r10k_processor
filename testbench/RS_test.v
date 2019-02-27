@@ -502,7 +502,7 @@ module testbench;
 		
 		@(posedge clock);
 		`DELAY;
-		
+
 		rs_table_test = clear_rs_table_test();
 		issue_next_test = clear_issue_next_test();
 		assert(rs_table_out == rs_table_test) else #1 exit_on_error;
@@ -541,15 +541,21 @@ module testbench;
 			inst_in.busy = 1'b0;
 			branch_not_taken=1'b0;
 		
-		table_out();
-
+		// table_out();
 		table_has_N_entries(0, rs_table_out);
-		@(negedge clock);
+
+		@(posedge clock);
+		`DELAY;
+
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
 		issue_next_test = clear_issue_next_test();
 		check_issue_next_correct(issue_next, issue_next_test);
+
+
+		@(negedge clock);
+
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
@@ -578,10 +584,13 @@ module testbench;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
-		
-		table_out();
         table_has_N_entries(1, rs_table_out);
-		@(negedge clock);
+
+		
+		// table_out();
+		@(posedge clock);
+		`DELAY;
+		
 		inst_in.busy = 1'b1;
 		table_has_N_entries(2, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
@@ -594,6 +603,8 @@ module testbench;
 		branch_not_taken = 0;
 
 		$display("****************************************DISPATCH ADD R1(Xready) R2 R5************************************************");
+
+		@(negedge clock);
 
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
@@ -616,15 +627,19 @@ module testbench;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
 		
-		table_out();
+		// table_out();
 
 		table_has_N_entries(2, rs_table_out);
-		@(negedge clock);
+		@(posedge clock);
+		`DELAY;
+
 		inst_in.busy = 1'b1;
 		table_has_N_entries(3, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
 		issue_next_test = clear_issue_next_test();
 		check_issue_next_correct(issue_next, issue_next_test);
+
+		@(negedge clock);
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 0;
@@ -633,8 +648,6 @@ module testbench;
 
 		$display("****************************************Commit R1, Issue MULT R1 R2 R3, Issue ADD R1 R2 R4, Not issue Add R1 R2 R5************************************************");
 
-		//$display("table looks like");
-		//table_out();
 		CAM_en = 1;
 		CDB_in = 7'b0000001;
 
@@ -664,6 +677,10 @@ module testbench;
 		inst_in.busy = 1'b1;
 
 		// set the mult
+
+		@(posedge clock);
+		`DELAY;
+		
 		issue_next_test[3] = inst_in;
 		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
 
