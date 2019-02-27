@@ -388,7 +388,7 @@ module testbench;
 		`DELAY;
 
 		table_has_N_entries(1, rs_table_out);
-		entry_exist_in_table(inst_in, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
 
 		inst_in.busy = 1'b1;
 		issue_next_test = clear_issue_next_test();
