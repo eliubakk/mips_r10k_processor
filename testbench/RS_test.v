@@ -701,6 +701,7 @@ module testbench;
 		end else begin
 			// if we exit here, it's because none of the ready
 			// add instructions were issued
+			$display("here?");
 			exit_on_error;
 		end
 		$display("third");
