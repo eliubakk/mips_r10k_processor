@@ -725,6 +725,7 @@ module testbench;
 	
 		$display("****************************************DISPATCH MULT R1(Xready) R2 R3 for 16 several times / ADD R1 R2 R4 should not be dispatched************************************************");
 
+		CAM_en = 0;
 		for(integer i=0; i<`RS_SIZE-5; i=i+1) begin
 
 			@(negedge clock); 
