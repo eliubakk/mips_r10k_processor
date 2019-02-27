@@ -676,6 +676,8 @@ module testbench;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b1;
 
+		issue_next_test[3] = inst_in;
+
 		print_issue_table(issue_next);
 		// set the mult
 
@@ -689,7 +691,7 @@ module testbench;
 
 		print_issue_table(issue_next);
 
-		issue_next_test[3] = inst_in;
+		
 
 		first = 1'b0;
 		second = 1'b0;
