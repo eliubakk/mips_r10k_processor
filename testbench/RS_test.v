@@ -395,6 +395,7 @@ module testbench;
 		issue_next_test[0] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
 
+		dispatch_valid = 1;
 		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGA;
@@ -415,7 +416,6 @@ module testbench;
 		inst_in.T2 = 7'b1000001;
 		inst_in.busy = 1'b0;
 		branch_not_taken= 1'b1;
-		dispatch_valid = 1;
 		$display("HERE");
 		table_out();
 
