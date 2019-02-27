@@ -696,6 +696,7 @@ module testbench;
 		if (issue_next[0] == inst_1) begin
 			$display("first");
 			first = 1'b1;
+			$display("first = %b", first);
 		end else if (issue_next[0] == inst_2) begin
 			// $display("issue_next[0]");
 			// print_rs_entry(issue_next[0]);
@@ -708,10 +709,7 @@ module testbench;
 		end
 
 		`DELAY;		
-
-		first = 1'b0;
-		second = 1'b0;
-
+		
 		@(posedge clock);
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
