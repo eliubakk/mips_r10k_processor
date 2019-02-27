@@ -977,7 +977,6 @@ module testbench;
 		CAM_en = 1;
 		CDB_in = 7'b0001001;
 		`DELAY;
-		table_out();
 		// check issue_next all valid
 		for (int i = 0; i < `NUM_FU; i += 1) begin
 			print_issue_table(issue_next);
@@ -990,8 +989,6 @@ module testbench;
 		`DELAY;
 		$display("------------------------Issue 5 instructions----------");
 		table_has_N_entries(11, rs_table_out);
-
-		@(negedge clock);
 		// check all of the previously issued instructions are
 		// no longer in the table
 		for (int i = 0; i < `NUM_FU; i += 1) begin
@@ -999,6 +996,9 @@ module testbench;
 			assert(issue_next[i].busy) else #1 exit_on_error;
 			assert(issue_next[i].inst.valid_inst) else #1 exit_on_error;
 		end
+		
+		@(negedge clock);
+
 		@(posedge clock);
 		`DELAY;
 
