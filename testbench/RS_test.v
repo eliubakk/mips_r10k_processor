@@ -388,7 +388,7 @@ module testbench;
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
-		issue_next_test[0] = inst_in;
+		issue_next_test[3] = inst_in;
 
 		$display("**********************************************DISPATCH BR R1 R2 R4, Issue MULT R1 R2 R3****************************");	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
