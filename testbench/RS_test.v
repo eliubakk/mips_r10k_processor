@@ -503,20 +503,13 @@ module testbench;
 
 		@(negedge clock);
 
+		// ST should not be issued because both tags are not ready.
 		inst_in.busy = 1'b1;
-		$display("hm");
 		table_has_N_entries(1, rs_table_out);
-		$display("uh");
 		entry_exists_in_table(inst_in, rs_table_out);
-		$display("hi");
 		issue_next_test = clear_issue_next_test();
-		issue_next_test[2] = inst_in;
-		print_issue_table(issue_next);
-		print_issue_table(issue_next_test);
 		check_issue_next_correct(issue_next, issue_next_test);
-		$display("sup");
 
-		$display("here");
 
 		$display("@@@Passed");
 		$finish;
