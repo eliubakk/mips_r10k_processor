@@ -584,6 +584,8 @@ module testbench;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
+		inst_1 = inst_in;
+		inst_1.busy = 1'b1;
         table_has_N_entries(1, rs_table_out);
 
 		
@@ -626,6 +628,8 @@ module testbench;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
+		inst_2 = inst_in;
+		inst_2.busy = 1'b1;
 		
 		// table_out();
 
@@ -681,68 +685,29 @@ module testbench;
 
 		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
 
-		$display("LOOK OVER HERE");
-		table_out();
-		print_issue_table(issue_next);
-
-		`DELAY;		
-
-		first = 1'b0;
-		second = 1'b0;
-
-		inst_1.inst.opa_select = ALU_OPA_IS_REGA;
-		inst_1.inst.opb_select = ALU_OPB_IS_REGB;
-		inst_1.inst.dest_reg = DEST_IS_REGC;
-		inst_1.inst.alu_func = ALU_ADDQ;
-		inst_1.inst.fu_name = FU_ALU;
-		inst_1.inst.rd_mem = 1'b0;
-		inst_1.inst.wr_mem = 1'b0;
-		inst_1.inst.ldl_mem = 1'b0;
-		inst_1.inst.stc_mem = 1'b0;
-		inst_1.inst.cond_branch = 1'b0;
-		inst_1.inst.uncond_branch = 1'b0;
-		inst_1.inst.halt = 1'b0;
-		inst_1.inst.cpuid = 1'b0;
-		inst_1.inst.illegal = 1'b0;
-		inst_1.inst.valid_inst = 1'b1;
-		inst_1.T = 7'd4;
-		inst_1.T1 = 7'b1000001;
-		inst_1.T2 = 7'b1000010;
-		inst_1.busy = 1'b1;
-
-
-		inst_2.inst.opa_select = ALU_OPA_IS_REGA;
-		inst_2.inst.opb_select = ALU_OPB_IS_REGB;
-		inst_2.inst.dest_reg = DEST_IS_REGC;
-		inst_2.inst.alu_func = ALU_ADDQ;
-		inst_2.inst.fu_name = FU_ALU;
-		inst_2.inst.rd_mem = 1'b0;
-		inst_2.inst.wr_mem = 1'b0;
-		inst_2.inst.ldl_mem = 1'b0;
-		inst_2.inst.stc_mem = 1'b0;
-		inst_2.inst.cond_branch = 1'b0;
-		inst_2.inst.uncond_branch = 1'b0;
-		inst_2.inst.halt = 1'b0;
-		inst_2.inst.cpuid = 1'b0;
-		inst_2.inst.illegal = 1'b0;
-		inst_2.inst.valid_inst = 1'b1;
-		inst_2.T = 7'd5;
-		inst_2.T1 = 7'b1000001;
-		inst_2.T2 = 7'b1000010;
-		inst_2.busy = 1'b1;
+		// $display("LOOK OVER HERE");
+		// table_out();
+		// print_issue_table(issue_next);
 
 		// check that just one of the alu inst was issued
 		if (issue_next[0] == inst_1) begin
 			first = 1'b1;
 		end else if (issue_next[0] == inst_2) begin
-			$display("issue_next[0]");
-			print_rs_entry(issue_next[0]);
+			// $display("issue_next[0]");
+			// print_rs_entry(issue_next[0]);
 			second = 1'b1;
 		end else begin
 			// if we exit here, it's because none of the ready
 			// add instructions were issued
 			exit_on_error;
 		end
+
+		`DELAY;		
+
+		first = 1'b0;
+		second = 1'b0;
+
+
 
 		// check that the mult inst was issued
 		// table_out();
