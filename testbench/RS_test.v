@@ -413,7 +413,8 @@ module testbench;
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
-		issue_next_test[0] = inst_in;
+		issue_next_test = clear_issue_next_test();
+		issue_next_test[4] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
 
 		// Dispatch an instruction when branch is taken.
