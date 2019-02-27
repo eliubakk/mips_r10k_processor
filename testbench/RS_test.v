@@ -681,6 +681,10 @@ module testbench;
 
 		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
 
+		$display("LOOK OVER HERE");
+		table_out();
+		print_issue_table(issue_next);
+
 		`DELAY;		
 
 		first = 1'b0;
