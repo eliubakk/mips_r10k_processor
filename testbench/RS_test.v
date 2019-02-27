@@ -683,12 +683,14 @@ module testbench;
 
 		@(posedge clock);
 
+		$display("first");
 		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
 
 		// $display("LOOK OVER HERE");
 		// table_out();
 		// print_issue_table(issue_next);
 
+		$display("second");
 		// check that just one of the alu inst was issued
 		if (issue_next[0] == inst_1) begin
 			first = 1'b1;
@@ -701,23 +703,21 @@ module testbench;
 			// add instructions were issued
 			exit_on_error;
 		end
+		$display("third");
 
 		`DELAY;		
 
 		first = 1'b0;
 		second = 1'b0;
 
-
-
-		// check that the mult inst was issued
-		// table_out();
-		@(negedge clock);
 		@(posedge clock);
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
 		if (first) begin
+			$display("fourth");
 			assert(issue_next[0] == inst_2) else #1 exit_on_error;
 		end else if (second) begin
+			$display("fifth");
 			table_out();
 			print_issue_table(issue_next);
 			print_rs_entry(inst_1);
