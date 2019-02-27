@@ -487,7 +487,7 @@ module testbench;
 		$display("uh");
 		entry_exists_in_table(inst_in, rs_table_out);
 		$display("hi");
-		issue_next_test[0] = inst_in;
+		issue_next_test[2] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
 		$display("sup");
 
