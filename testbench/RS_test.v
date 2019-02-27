@@ -935,7 +935,8 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 
-		table_out();
+		table_has_N_entries(16, rs_table_out);
+		assert(rs_full) else #1 exit_on_error;
 		check_has_func(rs_table_out, FU_ALU);
 		check_has_func(rs_table_out, FU_LD);
 		check_has_func(rs_table_out, FU_ST);
