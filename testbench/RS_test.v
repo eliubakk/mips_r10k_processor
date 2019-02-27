@@ -679,10 +679,12 @@ module testbench;
 		// set the mult
 
 		@(posedge clock);
-		`DELAY;
 		
-		issue_next_test[3] = inst_in;
 		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
+
+		`DELAY;
+
+		issue_next_test[3] = inst_in;
 
 		first = 1'b0;
 		second = 1'b0;
