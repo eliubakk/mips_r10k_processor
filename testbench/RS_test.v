@@ -290,6 +290,10 @@ module testbench;
 			// return;
 		end
 	endtask
+
+	// helper variables
+	logic first = 1'b0;
+	logic second = 1'b0;
 	
 	initial begin
 		
@@ -674,8 +678,8 @@ module testbench;
 		// set the mult
 		issue_next_test[3] = inst_in;
 
-		logic first = 1'b0;
-		logic second = 1'b0;
+		first = 1'b0;
+		second = 1'b0;
 
 		RS_ROW_T inst_1;
 		RS_ROW_T inst_2;
