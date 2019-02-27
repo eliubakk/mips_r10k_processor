@@ -293,7 +293,6 @@ module testbench;
 		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_test;
 		begin
 			for (int i = 0; i < `RS_SIZE; i += 1) begin
-				$display("i = %d",i);
 				assert(rs_table_test[i] === rs_table[i]) else #1 exit_on_error;
 			end
 		end
@@ -1040,6 +1039,43 @@ module testbench;
 		`DELAY;
 		rs_table_equal(rs_table_test, rs_table_out);
 		assert(issue_next_test == issue_next) else #1 exit_on_error;
+
+		@(negedge clock);
+		$display("------------------------Check for dispatch invalid inst----------");
+		reset = 1;
+		enable = 1;
+
+		@(posedge clock);
+		`DELAY;
+		reset = 0;
+		dispatch_valid = 1'b1;
+
+		@(negedge clock);
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b0;
+		inst_in.T = 7'd4;
+		inst_in.T1 = 7'b1001111;
+		inst_in.T2 = 7'b1001111;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(posedge clock);
+		`DELAY;
+
+		table_out();	
 
 		$display("@@@Passed");
 		$finish;
