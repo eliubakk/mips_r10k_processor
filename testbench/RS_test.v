@@ -521,6 +521,53 @@ module testbench;
 		assert(rs_table_out == rs_table_test) else #1 exit_on_error;
 		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
+        $display("###########################################################################");
+		$display("***********************TEST2 : Multiple issue and CAM*********************");
+		$display("###########################################################################\n");
+	
+		@(negedge clock);
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+		$display("****************************************DISPATCH MULT R1(Xready) R2 R3************************************************");
+
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_MULQ;
+			inst_in.inst.fu_name = FU_MULT;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd3;
+			inst_in.T1 = 7'b0000001;
+			inst_in.T2 = 7'b1000010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+		
+		table_out();
+
+		table_has_N_entries(0, rs_table_out);
+		@(negedge clock);
+		inst_in.busy = 1'b1;
+		table_has_N_entries(1, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test = clear_issue_next_test();
+		check_issue_next_correct(issue_next, issue_next_test);
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
 		$display("@@@Passed");
 		$finish;
 
