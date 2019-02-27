@@ -755,6 +755,8 @@ module testbench;
 			assert(issue_next[0] == inst_2) else #1 exit_on_error;
 			$display("fifth");
 		end else if (second) begin
+			print_issue_table(issue_next);
+			print_rs_entry(inst_1);
 			assert(issue_next[0] == inst_1) else #1 exit_on_error;
 			$display("sixth");
 		end else begin
