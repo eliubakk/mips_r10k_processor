@@ -1106,6 +1106,8 @@ module testbench;
 		`DELAY;
 		$display("hi");
 		inst_in.busy = 1'b1;
+		table_out();
+		print_rs_entry(inst_in);
 		entry_not_in_table(inst_in, rs_table_out);
 		$display("bye");
 
