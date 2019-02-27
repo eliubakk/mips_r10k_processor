@@ -205,6 +205,8 @@ module testbench;
 					_count += 1;
 				end
 			end
+			$display("count = %d, _count = %d", count, _count);
+			table_out();
 			assert(count == _count) else #1 exit_on_error;
 		end
 	endtask
