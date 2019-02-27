@@ -489,6 +489,7 @@ module testbench;
 		$display("hi");
 		issue_next_test[0] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
+		$display("sup");
 
 		$display("here");
 
