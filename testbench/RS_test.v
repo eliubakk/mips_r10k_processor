@@ -418,6 +418,7 @@ module testbench;
 		inst_in.T2 = 7'b1000001;
 		inst_in.busy = 1'b0;
 		branch_not_taken= 1'b1;
+		$display("WE SET THE INST");
 
 		@(negedge clock);
 		$display("HI");
