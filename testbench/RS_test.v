@@ -682,8 +682,8 @@ module testbench;
 		@(posedge clock);
 
 		print_issue_table(issue_next);
-
-		// assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
+		print_rs_entry(issue_next_test[3]);
+		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
 
 		`DELAY;
 
