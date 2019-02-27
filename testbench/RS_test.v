@@ -936,15 +936,10 @@ module testbench;
 		`DELAY;
 
 		table_out();
-		$display("check alu");
 		check_has_func(rs_table_out, FU_ALU);
-		$display("check alu");
 		check_has_func(rs_table_out, FU_LD);
-		$display("check alu");
 		check_has_func(rs_table_out, FU_ST);
-		$display("check alu");
 		check_has_func(rs_table_out, FU_MULT);
-		$display("check alu");
 		check_has_func(rs_table_out, FU_BR);
 
 		$display("@@@Passed");
