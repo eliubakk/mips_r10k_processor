@@ -651,9 +651,6 @@ module testbench;
 		CAM_en = 1;
 		CDB_in = 7'b0000001;
 
-		$display("after cam");
-		table_out();
-
 		issue_next_test = clear_issue_next_test();
 		// set inst_in to mult inst
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -742,19 +739,15 @@ module testbench;
 		end
 
 		// check that the mult inst was issued
-		$display("second");
 		// table_out();
 
 		@(negedge clock);
 		inst_in.busy = 1'b1;
-		$display("third");
-		table_out();
 		table_has_N_entries(1, rs_table_out);
-		$display("fourth");
 		if (first) begin
 			assert(issue_next[0] == inst_2) else #1 exit_on_error;
-			$display("fifth");
 		end else if (second) begin
+			table_out();
 			print_issue_table(issue_next);
 			print_rs_entry(inst_1);
 			assert(issue_next[0] == inst_1) else #1 exit_on_error;
