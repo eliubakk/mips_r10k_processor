@@ -231,42 +231,48 @@ module testbench;
 		input RS_ROW_T [(`NUM_FU -1 ):0] issue_next;
 		input RS_ROW_T [(`NUM_FU -1 ):0] issue_next_test;
 		begin
-			for (integer i = 0; i < `NUM_FU; i += 1) begin
-				logic found = 1'b0;
-				found = 1'b0;
-				if (issue_next[i].busy) begin
-					for (integer j = 0; j < `NUM_FU; j += 1) begin
-						if (issue_next_test[j].busy) begin
-							if (issue_next_test[j] == issue_next[i]) begin
-								found = 1'b1;
-								break;
-							end
-						end
-					end
-					if (!found) begin
-						exit_on_error;
-					end
-				end
-			end
-
-			for (integer i = 0; i < `NUM_FU; i += 1) begin
-				logic found = 1'b0;
-				found = 1'b0;
-				if (issue_next_test[i].busy) begin
-					for (integer j = 0; j < `NUM_FU; j += 1) begin
-						if (issue_next[j].busy) begin
-							if (issue_next_test[i] == issue_next[j]) begin
-								found = 1'b1;
-								break;
-							end
-						end
-					end
-					if (!found) begin
-						exit_on_error;
-					end
+			for (int i = 0; i < `NUM_FU; i += 1) begin
+				if (issue_next[i] != issue_next_test[i]) begin
+					exit_on_error;
 				end
 			end
 			return;
+			// for (integer i = 0; i < `NUM_FU; i += 1) begin
+			// 	logic found = 1'b0;
+			// 	found = 1'b0;
+			// 	if (issue_next[i].busy) begin
+			// 		for (integer j = 0; j < `NUM_FU; j += 1) begin
+			// 			if (issue_next_test[j].busy) begin
+			// 				if (issue_next_test[j] == issue_next[i]) begin
+			// 					found = 1'b1;
+			// 					break;
+			// 				end
+			// 			end
+			// 		end
+			// 		if (!found) begin
+			// 			exit_on_error;
+			// 		end
+			// 	end
+			// end
+
+			// for (integer i = 0; i < `NUM_FU; i += 1) begin
+			// 	logic found = 1'b0;
+			// 	found = 1'b0;
+			// 	if (issue_next_test[i].busy) begin
+			// 		for (integer j = 0; j < `NUM_FU; j += 1) begin
+			// 			if (issue_next[j].busy) begin
+			// 				if (issue_next_test[i] == issue_next[j]) begin
+			// 					found = 1'b1;
+			// 					break;
+			// 				end
+			// 			end
+			// 		end
+			// 		if (!found) begin
+			// 			exit_on_error;
+			// 		end
+			// 	end
+			// end
+			// return;
 		end
 	endtask
 	
@@ -487,6 +493,7 @@ module testbench;
 		$display("uh");
 		entry_exists_in_table(inst_in, rs_table_out);
 		$display("hi");
+		issue_next_test = clear_issue_next_test();
 		issue_next_test[2] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
 		$display("sup");
