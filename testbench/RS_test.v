@@ -673,7 +673,7 @@ module testbench;
 		inst_in.inst.illegal = 1'b0;
 		inst_in.inst.valid_inst = 1'b1;
 		inst_in.T = 7'd3;
-		inst_in.T1 = 7'b0000001;
+		inst_in.T1 = 7'b1000001;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b1;
 
@@ -699,7 +699,7 @@ module testbench;
 		inst_1.inst.illegal = 1'b0;
 		inst_1.inst.valid_inst = 1'b1;
 		inst_1.T = 7'd4;
-		inst_1.T1 = 7'b0000001;
+		inst_1.T1 = 7'b1000001;
 		inst_1.T2 = 7'b1000010;
 		inst_1.busy = 1'b1;
 
@@ -720,7 +720,7 @@ module testbench;
 		inst_2.inst.illegal = 1'b0;
 		inst_2.inst.valid_inst = 1'b1;
 		inst_2.T = 7'd5;
-		inst_2.T1 = 7'b0000001;
+		inst_2.T1 = 7'b1000001;
 		inst_2.T2 = 7'b1000010;
 		inst_2.busy = 1'b1;
 
