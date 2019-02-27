@@ -428,7 +428,7 @@ module RS(
 	//                                              //
 	//////////////////////////////////////////////////
 	always_ff @(posedge clock) begin
-		if (reset | ~branch_not_taken) begin
+		if (reset | branch_not_taken) begin
 		//	rs_table <= {(RS_ROW_T [(`RS_SIZE - 1):0]){0}}; // Other way to do this?
 			
 				for(integer i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?
