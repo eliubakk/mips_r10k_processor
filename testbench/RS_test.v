@@ -749,6 +749,7 @@ module testbench;
 		@(negedge clock);
 		inst_in.busy = 1'b1;
 		$display("third");
+		table_out();
 		table_has_N_entries(0, rs_table_out);
 		$display("fourth");
 		if (first) begin
