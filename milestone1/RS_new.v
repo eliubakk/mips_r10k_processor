@@ -82,7 +82,7 @@ module RS(
 	input   PHYS_REG					CDB_in, 
 	input							dispatch_valid,        // FU from ROB or Free list
 	input   RS_ROW_T					inst_in,
-	input [1:0]						LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy
+	input [1:0]						LSQ_busy,	// 00 : not busy, 01: LQ busy, 10: SQ busy, 11: Both of them busy
 	input							branch_not_taken, // signal to mention the status of the branch
 	// OUTPUTS
 	`ifdef DEBUG 
@@ -285,13 +285,13 @@ module RS(
 						end
 
 						FU_LD : begin	
-							if(LSQ_busy!=2'b01) begin
+							if(LSQ_busy[0] ==1'b1) begin
 								LD_issue_idx[i] = 1'b1;
 							end
 						end
 
 						FU_ST :  begin	
-							if(LSQ_busy!=2'b10)  begin
+							if(LSQ_busy[1] ==1'b1)  begin
 								ST_issue_idx[i] = 1'b1;
 							end
 						end
