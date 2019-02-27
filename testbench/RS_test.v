@@ -510,6 +510,16 @@ module testbench;
 		issue_next_test = clear_issue_next_test();
 		check_issue_next_correct(issue_next, issue_next_test);
 
+		@(negedge clock);
+
+		$display("*************************************RESET *********************************");	
+		reset = 1'b1;
+		
+		@(negedge clock);
+		rs_table_test = clear_rs_table_test();
+		issue_next_test = clear_issue_next_test();
+		assert(rs_table_out == rs_table_test) else #1 exit_on_error;
+		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
 		$display("@@@Passed");
 		$finish;
