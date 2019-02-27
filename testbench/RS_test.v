@@ -571,26 +571,26 @@ module testbench;
 
 		$display("****************************************DISPATCH ADD R1(Xready) R2 R4************************************************");
 
-			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
-			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
-			inst_in.inst.dest_reg = DEST_IS_REGC;
-			inst_in.inst.alu_func = ALU_ADDQ;
-			inst_in.inst.fu_name = FU_ALU;
-			inst_in.inst.rd_mem = 1'b0;
-			inst_in.inst.wr_mem = 1'b0;
-			inst_in.inst.ldl_mem = 1'b0;
-			inst_in.inst.stc_mem = 1'b0;
-			inst_in.inst.cond_branch = 1'b0;
-			inst_in.inst.uncond_branch = 1'b0;
-			inst_in.inst.halt = 1'b0;
-			inst_in.inst.cpuid = 1'b0;
-			inst_in.inst.illegal = 1'b0;
-			inst_in.inst.valid_inst = 1'b1;
-			inst_in.T = 7'd4;
-			inst_in.T1 = 7'b0000001;
-			inst_in.T2 = 7'b1000010;
-			inst_in.busy = 1'b0;
-			branch_not_taken=1'b0;
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd4;
+		inst_in.T1 = 7'b0000001;
+		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
 		
 		table_out();
         table_has_N_entries(1, rs_table_out);
@@ -604,7 +604,155 @@ module testbench;
 		enable = 1;
 		dispatch_valid = 1;
 		LSQ_busy = 0;
-		branch_not_taken = 0;		
+		branch_not_taken = 0;
+
+		$display("****************************************DISPATCH ADD R1(Xready) R2 R5************************************************");
+
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd5;
+		inst_in.T1 = 7'b0000001;
+		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+		
+		table_out();
+
+		table_has_N_entries(2, rs_table_out);
+		@(negedge clock);
+		inst_in.busy = 1'b1;
+		table_has_N_entries(3, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test = clear_issue_next_test();
+		check_issue_next_correct(issue_next, issue_next_test);
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 0;
+		LSQ_busy = 0;
+		branch_not_taken = 0;
+
+		$display("****************************************Commit R1, Issue MULT R1 R2 R3, Issue ADD R1 R2 R4, Not issue Add R1 R2 R5************************************************");
+
+		CAM_en = 1;
+		CDB_in = 7'b0000001;
+
+		issue_next_test = clear_issue_next_test();
+		// set inst_in to mult inst
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_MULQ;
+		inst_in.inst.fu_name = FU_MULT;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd3;
+		inst_in.T1 = 7'b0000001;
+		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b1;
+
+		// set the mult
+		issue_next_test[3] = inst_in;
+
+		logic first = 1'b0;
+		logic second = 1'b0;
+
+		RS_ROW_T inst_1;
+		RS_ROW_T inst_2;
+
+		inst_1.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_1.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_1.inst.dest_reg = DEST_IS_REGC;
+		inst_1.inst.alu_func = ALU_ADDQ;
+		inst_1.inst.fu_name = FU_ALU;
+		inst_1.inst.rd_mem = 1'b0;
+		inst_1.inst.wr_mem = 1'b0;
+		inst_1.inst.ldl_mem = 1'b0;
+		inst_1.inst.stc_mem = 1'b0;
+		inst_1.inst.cond_branch = 1'b0;
+		inst_1.inst.uncond_branch = 1'b0;
+		inst_1.inst.halt = 1'b0;
+		inst_1.inst.cpuid = 1'b0;
+		inst_1.inst.illegal = 1'b0;
+		inst_1.inst.valid_inst = 1'b1;
+		inst_1.T = 7'd4;
+		inst_1.T1 = 7'b0000001;
+		inst_1.T2 = 7'b1000010;
+		inst_1.busy = 1'b1;
+
+
+		inst_2.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_2.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_2.inst.dest_reg = DEST_IS_REGC;
+		inst_2.inst.alu_func = ALU_ADDQ;
+		inst_2.inst.fu_name = FU_ALU;
+		inst_2.inst.rd_mem = 1'b0;
+		inst_2.inst.wr_mem = 1'b0;
+		inst_2.inst.ldl_mem = 1'b0;
+		inst_2.inst.stc_mem = 1'b0;
+		inst_2.inst.cond_branch = 1'b0;
+		inst_2.inst.uncond_branch = 1'b0;
+		inst_2.inst.halt = 1'b0;
+		inst_2.inst.cpuid = 1'b0;
+		inst_2.inst.illegal = 1'b0;
+		inst_2.inst.valid_inst = 1'b1;
+		inst_2.T = 7'd5;
+		inst_2.T1 = 7'b0000001;
+		inst_2.T2 = 7'b1000010;
+		inst_2.busy = 1'b1;
+
+		// check that just one of the alu inst was issued
+		if (issue_next[0] == inst_1) begin
+			first = 1'b1;
+		end else if (issue_next[0] == inst_2) begin
+			second = 1'b1;
+		end else begin
+			// if we exit here, it's because none of the ready
+			// add instructions were issued
+			exit_on_error;
+		end
+
+		// check that the mult inst was issued
+		assert(issue_next[3] == inst_in) else #1 exit_on_error;
+		table_has_N_entries(3, rs_table_out);
+
+		@(negedge clock);
+		inst_in.busy = 1'b1;
+		table_has_N_entries(1, rs_table_out);
+		if (first) begin
+			assert(issue_next[0] == inst_2) else #1 exit_on_error;
+		end else if (second) begin
+			assert(issue_next[0] == inst_1) else #1 exit_on_error;
+		end else begin
+			// if we got here, that means there is a bigger problem
+			// than we know
+			exit_on_error;
+		end
+
+		@(negedge clock);
+		table_has_N_entries(0, rs_table_out);
+
+
 		$display("@@@Passed");
 		$finish;
 
