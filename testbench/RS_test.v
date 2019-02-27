@@ -333,6 +333,10 @@ module testbench;
 		LSQ_busy = 0;	
 		$display("****************************************DISPATCH MULT R1 R2 R3************************************************");
 
+		// At this cycle, rs_table should be empty
+		// because currently dispatched instruction is seen
+		// in rs_table on the next cycle
+
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGC;
@@ -357,6 +361,11 @@ module testbench;
 		table_has_N_entries(0, rs_table_out);
 		entry_not_in_table(inst_in, rs_table_out);
 		@(negedge clock);
+
+		// At this cycle, rs_table should have the previously dispatched
+		// instruction. 
+		// The previously dispatched instruction should be issued
+
 		dispatch_valid = 0;
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
@@ -384,9 +393,19 @@ module testbench;
 		inst_in.T2 = 7'b1000010;
 		inst_in.busy = 1'b0;
 
+		// The previously dispatched instruction should be the next
+		// issued instruction. 
+
 		dispatch_valid = 1;
 		check_issue_next_correct(issue_next, issue_next_test);
+
 		@(negedge clock);
+
+		// At this cycle, the table should have the dispatched BR
+		// instruction and the first instruction should be cleared.
+
+		// The BR instruction should be the next issued instruction.
+
 		dispatch_valid = 1'b0;
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
@@ -394,6 +413,13 @@ module testbench;
 		issue_next_test[0] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
 
+		// Dispatch an instruction when branch is taken.
+		// This means we were trying to dispatch an instruction
+		// according to the branch location; however, since the
+		// branch is not taken, this dispatched instruction is not
+		// the correct instruction to insert into rs_table. 
+		// Therefore, on the next cycle, the instruction should
+		// not be in the rs_table. 
 		dispatch_valid = 1'b1;
 		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
@@ -417,14 +443,53 @@ module testbench;
 		branch_not_taken= 1'b1;
 
 		@(negedge clock);
-		table_has_N_entries(0, rs_table_out);
 
+		// Because branch is not taken, the dispatched instruction
+		// should not be in the rs_table. 
+		dispatch_valid = 1'b0;
+		table_has_N_entries(0, rs_table_out);
 		inst_in.busy = 1'b1;
 		entry_not_in_table(inst_in, rs_table_out);
 
 		@(negedge clock);
 
-		// table_has_N_entries(0, rs_table_out);
+		// At this cycle, dispatch this next instruction. 
+		// Nothing should be issued for the next cycle since 
+		// rs_table has been cleared in the previous cycle. 
+
+		$display("*******************************************DISPATCH ST R1 DISP R6, ISSUE LD R1 DISP R5, EXECUTE BR R1 R2 R4************************");	
+		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGA;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ST;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b1;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b1;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'b1111111;
+		inst_in.T1 = 7'b0000001;
+		inst_in.T2 = 7'b0000110;
+		inst_in.busy = 1'b0;
+		branch_not_taken= 1'b0;
+		dispatch_valid = 1'b1;
+
+		table_has_N_entries(0, rs_table_out);
+
+		@(negedge clock);
+
+		inst_in.busy = 1'b1;
+		table_has_N_entries(1, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test[0] = inst_in;
+		check_issue_next_correct(issue_next, issue_next_test);
+
 		$display("@@@Passed");
 		$finish;
 
