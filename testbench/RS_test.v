@@ -979,7 +979,6 @@ module testbench;
 		`DELAY;
 		// check issue_next all valid
 		for (int i = 0; i < `NUM_FU; i += 1) begin
-			print_issue_table(issue_next);
 			assert(issue_next[i].busy) else #1 exit_on_error;
 			assert(issue_next[i].inst.valid_inst) else #1 exit_on_error;
 		end
@@ -996,10 +995,21 @@ module testbench;
 		end
 
 		@(negedge clock);
+		$display("------------------------Check Enable Signal----------");
+		rs_table_test = rs_table_out;
+		issue_next_test = issue_next;
+		enable = 1'b0;
+		dispatch_valid = 1'b1;
 
 		@(posedge clock);
 		`DELAY;
+		assert(rs_table_test == rs_table_out) else #1 exit_on_error;
+		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
+		@(posedge clock);
+		`DELAY;
+		assert(rs_table_test == rs_table_out) else #1 exit_on_error;
+		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
 		$display("@@@Passed");
 		$finish;
