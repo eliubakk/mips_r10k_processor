@@ -694,10 +694,12 @@ module testbench;
 
 		// check that just one of the alu inst was issued
 		if (issue_next[0] == inst_1) begin
+			$display("first");
 			first = 1'b1;
 		end else if (issue_next[0] == inst_2) begin
 			// $display("issue_next[0]");
 			// print_rs_entry(issue_next[0]);
+			$display("second");
 			second = 1'b1;
 		end else begin
 			// if we exit here, it's because none of the ready
