@@ -898,6 +898,8 @@ module testbench;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
 
+		@(posedge clock);
+
 		table_has_N_entries(15, rs_table_out);
 
 		@(negedge clock); 
