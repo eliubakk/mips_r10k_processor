@@ -1078,7 +1078,7 @@ module testbench;
 
 		@(negedge clock);
 		$display("------------------------Check for dispatch LSQ busy----------");
-		LSQ_busy = 2'b10;
+		LSQ_busy = 2'b01;
 		dispatch_valid = 1'b1;
 		// dispatch load
 		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
@@ -1112,7 +1112,7 @@ module testbench;
 
 		@(negedge clock);
 
-		LSQ_busy = 2'b01;
+		LSQ_busy = 2'b10;
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_ALU_IMM;
 		inst_in.inst.dest_reg = DEST_NONE;
