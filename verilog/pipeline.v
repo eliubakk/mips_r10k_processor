@@ -251,7 +251,6 @@ module pipeline (
       if_id_valid_inst <= `SD if_valid_inst_out;
     end // if (if_id_enable)
   end // always
-
    
   //////////////////////////////////////////////////
   //                                              //

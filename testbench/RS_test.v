@@ -1,6 +1,8 @@
 `include "sys_defs.vh"
 `define DEBUG
 
+`define DELAY #2
+
 module testbench;
 	logic clock, reset, enable;
 	logic    		CAM_en;
@@ -382,8 +384,17 @@ module testbench;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
 
-		table_has_N_entries(0, rs_table_out);
-		entry_not_in_table(inst_in, rs_table_out);
+		@(posedge clock);
+		`DELAY;
+
+		table_has_N_entries(1, rs_table_out);
+		entry_exist_in_table(inst_in, rs_table_out);
+
+		inst_in.busy = 1'b1;
+		issue_next_test = clear_issue_next_test();
+		issue_next_test[3] = inst_in;
+		check_issue_next_correct(issue_next_test, issue_next);
+
 		@(negedge clock);
 
 		// At this cycle, rs_table should have the previously dispatched
@@ -391,10 +402,6 @@ module testbench;
 		// The previously dispatched instruction should be issued
 
 		dispatch_valid = 0;
-		inst_in.busy = 1'b1;
-		table_has_N_entries(1, rs_table_out);
-		entry_exists_in_table(inst_in, rs_table_out);
-		issue_next_test[3] = inst_in;
 
 		$display("**********************************************DISPATCH BR R1 R2 R4, Issue MULT R1 R2 R3****************************");	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -421,6 +428,16 @@ module testbench;
 		// issued instruction. 
 
 		dispatch_valid = 1;
+
+		@(posedge clock);
+		`DELAY;
+
+		dispatch_valid = 1'b0;
+		inst_in.busy = 1'b1;
+		table_has_N_entries(1, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test = clear_issue_next_test();
+		issue_next_test[4] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
 
 		@(negedge clock);
@@ -430,13 +447,7 @@ module testbench;
 
 		// The BR instruction should be the next issued instruction.
 
-		dispatch_valid = 1'b0;
-		inst_in.busy = 1'b1;
-		table_has_N_entries(1, rs_table_out);
-		entry_exists_in_table(inst_in, rs_table_out);
-		issue_next_test = clear_issue_next_test();
-		issue_next_test[4] = inst_in;
-		check_issue_next_correct(issue_next, issue_next_test);
+
 
 		// Dispatch an instruction when branch is taken.
 		// This means we were trying to dispatch an instruction
@@ -467,7 +478,8 @@ module testbench;
 		inst_in.busy = 1'b0;
 		branch_not_taken= 1'b1;
 
-		@(negedge clock);
+		@(posedge clock);
+		`DELAY;
 
 		// Because branch is not taken, the dispatched instruction
 		// should not be in the rs_table. 
@@ -505,9 +517,8 @@ module testbench;
 		branch_not_taken= 1'b0;
 		dispatch_valid = 1'b1;
 
-		table_has_N_entries(0, rs_table_out);
-
-		@(negedge clock);
+		@(posedge clock);
+		`DELAY;
 
 		// ST should not be issued because both tags are not ready.
 		inst_in.busy = 1'b1;
@@ -521,7 +532,7 @@ module testbench;
 		$display("*************************************RESET *********************************");	
 		reset = 1'b1;
 		
-		@(negedge clock);
+		@(posedge clock);
 		rs_table_test = clear_rs_table_test();
 		issue_next_test = clear_issue_next_test();
 		assert(rs_table_out == rs_table_test) else #1 exit_on_error;
@@ -652,9 +663,8 @@ module testbench;
 
 		$display("****************************************Commit R1, Issue MULT R1 R2 R3, Issue ADD R1 R2 R4, Not issue Add R1 R2 R5************************************************");
 
-		$display("table looks like");
-		table_out();
-
+		//$display("table looks like");
+		//table_out();
 		CAM_en = 1;
 		CDB_in = 7'b0000001;
 
