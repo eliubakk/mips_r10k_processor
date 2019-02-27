@@ -732,23 +732,31 @@ module testbench;
 		end else begin
 			// if we exit here, it's because none of the ready
 			// add instructions were issued
+			$display("here?");
 			exit_on_error;
 		end
 
 		// check that the mult inst was issued
+		$display("start");
 		assert(issue_next[3] == inst_in) else #1 exit_on_error;
+		$display("second");
 		table_has_N_entries(3, rs_table_out);
 
 		@(negedge clock);
 		inst_in.busy = 1'b1;
+		$display("third");
 		table_has_N_entries(1, rs_table_out);
+		$display("fourth");
 		if (first) begin
 			assert(issue_next[0] == inst_2) else #1 exit_on_error;
+			$display("fifth");
 		end else if (second) begin
 			assert(issue_next[0] == inst_1) else #1 exit_on_error;
+			$display("sixth");
 		end else begin
 			// if we got here, that means there is a bigger problem
 			// than we know
+			$display("uh oh");
 			exit_on_error;
 		end
 
