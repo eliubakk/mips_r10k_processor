@@ -145,7 +145,7 @@ module testbench;
 
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				$display("Entry: %d", i);
-				print_rs_entry(rs_table[i]);
+				print_rs_entry(issue_table[i]);
 			end
 			$display("*******************************************************************\n");
 
