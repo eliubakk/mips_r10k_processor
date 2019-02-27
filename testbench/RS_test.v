@@ -74,7 +74,7 @@ module testbench;
 		end
 	endfunction
 
-	typedef RS_ROW_T issue_t[`NUM_FU];
+	typedef RS_ROW_T [`NUM_FU] issue_t;
 
 	function issue_t clear_issue_next_test;
 	begin
