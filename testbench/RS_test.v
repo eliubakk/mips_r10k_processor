@@ -70,7 +70,6 @@ module testbench;
 				clear_rs_table_test[i].T = `DUMMY_REG;
 				clear_rs_table_test[i].T1 = `DUMMY_REG;
 				clear_rs_table_test[i].T2 = `DUMMY_REG;
-				// $display("dummy reg: %b", `DUMMY_REG);
 				clear_rs_table_test[i].busy = 1'b0;
 			end
 		end
@@ -179,11 +178,7 @@ module testbench;
 		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_out;
 		begin
 			integer i;
-			// $display("checking for inst_in...");
-			// print_rs_entry(inst_in);
 			for (i = 0; i < `RS_SIZE; i += 1) begin
-				// $display("At entry %d", i);
-				// print_rs_entry(rs_table_out[i]);
 				if (rs_table_out[i].busy) begin
 					if (rs_table_out[i] == inst_in) begin
 						return;
@@ -224,8 +219,6 @@ module testbench;
 					_count += 1;
 				end
 			end
-			table_out();
-			$display("count = %d, _count = %d", count, _count);
 			assert(count == _count) else #1 exit_on_error;
 		end
 	endtask
@@ -942,6 +935,42 @@ module testbench;
 		check_has_func(rs_table_out, FU_ST);
 		check_has_func(rs_table_out, FU_MULT);
 		check_has_func(rs_table_out, FU_BR);
+
+		// since RS is full, check that dispatching another
+		// instruction doesn't actually dispatch it
+		@(negedge clock);
+
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd4;
+		inst_in.T1 = 7'b1001111;
+		inst_in.T2 = 7'b1001111;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(posedge clock);
+		`DELAY;
+		inst_in.busy = 1'b1;
+		entry_not_in_table(inst_in, rs_table_out);
 
 		$display("@@@Passed");
 		$finish;
