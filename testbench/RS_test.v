@@ -201,12 +201,9 @@ module testbench;
 			_count = 0;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
 				if (rs_table_out[i].busy) begin
-					$display("counting, busy: %d, i:%d",rs_table_out[i].busy, i);
 					_count += 1;
 				end
 			end
-			$display("count = %d, _count = %d", count, _count);
-			table_out();
 			assert(count == _count) else #1 exit_on_error;
 		end
 	endtask
