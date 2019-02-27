@@ -416,6 +416,8 @@ module testbench;
 		inst_in.busy = 1'b0;
 		branch_not_taken= 1'b1;
 		dispatch_valid = 1;
+		$display("HERE");
+		table_out();
 
 		@(negedge clock);
 		table_has_N_entries(1, rs_table_out);
