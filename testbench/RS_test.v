@@ -701,8 +701,6 @@ module testbench;
 		`DELAY;		
 
 		@(posedge clock);
-		`DELAY;
-		
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
 		if (first) begin
