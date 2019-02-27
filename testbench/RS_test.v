@@ -104,6 +104,7 @@ module testbench;
 	end
 	endfunction
 
+
 	// TASKS
 	task exit_on_error;
 		begin
@@ -259,6 +260,19 @@ module testbench;
 				end
 			end
 			return;
+		end
+	endtask
+
+	task check_has_func;
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table;
+		input FU_NAME func;
+		begin
+			for (int i = 0; i < `RS_SIZE; i += 1) begin
+				if (rs_table[i].inst.fu_name == func) begin
+					return;
+				end
+			end
+			exit_on_error;
 		end
 	endtask
 
@@ -882,8 +896,12 @@ module testbench;
 		`DELAY;
 
 		table_has_N_entries(15, rs_table_out);
-
-
+		check_has_func(rs_table_out, FU_ALU);
+		check_has_func(rs_table_out, FU_LD);
+		check_has_func(rs_table_out, FU_ST);
+		check_has_func(rs_table_out, FU_MULT);
+		check_has_func(rs_table_out, FU_BR);
+		
 		$display("@@@Passed");
 		$finish;
 	end
