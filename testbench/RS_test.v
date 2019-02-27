@@ -1074,8 +1074,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-
-		table_out();	
+		table_has_N_entries(0, rs_table_out);
 
 		$display("@@@Passed");
 		$finish;
