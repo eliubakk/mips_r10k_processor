@@ -173,6 +173,25 @@ module testbench;
 		end
 	endtask
 
+	task table_test_out;
+		begin
+				$display("**********************************************************\n");
+				$display("------------------------RS TABLE----------------------------\n");
+
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_test[i].busy, rs_table_test[i].inst.fu_name,rs_table_test[i].T, rs_table_test[i].T1, rs_table_test[i].T2);
+			end
+				$display("RS full = %b, issue_cnt = %d",rs_full, issue_cnt);
+				$display("-----------------------Issue table-----------------------------------\n");
+			for(integer i=0;i<`NUM_FU;i=i+1) begin
+				$display("Issue_row = %d, busy = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[i].busy, issue_next[i].T, issue_next[i].T1, issue_next[i].T2 );
+			
+			end
+			$display("*******************************************************************\n");
+
+		end
+	endtask
+
 	task entry_exists_in_table;
 		input RS_ROW_T inst_in;
 		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_out;
@@ -268,6 +287,16 @@ module testbench;
 			exit_on_error;
 		end
 	endtask
+
+	// task rs_table_equal;
+	// 	input RS_ROW_T [(`RS_SIZE - 1):0] rs_table;
+	// 	input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_test;
+	// 	begin
+	// 		for (int i = 0; i < `RS_SIZE; i += 1) begin
+	// 			if (rs_table_)
+	// 		end
+	// 	end
+	// endtask
 
 	// helper variables
 	logic first = 1'b0;
@@ -1005,7 +1034,7 @@ module testbench;
 		`DELAY;
 		$display("check here");
 		table_out();
-		print_rs_table(rs_table_test);
+		table_test_out();
 		assert(rs_table_test == rs_table_out) else #1 exit_on_error;
 		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
