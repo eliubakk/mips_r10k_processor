@@ -429,10 +429,7 @@ module testbench;
 		table_has_N_entries(1, rs_table_out);
 		entry_exists_in_table(inst_in, rs_table_out);
 		issue_next_test = clear_issue_next_test();
-		$display("check here");
-		print_issue_table(issue_next);
 		issue_next_test[4] = inst_in;
-		print_issue_table(issue_next_test);
 		check_issue_next_correct(issue_next, issue_next_test);
 
 		// Dispatch an instruction when branch is taken.
@@ -514,6 +511,8 @@ module testbench;
 		$display("hi");
 		issue_next_test = clear_issue_next_test();
 		issue_next_test[2] = inst_in;
+		print_issue_table(issue_next);
+		print_issue_table(issue_next_test);
 		check_issue_next_correct(issue_next, issue_next_test);
 		$display("sup");
 
