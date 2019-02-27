@@ -743,13 +743,13 @@ module testbench;
 
 		// check that the mult inst was issued
 		$display("second");
-		table_out();
-		table_has_N_entries(3, rs_table_out);
+		// table_out();
+		table_has_N_entries(1, rs_table_out);
 
 		@(negedge clock);
 		inst_in.busy = 1'b1;
 		$display("third");
-		table_has_N_entries(1, rs_table_out);
+		table_has_N_entries(0, rs_table_out);
 		$display("fourth");
 		if (first) begin
 			assert(issue_next[0] == inst_2) else #1 exit_on_error;
