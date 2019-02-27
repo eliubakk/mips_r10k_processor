@@ -658,6 +658,9 @@ module testbench;
 		CAM_en = 1;
 		CDB_in = 7'b0000001;
 
+		$display("after cam");
+		table_out();
+
 		issue_next_test = clear_issue_next_test();
 		// set inst_in to mult inst
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
