@@ -482,10 +482,15 @@ module testbench;
 		@(negedge clock);
 
 		inst_in.busy = 1'b1;
+		$display("hm");
 		table_has_N_entries(1, rs_table_out);
+		$display("uh");
 		entry_exists_in_table(inst_in, rs_table_out);
+		$display("hi");
 		issue_next_test[0] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
+
+		$display("here");
 
 		$display("@@@Passed");
 		$finish;
