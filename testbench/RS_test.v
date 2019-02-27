@@ -652,6 +652,9 @@ module testbench;
 
 		$display("****************************************Commit R1, Issue MULT R1 R2 R3, Issue ADD R1 R2 R4, Not issue Add R1 R2 R5************************************************");
 
+		$display("table looks like");
+		table_out();
+
 		CAM_en = 1;
 		CDB_in = 7'b0000001;
 
@@ -679,6 +682,7 @@ module testbench;
 
 		// set the mult
 		issue_next_test[3] = inst_in;
+		assert(issue_next_test[3] == issue_next[3]) else #1 exit_on_error;
 
 		first = 1'b0;
 		second = 1'b0;
