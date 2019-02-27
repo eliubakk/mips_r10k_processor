@@ -743,6 +743,7 @@ module testbench;
 
 		// check that the mult inst was issued
 		$display("second");
+		table_out();
 		table_has_N_entries(3, rs_table_out);
 
 		@(negedge clock);
