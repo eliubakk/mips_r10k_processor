@@ -721,6 +721,164 @@ module testbench;
 		$display("***********************TEST3 : Do not dispatch when RS is full*********************");
 		$display("###########################################################################\n");
 	
+		$display("****************************************DISPATCH MULT R1(Xready) R2 R3 for 16 several times / ADD R1 R2 R4 should not be dispatched************************************************");
+
+		for(integer i=0; i<`RS_SIZE-5; i=i+1) begin
+
+			@(negedge clock); 
+			
+			reset = 0;
+			enable = 1;
+			dispatch_valid = 1;
+			LSQ_busy = 0;
+			branch_not_taken = 0;		
+		
+			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+			inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+			inst_in.inst.dest_reg = DEST_IS_REGC;
+			inst_in.inst.alu_func = ALU_MULQ;
+			inst_in.inst.fu_name = FU_MULT;
+			inst_in.inst.rd_mem = 1'b0;
+			inst_in.inst.wr_mem = 1'b0;
+			inst_in.inst.ldl_mem = 1'b0;
+			inst_in.inst.stc_mem = 1'b0;
+			inst_in.inst.cond_branch = 1'b0;
+			inst_in.inst.uncond_branch = 1'b0;
+			inst_in.inst.halt = 1'b0;
+			inst_in.inst.cpuid = 1'b0;
+			inst_in.inst.illegal = 1'b0;
+			inst_in.inst.valid_inst = 1'b1;
+			inst_in.T = 7'd3;
+			inst_in.T1 = 7'b0000001;
+			inst_in.T2 = 7'b1000010;
+			inst_in.busy = 1'b0;
+			branch_not_taken=1'b0;
+		
+		
+
+		end
+
+		@(negedge clock); 
+		
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_MULQ;
+		inst_in.inst.fu_name = FU_MULT;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd3;
+		inst_in.T1 = 7'b0001001;
+		inst_in.T2 = 7'b1001010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+		
+
+		@(negedge clock); 
+		
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+	
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_BR;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd7;
+		inst_in.T1 = 7'b0001001;
+		inst_in.T2 = 7'b1001010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(negedge clock); 
+	
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd7;
+		inst_in.T1 = 7'b0001001;
+		inst_in.T2 = 7'b1001010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(negedge clock); 
+	
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		LSQ_busy = 0;
+		branch_not_taken = 0;		
+
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_LD;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd7;
+		inst_in.T1 = 7'b0001001;
+		inst_in.T2 = 7'b1001010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(posedge clock);
+		`DELAY;
+
+		table_has_N_entries(15, rs_table_out);
 
 
 		$display("@@@Passed");
