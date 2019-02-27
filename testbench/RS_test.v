@@ -8,6 +8,7 @@ module testbench;
 	logic			dispatch_valid;
 	RS_ROW_T		inst_in;
 	logic	 [1:0]		LSQ_busy;
+	logic 					branch_not_taken;
 	
 
 	RS_ROW_T   	 [(`RS_SIZE - 1):0] 	rs_table_out;
@@ -28,16 +29,17 @@ module testbench;
 		.dispatch_valid(dispatch_valid),
 		.inst_in(inst_in), 
 		.LSQ_busy(LSQ_busy),
+		.branch_not_taken(branch_not_taken),
 
 		// outputs
 		.rs_table_out(rs_table_out), 
-		.issue_next(issue_next), 
+		.issue_out(issue_next), 
 		.issue_cnt(issue_cnt), 
 		.rs_full(rs_full)
 	 );
 
 	
-	always #5 clock = ~clock;
+	always #10 clock = ~clock;
 
 	// need to update this
 
@@ -53,21 +55,21 @@ module testbench;
 				clear_rs_table_test[i].inst.dest_reg = DEST_IS_REGC;
 				clear_rs_table_test[i].inst.alu_func = ALU_ADDQ;
 				clear_rs_table_test[i].inst.fu_name = FU_ALU;
-				clear_rs_table_test[i].inst.rd_mem = 0;
-				clear_rs_table_test[i].inst.wr_mem = 0;
-				clear_rs_table_test[i].inst.ldl_mem = 0;
-				clear_rs_table_test[i].inst.stc_mem = 0;
-				clear_rs_table_test[i].inst.cond_branch = 0;
-				clear_rs_table_test[i].inst.uncond_branch = 0;
-				clear_rs_table_test[i].inst.halt = 0;
-				clear_rs_table_test[i].inst.cpuid = 0;
-				clear_rs_table_test[i].inst.illegal = 0;
-				clear_rs_table_test[i].inst.valid_inst = 0;
+				clear_rs_table_test[i].inst.rd_mem = 1'b0;
+				clear_rs_table_test[i].inst.wr_mem = 1'b0;
+				clear_rs_table_test[i].inst.ldl_mem = 1'b0;
+				clear_rs_table_test[i].inst.stc_mem = 1'b0;
+				clear_rs_table_test[i].inst.cond_branch = 1'b0;
+				clear_rs_table_test[i].inst.uncond_branch = 1'b0;
+				clear_rs_table_test[i].inst.halt = 1'b0;
+				clear_rs_table_test[i].inst.cpuid = 1'b0;
+				clear_rs_table_test[i].inst.illegal = 1'b0;
+				clear_rs_table_test[i].inst.valid_inst = 1'b0;
 				clear_rs_table_test[i].T = `DUMMY_REG;
 				clear_rs_table_test[i].T1 = `DUMMY_REG;
 				clear_rs_table_test[i].T2 = `DUMMY_REG;
 				// $display("dummy reg: %b", `DUMMY_REG);
-				clear_rs_table_test[i].busy = 0;
+				clear_rs_table_test[i].busy = 1'b0;
 			end
 		end
 	endfunction
@@ -82,20 +84,20 @@ module testbench;
 			clear_issue_next_test[i].inst.dest_reg = DEST_IS_REGC;
 			clear_issue_next_test[i].inst.alu_func = ALU_ADDQ;
 			clear_issue_next_test[i].inst.fu_name = FU_ALU;
-			clear_issue_next_test[i].inst.rd_mem = 0;
-			clear_issue_next_test[i].inst.wr_mem = 0;
-			clear_issue_next_test[i].inst.ldl_mem = 0;
-			clear_issue_next_test[i].inst.stc_mem = 0;
-			clear_issue_next_test[i].inst.cond_branch = 0;
-			clear_issue_next_test[i].inst.uncond_branch = 0;
-			clear_issue_next_test[i].inst.halt = 0;
-			clear_issue_next_test[i].inst.cpuid = 0;
-			clear_issue_next_test[i].inst.illegal = 0;
-			clear_issue_next_test[i].inst.valid_inst = 0;
+			clear_issue_next_test[i].inst.rd_mem = 1'b0;
+			clear_issue_next_test[i].inst.wr_mem = 1'b0;
+			clear_issue_next_test[i].inst.ldl_mem = 1'b0;
+			clear_issue_next_test[i].inst.stc_mem = 1'b0;
+			clear_issue_next_test[i].inst.cond_branch = 1'b0;
+			clear_issue_next_test[i].inst.uncond_branch = 1'b0;
+			clear_issue_next_test[i].inst.halt = 1'b0;
+			clear_issue_next_test[i].inst.cpuid = 1'b0;
+			clear_issue_next_test[i].inst.illegal = 1'b0;
+			clear_issue_next_test[i].inst.valid_inst = 1'b0;
 			clear_issue_next_test[i].T = `DUMMY_REG;
 			clear_issue_next_test[i].T1 = `DUMMY_REG;
 			clear_issue_next_test[i].T2 = `DUMMY_REG;
-			clear_issue_next_test[i].busy = 0;
+			clear_issue_next_test[i].busy = 1'b0;
 		end
 	end
 	endfunction
@@ -121,7 +123,7 @@ module testbench;
 	endtask
 
 	task print_rs_table;
-		input RS_ROW_T rs_table [(`RS_SIZE - 1):0];
+		input RS_ROW_T  [(`RS_SIZE - 1):0]	rs_table;
 		begin
 			$display("**********************************************************\n");
 			$display("------------------------RS TABLE----------------------------\n");
@@ -135,9 +137,28 @@ module testbench;
 		end
 	endtask
 
+	task table_out;
+		begin
+				$display("**********************************************************\n");
+				$display("------------------------RS TABLE----------------------------\n");
+
+			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
+			end
+				$display("RS full = %b, issue_cnt = %d",rs_full, issue_cnt);
+				$display("-----------------------Issue table-----------------------------------\n");
+			for(integer i=0;i<`NUM_FU;i=i+1) begin
+				$display("Issue_row = %d, busy = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[i].busy, issue_next[i].T, issue_next[i].T1, issue_next[i].T2 );
+			
+			end
+			$display("*******************************************************************\n");
+
+		end
+	endtask
+
 	task entry_exists_in_table;
 		input RS_ROW_T inst_in;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_out;
 		begin
 			integer i;
 			// $display("checking for inst_in...");
@@ -157,7 +178,7 @@ module testbench;
 
 	task entry_not_in_table;
 		input RS_ROW_T inst_in;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_out;
 		begin
 			integer i;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
@@ -173,12 +194,14 @@ module testbench;
 
 	task table_has_N_entries;
 		input integer count;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_out;
 		begin
 			integer _count = 0;
 			integer i;
+			_count = 0;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
 				if (rs_table_out[i].busy) begin
+					$display("counting, busy: %d, i:%d",rs_table_out[i].busy, i);
 					_count += 1;
 				end
 			end
@@ -188,7 +211,7 @@ module testbench;
 
 	task tags_now_ready;
 		input integer tag;
-		input RS_ROW_T rs_table_out [(`RS_SIZE - 1):0];
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_out;
 		begin
 			integer i;
 			for (i = 0; i < `RS_SIZE; i += 1) begin
@@ -206,11 +229,12 @@ module testbench;
 	endtask
 
 	task check_issue_next_correct;
-		input RS_ROW_T issue_next [(`NUM_FU -1 ):0];
-		input RS_ROW_T issue_next_test [(`NUM_FU -1 ):0];
+		input RS_ROW_T [(`NUM_FU -1 ):0] issue_next;
+		input RS_ROW_T [(`NUM_FU -1 ):0] issue_next_test;
 		begin
 			for (integer i = 0; i < `NUM_FU; i += 1) begin
 				logic found = 1'b0;
+				found = 1'b0;
 				if (issue_next[i].busy) begin
 					for (integer j = 0; j < `NUM_FU; j += 1) begin
 						if (issue_next_test[j].busy) begin
@@ -228,6 +252,7 @@ module testbench;
 
 			for (integer i = 0; i < `NUM_FU; i += 1) begin
 				logic found = 1'b0;
+				found = 1'b0;
 				if (issue_next_test[i].busy) begin
 					for (integer j = 0; j < `NUM_FU; j += 1) begin
 						if (issue_next[j].busy) begin
@@ -253,13 +278,15 @@ module testbench;
 		$monitor("Clock: %4.0f, reset: %b, enable:%b, ", clock, reset, enable);	
 
 		// Initial value
-		clock = 0;
-		reset = 0;
-		enable = 0;
-		CAM_en = 0;
-		CDB_in = 0;
-		dispatch_valid = 0;
-	
+		clock = 1'b0;
+		reset = 1'b0;
+		enable = 1'b0;
+		CAM_en = 1'b0;
+		CDB_in = {($clog2(`NUM_PHYS_REG) - 1){1'b0}};
+		dispatch_valid = 1'b0;
+		LSQ_busy = 2'b0;	
+		branch_not_taken = 1'b0;
+
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGC;
@@ -279,8 +306,6 @@ module testbench;
 		inst_in.T1 = 7'b1111111;
 		inst_in.T2 = 7'b1111111;
 		inst_in.busy = 1'b0;
-
-		LSQ_busy = 0;	
 	
 	///Things to do
 	//For 1-way superscalar, multiple issue
@@ -291,7 +316,7 @@ module testbench;
 	//3. Testing for functionality (enable, reset, dispatch_valid,
 	//LSQ_busy, CAM_en, commit, issue, dispatch) and corner cases (Issue 2 branches at
 	//a same cycle?, input is invalid instruction, etc...)    
-
+	
 	@(negedge clock);
 //Check reset
 		reset = 1;
@@ -304,12 +329,13 @@ module testbench;
 		enable = 1;
 		dispatch_valid = 1;
 		LSQ_busy = 0;	
+		$display("****************************************DISPATCH MULT R1 R2 R3************************************************");
 
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in.inst.dest_reg = DEST_IS_REGC;
-		inst_in.inst.alu_func = ALU_ADDQ;
-		inst_in.inst.fu_name = FU_ALU;
+		inst_in.inst.alu_func = ALU_MULQ;
+		inst_in.inst.fu_name = FU_MULT;
 		inst_in.inst.rd_mem = 1'b0;
 		inst_in.inst.wr_mem = 1'b0;
 		inst_in.inst.ldl_mem = 1'b0;
@@ -319,22 +345,60 @@ module testbench;
 		inst_in.inst.halt = 1'b0;
 		inst_in.inst.cpuid = 1'b0;
 		inst_in.inst.illegal = 1'b0;
-		inst_in.inst.valid_inst = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
 		inst_in.T = 7'd3;
 		inst_in.T1 = 7'b1000001;
 		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		table_has_N_entries(0, rs_table_out);
+		entry_not_in_table(inst_in, rs_table_out);
+		@(negedge clock);
+		dispatch_valid = 0;
+		inst_in.busy = 1'b1;
+		table_has_N_entries(1, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test[0] = inst_in;
+
+		$display("**********************************************DISPATCH BR R1 R2 R4, Issue MULT R1 R2 R3****************************");	
+		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGC;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_BR; // Branch
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd4;
+		inst_in.T1 = 7'b1000001;
+		inst_in.T2 = 7'b1000010;
+		inst_in.busy = 1'b0;
+
+		dispatch_valid = 1;
+		check_issue_next_correct(issue_next, issue_next_test);
+		@(negedge clock);
+		dispatch_valid = 0;
 		inst_in.busy = 1'b1;
 		
-		
+		table_has_N_entries(1, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test[0] = inst_in;
+		check_issue_next_correct(issue_next, issue_next_test);
+		@(negedge clock);
 
-
-		@(negedge clock);
-		@(negedge clock);
-		@(negedge clock);
 		
 		
+		table_has_N_entries(0, rs_table_out);
 		$display("@@@Passed");
-		// $finish;
+		$finish;
 
 		/*inst_in = ;
 		fu_idx = ;
@@ -351,218 +415,218 @@ module testbench;
 
 
 	// Test for Reset
-	reset = 0;
-	enable = 0;
-	CAM_en = 0;
-	CDB_in = `DUMMY_REG;
-	// inst_in.inst.opa_select = ALU_OPA_IS_REGA;
-	// inst_in.inst.opb_select = ALU_OPB_IS_REGB;
-	// inst_in.inst.dest_reg = DEST_IS_REGC;
-	// inst_in.inst.alu_func = ALU_ADDQ;
-	// inst_in.inst.fu_name = FU_ALU;
-	// inst_in.inst.rd_mem = 0;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd3};
-	inst_in.T1 = {1, 6'd2};
-	inst_in.T2 = {1, 6'd1};
-	inst_in.busy = 1;
-	dispatch_valid = 1;
-	LSQ_busy = 2'b00;
+	// reset = 0;
+	// enable = 0;
+	// CAM_en = 0;
+	// CDB_in = `DUMMY_REG;
+	// // inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+	// // inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+	// // inst_in.inst.dest_reg = DEST_IS_REGC;
+	// // inst_in.inst.alu_func = ALU_ADDQ;
+	// // inst_in.inst.fu_name = FU_ALU;
+	// // inst_in.inst.rd_mem = 0;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd3};
+	// inst_in.T1 = {1, 6'd2};
+	// inst_in.T2 = {1, 6'd1};
+	// inst_in.busy = 1;
+	// dispatch_valid = 1;
+	// LSQ_busy = 2'b00;
 
 
-	@(negedge clock);
-	// Nothing issued since it is reset
-	$display("-------RESET------\n");
-	reset = 1;
-	rs_table_test = clear_rs_table_test();
-	issue_next_test = clear_issue_next_test();
+	// @(negedge clock);
+	// // Nothing issued since it is reset
+	// $display("-------RESET------\n");
+	// reset = 1;
+	// rs_table_test = clear_rs_table_test();
+	// issue_next_test = clear_issue_next_test();
 
-	// print_rs_table(rs_table_out);
-	// print_rs_table(rs_table_test);
-	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Reset 1 passed");
+	// // print_rs_table(rs_table_out);
+	// // print_rs_table(rs_table_test);
+	// assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Reset 1 passed");
 	
-	@(negedge clock);
-	reset = 0;
-	//RS is empty since it is reset
-	assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Reset 2 passed");
+	// @(negedge clock);
+	// reset = 0;
+	// //RS is empty since it is reset
+	// assert( rs_table_out == rs_table_test ) else #1 exit_on_error;
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Reset 2 passed");
 
-	@(negedge clock);
-	$display("-------Dispatch One Instruction------\n");
-	// dispatch add p2 p1 p3
-	enable = 1;
-	CAM_en = 0;
-	dispatch_valid = 1;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd3};
-	inst_in.T1 = {1, 6'd2};
-	inst_in.T2 = {1, 6'd1};
-	inst_in.busy = 1;
-	LSQ_busy = 2'b00;
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
+	// @(negedge clock);
+	// $display("-------Dispatch One Instruction------\n");
+	// // dispatch add p2 p1 p3
+	// enable = 1;
+	// CAM_en = 0;
+	// dispatch_valid = 1;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd3};
+	// inst_in.T1 = {1, 6'd2};
+	// inst_in.T2 = {1, 6'd1};
+	// inst_in.busy = 1;
+	// LSQ_busy = 2'b00;
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
 
 
-	@(negedge clock);
-	entry_exists_in_table(inst_in, rs_table_out);
-	table_has_N_entries(1, rs_table_out);
-	$display("Dispatch 1 instruction passed");
+	// @(negedge clock);
+	// entry_exists_in_table(inst_in, rs_table_out);
+	// table_has_N_entries(1, rs_table_out);
+	// $display("Dispatch 1 instruction passed");
 
-	$display("-------Issue One Instruction------\n");
-	// issue add p2 p1 p3
-	dispatch_valid = 0;
-	for (int i = 0; i < `NUM_FU; i += 1) begin
-		print_rs_entry(issue_next[i]);
-	end
-	$display("here");
-	print_rs_entry(inst_in);
-	assert( issue_next[0] == inst_in ) else #1 exit_on_error;
-	assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
-	assert( issue_cnt == 1) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
+	// $display("-------Issue One Instruction------\n");
+	// // issue add p2 p1 p3
+	// dispatch_valid = 0;
+	// for (int i = 0; i < `NUM_FU; i += 1) begin
+	// 	print_rs_entry(issue_next[i]);
+	// end
+	// $display("here");
+	// print_rs_entry(inst_in);
+	// assert( issue_next[0] == inst_in ) else #1 exit_on_error;
+	// assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
+	// assert( issue_cnt == 1) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
 
-	@(negedge clock);
+	// @(negedge clock);
 
-	entry_not_in_table(inst_in, rs_table_out);
-	table_has_N_entries(0, rs_table_out);
-
-	$display("Issue 1 instruction passed");
-
-	assert( issue_cnt == 0) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-
-	@(negedge clock);
-	$display("-------Commit One Instruction------\n");
-	// commit add p2 p1 p3
-	CAM_en = 1;
-	CDB_in = {1, 6'd3};
-
-	@(negedge clock);
-
-	tags_now_ready(3, rs_table_out);
-	table_has_N_entries(0, rs_table_out);
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	$display("Commit 1 Instruction passed");
-
-	$display("-------Issue Multiple Instructions------\n");
-	// dispatch mult p2 p3 p4
-	enable = 1;
-	dispatch_valid = 1;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_MULQ, FU_MULT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd4};
-	inst_in.T1 = {1, 6'd2};
-	inst_in.T2 = {1, 6'd3};
-	inst_in.busy = 1;
-
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-
-	@(negedge clock);
-
-	entry_exists_in_table(inst_in, rs_table_out);
-	table_has_N_entries(1, rs_table_out);
-
-	assert( !rs_full ) else #1 exit_on_error;
-
-	// check for issue for mult
 	// entry_not_in_table(inst_in, rs_table_out);
 	// table_has_N_entries(0, rs_table_out);
-	assert( issue_next[0] == inst_in ) else #1 exit_on_error;
-	assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
-	assert( issue_cnt == 1) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	// dispatch add p4 p5 p6 and
-	dispatch_valid = 1;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd6};
-	inst_in.T1 = {0, 6'd4};
-	inst_in.T2 = {1, 6'd5};
-	inst_in.busy = 1;	
 
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
+	// $display("Issue 1 instruction passed");
 
-	@(negedge clock);
-	entry_exists_in_table(inst_in, rs_table_out);
-	table_has_N_entries(1, rs_table_out);
-	// check nothing is issued
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	// dispatch add p4 p4 p7
-	dispatch_valid = 1;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd7};
-	inst_in.T1 = {0, 6'd4};
-	inst_in.T2 = {0, 6'd4};
-	inst_in.busy = 1;	
+	// assert( issue_cnt == 0) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
 
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
+	// @(negedge clock);
+	// $display("-------Commit One Instruction------\n");
+	// // commit add p2 p1 p3
+	// CAM_en = 1;
+	// CDB_in = {1, 6'd3};
 
-	@(negedge clock);
-	entry_exists_in_table(inst_in, rs_table_out);
-	table_has_N_entries(2, rs_table_out);
-	dispatch_valid = 0;
+	// @(negedge clock);
+
+	// tags_now_ready(3, rs_table_out);
+	// table_has_N_entries(0, rs_table_out);
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// $display("Commit 1 Instruction passed");
+
+	// $display("-------Issue Multiple Instructions------\n");
+	// // dispatch mult p2 p3 p4
+	// enable = 1;
+	// dispatch_valid = 1;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_MULQ, FU_MULT, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd4};
+	// inst_in.T1 = {1, 6'd2};
+	// inst_in.T2 = {1, 6'd3};
+	// inst_in.busy = 1;
+
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+
+	// @(negedge clock);
+
+	// entry_exists_in_table(inst_in, rs_table_out);
+	// table_has_N_entries(1, rs_table_out);
+
+	// assert( !rs_full ) else #1 exit_on_error;
+
+	// // check for issue for mult
+	// // entry_not_in_table(inst_in, rs_table_out);
+	// // table_has_N_entries(0, rs_table_out);
+	// assert( issue_next[0] == inst_in ) else #1 exit_on_error;
+	// assert( issue_next[`NUM_FU-1:1] == issue_next_test[`NUM_FU-1:1] );
+	// assert( issue_cnt == 1) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// // dispatch add p4 p5 p6 and
+	// dispatch_valid = 1;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd6};
+	// inst_in.T1 = {0, 6'd4};
+	// inst_in.T2 = {1, 6'd5};
+	// inst_in.busy = 1;	
+
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+
+	// @(negedge clock);
+	// entry_exists_in_table(inst_in, rs_table_out);
+	// table_has_N_entries(1, rs_table_out);
+	// // check nothing is issued
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// // dispatch add p4 p4 p7
+	// dispatch_valid = 1;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd7};
+	// inst_in.T1 = {0, 6'd4};
+	// inst_in.T2 = {0, 6'd4};
+	// inst_in.busy = 1;	
+
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+
+	// @(negedge clock);
+	// entry_exists_in_table(inst_in, rs_table_out);
 	// table_has_N_entries(2, rs_table_out);
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	@(negedge clock);
-	table_has_N_entries(2, rs_table_out);
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	@(negedge clock);
-	table_has_N_entries(2, rs_table_out);
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( !issue_cnt) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
+	// dispatch_valid = 0;
+	// // table_has_N_entries(2, rs_table_out);
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// @(negedge clock);
+	// table_has_N_entries(2, rs_table_out);
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// @(negedge clock);
+	// table_has_N_entries(2, rs_table_out);
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( !issue_cnt) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
 
-	@(negedge clock);
-	// commit mult p2 p3 p4
-	CAM_en = 1;
-	CDB_in = {1, 6'd4};
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd6};
-	inst_in.T1 = {0, 6'd4};
-	inst_in.T2 = {1, 6'd5};
-	issue_next_test[0] = inst_in;
-	inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
-	inst_in.T = {1, 6'd7};
-	inst_in.T1 = {0, 6'd4};
-	inst_in.T2 = {0, 6'd4};
-	inst_in.busy = 1;	
-	issue_next_test[1] = inst_in;
+	// @(negedge clock);
+	// // commit mult p2 p3 p4
+	// CAM_en = 1;
+	// CDB_in = {1, 6'd4};
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd6};
+	// inst_in.T1 = {0, 6'd4};
+	// inst_in.T2 = {1, 6'd5};
+	// issue_next_test[0] = inst_in;
+	// inst_in.inst = '{ALU_OPA_IS_REGA, ALU_OPB_IS_REGB, DEST_IS_REGC, ALU_ADDQ, FU_ALU, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}; 
+	// inst_in.T = {1, 6'd7};
+	// inst_in.T1 = {0, 6'd4};
+	// inst_in.T2 = {0, 6'd4};
+	// inst_in.busy = 1;	
+	// issue_next_test[1] = inst_in;
 
-	check_issue_next_correct(issue_next, issue_next_test);
+	// check_issue_next_correct(issue_next, issue_next_test);
 
 
-	@(negedge clock);
-	tags_now_ready(4, rs_table_out);
+	// @(negedge clock);
+	// tags_now_ready(4, rs_table_out);
 
-	// check for 2 issued instructions
-	table_has_N_entries(0, rs_table_out);
+	// // check for 2 issued instructions
+	// table_has_N_entries(0, rs_table_out);
 
-	assert( issue_next == issue_next_test ) else #1 exit_on_error;
-	assert( issue_cnt == 2) else #1 exit_on_error;
-	assert( !rs_full ) else #1 exit_on_error;
-	// clear issue_next_test
-	issue_next_test = clear_issue_next_test();
+	// assert( issue_next == issue_next_test ) else #1 exit_on_error;
+	// assert( issue_cnt == 2) else #1 exit_on_error;
+	// assert( !rs_full ) else #1 exit_on_error;
+	// // clear issue_next_test
+	// issue_next_test = clear_issue_next_test();
 
-	$finish;
+	// $finish;
 
 	// -------------Test for reset
 /*	$display("-------RESET------\n");

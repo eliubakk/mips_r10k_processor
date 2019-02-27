@@ -47,7 +47,7 @@ HEADERS     = $(wildcard *.vh)
 #	dc_shell-t -f ./synth/RS.tcl | tee RS_synth.out
 #TESTBENCH   = $(wildcard testbench/*.v)
 #TESTBENCH  += $(wildcard testbench/*.c)
-TESTBENCH = testbench/RS_new_test.v
+TESTBENCH = testbench/RS_test.v
 PIPEFILES   = $(wildcard verilog/*.v)
 CACHEFILES  = $(wildcard verilog/cache/*.v)
 
