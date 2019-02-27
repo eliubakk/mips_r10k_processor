@@ -294,7 +294,7 @@ module testbench;
 		begin
 			for (int i = 0; i < `RS_SIZE; i += 1) begin
 				$display("i = %d",i);
-				assert(rs_table_test[i] == rs_table[i]) else #1 exit_on_error;
+				assert(rs_table_test[i] === rs_table[i]) else #1 exit_on_error;
 			end
 		end
 	endtask
