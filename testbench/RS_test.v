@@ -742,7 +742,7 @@ module testbench;
 
 		// check that the mult inst was issued
 		// table_out();
-
+		@(negedge clock);
 		@(posedge clock);
 		inst_in.busy = 1'b1;
 		table_has_N_entries(1, rs_table_out);
