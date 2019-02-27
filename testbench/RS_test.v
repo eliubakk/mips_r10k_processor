@@ -392,11 +392,39 @@ module testbench;
 		entry_exists_in_table(inst_in, rs_table_out);
 		issue_next_test[0] = inst_in;
 		check_issue_next_correct(issue_next, issue_next_test);
-		@(negedge clock);
 
+		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGA;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_LD;
+		inst_in.inst.rd_mem = 1'b1;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b1;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd5;
+		inst_in.T1 = 7'b1111111;
+		inst_in.T2 = 7'b1000001;
+		inst_in.busy = 1'b0;
+		branch_not_taken= 1'b1;
+		dispatch_valid = 1;
+
+		@(negedge clock);
+		table_has_N_entries(1, rs_table_out);
+
+		inst_in.busy = 1'b1;
+		entry_exists_in_table(inst_in, rs_table_out);
+		issue_next_test[0] = inst_in;
+		check_issue_next_correct(issue_next, issue_next_test);
 		
 		
-		table_has_N_entries(0, rs_table_out);
+		// table_has_N_entries(0, rs_table_out);
 		$display("@@@Passed");
 		$finish;
 
