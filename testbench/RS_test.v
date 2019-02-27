@@ -1076,6 +1076,68 @@ module testbench;
 		`DELAY;
 		table_has_N_entries(0, rs_table_out);
 
+		@(negedge clock);
+		$display("------------------------Check for dispatch LSQ busy----------");
+		LSQ_busy = 2'b10;
+		dispatch_valid = 1'b1;
+		// dispatch load
+		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
+		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		inst_in.inst.dest_reg = DEST_IS_REGA;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_LD;
+		inst_in.inst.rd_mem = 1'b1;
+		inst_in.inst.wr_mem = 1'b0;
+		inst_in.inst.ldl_mem = 1'b1;
+		inst_in.inst.stc_mem = 1'b0;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd7;
+		inst_in.T1 = 7'b1001001;
+		inst_in.T2 = 7'b1001010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(posedge clock);
+		`DELAY;
+		inst_in.busy = 1'b1;
+		entry_not_in_table(inst_in, rs_table_out);
+
+		@(negedge clock);
+
+		LSQ_busy = 2'b01;
+		inst_in.inst.opa_select = DEST_IS_REGA;
+		inst_in.inst.opb_select = ALU_OPB_IS_ALU_IMM;
+		inst_in.inst.dest_reg = DEST_NONE;
+		inst_in.inst.alu_func = ALU_ADDQ;
+		inst_in.inst.fu_name = FU_ST;
+		inst_in.inst.rd_mem = 1'b0;
+		inst_in.inst.wr_mem = 1'b1;
+		inst_in.inst.ldl_mem = 1'b0;
+		inst_in.inst.stc_mem = 1'b1;
+		inst_in.inst.cond_branch = 1'b0;
+		inst_in.inst.uncond_branch = 1'b0;
+		inst_in.inst.halt = 1'b0;
+		inst_in.inst.cpuid = 1'b0;
+		inst_in.inst.illegal = 1'b0;
+		inst_in.inst.valid_inst = 1'b1;
+		inst_in.T = 7'd7;
+		inst_in.T1 = 7'b1001001;
+		inst_in.T2 = 7'b1001010;
+		inst_in.busy = 1'b0;
+		branch_not_taken=1'b0;
+
+		@(posedge clock);
+		`DELAY;
+		inst_in.busy = 1'b1;
+		entry_not_in_table(inst_in, rs_table_out);
+
+		@(negedge clock);	
+
 		$display("@@@Passed");
 		$finish;
 	end
