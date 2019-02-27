@@ -586,6 +586,7 @@ module testbench;
 		branch_not_taken=1'b0;
 		inst_1 = inst_in;
 		inst_1.busy = 1'b1;
+		inst_1.T1 = 7'b1000001;
         table_has_N_entries(1, rs_table_out);
 
 		
@@ -630,6 +631,7 @@ module testbench;
 		branch_not_taken=1'b0;
 		inst_2 = inst_in;
 		inst_2.busy = 1'b1;
+		inst_2.T1 = 7'b1000001;
 		
 		// table_out();
 
