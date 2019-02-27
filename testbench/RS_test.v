@@ -143,7 +143,7 @@ module testbench;
 			$display("**********************************************************\n");
 			$display("------------------------ISSUE TABLE----------------------------\n");
 
-			for(integer i=0;i<`RS_SIZE;i=i+1) begin
+			for(integer i=0;i<`NUM_FU;i=i+1) begin
 				$display("Entry: %d", i);
 				print_rs_entry(issue_table[i]);
 			end
