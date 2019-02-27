@@ -288,15 +288,16 @@ module testbench;
 		end
 	endtask
 
-	// task rs_table_equal;
-	// 	input RS_ROW_T [(`RS_SIZE - 1):0] rs_table;
-	// 	input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_test;
-	// 	begin
-	// 		for (int i = 0; i < `RS_SIZE; i += 1) begin
-	// 			if (rs_table_)
-	// 		end
-	// 	end
-	// endtask
+	task rs_table_equal;
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table;
+		input RS_ROW_T [(`RS_SIZE - 1):0] rs_table_test;
+		begin
+			for (int i = 0; i < `RS_SIZE; i += 1) begin
+				$display("i = %d",i);
+				assert(rs_table_test[i] == rs_table[i]) else #1 exit_on_error;
+			end
+		end
+	endtask
 
 	// helper variables
 	logic first = 1'b0;
@@ -1032,10 +1033,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		$display("check here");
-		table_out();
-		table_test_out();
-		assert(rs_table_test == rs_table_out) else #1 exit_on_error;
+		rs_table_equal(rs_table_test, rs_table_out);
 		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
 		@(posedge clock);
