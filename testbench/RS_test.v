@@ -1038,7 +1038,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		assert(rs_table_test == rs_table_out) else #1 exit_on_error;
+		rs_table_equal(rs_table_test, rs_table_out);
 		assert(issue_next_test == issue_next) else #1 exit_on_error;
 
 		$display("@@@Passed");
