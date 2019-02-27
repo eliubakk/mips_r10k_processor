@@ -294,6 +294,8 @@ module testbench;
 	// helper variables
 	logic first = 1'b0;
 	logic second = 1'b0;
+	RS_ROW_T inst_1;
+	RS_ROW_T inst_2;
 	
 	initial begin
 		
@@ -681,8 +683,8 @@ module testbench;
 		first = 1'b0;
 		second = 1'b0;
 
-		RS_ROW_T inst_1;
-		RS_ROW_T inst_2;
+		inst_1;
+		inst_2;
 
 		inst_1.inst.opa_select = ALU_OPA_IS_REGA;
 		inst_1.inst.opb_select = ALU_OPB_IS_REGB;
