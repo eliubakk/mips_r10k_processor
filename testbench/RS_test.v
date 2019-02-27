@@ -1104,12 +1104,10 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		$display("hi");
 		inst_in.busy = 1'b1;
-		table_out();
-		print_rs_entry(inst_in);
-		entry_not_in_table(inst_in, rs_table_out);
-		$display("bye");
+		entry_exists_in_table(inst_in, rs_table_out);
+		assert(!issue_next[1].busy) else #1 exit_on_error;
+		assert(!issue_cnt);
 
 		@(negedge clock);
 
@@ -1138,7 +1136,9 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		inst_in.busy = 1'b1;
-		entry_not_in_table(inst_in, rs_table_out);
+		entry_exists_in_table(inst_in, rs_table_out);
+		assert(!issue_next[2].busy) else #1 exit_on_error;
+		assert(!issue_cnt);
 
 		@(negedge clock);	
 
