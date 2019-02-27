@@ -972,6 +972,33 @@ module testbench;
 		inst_in.busy = 1'b1;
 		entry_not_in_table(inst_in, rs_table_out);
 
+		@(negedge clock);
+		inst_in.inst.valid_inst = 1'b0;
+		CAM_en = 1;
+		CDB_in = 7'b0001001;
+
+		@(posedge clock);
+		`DELAY;
+		$display("------------------------Issue 5 instructions----------");
+		table_has_N_entries(11, rs_table_out);
+		// check issue_next all valid
+		for (int i = 0; i < `NUM_FU; i += 1) begin
+			assert(issue_next[i].busy);
+			assert(issue_next[i].inst.valid_inst);
+		end
+		issue_next_test = issue_next;
+
+		@(negedge clock);
+		@(posedge clock);
+		`DELAY;
+		// check all of the previously issued instructions are
+		// no longer in the table
+		for (int i = 0; i < `NUM_FU; i += 1) begin
+			entry_not_in_table(issue_next_test[i], rs_table_out);
+			assert(issue_next[i].busy);
+			assert(issue_next[i].inst.valid_inst);
+		end
+
 		$display("@@@Passed");
 		$finish;
 	end
