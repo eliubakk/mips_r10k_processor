@@ -287,13 +287,13 @@ module RS(
 						end
 
 						FU_LD : begin	
-							if(LSQ_busy[0] ==1'b1) begin
+							if(LSQ_busy[0] ==1'b0) begin
 								LD_issue_idx[i] = 1'b1;
 							end
 						end
 
 						FU_ST :  begin	
-							if(LSQ_busy[1] ==1'b1)  begin
+							if(LSQ_busy[1] ==1'b0)  begin
 								ST_issue_idx[i] = 1'b1;
 							end
 						end
