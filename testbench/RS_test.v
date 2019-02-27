@@ -976,6 +976,7 @@ module testbench;
 		inst_in.inst.valid_inst = 1'b0;
 		CAM_en = 1;
 		CDB_in = 7'b0001001;
+		`DELAY;
 		table_out();
 		// check issue_next all valid
 		for (int i = 0; i < `NUM_FU; i += 1) begin
