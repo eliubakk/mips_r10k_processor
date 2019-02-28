@@ -1,0 +1,12 @@
+We are submitting the following files: 
+RS.v
+RS_test.v
+RS.tcl
+
+RS.v contains the module for our Reservation Station. This is the first major component/module which we implemented for the first milestone. 
+RS_test.v is the testbench that tests for the reservation station module. The module is named RS. 
+RS.tcl is the script that synthesizes our reservation station. 
+
+From the root directory, you can perform the following operations:
+"make" --> create simv executable that runs the testbench without synthesis to check for behavior
+"make syn" --> synthesize the RS module and run the testbench across the synthesized module
