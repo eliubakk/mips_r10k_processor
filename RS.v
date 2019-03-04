@@ -220,28 +220,48 @@ module RS(
 
 		// ISSUE STAGE //
 		//Initiaalization to prevent latch
-			for(integer i=0; i<`NUM_FU; i=i+1) begin // Anothe way to do this?
-			issue_out[i].inst.opa_select = ALU_OPA_IS_REGA;
-			issue_out[i].inst.opb_select = ALU_OPB_IS_REGB;
-			issue_out[i].inst.dest_reg = DEST_IS_REGC;
-			issue_out[i].inst.alu_func = ALU_ADDQ;
-			issue_out[i].inst.fu_name = FU_ALU;
-			issue_out[i].inst.rd_mem = 1'b0;
-			issue_out[i].inst.wr_mem = 1'b0;
-			issue_out[i].inst.ldl_mem = 1'b0;
-			issue_out[i].inst.stc_mem = 1'b0;
-			issue_out[i].inst.cond_branch = 1'b0;
-			issue_out[i].inst.uncond_branch = 1'b0;
-			issue_out[i].inst.halt = 1'b0;
-			issue_out[i].inst.cpuid = 1'b0;
-			issue_out[i].inst.illegal = 1'b0;
-			issue_out[i].inst.valid_inst = 1'b0;
+		// for(integer i=0; i<`NUM_FU; i=i+1) begin // Anothe way to do this?
+		// 	issue_out[i].inst.opa_select = ALU_OPA_IS_REGA;
+		// 	issue_out[i].inst.opb_select = ALU_OPB_IS_REGB;
+		// 	issue_out[i].inst.dest_reg = DEST_IS_REGC;
+		// 	issue_out[i].inst.alu_func = ALU_ADDQ;
+		// 	issue_out[i].inst.fu_name = FU_ALU;
+		// 	issue_out[i].inst.rd_mem = 1'b0;
+		// 	issue_out[i].inst.wr_mem = 1'b0;
+		// 	issue_out[i].inst.ldl_mem = 1'b0;
+		// 	issue_out[i].inst.stc_mem = 1'b0;
+		// 	issue_out[i].inst.cond_branch = 1'b0;
+		// 	issue_out[i].inst.uncond_branch = 1'b0;
+		// 	issue_out[i].inst.halt = 1'b0;
+		// 	issue_out[i].inst.cpuid = 1'b0;
+		// 	issue_out[i].inst.illegal = 1'b0;
+		// 	issue_out[i].inst.valid_inst = 1'b0;
 					
-			issue_out[i].T = 7'b1111111;
-			issue_out[i].T1 = 7'b1111111;
-			issue_out[i].T2 = 7'b1111111;
-			issue_out[i].busy = 1'b0;
-			end
+		// 	issue_out[i].T = 7'b1111111;
+		// 	issue_out[i].T1 = 7'b1111111;
+		// 	issue_out[i].T2 = 7'b1111111;
+		// 	issue_out[i].busy = 1'b0;
+		// end
+		issue_out.inst.opa_select = ALU_OPA_IS_REGA;
+		issue_out.inst.opb_select = ALU_OPB_IS_REGB;
+		issue_out.inst.dest_reg = DEST_IS_REGC;
+		issue_out.inst.alu_func = ALU_ADDQ;
+		issue_out.inst.fu_name = FU_ALU;
+		issue_out.inst.rd_mem = 1'b0;
+		issue_out.inst.wr_mem = 1'b0;
+		issue_out.inst.ldl_mem = 1'b0;
+		issue_out.inst.stc_mem = 1'b0;
+		issue_out.inst.cond_branch = 1'b0;
+		issue_out.inst.uncond_branch = 1'b0;
+		issue_out.inst.halt = 1'b0;
+		issue_out.inst.cpuid = 1'b0;
+		issue_out.inst.illegal = 1'b0;
+		issue_out.inst.valid_inst = 1'b0;
+				
+		issue_out.T = 7'b1111111;
+		issue_out.T1 = 7'b1111111;
+		issue_out.T2 = 7'b1111111;
+		issue_out.busy = 1'b0;
 	
 		// Initialize the issue cnt and inx, gnt table	
 			//issue_cnt_next = {$clog2(`NUM_FU){1'b0}}; 
