@@ -21,3 +21,5 @@ DVEfiles
 *.ddc
 *.log
 *.swp
+synth/*.sv
+synth/*.svf
