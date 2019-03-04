@@ -44,8 +44,11 @@
 //
 //////////////////////////////////////////////
 `define NUM_PHYS_REG 64
-typedef logic [$clog2(`NUM_PHYS_REG)+1:0] PHYS_REG;
+typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
+
+`define NUM_GEN_REG 32
+typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
 
 //////////////////////////////////////////////
@@ -124,6 +127,7 @@ typedef enum logic [4:0] {
 `define NUM_FU 5
 `define RS_SIZE 16
 `define SS_SIZE 1 // superscalar size
+`define ROB_SIZE 16
 
 typedef enum logic [2:0]{
   FU_ALU,
