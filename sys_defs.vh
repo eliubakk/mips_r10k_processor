@@ -168,6 +168,10 @@ typedef struct packed{
   logic        busy;
 } RS_ROW_T;
 
+typedef struct packed {
+	PHYS_REG phys_tag;
+} MAP_ROW_T;
+
 //////////////////////////////////////////////
 //
 // Assorted things it is not wise to change
