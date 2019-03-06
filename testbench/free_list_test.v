@@ -147,6 +147,47 @@ module testbench;
 
 		$display("Dispatch One Register Passed");
 
+		$display("Testing Multiple Register Retire...");
+
+		// reset
+		@(negedge clock);
+		reset = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+
+		// retire multiple
+		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+			@(negedge clock);
+			T_old = i;
+			enable = ONE;
+			dispatch_en = ZERO;
+			reset = ZERO;
+			last_free_reg = free_reg;
+
+			@(posedge clock);
+			`DELAY;
+			enable = ZERO;
+			assert(num_free_entries == (`NUM_PHYS_REG - `NUM_GEN_REG + 1 + i)) else #1 exit_on_error;
+			if (i == `NUM_GEN_REG - 1) begin
+				assert(empty) else #1 exit_on_error;
+			end else begin
+				assert(!empty) else #1 exit_on_error;
+			end
+			assert(last_free_reg == free_reg) else #1 exit_on_error;
+		end
+
+		// reset
+		@(negedge clock);
+		reset = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+
+		$display("Multiple Register Retire Passed");
+
 		$display("ALL TESTS Passed");
 		$finish;
 	end
