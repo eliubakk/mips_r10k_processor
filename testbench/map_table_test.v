@@ -91,7 +91,8 @@ module testbench;
 		// check that at reset, all mappings of gen purp reg are
 		// to their equivalent phys reg
 		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
-			assert(map_table_out[i].phys_tag == i) else #1 exit_on_error;
+			assert(map_table_out[i].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == i) else #1 exit_on_error;
+			assert(map_table_out[i].phys_tag[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
 		end
 
 		$display("Reset Test Passed");
@@ -116,9 +117,9 @@ module testbench;
 					`DELAY;
 					assert(T1[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
 					assert(T1[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-					assert(T2[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
+					assert(T2[$clog2(`NUM_GEN_REG)-1:0] == j) else #1 exit_on_error;
 					assert(T2[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-					assert(T[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
+					assert(T[$clog2(`NUM_GEN_REG)-1:0] == k) else #1 exit_on_error;
 					assert(T[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
 				end
 			end

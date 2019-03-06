@@ -1,4 +1,4 @@
-
+`include "sys_defs.vh"
 `define DEBUG
 module Map_Table(
 	input	clock,
@@ -57,9 +57,9 @@ module Map_Table(
 
 		// DISPATCH STAGE
 		if (enable) begin
-			T1 = map_table[reg_a].phys_reg;
-			T2 = map_table[reg_b].phys_reg;
-			T  = map_table[reg_dest].phys_reg;
+			T1 = map_table[reg_a].phys_tag;
+			T2 = map_table[reg_b].phys_tag;
+			T  = map_table[reg_dest].phys_tag;
 		end else if (~CDB_en) begin
 			// if disabled, retain the current map_table state
 			next_map_table = map_table;
@@ -71,6 +71,7 @@ module Map_Table(
 			// if reset, set reg_i = pr_i (i.e. reg0 = pr0, ...)
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
 				map_table[i].phys_tag 		<= i;
+				map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] <= 1'b1;
 			end
 		end else begin
 			// update the map_table's next state
