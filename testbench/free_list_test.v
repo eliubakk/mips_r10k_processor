@@ -174,15 +174,25 @@ module testbench;
 			assert(last_free_reg == free_reg) else #1 exit_on_error;
 		end
 
-		// reset
+		$display("Multiple Register Retire Passed");
+
+		$display("Testing Register Retire Past PhysReg Size...");
+		// retire a register
 		@(negedge clock);
-		reset = ONE;
+		T_old = 6;
+		enable = ONE;
+		dispatch_en = ZERO;
+		reset = ZERO;
+		last_free_reg = free_reg;
 
 		@(posedge clock);
 		`DELAY;
-		reset = ZERO;
+		enable = ZERO;
+		assert(num_free_entries == `NUM_PHYS_REG) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(last_free_reg == free_reg) else #1 exit_on_error;
 
-		$display("Multiple Register Retire Passed");
+		$display("Register Retire Past PhysReg Size Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;

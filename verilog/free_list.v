@@ -41,9 +41,14 @@ module Free_List(
 			next_tail = tail;
 		end else if (enable) begin
 			// Register is getting retired
-			next_free_list = free_list;
-			next_free_list[tail] = T_old;
-			next_tail = tail + 1;
+			if (tail == `FL_SIZE) begin
+				next_free_list = free_list;
+				next_tail = tail;
+			end else begin
+				next_free_list = free_list;
+				next_free_list[tail] = T_old;
+				next_tail = tail + 1;
+			end
 		end else if (dispatch_en) begin
 			// Register is getting dispatched
 			for (int i = 0; i < `FL_SIZE; ++i) begin
