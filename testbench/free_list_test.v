@@ -194,6 +194,30 @@ module testbench;
 
 		$display("Register Retire Past PhysReg Size Passed");
 
+		$display("Testing Dispatch All Free Register...");
+
+		for (int i = 0; i < `NUM_PHYS_REG; ++i) begin
+			// dispatch register
+			@(negedge clock);
+			enable = ZERO;
+			display = ONE;
+			reset = ZERO;
+			last_free_reg = free_reg;
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en = ZERO;
+			assert(num_free_entries == `NUM_PHYS_REG - 1 - i) else #1 exit_on_error;
+			if (i == `NUM_PHYS_REG - 1) begin
+				assert(empty) else #1 exit_on_error;
+			end else begin
+				assert(!empty) else #1 exit_on_error;
+				assert(last_free_reg != free_reg) else #1 exit_on_error;
+			end
+		end
+
+		$display("Dispatch All Free Register Passed");
+
 		$display("ALL TESTS Passed");
 		$finish;
 	end
