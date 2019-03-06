@@ -200,7 +200,7 @@ module testbench;
 			// dispatch register
 			@(negedge clock);
 			enable = ZERO;
-			display = ONE;
+			dispatch_en = ONE;
 			reset = ZERO;
 			last_free_reg = free_reg;
 
