@@ -1,3 +1,6 @@
+`include "sys_defs.vh"
+`define DEBUG
+
 module ROB(
 	input 		    	clock,
 	input 		    	reset,
@@ -9,11 +12,14 @@ module ROB(
 	input				dispatch_en, // Structural Hazard detection during Dispatch
 	input 				branch_not_taken,
 
+	// OUTPUTS
+	`ifdef DEBUG 
 	output PHYS_REG 	T_old_out, // Output for Retire Stage goes to Free List
 	output PHYS_REG     T_new_out, // Output for Retire Stage goes to Arch Map
 	output 				T_old_valid, T_new_valid;
-	output [$clog2(`ROB_SIZE) - 1:0] rob_free_entries // Used for Dispatch Hazard
-
+	output [$clog2(`ROB_SIZE) - 1:0] rob_free_entries,
+	output							 rob_full // Used for Dispatch Hazard
+	`endif
 );
 
 endmodule // ROB
@@ -79,11 +85,11 @@ always_comb begin
 		ROB_table[i].T_new_out[6]= MSB_T1 | ROB_table_reg[i].T_new_out[6];
 	end
 
-ROB_full = ROB_table_reg[0].busy & ROB_table_reg[1].busy & ROB_table_reg[2].busy & ROB_table_reg[3].busy & ROB_table_reg[4].busy 
+rob_full = ROB_table_reg[0].busy & ROB_table_reg[1].busy & ROB_table_reg[2].busy & ROB_table_reg[3].busy & ROB_table_reg[4].busy 
 			& ROB_table_reg[5].busy & ROB_table_reg[6].busy & ROB_table_reg[7].busy & ROB_table_reg[8].busy & ROB_table_reg[9].busy 
 			& ROB_table_reg[10].busy & ROB_table_reg[11].busy &  ROB_table_reg[12].busy & ROB_table_reg[13].busy & ROB_table_reg[14].busy & ROB_table_reg[15].busy; 
 
-rs_busy_cnt_next = ROB_table[0].busy + ROB_table[1].busy + ROB_table[2].busy + ROB_table[3].busy +  ROB_table[4].busy + ROB_table[5].busy + ROB_table[6].busy + ROB_table[7].busy + ROB_table[8].busy + ROB_table[9].busy + ROB_table[10].busy + ROB_table[11].busy +  ROB_table[12].busy + ROB_table[13].busy + ROB_table[14].busy + ROB_table[15].busy; 
+rob_free_entries = `ROB_SIZE - (ROB_table[0].busy + ROB_table[1].busy + ROB_table[2].busy + ROB_table[3].busy +  ROB_table[4].busy + ROB_table[5].busy + ROB_table[6].busy + ROB_table[7].busy + ROB_table[8].busy + ROB_table[9].busy + ROB_table[10].busy + ROB_table[11].busy +  ROB_table[12].busy + ROB_table[13].busy + ROB_table[14].busy + ROB_table[15].busy); 
 
 // Dispatch
 check_loop = 1'b0;
