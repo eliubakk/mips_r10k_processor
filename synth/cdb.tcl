@@ -11,7 +11,7 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "cdb.v"]
+read_file -f sverilog [list "verilog/cdb.v"]
 set design_name CDB
 set clock_name clock
 set reset_name reset
