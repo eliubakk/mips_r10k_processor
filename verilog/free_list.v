@@ -51,10 +51,16 @@ module Free_List(
 			end
 		end else if (dispatch_en) begin
 			// Register is getting dispatched
-			for (int i = 0; i < `FL_SIZE; ++i) begin
-				next_free_list[i] = free_list[i + 1];
+			if (tail == 0) begin
+				next_free_list = free_list;
+				next_tail = tail;
+			end else begin 
+				for (int i = 0; i < `FL_SIZE; ++i) begin
+					next_free_list[i] = free_list[i + 1];
+				end
+				next_tail = tail - 1;
 			end
-			next_tail = tail - 1;
+
 		end else begin
 			// Remain the same state
 			// nothing getting pushed or popped off

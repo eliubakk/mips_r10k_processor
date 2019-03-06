@@ -218,6 +218,22 @@ module testbench;
 
 		$display("Dispatch All Free Register Passed");
 
+		$display("Testing Dispatch Past Empty Free List...");
+
+		// dispatch register
+		@(negedge clock);
+		enable = ZERO;
+		dispatch_en = ONE;
+		reset = ZERO;
+
+		@(posedge clock);
+		`DELAY;
+		dispatch_en = ZERO;
+		assert(num_free_entries == 0) else #1 exit_on_error;
+		assert(empty) else #1 exit_on_error;
+
+		$display("Dispatch Past Empty Free List Passed");
+
 		$display("ALL TESTS Passed");
 		$finish;
 	end
