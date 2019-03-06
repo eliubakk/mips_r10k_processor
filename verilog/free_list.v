@@ -26,56 +26,36 @@ module Free_List(
 	logic [$clog2(`FL_SIZE)-1:0] tail;
 	logic [$clog2(`FL_SIZE)-1:0] next_tail;
 
+	assign empty = (tail == 0);
+	assign free_reg = free_list[0];
+
 	always_comb begin
-		// RETIRE STAGE
-		if (enable) begin
-			// if retire stage is retiring a register
-			// that register should be added to free list
-			// hence, insert at tail position of queue
+
+		if (dispatch_en & enable) begin
+			// Reg is getting retired AND getting sent out
+			for (int i = 0; i < `FL_SIZE; ++i) begin
+				next_free_list[i] = free_list[i+1];
+			end
+			next_free_list[tail - 1] = T_old;
+			next_tail = tail;
+		end else if (enable) begin
+			// Register is getting retired
+			next_free_list = free_list;
 			next_free_list[tail] = T_old;
 			next_tail = tail + 1;
-		end else begin
-			next_free_list = free_list;
-			next_tail = tail;
-		end
-
-		// DISPATCH STAGE
-		if (dispatch_en) begin
-			// inst is getting dispatched so we need
-			// to pop off the next free reg
-			// if dispatch_en is 1 then that means
-			// that there is at least 1 free reg
-			// because if it was 0, then outside modules
-			// would not have set dispatch_en to 1
-			free_reg = free_list[0];
-			
-			if (enable) begin
-				// if enable, then that means a reg was pushed
-				// into queue during retire
-				/*
- 				not sure if this way works...
-				next_free_list = {{(`FL_SIZE - tail){0}}, T_old, free_reg[tail-1:1]};
-				*/
-				// not sure how this way synthesizes...
-				for (int i = tail; i < `FL_SIZE; i += 1) begin
-					next_free_list[i] = `DUMMY_REG;
-				end
-				next_free_list[tail-1:0] = {T_old, free_reg[tail-1:1]};
-				// if both dispatch_en and enable, that means 
-				// something is getting pushed in and popped
-				// off so tail must remain in same position
-				next_tail = tail;
-			end else begin
-				// nothing is getting pushed into queue
-				next_free_list[tail-2:0] = {free_reg[tail-1:1]};
-				next_tail = tail - 1;
+		end else if (dispatch_en) begin
+			// Register is getting dispatched
+			for (int i = 0; i < `FL_SIZE; ++i) begin
+				next_free_list[i] = free_list[i + 1];
 			end
-		end else if (~enable) begin
+			next_tail = tail - 1;
+		end else begin
+			// Remain the same state
 			// nothing getting pushed or popped off
 			next_free_list = free_list;
 			next_tail = tail;
 		end
-	end
+
 
 	always_ff @(posedge clock) begin
 		if (reset) begin
@@ -92,6 +72,7 @@ module Free_List(
 			next_tail 	<= `NUM_GEN_REG;
 		end else begin
 			free_list <= next_free_list;
+			tail <= next_tail;
 		end
 	end
 
