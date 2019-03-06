@@ -159,6 +159,7 @@ module testbench;
 
 			@(posedge clock);
 			`DELAY;
+			enable = ZERO;
 			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
 			++counter;
 
@@ -190,6 +191,7 @@ module testbench;
 
 			@(posedge clock);
 			`DELAY;
+			enable = ZERO;
 			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
 			++counter;
 
@@ -215,6 +217,50 @@ module testbench;
 		assert(map_table_out[0].phys_tag == CDB_tag_in) else #1 exit_on_error;
 
 		$display("Single Reg Commit Passed");
+
+		$display("Testing Multiple Reg Commit...");
+
+		// set up map_table so ready bits are 0
+
+		counter = 0;
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+		end
+
+		// at this point, all regs in map_table are not ready
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			@(negedge clock);
+			CDB_en = ONE;
+			CDB_tag_in = i;
+			CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+
+			@(posedge clock);
+			`DELAY;
+			CDB_en = ZERO;
+			assert(map_table_out[0].phys_tag == CDB_tag_in) else #1 exit_on_error;
+		end
+
+		$display("Multiple Reg Commit Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
