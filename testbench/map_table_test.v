@@ -15,6 +15,7 @@ module testbench;
 
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_test;
 	PHYS_REG test_tag;
+	int counter = 0;
 
 	// input wires
 	logic clock;
@@ -135,48 +136,83 @@ module testbench;
 
 		map_table_test = map_table_out;
 
-		$display("Testing Single Reg Commit...");
+		$display("Testing Single Reg Dispatch...");
 
 		// reset
 		@(negedge clock);
-		reset = ONE;
+		reset = ZERO;
 		enable = ZERO;
 
-		// commit a register
-		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
 
 			// reset
 			@(negedge clock);
-			reset = ONE;
+			reset = ZERO;
 			enable = ZERO;
 
-			for (int j = `NUM_GEN_REG; j < `NUM_PHYS_REG; ++j) begin
-				// i is the gen reg, j is the phys reg we assign
-				@(negedge clock);
-				enable = ZERO;
-				CDB_en = ONE;
-				CDB_tag_in = j; 
-				CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
-				test_tag = CDB_tag_in;
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
 
-				@(posedge clock);
-				`DELAY;
-				CDB_en = ZERO;
-				assert(map_table_out[i].phys_tag == test_tag) else #1 exit_on_error;
-
-			end
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
 
 			// reset
 			@(negedge clock);
-			reset = ONE;
+			reset = ZERO;
 			enable = ZERO;
+
 		end
 
+		$display("Single Reg Dispatch Passed");
 
+		$display("Testing Multiple Reg Dispatch...");
+
+		counter = 0;
 		// reset
 		@(negedge clock);
-		reset = ONE;
-		enable = ZERO;				
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+		end
+
+		$display("Multiple Reg Dispatch Passed");
+
+		$display("Testing Single Reg Commit...");
+
+		// at this point, all the mapped registers are not ready
+		// from the prev test
+
+		// commit a register
+		@(negedge clock);
+		reset = ZERO;
+		CDB_en = ONE;
+		CDB_tag_in = 32;
+		CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		CDB_en = ZERO;
+		assert(map_table_out[0].phys_tag == CDB_tag_in) else #1 exit_on_error;
 
 		$display("Single Reg Commit Passed");
 
