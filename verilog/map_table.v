@@ -1,3 +1,5 @@
+
+`define DEBUG
 module Map_Table(
 	input	clock,
 	input 	reset,
@@ -8,6 +10,10 @@ module Map_Table(
 	input PHYS_REG			free_reg, 	// Comes from Free List during Dispatch
 	input PHYS_REG 			CDB_tag_in, 	// Comes from CDB during Commit
 	input				CDB_en, 	// Comes from CDB during Commit
+
+	`ifdef DEBUG
+	output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
+	`endif
 
 	output PHYS_REG 		T1, 		// Output for Dispatch and goes to RS
 	output PHYS_REG 		T2, 		// Output for Dispatch and goes to RS
@@ -20,7 +26,9 @@ module Map_Table(
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table;
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	next_map_table;
 
-
+	`ifdef DEBUG
+	assign map_table_out = map_table;
+	`endif
 
 	always_comb begin
 
@@ -63,7 +71,6 @@ module Map_Table(
 			// if reset, set reg_i = pr_i (i.e. reg0 = pr0, ...)
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
 				map_table[i].phys_tag 		<= i;
-				next_map_table[i].phys_tag 	<= i;
 			end
 		end else begin
 			// update the map_table's next state
