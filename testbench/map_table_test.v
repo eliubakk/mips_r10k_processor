@@ -14,6 +14,7 @@ module testbench;
 	// initialize wires
 
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_test;
+	PHYS_REG test_tag;
 
 	// input wires
 	logic clock;
@@ -108,22 +109,20 @@ module testbench;
 		// check each gen reg
 		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
 			for (int j = 0; j < `NUM_GEN_REG; ++j) begin
-				for (int k = 0; k < `NUM_GEN_REG; ++k) begin
-					@(negedge clock);
-					enable = ONE;
-					reg_a = i;
-					reg_b = j;
-					reg_dest = k;
 
-					@(posedge clock);
-					`DELAY;
-					assert(T1[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
-					assert(T1[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-					assert(T2[$clog2(`NUM_GEN_REG)-1:0] == j) else #1 exit_on_error;
-					assert(T2[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-					assert(T[$clog2(`NUM_GEN_REG)-1:0] == k) else #1 exit_on_error;
-					assert(T[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-				end
+
+				@(negedge clock);
+				enable = ONE;
+				reg_a = i;
+				reg_b = j;
+
+				@(posedge clock);
+				`DELAY;
+				assert(T1[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
+				assert(T1[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+				assert(T2[$clog2(`NUM_GEN_REG)-1:0] == j) else #1 exit_on_error;
+				assert(T2[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+
 			end
 		end
 
@@ -138,7 +137,46 @@ module testbench;
 
 		$display("Testing Single Reg Commit...");
 
-		// need to discuss map_table behavior...
+		// reset
+		@(negedge clock);
+		reset = ONE;
+		enable = ZERO;
+
+		// commit a register
+		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+
+			// reset
+			@(negedge clock);
+			reset = ONE;
+			enable = ZERO;
+
+			for (int j = `NUM_GEN_REG; j < `NUM_PHYS_REG; ++j) begin
+				// i is the gen reg, j is the phys reg we assign
+				@(negedge clock);
+				enable = ZERO;
+				CDB_en = ONE;
+				CDB_tag_in = j; 
+				CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+				test_tag = CDB_tag_in;
+
+				@(posedge clock);
+				`DELAY;
+				CDB_en = ZERO;
+				assert(map_table_out[i].phys_tag == test_tag) else #1 exit_on_error;
+
+			end
+
+			// reset
+			@(negedge clock);
+			reset = ONE;
+			enable = ZERO;
+		end
+
+
+		// reset
+		@(negedge clock);
+		reset = ONE;
+		enable = ZERO;				
 
 		$display("Single Reg Commit Passed");
 
