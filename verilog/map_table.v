@@ -61,7 +61,7 @@ module Map_Table(
 		end else begin
 			next_map_table = map_table;
 		end
-
+	end
 
 	always_ff @(posedge clock) begin
 		if (reset) begin
