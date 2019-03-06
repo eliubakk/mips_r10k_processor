@@ -17,13 +17,24 @@ all:    simv
 ##### 
 # Modify starting here
 #####
+## Testing for CDB.v
+#TESTBENCH = testbench/CDB_test.v
+#SIMFILES = verilog/cdb.v
+#SYNFILES = CDB.vg 
 
-TESTBENCH = RS_test.v
-SIMFILES = RS.v
-SYNFILES = RS.vg 
+#CDB.vg: $(SIMFILES) synth/cdb.tcl
+#	 dc_shell-t -f cdb.tcl | tee cdb_synth.out
 
-RS.vg: $(SIMFILES) synth/RS.tcl
-	 dc_shell-t -f RS.tcl | tee RS_synth.out
+
+## Testing for arch_map.v
+TESTBENCH = testbench/Arch_test.v
+SIMFILES = verilog/arch_map.v
+SYNFILES = Arch_Map_Table.vg 
+
+Arch_Map_Table.vg: $(SIMFILES) synth/arch_map.tcl
+	 dc_shell-t -f arch_map.tcl | tee arch_map_synth.out
+
+
 
 #####
 # Should be no need to modify after here
