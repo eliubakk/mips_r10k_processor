@@ -20,7 +20,7 @@ module testbench;
 	logic dispatch_en;
 
 	// output wires
-	logic [$clog2(`NUM_PHYS_REG)-1:0] num_free_entries;
+	logic [$clog2(`NUM_PHYS_REG):0] num_free_entries;
 	logic empty;
 	PHYS_REG free_reg;
 	PHYS_REG last_free_reg;
@@ -170,11 +170,7 @@ module testbench;
 			`DELAY;
 			enable = ZERO;
 			assert(num_free_entries == (`NUM_PHYS_REG - `NUM_GEN_REG + 1 + i)) else #1 exit_on_error;
-			if (i == `NUM_GEN_REG - 1) begin
-				assert(empty) else #1 exit_on_error;
-			end else begin
-				assert(!empty) else #1 exit_on_error;
-			end
+			assert(!empty) else #1 exit_on_error;
 			assert(last_free_reg == free_reg) else #1 exit_on_error;
 		end
 

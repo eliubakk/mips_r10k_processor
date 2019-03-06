@@ -11,7 +11,7 @@ module Free_List(
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
 	input dispatch_en, // Structural Hazard detection during Dispatch
 
-	output [$clog2(`NUM_PHYS_REG)-1:0] num_free_entries, // Used for Dispatch Hazard
+	output [$clog2(`FL_SIZE):0] num_free_entries, // Used for Dispatch Hazard
 	output empty, // Used for Dispatch Hazard
 	output PHYS_REG free_reg // Output for Dispatch for other modules
 );
@@ -23,8 +23,8 @@ module Free_List(
 	PHYS_REG [`FL_SIZE-1:0] next_free_list;
 
 	// tail pointer register and combination next_tail
-	logic [$clog2(`FL_SIZE)-1:0] tail;
-	logic [$clog2(`FL_SIZE)-1:0] next_tail;
+	logic [$clog2(`FL_SIZE):0] tail;
+	logic [$clog2(`FL_SIZE):0] next_tail;
 
 	assign empty = (tail == 0);
 	assign free_reg = free_list[0];
