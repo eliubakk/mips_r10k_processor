@@ -97,7 +97,7 @@ module testbench;
 
 			@(posedge clock);
 			`DELAY;
-			assert(num_free_entries == (`NUM_PHYS_REG - `NUM_GEN_REG - 1)) else #1 exit_on_error;
+			assert(num_free_entries == (`NUM_PHYS_REG - `NUM_GEN_REG + 1)) else #1 exit_on_error;
 			assert(!empty) else #1 exit_on_error;
 			enable = ZERO;
 
