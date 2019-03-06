@@ -22,21 +22,21 @@ all:    simv
 # SIMFILES = RS.v
 # SYNFILES = RS.vg 
 
-#TESTBENCH = testbench/free_list_test.v
-#SIMFILES = verilog/free_list.v
-#SYNFILES = free_list.vg
+TESTBENCH = testbench/free_list_test.v
+SIMFILES = verilog/free_list.v
+SYNFILES = Free_List.vg
 
-TESTBENCH = testbench/map_table_test.v
-SIMFILES = verilog/map_table.v
-SYNFILES = map_table.vg
+#TESTBENCH = testbench/map_table_test.v
+#SIMFILES = verilog/map_table.v
+#SYNFILES = Map_Table.vg
 
 RS.vg: $(SIMFILES) synth/RS.tcl
 	 dc_shell-t -f RS.tcl | tee RS_synth.out
 
-free_list.vg: $(SIMFILES) synth/free_list.tcl
+Free_List.vg: $(SIMFILES) synth/free_list.tcl
 	dc_shell-t -f synth/free_list.tcl | tee free_list_synth.out
 
-map_table.vg: $(SIMFILES) synth/map_table.tcl
+Map_Table.vg: $(SIMFILES) synth/map_table.tcl
 	dc_shell-t -f synth/map_table.tcl | tee map_table_synth.out
 #####
 # Should be no need to modify after here
