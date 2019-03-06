@@ -262,6 +262,57 @@ module testbench;
 
 		$display("Multiple Reg Commit Passed");
 
+		$display("Testing Simultaneous Commit and Dispatch...");
+
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+		CDB_en = ZERO;
+
+		counter = 0;
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+		end
+
+		@(negedge clock);
+		enable = ONE;
+		CDB_en = ONE;
+		reg_a = 6;
+		reg_b = 9;
+		reg_dest = 4;
+		CDB_tag_in = 36;
+		CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+		free_reg = 0;
+
+		@(posedge clock);
+		`DELAY;
+		enable = ZERO;
+		CDB_en = ZERO;
+		assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+		assert(T1 == `NUM_GEN_REG + reg_a) else #1 exit_on_error;
+		assert(T2 == `NUM_GEN_REG + reg_b) else #1 exit_on_error;
+		assert(T == free_reg) else #1 exit_on_error;
+
+		$display("Simultaneous Commit and Dispatch Passed");
+
 		$display("ALL TESTS Passed");
 		$finish;
 	end
