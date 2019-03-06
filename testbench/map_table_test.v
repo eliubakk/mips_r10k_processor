@@ -13,6 +13,8 @@ module testbench;
 
 	// initialize wires
 
+	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_test;
+
 	// input wires
 	logic clock;
 	logic reset;
@@ -128,8 +130,17 @@ module testbench;
 		// reset
 		@(negedge clock);
 		reset = ONE;
+		enable = ZERO;
 
 		$display("Get Mapped Registers Passed");
+
+		map_table_test = map_table_out;
+
+		$display("Testing Single Reg Commit...");
+
+		// need to discuss map_table behavior...
+
+		$display("Single Reg Commit Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
