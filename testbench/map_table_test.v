@@ -257,7 +257,7 @@ module testbench;
 			@(posedge clock);
 			`DELAY;
 			CDB_en = ZERO;
-			assert(map_table_out[0].phys_tag == CDB_tag_in) else #1 exit_on_error;
+			assert(map_table_out[i - `NUM_GEN_REG].phys_tag == CDB_tag_in) else #1 exit_on_error;
 		end
 
 		$display("Multiple Reg Commit Passed");
