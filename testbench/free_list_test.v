@@ -23,6 +23,7 @@ module testbench;
 	logic [$clog2(`NUM_PHYS_REG)-1:0] num_free_entries;
 	logic empty;
 	PHYS_REG free_reg;
+	PHYS_REG last_free_reg;
 
 	
 	// initialize module
@@ -111,6 +112,40 @@ module testbench;
 		end
 
 		$display("Retire One Register Passed");
+
+		$display("Testing Dispatch One Register...");
+
+		// reset
+		@(negedge clock);
+		reset = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+
+		// dispatch
+		@(negedge clock);
+		enable = ZERO;
+		dispatch_en = ONE;
+		reset = ZERO;
+		last_free_reg = free_reg;
+
+		@(posedge clock);
+		`DELAY;
+		assert(num_free_entries == (`NUM_PHYS_REG - `NUM_GEN_REG - 1)) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(last_free_reg != free_reg) else #1 exit_on_error;
+		dispatch_en = ZERO;
+
+		// reset
+		@(negedge clock);
+		reset = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+
+		$display("Dispatch One Register Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
