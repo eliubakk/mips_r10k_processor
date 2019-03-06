@@ -28,6 +28,7 @@ module Free_List(
 
 	assign empty = (tail == 0);
 	assign free_reg = free_list[0];
+	assign num_free_entries = tail;
 
 	always_comb begin
 
@@ -55,7 +56,7 @@ module Free_List(
 			next_free_list = free_list;
 			next_tail = tail;
 		end
-
+	end
 
 	always_ff @(posedge clock) begin
 		if (reset) begin
@@ -66,10 +67,8 @@ module Free_List(
 			// pr(num_gen- 1)
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
 				free_list[i] 		<= {0, `NUM_GEN_REG + i};
-				next_free_list[i] 	<= {0, `NUM_GEN_REG + i};
 			end
 			tail 		<= `NUM_GEN_REG;
-			next_tail 	<= `NUM_GEN_REG;
 		end else begin
 			free_list <= next_free_list;
 			tail <= next_tail;
