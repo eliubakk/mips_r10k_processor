@@ -33,7 +33,7 @@ module testbench;
 		.reset(reset),
 		.enable(enable),
 		.T_old(T_old),
-		.dispatch_en(dispatch_en);
+		.dispatch_en(dispatch_en),
 		// outputs
 		.num_free_entries(num_free_entries),
 		.empty(empty),

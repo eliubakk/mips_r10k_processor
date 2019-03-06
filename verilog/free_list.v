@@ -1,3 +1,4 @@
+`include "sys_defs.vh"
 `define FL_SIZE `NUM_PHYS_REG
 
 // would be good idea to create a queue module and create an instance of that

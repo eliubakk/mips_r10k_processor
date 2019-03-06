@@ -22,7 +22,7 @@ all:    simv
 # SIMFILES = RS.v
 # SYNFILES = RS.vg 
 
-TESTBENCH = free_list_test.v
+TESTBENCH = testbench/free_list_test.v
 SIMFILES = verilog/free_list.v
 SYNFILES = free_list.vg
 
