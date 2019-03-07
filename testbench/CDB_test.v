@@ -45,13 +45,13 @@ module testbench;
 	
 	initial begin
 		
-		$monitor("Clock: %4.0f, reset: %b, enable:%b, tag_in:%d, ex_valid:%b, \n CDB_tag_out:%d, CDB_en_out:%b, busy:%b", clock, reset, enable, tag_in, ex_valid, CDB_tag_out, CDB_en_out, busy);	
+		$monitor("Clock: %4.0f, reset: %b, enable:%b, tag_in:%d, ex_valid:%b, CDB_tag_out:%d, CDB_en_out:%b, busy:%b", clock, reset, enable, tag_in, ex_valid, CDB_tag_out, CDB_en_out, busy);	
 
 		// Initial value
 		clock = 1'b0;
 		reset = 1'b0;
 		enable = 1'b0;
-		tag_in = 7'b0;
+		tag_in = 0;
 		ex_valid = 1'b0;
 
 		@(negedge clock);
@@ -60,7 +60,7 @@ module testbench;
 		$display("-----Check the CDB functionality-----"); // Check the CDB functionality
 
 		
-		for(i=0;i<64;i=i+1) begin
+		for(i=0;i<`NUM_PHYS_REG;i=i+1) begin
 			@(negedge clock);
 			reset =  1'b0;
 			enable = 1'b1;
@@ -115,9 +115,32 @@ module testbench;
 		`DELAY;
 		assert(!busy & !CDB_en_out &(CDB_tag_out==7'd3)) else #1 exit_on_error;
 
+		$display("-----Check output is not valid when enable = 0 and ex_valid = 0-----"); // check enable & ex_valid
+	
+		@(negedge clock);
+		reset = 1'b0;
+		tag_in = 7'b0000111;
+		enable = 1'b0;
+		ex_valid = 1'b0;
+		@(posedge clock);
+		`DELAY;
+		assert(!busy & !CDB_en_out &(CDB_tag_out==7'd3)) else #1 exit_on_error;
+
+
+
 		$display("@@@passed");
 		$finish;		
 
 		end
 	
 endmodule
+
+		// Change the inputs with sys_defsvalues
+		// 0. Synthesize
+		// 1. integrate everything into pipeline (single scalar)
+		// + check functionality + precise state & interrupt
+		// 2. Superscalar for each module
+		// 3. Small test programs (single scalar, super scalar)
+		// 4. Automated testing
+		// Future work : LSQ + branch predictor
+

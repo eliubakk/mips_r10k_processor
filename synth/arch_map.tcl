@@ -11,7 +11,7 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "arch_map.v"]
+read_file -f sverilog [list "verilog/arch_map.v"]
 set design_name Arch_Map_Table
 set clock_name clock
 set reset_name reset

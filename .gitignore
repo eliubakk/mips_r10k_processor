@@ -6,7 +6,7 @@ csrc/*
 *.out
 vis_simv
 *.daidir
-syn_simv
+syn_simv*
 synsimv
 vcdplus.vpd
 vc_hdrs.h

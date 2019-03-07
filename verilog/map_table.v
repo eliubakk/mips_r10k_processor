@@ -10,6 +10,9 @@ module Map_Table(
 	input PHYS_REG			free_reg, 	// Comes from Free List during Dispatch
 	input PHYS_REG 			CDB_tag_in, 	// Comes from CDB during Commit
 	input				CDB_en, 	// Comes from CDB during Commit
+	input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
+	input branch_incorrect,
+
 
 	`ifdef DEBUG
 	output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
@@ -36,7 +39,9 @@ module Map_Table(
 
 	always_comb begin
 
-		if (CDB_en & enable) begin
+		if (branch_incorrect) begin
+			next_map_table = map_check_point;
+		end else if (CDB_en & enable) begin
 			// Commit Stage first
 			for (int i = 0; i < `NUM_GEN_REG; ++i) begin
 				if (map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == CDB_tag_in[$clog2(`NUM_PHYS_REG)-1:0]) begin

@@ -16,6 +16,9 @@ module testbench;
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_test;
 	PHYS_REG test_tag;
 	int counter = 0;
+	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point;
+	logic branch_incorrect = ZERO;
+	
 
 	// input wires
 	logic clock;
@@ -48,6 +51,8 @@ module testbench;
 		.free_reg(free_reg),
 		.CDB_tag_in(CDB_tag_in),
 		.CDB_en(CDB_en),
+		.branch_incorrect(branch_incorrect),
+		.map_check_point(map_check_point),
 		// outputs
 		.map_table_out(map_table_out),
 		.T1(T1),
@@ -312,6 +317,26 @@ module testbench;
 		assert(T == free_reg) else #1 exit_on_error;
 
 		$display("Simultaneous Commit and Dispatch Passed");
+
+
+		$display("Testing Basic Branch Incorrect...");
+
+		@(negedge clock);
+		enable = ZERO;
+		CDB_en = ZERO;
+		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+			map_check_point[i].phys_tag = i + 4;
+		end
+
+		@(negedge clock);
+		branch_incorrect = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		assert(map_table_out == map_check_point) else #1 exit_on_error;
+
+		$display("Basic Branch Incorrect Passed");
+
 
 		$display("ALL TESTS Passed");
 		$finish;

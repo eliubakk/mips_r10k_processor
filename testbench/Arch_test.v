@@ -56,8 +56,8 @@ module testbench;
 		clock = 1'b0;
 		reset = 1'b0;
 		enable = 1'b0;
-		T_new_in = 7'b0;
-		T_old_in = 7'b0;
+		T_new_in = 0;
+		T_old_in = 0;
 
 		@(negedge clock);
 		reset = 1'b1;
@@ -74,8 +74,8 @@ module testbench;
 		@(negedge clock);
 		reset = 1'b0;
 		enable = 1'b1;
-		T_old_in = 7'd3;
-		T_new_in = 7'd3 + `NUM_GEN_REG;
+		T_old_in = 3;
+		T_new_in = 3 + `NUM_GEN_REG;
 		@(posedge clock);
 		`DELAY;
 		display_arch_table;
@@ -113,8 +113,8 @@ module testbench;
 		@(negedge clock);
 		reset = 1'b0;
 		enable = 1'b0;
-		T_old_in = 7'b0000111;
-		T_new_in = 7'b0100111;
+		T_old_in = 7;
+		T_new_in = 7;
 		@(posedge clock);
 		`DELAY;
 		for(j=0;j<`NUM_GEN_REG;j=j+1) begin
@@ -123,6 +123,22 @@ module testbench;
 		end
 
 		display_arch_table;
+
+		// random numbers
+		$display("-----Random number check"); // check for random numbers
+
+		for(i=0;i<`NUM_GEN_REG;i=i+1) begin
+			@(negedge clock);
+			enable = 1'b1;
+			T_old_in = i;
+			T_new_in = $urandom()%`NUM_GEN_REG + `NUM_GEN_REG;
+			@(posedge clock);
+			`DELAY;
+			display_arch_table;
+			assert(arch_table[i]==T_new_in) else #1 exit_on_error;
+	
+		end
+
 
 		$display("@@@passed");
 		$finish;		
