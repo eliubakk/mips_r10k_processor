@@ -349,7 +349,7 @@ module testbench;
 		for (int i = 0; i < `NUM_PHYS_REG; ++i) begin
 			@(negedge clock);
 			for (int j = 0; j < i; ++j) begin
-				free_check_point[j] = $urandom_range(64, 0);
+				free_check_point[j] = $urandom_range(63, 0);
 			end
 			tail_check_point = i;
 			branch_incorrect = ONE;

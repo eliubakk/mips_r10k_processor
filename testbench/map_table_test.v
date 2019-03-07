@@ -18,7 +18,15 @@ module testbench;
 	int counter = 0;
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point;
 	logic branch_incorrect = ZERO;
-	
+
+	int test_a;
+	int test_b;
+	int test_reg_dest;
+	int test_free_reg;
+	int test_CDB_tag;
+	logic test_CDB_en;
+	logic test_enable;
+
 
 	// input wires
 	logic clock;
@@ -318,6 +326,53 @@ module testbench;
 
 		$display("Simultaneous Commit and Dispatch Passed");
 
+		$display("Testing Multiple Simultaneous Commit and Dispatch...");
+
+
+		for (int i = 0; i < 50; ++i) begin
+			test_a = $urandom_range(31, 0);
+			test_b = $urandom_range(31, 0);
+			test_reg_dest = $urandom_range(31, 0);
+			test_free_reg = $urandom_range(63, 0);
+			test_CDB_tag = $urandom_range(63, 0);
+			test_CDB_en = $urandom_range(1, 0);
+			test_enable = $urandom_range(1, 0);
+			map_table_test = map_table_out;
+
+			if (test_CDB_en) begin
+				for (int j = 0; j < `NUM_GEN_REG; ++j) begin
+					if (map_table_test[j].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == test_CDB_tag[$clog2(`NUM_PHYS_REG)-1:0]) begin
+						map_table_test[j].phys_tag = test_CDB_tag;
+					end
+				end
+			end
+
+			if (test_enable) begin
+				map_table_test[test_reg_dest].phys_tag = test_free_reg;
+			end
+
+			@(negedge clock);
+			reset = ZERO;
+			enable = test_enable;
+			reg_a = test_a;
+			reg_b = test_b;
+			reg_dest = test_reg_dest;
+			free_reg = test_free_reg;
+			CDB_tag_in = test_CDB_tag;
+			CDB_en = test_CDB_en;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out == map_table_test) else #1 exit_on_error;
+			if (test_enable) begin
+				assert(T1 == map_table_test[test_a].phys_tag) else #1 exit_on_error;
+				assert(T2 == map_table_test[test_b].phys_tag) else #1 exit_on_error;
+				assert(T == map_table_test[test_reg_dest].phys_tag) else #1 exit_on_error;
+			end
+			
+		end
+
+		$display("Multiple Simultaneous Commit and Dispatch");
 
 		$display("Testing Basic Branch Incorrect...");
 
@@ -336,6 +391,25 @@ module testbench;
 		assert(map_table_out == map_check_point) else #1 exit_on_error;
 
 		$display("Basic Branch Incorrect Passed");
+
+		$display("Testing Multiple Branch Incorrect...");
+
+		branch_incorrect = ZERO;
+
+		for (int i = 0; i < 10; ++i) begin
+			@(negedge clock);
+			for (int j = 0; j < `NUM_GEN_REG; ++j) begin
+				map_check_point[j] = $urandom_range(`NUM_PHYS_REG - 1, 0);
+			end
+			branch_incorrect = ONE;
+
+			@(posedge clock);
+			`DELAY;
+			branch_incorrect = ZERO;
+			assert(map_table_out == map_check_point) else #1 exit_on_error;
+		end
+
+		$display("Multiple Branch Incorrect Passed");
 
 
 		$display("ALL TESTS Passed");
