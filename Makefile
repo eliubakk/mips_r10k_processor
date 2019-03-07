@@ -22,6 +22,11 @@ TESTBENCH = testbench/CDB_test.v
 SIMFILES = verilog/cdb.v
 SYNFILES = CDB.vg 
 
+# RS files
+RSFILES = verilog/RS.v
+RSSYN = RS.vg
+RSTEST = testbench/RS_test.v
+
 # free list files
 FREELISTFILES = verilog/free_list.v
 FREELISTSYN = Free_List.vg
@@ -37,6 +42,16 @@ CDBFILES = verilog/cdb.v
 CDBSYN = CDB.vg
 CDBTEST = testbench/CDB_test.v
 
+# Arch Map Table files
+ARCHFILES = verilog/arch_map.v
+ARCHSYN = Arch_Table.vg
+ARCHTEST = testbench/Arch_test.v
+
+RS.vg: $(RSFILES) synth/RS.tcl
+	dc_shell-t -f synth/RS.tcl | tee RS_synth.out
+
+Arch_Table.vg: $(ARCHFILES) synth/arch_map.tcl
+	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
 
 CDB.vg: $(CDBFILES) synth/cdb.tcl
 	 dc_shell-t -f synth/cdb.tcl | tee cdb_synth.out
@@ -55,6 +70,17 @@ Map_Table.vg: $(MAPTABLEFILES) synth/map_table.tcl
 #Arch_Map_Table.vg: $(SIMFILES) synth/arch_map.tcl
 #	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
 
+syn_simv_RS: $(RSSYN) $(RSTEST)
+	$(VCS) $(RSTEST) $(RSSYN) $(LIB) -o syn_simv_RS
+
+RS: syn_simv_RS
+	./syn_simv_RS | tee syn_RS_program.out
+
+syn_simv_arch: $(ARCHSYN) $(ARCHTEST)
+	$(VCS) $(ARCHTEST) $(ARCHSYN) $(LIB) -o syn_simv_arch
+
+arch_map: syn_simv_arch
+	./syn_simv_arch | tee syn_arch_program.out
 
 syn_simv_cdb: $(CDBSYN) $(CDBTEST)
 	$(VCS) $(CDBTEST) $(CDBSYN) $(LIB) -o syn_simv_cdb
