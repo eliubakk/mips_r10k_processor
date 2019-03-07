@@ -44,13 +44,13 @@ CDBTEST = testbench/CDB_test.v
 
 # Arch Map Table files
 ARCHFILES = verilog/arch_map.v
-ARCHSYN = Arch_Table.vg
+ARCHSYN = Arch_Map_Table.vg
 ARCHTEST = testbench/Arch_test.v
 
 RS.vg: $(RSFILES) synth/RS.tcl
 	dc_shell-t -f synth/RS.tcl | tee RS_synth.out
 
-Arch_Table.vg: $(ARCHFILES) synth/arch_map.tcl
+Arch_Map_Table.vg: $(ARCHFILES) synth/arch_map.tcl
 	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
 
 CDB.vg: $(CDBFILES) synth/cdb.tcl
@@ -125,7 +125,7 @@ syn:	syn_simv
 
 clean:
 	rm -rvf simv *.daidir csrc vcs.key program.out \
-	  syn_simv syn_simv.daidir syn_program.out \
+	  syn_simv* syn_simv.daidir syn_program.out \
           dve *.vpd *.vcd *.dump ucli.key
 
 nuke:	clean
