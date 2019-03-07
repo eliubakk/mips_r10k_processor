@@ -22,16 +22,23 @@ TESTBENCH = testbench/CDB_test.v
 SIMFILES = verilog/cdb.v
 SYNFILES = CDB.vg 
 
+# free list files
 FREELISTFILES = verilog/free_list.v
 FREELISTSYN = Free_List.vg
 FREELISTTEST = testbench/free_list_test.v
 
+# map table files
 MAPTABLEFILES = verilog/map_table.v
 MAPTABLESYN = Map_Table.vg
 MAPTABLETEST = testbench/map_table_test.v
 
+# CDB files
+CDBFILES = verilog/cdb.v
+CDBSYN = CDB.vg
+CDBTEST = testbench/CDB_test.v
 
-CDB.vg: $(SIMFILES) synth/cdb.tcl
+
+CDB.vg: $(CDBFILES) synth/cdb.tcl
 	 dc_shell-t -f synth/cdb.tcl | tee cdb_synth.out
 
 Free_List.vg: $(FREELISTFILES) synth/free_list.tcl
@@ -47,6 +54,13 @@ Map_Table.vg: $(MAPTABLEFILES) synth/map_table.tcl
 
 #Arch_Map_Table.vg: $(SIMFILES) synth/arch_map.tcl
 #	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
+
+
+syn_simv_cdb: $(CDBSYN) $(CDBTEST)
+	$(VCS) $(CDBTEST) $(CDBSYN) $(LIB) -o syn_simv_cdb
+
+cdb: syn_simv_cdb
+	./syn_simv_cdb | tee syn_cdb_program.out
 
 syn_simv_free_list: $(FREELISTSYN) $(FREELISTTEST)
 	$(VCS) $(FREELISTTEST) $(FREELISTSYN) $(LIB) -o syn_simv_free_list
