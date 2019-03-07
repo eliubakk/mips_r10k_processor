@@ -1,6 +1,6 @@
 `include "sys_defs.vh"
 `define FL_SIZE `NUM_PHYS_REG
-
+`define DEBUG
 // would be good idea to create a queue module and create an instance of that
 // here...
 
@@ -11,8 +11,18 @@ module Free_List(
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
 	input dispatch_en, // Structural Hazard detection during Dispatch
 
+	// inputs for branch misprediction
+	input branch_incorrect,
+	input PHYS_REG [`FL_SIZE-1:0] free_check_point,
+	input [$clog2(`FL_SIZE):0] tail_check_point,
+
+	`ifdef DEBUG
+	output PHYS_REG [`FL_SIZE-1:0] free_list_out,
+	output logic [$clog2(`FL_SIZE):0] tail_out,
+	`endif
+
 	output [$clog2(`FL_SIZE):0] num_free_entries, // Used for Dispatch Hazard
-	output empty, // Used for Dispatch Hazard
+	output logic empty, // Used for Dispatch Hazard
 	output PHYS_REG free_reg // Output for Dispatch for other modules
 );
 
@@ -29,10 +39,17 @@ module Free_List(
 	assign empty = (tail == 0);
 	assign free_reg = free_list[0];
 	assign num_free_entries = tail;
+	`ifdef DEBUG
+	assign free_list_out = free_list;
+	assign tail_out = tail;
+	`endif
 
 	always_comb begin
 
-		if (dispatch_en & enable) begin
+		if (branch_incorrect) begin
+			next_free_list = free_check_point;
+			next_tail = tail_check_point;
+		end else if (dispatch_en & enable) begin
 			// Reg is getting retired AND getting sent out
 			for (int i = 0; i < `FL_SIZE; ++i) begin
 				next_free_list[i] = free_list[i+1];

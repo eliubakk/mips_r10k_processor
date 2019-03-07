@@ -18,9 +18,9 @@ all:    simv
 # Modify starting here
 #####
 ## Testing for CDB.v
-TESTBENCH = testbench/CDB_test.v
-SIMFILES = verilog/cdb.v
-SYNFILES = CDB.vg 
+TESTBENCH = testbench/free_list_test.v
+SIMFILES = verilog/free_list.v
+SYNFILES = Free_List.vg 
 
 # RS files
 RSFILES = verilog/RS.v

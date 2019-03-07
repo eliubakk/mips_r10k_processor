@@ -19,11 +19,19 @@ module testbench;
 	PHYS_REG T_old;
 	logic dispatch_en;
 
+	logic branch_incorrect = ZERO;
+	PHYS_REG [`NUM_PHYS_REG-1:0] free_check_point;
+	logic [$clog2(`NUM_PHYS_REG):0] tail_check_point;
+
 	// output wires
 	logic [$clog2(`NUM_PHYS_REG):0] num_free_entries;
 	logic empty;
 	PHYS_REG free_reg;
 	PHYS_REG last_free_reg;
+
+	PHYS_REG [`NUM_PHYS_REG-1:0] free_list_out;
+	logic [$clog2(`NUM_PHYS_REG):0] tail_out;
+
 
 	
 	// initialize module
@@ -34,11 +42,19 @@ module testbench;
 		.reset(reset),
 		.enable(enable),
 		.T_old(T_old),
+
+		.branch_incorrect(branch_incorrect),
+		.free_check_point(free_check_point),
+		.tail_check_point(tail_check_point),
+
 		.dispatch_en(dispatch_en),
 		// outputs
 		.num_free_entries(num_free_entries),
 		.empty(empty),
-		.free_reg(free_reg)
+		.free_reg(free_reg),
+
+		.free_list_out(free_list_out),
+		.tail_out(tail_out)
 	);
 
 
@@ -52,14 +68,37 @@ module testbench;
 	endtask
 
 
+	task print_free_list;
+		input	PHYS_REG [`NUM_PHYS_REG-1:0] list;
+		begin
+			for (int i = 0; i < `NUM_PHYS_REG; ++i) begin
+				$display("i = %d tag: %d", i, list[i]);
+			end	
+		end
+	endtask
+
+	task check_free_list;
+		input	PHYS_REG [`NUM_PHYS_REG-1:0] first;
+		input 	[$clog2(`NUM_PHYS_REG):0] first_tail;
+		input	PHYS_REG [`NUM_PHYS_REG-1:0] second;
+		input 	[$clog2(`NUM_PHYS_REG):0] second_tail;
+		begin
+			assert (first_tail == second_tail) else #1 exit_on_error;
+			for (int i = 0; i < first_tail; ++i) begin
+				assert(first[i] == second[i]) else #1 exit_on_error;
+			end
+		end
+	endtask
+
+
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
 
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b enable: %b T_old: %d dispatch_en: %b num_free_entries: %d empty: %b free_reg: %d", 
-				clock, reset, enable, T_old, dispatch_en, num_free_entries, empty, free_reg);
+		$monitor("clock: %b reset: %b enable: %b T_old: %d dispatch_en: %b num_free_entries: %d empty: %b free_reg: %d branch_incorrect: %b", 
+				clock, reset, enable, T_old, dispatch_en, num_free_entries, empty, free_reg, branch_incorrect);
 
 		// intial values
 		clock = ZERO;
@@ -233,6 +272,76 @@ module testbench;
 		assert(empty) else #1 exit_on_error;
 
 		$display("Dispatch Past Empty Free List Passed");
+
+
+		$display("Testing Basic Branch Incorrect...");
+
+		// retire a few registers
+		// retire reg 5, 7, 9, 14
+
+		@(negedge clock);
+		enable = ONE;
+		T_old = 5;
+
+		@(posedge clock);
+		`DELAY;
+		assert(num_free_entries == 1) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(free_reg == 5) else #1 exit_on_error;	
+
+		@(negedge clock);
+		enable = ONE;
+		T_old = 7;
+
+		@(posedge clock);
+		`DELAY;
+		assert(num_free_entries == 2) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(free_reg == 5) else #1 exit_on_error;	
+
+
+		@(negedge clock);
+		enable = ONE;
+		T_old = 9;
+
+		@(posedge clock);
+		`DELAY;
+		assert(num_free_entries == 3) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(free_reg == 5) else #1 exit_on_error;	
+
+
+		@(negedge clock);
+		enable = ONE;
+		T_old = 14;
+
+		@(posedge clock);
+		`DELAY;
+		assert(num_free_entries == 4) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(free_reg == 5) else #1 exit_on_error;	
+		enable = ZERO;
+
+		// update the checkpoint free list
+		free_check_point[0] = 8;
+		free_check_point[1] = 9;
+		free_check_point[2] = 12;
+		tail_check_point = 3;
+
+		// set branch_incorrect to high
+		@(negedge clock);
+		branch_incorrect = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		assert(num_free_entries == 3) else #1 exit_on_error;
+		assert(!empty) else #1 exit_on_error;
+		assert(free_reg == 8) else #1 exit_on_error;
+
+		check_free_list(free_list_out, tail_out, free_check_point, tail_check_point);
+		
+		$display("Basic Branch Incorrect Passed");
+
 
 		$display("ALL TESTS Passed");
 		$finish;
