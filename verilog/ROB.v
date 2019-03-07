@@ -1,37 +1,6 @@
 `include "sys_defs.vh"
 `define DEBUG
 
-module ROB(
-	input 		    	clock,
-	input 		    	reset,
-	input 		    	enable,
-	input PHYS_REG 		T_old_in, // Comes from Map Table During Dispatch
-	input PHYS_REG		T_new_in, // Comes from Free List During Dispatch
-	input PHYS_REG 		CDB_tag_in, // Comes from CDB during Commit
-	input				CDB_en, // Comes from CDB during Commit
-	input				dispatch_en, // Structural Hazard detection during Dispatch
-	input 				branch_not_taken,
-
-	// OUTPUTS
-	`ifdef DEBUG 
-	output PHYS_REG 	T_old_out, // Output for Retire Stage goes to Free List
-	output PHYS_REG     T_new_out, // Output for Retire Stage goes to Arch Map
-	output 				T_old_valid, T_new_valid;
-	output [$clog2(`ROB_SIZE) - 1:0] rob_free_entries,
-	output							 rob_full // Used for Dispatch Hazard
-	`endif
-);
-
-endmodule // ROB
-
-logic [$clog2(`ROB_SIZE) - 1:0] tail, head;
-logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg;
-//logic [$clog2(`ROB_SIZE) - 1:0] ROB_idx;
-							
-logic ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table, ROB_table_reg;
-logic check_loop;		// To keep a tab on the loop checking during dispatch stage
-logic T_new_valid_reg, T_old_valid_reg;
-
 /// CAM module
 module ROB_CAM(
 		input				enable,
@@ -53,6 +22,43 @@ module ROB_CAM(
 			
 		end	
 	end		
+endmodule
+
+module ROB(
+	input 		    	clock,
+	input 		    	reset,
+	input 		    	enable,
+	input PHYS_REG 		T_old_in, // Comes from Map Table During Dispatch
+	input PHYS_REG		T_new_in, // Comes from Free List During Dispatch
+	input PHYS_REG 		CDB_tag_in, // Comes from CDB during Commit
+	input				CDB_en, // Comes from CDB during Commit
+	input				dispatch_en, // Structural Hazard detection during Dispatch
+	input 				branch_not_taken,
+
+	// OUTPUTS
+	
+	output PHYS_REG 	T_old_out, // Output for Retire Stage goes to Free List
+	output PHYS_REG     T_new_out, // Output for Retire Stage goes to Arch Map
+	output 				T_old_valid, T_new_valid;
+	output [$clog2(`ROB_SIZE) - 1:0] rob_free_entries,
+	output							 rob_full, // Used for Dispatch Hazard
+	`ifdef DEBUG 
+	output  ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out,
+	output logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg
+	`endif
+);
+
+
+
+logic [$clog2(`ROB_SIZE) - 1:0] tail, head;
+logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg;
+//logic [$clog2(`ROB_SIZE) - 1:0] ROB_idx;
+							
+logic ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table, ROB_table_reg;
+logic check_loop;		// To keep a tab on the loop checking during dispatch stage
+logic T_new_valid_reg, T_old_valid_reg;
+
+
 //RETIRE STAGE
 
 always_comb begin
@@ -134,3 +140,4 @@ check_loop = 1'b0;
 		end
 	end
 end
+endmodule // ROB
