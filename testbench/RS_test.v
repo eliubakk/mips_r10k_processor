@@ -20,7 +20,8 @@ module testbench;
 	RS_ROW_T   	[(`RS_SIZE - 1):0] 	rs_table_test ;
 	RS_ROW_T 	[(`NUM_FU -1 ):0]	issue_next_test   ; 
 
-	`DUT(RS) RS0(
+	
+	RS RS0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 

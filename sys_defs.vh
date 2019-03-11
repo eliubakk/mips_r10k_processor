@@ -160,6 +160,7 @@ typedef struct packed {
   logic valid_inst; // for counting valid instructions executed
 } DECODED_INST;
 
+// RS_ROWS
 typedef struct packed{
   DECODED_INST inst;
   PHYS_REG     T;
@@ -171,6 +172,20 @@ typedef struct packed{
 typedef struct packed {
 	PHYS_REG phys_tag;
 } MAP_ROW_T;
+
+
+//ROB_ROWS
+typedef struct packed{
+  PHYS_REG T_new_out;
+  PHYS_REG T_old_out;
+//  logic T_new_valid;
+//  logic T_old_valid;
+  logic busy;
+} ROB_ROW_T;
+
+
+
+
 
 //////////////////////////////////////////////
 //

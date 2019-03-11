@@ -1,3 +1,5 @@
+`include "sys_defs.vh"
+
 module CDB (
 	input clock,    // Clock
 	input reset,  // Asynchronous reset active low
@@ -11,18 +13,15 @@ module CDB (
 	output 		busy
 );
 
+	assign CDB_en_out	= !reset & enable & ex_valid;
+	assign busy 		= !reset & enable & ex_valid;
+
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			CDB_tag_out	<= 7'b1111111; // Dummy register
-			CDB_en_out 	<= 1'b0;
-			busy 		<= 1'b0;	
-		end else if (enable) begin
-			if(ex_valid) begin
-				CDB_tag_out	<= tag_in;
-				CDB_en_out	<= 1'b1;
-				busy		<= 1'b1;
-			end	
-		end
+			CDB_tag_out	<= 7'b0; 
+		end else if (enable & ex_valid) begin
+			CDB_tag_out	<= tag_in;
+		end	
 
 	end
 

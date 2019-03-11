@@ -14,6 +14,19 @@ module testbench;
 	// initialize wires
 
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_test;
+	PHYS_REG test_tag;
+	int counter = 0;
+	MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point;
+	logic branch_incorrect = ZERO;
+
+	int test_a;
+	int test_b;
+	int test_reg_dest;
+	int test_free_reg;
+	int test_CDB_tag;
+	logic test_CDB_en;
+	logic test_enable;
+
 
 	// input wires
 	logic clock;
@@ -46,6 +59,8 @@ module testbench;
 		.free_reg(free_reg),
 		.CDB_tag_in(CDB_tag_in),
 		.CDB_en(CDB_en),
+		.branch_incorrect(branch_incorrect),
+		.map_check_point(map_check_point),
 		// outputs
 		.map_table_out(map_table_out),
 		.T1(T1),
@@ -108,22 +123,20 @@ module testbench;
 		// check each gen reg
 		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
 			for (int j = 0; j < `NUM_GEN_REG; ++j) begin
-				for (int k = 0; k < `NUM_GEN_REG; ++k) begin
-					@(negedge clock);
-					enable = ONE;
-					reg_a = i;
-					reg_b = j;
-					reg_dest = k;
 
-					@(posedge clock);
-					`DELAY;
-					assert(T1[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
-					assert(T1[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-					assert(T2[$clog2(`NUM_GEN_REG)-1:0] == j) else #1 exit_on_error;
-					assert(T2[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-					assert(T[$clog2(`NUM_GEN_REG)-1:0] == k) else #1 exit_on_error;
-					assert(T[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
-				end
+
+				@(negedge clock);
+				enable = ONE;
+				reg_a = i;
+				reg_b = j;
+
+				@(posedge clock);
+				`DELAY;
+				assert(T1[$clog2(`NUM_GEN_REG)-1:0] == i) else #1 exit_on_error;
+				assert(T1[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+				assert(T2[$clog2(`NUM_GEN_REG)-1:0] == j) else #1 exit_on_error;
+				assert(T2[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+
 			end
 		end
 
@@ -136,11 +149,268 @@ module testbench;
 
 		map_table_test = map_table_out;
 
+		$display("Testing Single Reg Dispatch...");
+
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// reset
+			@(negedge clock);
+			reset = ZERO;
+			enable = ZERO;
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			enable = ZERO;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+			// reset
+			@(negedge clock);
+			reset = ZERO;
+			enable = ZERO;
+
+		end
+
+		$display("Single Reg Dispatch Passed");
+
+		$display("Testing Multiple Reg Dispatch...");
+
+		counter = 0;
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			enable = ZERO;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+		end
+
+		$display("Multiple Reg Dispatch Passed");
+
 		$display("Testing Single Reg Commit...");
 
-		// need to discuss map_table behavior...
+		// at this point, all the mapped registers are not ready
+		// from the prev test
+
+		// commit a register
+		@(negedge clock);
+		reset = ZERO;
+		CDB_en = ONE;
+		CDB_tag_in = 32;
+		CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		CDB_en = ZERO;
+		assert(map_table_out[0].phys_tag == CDB_tag_in) else #1 exit_on_error;
 
 		$display("Single Reg Commit Passed");
+
+		$display("Testing Multiple Reg Commit...");
+
+		// set up map_table so ready bits are 0
+
+		counter = 0;
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+		end
+
+		// at this point, all regs in map_table are not ready
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			@(negedge clock);
+			CDB_en = ONE;
+			CDB_tag_in = i;
+			CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+
+			@(posedge clock);
+			`DELAY;
+			CDB_en = ZERO;
+			assert(map_table_out[i - `NUM_GEN_REG].phys_tag == CDB_tag_in) else #1 exit_on_error;
+		end
+
+		$display("Multiple Reg Commit Passed");
+
+		$display("Testing Simultaneous Commit and Dispatch...");
+
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+		CDB_en = ZERO;
+
+		counter = 0;
+		// reset
+		@(negedge clock);
+		reset = ZERO;
+		enable = ZERO;
+
+		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
+
+			// map new registers in map_table
+			// the newly mapped registers are marked as not ready
+			@(negedge clock);
+			enable = ONE;
+			free_reg = i;
+			reg_dest = counter;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+			++counter;
+
+		end
+
+		@(negedge clock);
+		enable = ONE;
+		CDB_en = ONE;
+		reg_a = 6;
+		reg_b = 9;
+		reg_dest = 4;
+		CDB_tag_in = 36;
+		CDB_tag_in[$clog2(`NUM_PHYS_REG)] = ONE;
+		free_reg = 0;
+
+		@(posedge clock);
+		`DELAY;
+		enable = ZERO;
+		CDB_en = ZERO;
+		assert(map_table_out[reg_dest].phys_tag == free_reg) else #1 exit_on_error;
+		assert(T1 == `NUM_GEN_REG + reg_a) else #1 exit_on_error;
+		assert(T2 == `NUM_GEN_REG + reg_b) else #1 exit_on_error;
+		assert(T == free_reg) else #1 exit_on_error;
+
+		$display("Simultaneous Commit and Dispatch Passed");
+
+		$display("Testing Multiple Simultaneous Commit and Dispatch...");
+
+
+		for (int i = 0; i < 50; ++i) begin
+			test_a = $urandom_range(31, 0);
+			test_b = $urandom_range(31, 0);
+			test_reg_dest = $urandom_range(31, 0);
+			test_free_reg = $urandom_range(63, 0);
+			test_CDB_tag = $urandom_range(63, 0);
+			test_CDB_en = $urandom_range(1, 0);
+			test_enable = $urandom_range(1, 0);
+			map_table_test = map_table_out;
+
+			if (test_CDB_en) begin
+				for (int j = 0; j < `NUM_GEN_REG; ++j) begin
+					if (map_table_test[j].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == test_CDB_tag[$clog2(`NUM_PHYS_REG)-1:0]) begin
+						map_table_test[j].phys_tag = test_CDB_tag;
+					end
+				end
+			end
+
+			if (test_enable) begin
+				map_table_test[test_reg_dest].phys_tag = test_free_reg;
+			end
+
+			@(negedge clock);
+			reset = ZERO;
+			enable = test_enable;
+			reg_a = test_a;
+			reg_b = test_b;
+			reg_dest = test_reg_dest;
+			free_reg = test_free_reg;
+			CDB_tag_in = test_CDB_tag;
+			CDB_en = test_CDB_en;
+
+			@(posedge clock);
+			`DELAY;
+			assert(map_table_out == map_table_test) else #1 exit_on_error;
+			if (test_enable) begin
+				assert(T1 == map_table_test[test_a].phys_tag) else #1 exit_on_error;
+				assert(T2 == map_table_test[test_b].phys_tag) else #1 exit_on_error;
+				assert(T == map_table_test[test_reg_dest].phys_tag) else #1 exit_on_error;
+			end
+			
+		end
+
+		$display("Multiple Simultaneous Commit and Dispatch");
+
+		$display("Testing Basic Branch Incorrect...");
+
+		@(negedge clock);
+		enable = ZERO;
+		CDB_en = ZERO;
+		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+			map_check_point[i].phys_tag = i + 4;
+		end
+
+		@(negedge clock);
+		branch_incorrect = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		assert(map_table_out == map_check_point) else #1 exit_on_error;
+
+		$display("Basic Branch Incorrect Passed");
+
+		$display("Testing Multiple Branch Incorrect...");
+
+		branch_incorrect = ZERO;
+
+		for (int i = 0; i < 10; ++i) begin
+			@(negedge clock);
+			for (int j = 0; j < `NUM_GEN_REG; ++j) begin
+				map_check_point[j] = $urandom_range(`NUM_PHYS_REG - 1, 0);
+			end
+			branch_incorrect = ONE;
+
+			@(posedge clock);
+			`DELAY;
+			branch_incorrect = ZERO;
+			assert(map_table_out == map_check_point) else #1 exit_on_error;
+		end
+
+		$display("Multiple Branch Incorrect Passed");
+
 
 		$display("ALL TESTS Passed");
 		$finish;

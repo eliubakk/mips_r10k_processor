@@ -10,6 +10,9 @@ module Map_Table(
 	input PHYS_REG			free_reg, 	// Comes from Free List during Dispatch
 	input PHYS_REG 			CDB_tag_in, 	// Comes from CDB during Commit
 	input				CDB_en, 	// Comes from CDB during Commit
+	input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
+	input branch_incorrect,
+
 
 	`ifdef DEBUG
 	output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
@@ -30,38 +33,37 @@ module Map_Table(
 	assign map_table_out = map_table;
 	`endif
 
+	assign T1 = map_table[reg_a].phys_tag;
+	assign T2 = map_table[reg_b].phys_tag;
+	assign T = map_table[reg_dest].phys_tag;
+
 	always_comb begin
 
-		// COMMIT STAGE
-		if (CDB_en) begin
-			// if CDB is enabled, we want to update
-			// the mapped registers
-			// cam for the value and update it
-			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
-				// check if the bits from 6:0 match since bit
-				// 7 is used to determine ready
+		if (branch_incorrect) begin
+			next_map_table = map_check_point;
+		end else if (CDB_en & enable) begin
+			// Commit Stage first
+			for (int i = 0; i < `NUM_GEN_REG; ++i) begin
 				if (map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == CDB_tag_in[$clog2(`NUM_PHYS_REG)-1:0]) begin
-					// if tags match, then update the
-					// phys_tag
 					next_map_table[i].phys_tag = CDB_tag_in;
 				end else begin
-					// if tags don't match, leave it as is
-					next_map_table[i].phys_tag = map_table[i];
+					next_map_table[i].phys_tag = map_table[i].phys_tag;
 				end
 			end
-		end else begin
-			// if CDB is not enabled, then retain current
-			// map_table state
+			// Dispatch Stage second
+			next_map_table[reg_dest] = free_reg;
+		end else if (CDB_en) begin
+			for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+				if (map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == CDB_tag_in[$clog2(`NUM_PHYS_REG)-1:0]) begin
+					next_map_table[i].phys_tag = CDB_tag_in;
+				end else begin
+					next_map_table[i].phys_tag = map_table[i].phys_tag;
+				end
+			end
+		end else if (enable) begin
 			next_map_table = map_table;
-		end	
-
-		// DISPATCH STAGE
-		if (enable) begin
-			T1 = map_table[reg_a].phys_tag;
-			T2 = map_table[reg_b].phys_tag;
-			T  = map_table[reg_dest].phys_tag;
-		end else if (~CDB_en) begin
-			// if disabled, retain the current map_table state
+			next_map_table[reg_dest] = free_reg;
+		end else begin
 			next_map_table = map_table;
 		end
 	end
