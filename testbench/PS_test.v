@@ -3,10 +3,9 @@
 
 `define DELAY #2
 
-`define WIDTH 16
-`define NUM_REQS 3
-
 module testbench;
+	parameter WIDTH = 16;
+	parameter REQS = 3;
 	logic clock;
 	
 	//module inputs/outputs
@@ -17,7 +16,7 @@ module testbench;
 
 	wire correct = (gnt == gnt_correct);
 
-	`DUT(ps_multiple) #(WIDTH=`WIDTH, NUM_REQS=`NUM_REQS) ps_mult(
+	`DUT(ps_multiple) #(WIDTH, NUM_REQS) ps_mult(
 		.req(req),
 		.en(en),
 		.gnt(gnt));
@@ -46,22 +45,22 @@ module testbench;
 
 	initial begin
 		en = 0;
-		req = {`WIDTH{1'b0}};
-		gnt_correct = {`WIDTH{1'b0}};
+		req = {WIDTH{1'b0}};
+		gnt_correct = {WIDTH{1'b0}};
 
 		//check gnt doesn't change when en = 0
 		@(negedge clock);
-		req[`WIDTH-1] = 1'b1;
+		req[WIDTH-1] = 1'b1;
 
 		//enable
 		@(negedge clock);
-		gnt_correct[`WIDTH-1] = 1'b1;
+		gnt_correct[WIDTH-1] = 1'b1;
 		en = 1;
 
 		//check all 1's
 		@(negedge clock);
-		req = {`WIDTH{1'b1}};
-		gnt_correct = {`NUM_REQS{1'b1}, (`WIDTH-`NUM_REQS){1'b0}};
+		req = {WIDTH{1'b1}};
+		gnt_correct = {{NUM_REQS{1'b1}}, {(WIDTH-NUM_REQS){1'b0}}};
 
 		@(negedge clock);
 		$display("@@@PASSED");

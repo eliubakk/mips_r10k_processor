@@ -24,6 +24,10 @@ TESTBENCH = testbench/free_list_test.v
 SIMFILES = verilog/free_list.v
 SYNFILES = Free_List.vg 
 
+PSFILES = verilog/PS.v
+PSSYN = PS.vg
+PSTEST= testbench/PS_test.v
+
 # RS files
 RSFILES = verilog/RS.v
 RSSYN = RS.vg
@@ -49,6 +53,9 @@ ARCHFILES = verilog/arch_map.v
 ARCHSYN = Arch_Map_Table.vg
 ARCHTEST = testbench/Arch_test.v
 
+PS.vg: $(PSFILES) synth/PS.tcl
+	dc_shell-t -f synth/PS.tcl | tee PS_synth.out
+
 RS.vg: $(RSFILES) synth/RS.tcl
 	dc_shell-t -f synth/RS.tcl | tee RS_synth.out
 
@@ -71,6 +78,12 @@ Map_Table.vg: $(MAPTABLEFILES) synth/map_table.tcl
 
 #Arch_Map_Table.vg: $(SIMFILES) synth/arch_map.tcl
 #	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
+
+syn_simv_PS: $(PSSYN) $(PSTEST)
+	$(VCS) $(PSTEST) $(PSSYN) $(LIB) -o syn_simv_PS
+
+PS: syn_simv_PS
+	./syn_simv_PS | tee syn_PS_program.out
 
 syn_simv_RS: $(RSSYN) $(RSTEST)
 	$(VCS) $(RSTEST) $(RSSYN) $(LIB) -o syn_simv_RS
