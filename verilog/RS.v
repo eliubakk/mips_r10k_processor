@@ -34,15 +34,15 @@ endmodule
 //-----------------------------------------------------------------------------------------
 module RS(
 	// INPUTS
-	input 		    		clock,
-	input 		    		reset,
-	input 		    		enable, // enable input comes from ROB's "dispatch" output
-	input [`SS_SIZE-1:0] 	CAM_en,
-	input PHYS_REG			CDB_in, 
-	input					dispatch_valid, // FU from ROB or Free list
-	input RS_ROW_T			inst_in,
-	input [1:0]				LSQ_busy, // 00 : not busy, 01: LQ busy, 10: SQ busy, 11: Both of them busy
-	input					branch_not_taken, // signal to mention the status of the branch
+	input 		    				clock,
+	input 		    				reset,
+	input 		    				enable, // enable input comes from ROB's "dispatch" output
+	input [`SS_SIZE-1:0] 			CAM_en,
+	input PHYS_REG					CDB_in, 
+	input							dispatch_valid, // FU from ROB or Free list
+	input RS_ROW_T [(`SS_SIZE)-1:0]	inst_in,
+	input [1:0]						LSQ_busy, // 00 : not busy, 01: LQ busy, 10: SQ busy, 11: Both of them busy
+	input							branch_not_taken, // signal to mention the status of the branch
 	
 	// OUTPUTS
 	`ifdef DEBUG 
@@ -203,16 +203,16 @@ module RS(
 
 			
 		// DISPATCH STAGE
-		//for(integer i = 0; i < `SS_SIZE; i = i + 1) begin
-			if(inst_in.inst.valid_inst) begin
+		for(i = 0; i < `SS_SIZE; i = i + 1) begin
+			if(inst_in[i].inst.valid_inst) begin
 				for(j = 0; j < `RS_SIZE; j = j + 1) begin
 					if(dispatch_gnt[j] & ~rs_table_next[j].busy) begin
-						rs_table_next[j] = inst_in;
+						rs_table_next[j] = inst_in[i];
 						rs_table_next[j].busy = 1'b1;
 					end 
 				end	
 			end
-		//end
+		end
 
 	end
 
