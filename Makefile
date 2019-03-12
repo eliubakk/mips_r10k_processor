@@ -59,10 +59,10 @@ ARCHTEST = testbench/Arch_test.v
 psel_single.vg: $(PSELSINFILES) synth/psel_single.tcl
 	dc_shell-t -f synth/psel_single.tcl | tee psel_single_synth.out
 
-psel_generic.vg: $(PSELGENFILES) synth/psel_generic.tcl
+psel_generic.vg: $(PSELSINSYN) $(PSELGENFILES) synth/psel_generic.tcl
 	dc_shell-t -f synth/psel_generic.tcl | tee psel_generic_synth.out
 
-RS.vg: $(RSFILES) synth/RS.tcl
+RS.vg: $(PSELGENSYN) $(RSFILES) synth/RS.tcl
 	dc_shell-t -f synth/RS.tcl | tee RS_synth.out
 
 Arch_Map_Table.vg: $(ARCHFILES) synth/arch_map.tcl
