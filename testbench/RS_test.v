@@ -41,7 +41,7 @@ module testbench;
 	 );
 
 	
-	always #10 clock = ~clock;
+	always #5 clock = ~clock;
 
 	// need to update this
 

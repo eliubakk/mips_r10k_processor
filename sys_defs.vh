@@ -125,9 +125,12 @@ typedef enum logic [4:0] {
 } ALU_FUNC;
 
 `define NUM_FU 5
+`define NUM_LD 1
 `define RS_SIZE 16
 `define SS_SIZE 1 // superscalar size
 `define ROB_SIZE 16
+
+const logic [(`NUM_FU - 1):0] NUM_FU_TYPE = {1'b1,1'b1,1'b1,1'b1,1'b1};
 
 typedef enum logic [2:0]{
   FU_ALU,
@@ -137,13 +140,17 @@ typedef enum logic [2:0]{
   FU_BR
 } FU_NAME;
 
+const FU_NAME [(`NUM_FU - 1):0] FU_NAME_VAL = {FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR};
+
 typedef enum logic [2:0]{
-  FU_ALU_IDX,
-  FU_LD_IDX,
-  FU_ST_IDX,
-  FU_MULT_IDX,
-  FU_BR_IDX
+  FU_ALU_IDX = 0,
+  FU_LD_IDX = 1,
+  FU_ST_IDX = 2,
+  FU_MULT_IDX = 3,
+  FU_BR_IDX = 4
 } FU_IDX;
+
+const FU_IDX [(`NUM_FU - 1):0] FU_IDX_VAL = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
 
 
 
