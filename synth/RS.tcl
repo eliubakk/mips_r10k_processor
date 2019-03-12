@@ -11,7 +11,7 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f ddc [list "psel_generic_NUM_REQS1.ddc"]
+read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.dcc"]
 set_dont_touch psel_generic_NUM_REQS1
 read_file -f sverilog [list "verilog/RS.v"]
 set design_name RS
