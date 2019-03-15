@@ -36,6 +36,11 @@ RSFILES = verilog/RS.v
 RSSYN = RS.vg
 RSTEST = testbench/RS_test.v
 
+#ROB files
+ROBFILES = verilog/ROB.v
+R0OBSYN = ROB.vg
+ROBTEST = testbench/ROB_manual_test.v
+
 # free list files
 FREELISTFILES = verilog/free_list.v
 FREELISTSYN = Free_List.vg
@@ -64,6 +69,9 @@ psel_generic.vg: $(PSELSINSYN) $(PSELGENFILES) synth/psel_generic.tcl
 
 RS.vg: $(PSELGENSYN) $(RSFILES) synth/RS.tcl
 	dc_shell-t -f synth/RS.tcl | tee RS_synth.out
+
+ROB.vg: $(ROBFILES) synth/ROB.tcl
+	dc_shell-t -f synth/ROB.tcl | tee ROB_synth.out
 
 Arch_Map_Table.vg: $(ARCHFILES) synth/arch_map.tcl
 	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
@@ -96,6 +104,12 @@ syn_simv_RS: $(RSSYN) $(RSTEST)
 
 RS: syn_simv_RS
 	./syn_simv_RS | tee syn_RS_program.out
+
+syn_simv_ROB: $(ROBSYN) $(ROBTEST)
+	$(VCS) $(ROBTEST) $(ROBSYN) $(LIB) -o syn_simv_ROB
+
+ROB: syn_simv_ROB
+	./syn_simv_ROB | tee syn_ROB_program.out
 
 syn_simv_arch: $(ARCHSYN) $(ARCHTEST)
 	$(VCS) $(ARCHTEST) $(ARCHSYN) $(LIB) -o syn_simv_arch
