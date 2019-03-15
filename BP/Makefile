@@ -22,13 +22,13 @@ all:    simv
 # Modify starting here
 #####
 
-TESTBENCH = 2bit_sc_test.v
-SIMFILES = 2bit_sc.v
-SYNFILES = 2bit_sc.vg
+TESTBENCH = pht_test.v
+SIMFILES = pht_2bsc.v
+SYNFILES = PHT_TWO_SC.vg
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
-2bit_sc.vg:	test_ab.v fsm_ab.tcl 
-	dc_shell-t -f fsm_ab.tcl | tee synth.out
+PHT_TWO_SC.vg:	pht_test.v pht_2bsc.tcl 
+	dc_shell-t -f pht_2bsc.tcl | tee synth.out
 
 
 #####
