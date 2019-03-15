@@ -68,7 +68,7 @@ module pipeline (
   );
 
   // Pipeline register enables
-  logic   if_id_enable, id_ex_enable, ex_mem_enable, mem_wb_enable;
+  logic   if_id_enable, RS_enable, issue_ex_enable, ex_mem_enable, CDB_en, ROB_enable, co_re_enable;
 
   // Outputs from ID stage
   logic [63:0]   id_rega_out;
@@ -273,6 +273,7 @@ module pipeline (
     .id_opb_select_out(id_opb_select_out),
     .id_dest_reg_idx_out(id_dest_reg_idx_out),
     .id_alu_func_out(id_alu_func_out),
+    .id_fu_name(id_fu_name_out),
     .id_rd_mem_out(id_rd_mem_out),
     .id_wr_mem_out(id_wr_mem_out),
     .id_ldl_mem_out(id_ldl_mem_out),
@@ -284,6 +285,31 @@ module pipeline (
     .id_illegal_out(id_illegal_out),
     .id_valid_inst_out(id_valid_inst_out)
   );
+
+  //////////////////////////////////////////////////
+  //                                              //
+  //                  DI-Stage                    //
+  //                                              //
+  //////////////////////////////////////////////////
+  
+  RS RS0(
+      // inputs
+      .clock(clock), 
+      .reset(reset), 
+      .enable(RS_enable), 
+      .CAM_en(CAM_en), 
+      .CDB_in(CDB_in), 
+      .dispatch_valid(dispatch_valid),
+      .inst_in({id_opa_select_out, id_opb_select_out, id_dest_reg_idx_out, id_alu_func_out, id_fu_name_out, id_rd_mem_out, id_wr_mem_out, id_ldl_mem_out, id_stc_mem_out, id_cond_branch_out, id_uncond_branch_out, id_halt_out, id_cpuid_out, id_illegal_out, id_valid_inst_out}), 
+      .LSQ_busy(LSQ_busy),
+      .branch_not_taken(!ex_take_branch_out),
+
+      // outputs
+      .rs_table_out(rs_table_out), 
+      .issue_out(issue_next), 
+      .issue_cnt(issue_cnt), 
+      .rs_full(rs_full)
+    );
 
   // Note: Decode signals for load-lock/store-conditional and "get CPU ID"
   //  instructions (id_{ldl,stc}_mem_out, id_cpuid_out) are not connected
