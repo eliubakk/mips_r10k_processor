@@ -342,6 +342,25 @@ module testbench;
 		
 		$display("Basic Branch Incorrect Passed");
 
+		$display("Testing Multiple Branch Incorrect...");
+
+		branch_incorrect = ZERO;
+
+		for (int i = 0; i < `NUM_PHYS_REG; ++i) begin
+			@(negedge clock);
+			for (int j = 0; j < i; ++j) begin
+				free_check_point[j] = $urandom_range(63, 0);
+			end
+			tail_check_point = i;
+			branch_incorrect = ONE;
+
+			@(posedge clock);
+			`DELAY;
+			branch_incorrect = ZERO;
+			check_free_list(free_list_out, tail_out, free_check_point, tail_check_point);
+		end
+
+		$display("Multiple Branch Incorrect Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;

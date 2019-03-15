@@ -11,10 +11,20 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.dcc"]
-set_dont_touch psel_generic_NUM_REQS1
-read_file -f sverilog [list "verilog/RS.v"]
-set design_name RS
+read_file -f ddc [list "psel_single_WIDTH16.ddc"]
+set_dont_touch psel_single_WIDTH16
+
+#############################################
+# the follwoing two lines for RS_test
+analyze -f sverilog [list "verilog/psel_generic.v"]
+elaborate psel_generic -param NUM_REQS=1
+set design_name psel_generic_NUM_REQS1
+##############################################
+#the following for psel_generic_test
+#analyze -f sverilog [list "verilog/psel_generic.v"]
+#elaborate psel_generic
+#set design_name psel_generic
+##############################################
 set clock_name clock
 set reset_name reset
 set CLK_PERIOD 10

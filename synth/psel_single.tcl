@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : ISR.tcl                          */
+#/*   FILE        : mult_stage.tcl                          */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -10,14 +10,12 @@
 #/* new design                                              */
 #/***********************************************************/
 
-set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.dcc"]
-set_dont_touch psel_generic_NUM_REQS1
-read_file -f sverilog [list "verilog/RS.v"]
-set design_name RS
+analyze -f sverilog [list "verilog/psel_single.v"]
+elaborate psel_single -param WIDTH=16
+set design_name psel_single_WIDTH16
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 10
+set CLK_PERIOD 4.25
 
 
 
