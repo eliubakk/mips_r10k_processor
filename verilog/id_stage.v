@@ -51,6 +51,7 @@ module decoder(
     opa_select = ALU_OPA_IS_REGA;
     opb_select = ALU_OPB_IS_REGB;
     alu_func = ALU_ADDQ;
+    fu_name = FU_ALU;
     dest_reg = DEST_NONE;
     rd_mem = `FALSE;
     wr_mem = `FALSE;
@@ -92,6 +93,7 @@ module decoder(
                 `CMPULE_INST:  alu_func = ALU_CMPULE;
                 `CMPLT_INST:   alu_func = ALU_CMPLT;
                 `CMPLE_INST:   alu_func = ALU_CMPLE;
+                fu_name = FU_ALU;
                 default:        illegal = `TRUE;
               endcase // case(inst[11:5])
             `INTL_GRP:
@@ -102,6 +104,7 @@ module decoder(
                 `ORNOT_INST:  alu_func = ALU_ORNOT;
                 `XOR_INST:    alu_func = ALU_XOR;
                 `EQV_INST:    alu_func = ALU_EQV;
+                fu_name = FU_ALU;
                 default:       illegal = `TRUE;
               endcase // case(inst[11:5])
             `INTS_GRP:
@@ -109,10 +112,12 @@ module decoder(
                 `SRL_INST:  alu_func = ALU_SRL;
                 `SLL_INST:  alu_func = ALU_SLL;
                 `SRA_INST:  alu_func = ALU_SRA;
+                fu_name = FU_ALU;
                 default:    illegal = `TRUE;
               endcase // case(inst[11:5])
             `INTM_GRP:
               case (inst[11:5])
+                fu_name = FU_MULT;
                 `MULQ_INST:       alu_func = ALU_MULQ;
                 default:          illegal = `TRUE;
               endcase // case(inst[11:5])
@@ -125,6 +130,7 @@ module decoder(
            
         6'h18:
           case (inst[31:26])
+            fu_name = FU_BR;
             `MISC_GRP:       illegal = `TRUE; // unimplemented
             `JSR_GRP:
             begin
@@ -146,27 +152,34 @@ module decoder(
           dest_reg = DEST_IS_REGA;
           case (inst[31:26])
             `LDA_INST:  /* defaults are OK */;
+            begin
+              fu_name = FU_LD;
+            end
             `LDQ_INST:
             begin
               rd_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
+              fu_name = FU_LD;
             end // case: `LDQ_INST
             `LDQ_L_INST:
               begin
               rd_mem = `TRUE;
               ldl_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
+              fu_name = FU_LD;
             end // case: `LDQ_L_INST
             `STQ_INST:
             begin
               wr_mem = `TRUE;
               dest_reg = DEST_NONE;
+              fu_name = FU_ST;
             end // case: `STQ_INST
             `STQ_C_INST:
             begin
               wr_mem = `TRUE;
               stc_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
+              fu_name = FU_ST;
             end // case: `STQ_INST
             default:       illegal = `TRUE;
           endcase // case(inst[31:26])
@@ -189,6 +202,7 @@ module decoder(
             begin
               dest_reg = DEST_IS_REGA;
               uncond_branch = `TRUE;
+              fu_name = FU_BR;
             end
 
             default:
@@ -221,6 +235,7 @@ module id_stage(
         output logic  [4:0] id_dest_reg_idx_out,  // destination (writeback) register index
         // (ZERO_REG if no writeback)
         output ALU_FUNC     id_alu_func_out,      // ALU function select (ALU_xxx *)
+        output FU_NAME      id_fu_name_out,           // Function unit name
         output logic        id_rd_mem_out,        // does inst read memory?
         output logic        id_wr_mem_out,        // does inst write memory?
         output logic        id_ldl_mem_out,       // load-lock inst?
@@ -266,6 +281,7 @@ module id_stage(
     .opa_select(id_opa_select_out),
     .opb_select(id_opb_select_out),
     .alu_func(id_alu_func_out),
+    .fu_name(id_fu_name_out)
     .dest_reg(dest_reg_select),
     .rd_mem(id_rd_mem_out),
     .wr_mem(id_wr_mem_out),
