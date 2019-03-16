@@ -215,7 +215,6 @@ module testbench;
 				@(negedge clock);
 				branch_taken = $urandom()%2;
 				pc_in	     = $urandom();
-				pc_in = pc_in + 4;
 				@(posedge clock);
 				`DELAY;
 				display_pht;

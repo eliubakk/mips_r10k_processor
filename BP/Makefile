@@ -22,13 +22,13 @@ all:    simv
 # Modify starting here
 #####
 
-TESTBENCH = pht_test.v
-SIMFILES = pht_2bsc.v
-SYNFILES = PHT_TWO_SC.vg
+TESTBENCH = gas_test.v
+SIMFILES = gas.v
+SYNFILES = GAS.vg
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
-PHT_TWO_SC.vg:	pht_test.v pht_2bsc.tcl 
-	dc_shell-t -f pht_2bsc.tcl | tee synth.out
+GAS.vg:	gas_test.v gas.tcl 
+	dc_shell-t -f gas.tcl | tee synth.out
 
 
 #####
