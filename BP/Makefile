@@ -22,13 +22,13 @@ all:    simv
 # Modify starting here
 #####
 
-TESTBENCH = gas_test.v
-SIMFILES = gas.v
-SYNFILES = GAS.vg
+TESTBENCH = btb_test.v
+SIMFILES = btb.v
+SYNFILES = BTB.vg
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
-GAS.vg:	gas_test.v gas.tcl 
-	dc_shell-t -f gas.tcl | tee synth.out
+BTB.vg:	btb_test.v btb.tcl 
+	dc_shell-t -f btb.tcl | tee synth.out
 
 
 #####
