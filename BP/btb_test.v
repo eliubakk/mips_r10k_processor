@@ -75,11 +75,11 @@ module testbench;
 	task display_table;
 		begin
 			$display("--------------------------BTB-----------------------------------");
-			$display("BTB_count : %b", BTB_count);
+			$display("BTB_count : %d // valid_target : %b, target_pc : %h", BTB_count, valid_target, target_pc);
 			$display("---------------------------------------------------------");
-			$display("index			valid		tag			target_address");
+			$display("index			valid		tag		target_address");
 			for(i=0;i<`BTB_ROW;i=i+1) begin
-			$display("%d		 %1.0b		%b		%b",i,valid[i], tag[i], target_address[i] );
+			$display("%d		 %1.0b		%h		%h",i,valid[i], tag[i], target_address[i] );
 			end
 			$display("-------------------------------------------\n");
 		end
@@ -127,18 +127,41 @@ module testbench;
 		// 5. When the entry is full
 		
 		$display("--------------------------------Execute Check----------------------------------"); 
-		@(negedge clock);
 		
+		$display("--------------------Predict is taken but not in the btb------------------------");
+		@(negedge clock);
 		ex_pc		= 32'h4;
 		calculated_pc	= 32'h8;
 		ex_branch_taken	= 1'b1;
 		ex_en_branch	=1'b1;
-		
-
 		@(posedge clock);
 		`DELAY;
 		display_table;
-		assert (valid[0] & (tag[0]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b10)  ) else #1 exit_on_error;
+		assert (!valid_target & (target_pc==32'h0) & valid[0] & (tag[0]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b10) & (BTB_count == 1) ) else #1 exit_on_error;
+
+		
+		@(negedge clock);
+		ex_pc		= 32'h8;
+		calculated_pc	= 32'h10;
+		ex_branch_taken	= 1'b1;
+		ex_en_branch	=1'b1;
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (!valid_target & (target_pc==32'h0) & valid[0] & valid[1] & (tag[1]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b100) & (BTB_count == 2) ) else #1 exit_on_error;
+
+
+		$display("------------------------Predict is taken and in the btb------------------------");
+		@(negedge clock);
+		ex_pc		= 32'h4;
+		calculated_pc	= 32'hc;
+		ex_branch_taken	= 1'b1;
+		ex_en_branch	=1'b1;
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (!valid_target & (target_pc==32'h0) & valid[0] & (tag[0]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b11) & (BTB_count == 2) ) else #1 exit_on_error;
+
 
 
 		// Fetch (When BTB reads value)

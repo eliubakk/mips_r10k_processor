@@ -76,7 +76,7 @@ module  BTB(
 			CAM_ex_idx	= {($clog2(`BTB_ROW)-1){1'b0}};
 		
 			for (i=`BTB_ROW-1;i>=0;i=i-1) begin
-				if(valid[i] & (ex_pc[(`PC_ALIAS+`TAG_SIZE-1):`PC_ALIAS] == tag[i])) begin
+				if(valid[i] & (ex_pc[`TAG_SIZE-1:2] == tag[i][`TAG_SIZE-1:2])) begin
 					CAM_ex_hit		= 1'b1;
 					CAM_ex_idx		= i;
 				end
@@ -120,7 +120,7 @@ module  BTB(
 			CAM_if_idx	= {($clog2(`BTB_ROW)-1){1'b0}};
 		
 			for (i=`BTB_ROW-1;i>=0;i=i-1) begin
-				if(valid[i] & (current_pc[(`PC_ALIAS+`TAG_SIZE-1):`PC_ALIAS] == tag[i])) begin
+				if(valid[i] & (current_pc[`TAG_SIZE-1:2] == tag[i])) begin
 					CAM_if_hit		= 1'b1;
 					CAM_if_idx		= i;
 				end
