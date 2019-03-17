@@ -180,16 +180,50 @@ module testbench;
 		`DELAY;
 		$display("\n predict taken, PHT[1111][0] is updated to 0, GHT is updated to 1110");
 		display_table;
-		$display(" %d, %d, %d", prediction, pht_out[15][0], ght_out);
-
 		assert( (prediction) & !pht_out[15][0] & (ght_out==`GHT_BIT'b1110) ) else #1 exit_on_error;
 
 
 		// Change the pc value
 
 
+		@(negedge clock);
+		branch_taken = 1'b1;
+		pc_in = 32'b1000;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict not taken, PHT[1110][2] is updated to 1, GHT is updated to 1101");
+		display_table;
+		assert( (!prediction) & pht_out[14][2] & (ght_out==`GHT_BIT'b1101) ) else #1 exit_on_error;
 
 
+		@(negedge clock);
+		branch_taken = 1'b1;
+		pc_in = 32'b1100;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict not taken, PHT[1101][3] is updated to 1, GHT is updated to 1011");
+		display_table;
+		assert( (!prediction) & pht_out[13][3] & (ght_out==`GHT_BIT'b1011) ) else #1 exit_on_error;
+
+		
+		@(negedge clock);
+		branch_taken = 1'b1;
+		pc_in = 32'b1000;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict not taken, PHT[1011][2] is updated to 1, GHT is updated to 0111");
+		display_table;
+		assert( (!prediction) & pht_out[11][2] & (ght_out==`GHT_BIT'b0111) ) else #1 exit_on_error;
+
+
+		@(negedge clock);
+		branch_taken = 1'b0;
+		pc_in = 32'b0;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict taken, PHT[0111][0] is updated to 0, GHT is updated to 1110");
+		display_table;
+		assert( (prediction) & !pht_out[7][0] & (ght_out==`GHT_BIT'b1110) ) else #1 exit_on_error;
 		
 
 		// Pick some value
