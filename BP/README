@@ -7,14 +7,14 @@ Random and for-loop testing
 
 -------------------Things to do left
 
-BHT(ongoing)
+**BHT(ongoing)
+Global per PC counter(ongoing)
 
-Global per PC counter
 Gshare
 Tournament predictor
-Speculate update of GHT and roll back
+**Speculate update of GHT and roll back
 Test which predictor is the best (Different predictor / predictor 1bit vs 2bit /GHT and PHT size (GHT bit and per PC entry )
-Big branch predictor module
+**Big branch predictor module
 
 
 + prefetcher, icache

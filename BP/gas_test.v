@@ -41,7 +41,7 @@ module testbench;
 		.pht_out(pht_out),
 		`endif	
 	
-		.prediction(prediction)
+		.prediction_out(prediction)
 	);
 
 
@@ -132,7 +132,7 @@ module testbench;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 0001, PHT[0000][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0000][0] is updated to 1, GHT is updated to 0001");
 		display_table;
 		assert( (!prediction) & pht_out[0][0] & (ght_out==1) ) else #1 exit_on_error;
 
@@ -142,45 +142,47 @@ module testbench;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 0011, PHT[0001][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0001][0] is updated to 1, GHT is updated to 0011");
 		display_table;
-		assert( (!prediction) & pht_out[1][0] & (ght_out=`GHT_BIT'b11) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[1][0] & (ght_out==`GHT_BIT'b11) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b1;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 0111, PHT[0011][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0011][0] is updated to 1, GHT is updated to 0111");
 		display_table;
-		assert( (!prediction) & pht_out[3][0] & (ght_out=`GHT_BIT'b111) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[3][0] & (ght_out==`GHT_BIT'b111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b1;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 1111, PHT[0111][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0111][0] is updated to 1, GHT is updated to 1111");
 		display_table;
-		assert( (!prediction) & pht_out[7][0] & (ght_out=`GHT_BIT'b1111) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[7][0] & (ght_out==`GHT_BIT'b1111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b1;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 1111, PHT[1111][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[1111][0] is updated to 1, GHT is updated to 1111");
 		display_table;
-		assert( (!prediction) & pht_out[15][0] & (ght_out=`GHT_BIT'b1111) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[15][0] & (ght_out==`GHT_BIT'b1111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b0;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 1110, PHT[1111][0] is updated to 0, predict taken");
+		$display("\n predict taken, PHT[1111][0] is updated to 0, GHT is updated to 1110");
 		display_table;
-		assert( (prediction) & !pht_out[15][0] & (ght_out=`GHT_BIT'b1110) ) else #1 exit_on_error;
+		$display(" %d, %d, %d", prediction, pht_out[15][0], ght_out);
+
+		assert( (prediction) & !pht_out[15][0] & (ght_out==`GHT_BIT'b1110) ) else #1 exit_on_error;
 
 
 		// Change the pc value
