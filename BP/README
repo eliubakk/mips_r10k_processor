@@ -1,14 +1,16 @@
 -------------------Things have done
-
-2 bit saturation counter
-8 entry 2 bit saturation counter PHT (synthesized, 76% for random pattern)
 Random and for-loop testing
-
+2 bit saturation counter
+8 entry 2 bit saturation counter PHT (synthesized) 
+	(9T1N loop : 90%, random test : 76%)
+Global per PC counter(GAS) (synthesized) 
+	(9T1N loop : 78%, random test : 48% @ 4 GHT bit, 2 bit per PC)
+	(9T1N loop : 97%, random test : 49% @ 10 GHT bit, 2 bit per PC)
+	(9T1N loop : 91%, random test : 49% @ 10 GHT bit, 4 bit per PC)
 
 -------------------Things to do left
 
 **BHT(ongoing)
-Global per PC counter(ongoing)
 
 Gshare
 Tournament predictor
