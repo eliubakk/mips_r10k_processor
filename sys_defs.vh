@@ -173,6 +173,7 @@ typedef struct packed{
   PHYS_REG     T1;
   PHYS_REG     T2;
   logic        busy;
+  logic [31:0]  inst_opcode;
 } RS_ROW_T;
 
 typedef struct packed {

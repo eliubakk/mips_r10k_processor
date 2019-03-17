@@ -246,8 +246,8 @@ module id_stage(
         output logic        id_halt_out,
         output logic        id_cpuid_out,         // get CPUID inst?
         output logic        id_illegal_out,
-        output logic        id_valid_inst_out     // is inst a valid instruction to be 
-                                                  // counted for CPI calculations?
+        output logic        id_valid_inst_out,     // is inst a valid instruction to be 
+        output logic [4:0] ra_idx, rb_idx, rc_idx       //for giving input for the maptable                                // counted for CPI calculations?
             );
    
   DEST_REG_SEL dest_reg_select;
@@ -270,6 +270,10 @@ module id_stage(
     .wr_idx(wb_reg_wr_idx_out),
     .wr_data(wb_reg_wr_data_out)
   );
+
+
+
+
 
   // instantiate the instruction decoder
   decoder decoder_0 (
