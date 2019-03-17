@@ -41,7 +41,7 @@ module testbench;
 		.pht_out(pht_out),
 		`endif	
 	
-		.prediction(prediction)
+		.prediction_out(prediction)
 	);
 
 
@@ -124,7 +124,7 @@ module testbench;
 		`DELAY;
 		display_table;
 
-		$display("------------------------------Functionality check----------------------");
+		$display("------------------------------Functionality check for 4bit----------------------");
 		// Functionality check - Fix PC and check the update of
 		// prediction, GHT, and PHT
 		@(negedge clock);
@@ -132,7 +132,7 @@ module testbench;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 0001, PHT[0000][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0000][0] is updated to 1, GHT is updated to 0001");
 		display_table;
 		assert( (!prediction) & pht_out[0][0] & (ght_out==1) ) else #1 exit_on_error;
 
@@ -142,59 +142,103 @@ module testbench;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 0011, PHT[0001][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0001][0] is updated to 1, GHT is updated to 0011");
 		display_table;
-		assert( (!prediction) & pht_out[1][0] & (ght_out=`GHT_BIT'b11) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[1][0] & (ght_out==`GHT_BIT'b11) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b1;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 0111, PHT[0011][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0011][0] is updated to 1, GHT is updated to 0111");
 		display_table;
-		assert( (!prediction) & pht_out[3][0] & (ght_out=`GHT_BIT'b111) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[3][0] & (ght_out==`GHT_BIT'b111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b1;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 1111, PHT[0111][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[0111][0] is updated to 1, GHT is updated to 1111");
 		display_table;
-		assert( (!prediction) & pht_out[7][0] & (ght_out=`GHT_BIT'b1111) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[7][0] & (ght_out==`GHT_BIT'b1111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b1;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 1111, PHT[1111][0] is updated to 1, predict not taken");
+		$display("\n predict not taken, PHT[1111][0] is updated to 1, GHT is updated to 1111");
 		display_table;
-		assert( (!prediction) & pht_out[15][0] & (ght_out=`GHT_BIT'b1111) ) else #1 exit_on_error;
+		assert( (!prediction) & pht_out[15][0] & (ght_out==`GHT_BIT'b1111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		branch_taken = 1'b0;
 		pc_in = 0;
 		@(posedge clock);
 		`DELAY;
-		$display("\nGHT : 1110, PHT[1111][0] is updated to 0, predict taken");
+		$display("\n predict taken, PHT[1111][0] is updated to 0, GHT is updated to 1110");
 		display_table;
-		assert( (prediction) & !pht_out[15][0] & (ght_out=`GHT_BIT'b1110) ) else #1 exit_on_error;
+		assert( (prediction) & !pht_out[15][0] & (ght_out==`GHT_BIT'b1110) ) else #1 exit_on_error;
 
 
 		// Change the pc value
 
 
+		@(negedge clock);
+		branch_taken = 1'b1;
+		pc_in = 32'b1000;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict not taken, PHT[1110][2] is updated to 1, GHT is updated to 1101");
+		display_table;
+		assert( (!prediction) & pht_out[14][2] & (ght_out==`GHT_BIT'b1101) ) else #1 exit_on_error;
 
+
+		@(negedge clock);
+		branch_taken = 1'b1;
+		pc_in = 32'b1100;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict not taken, PHT[1101][3] is updated to 1, GHT is updated to 1011");
+		display_table;
+		assert( (!prediction) & pht_out[13][3] & (ght_out==`GHT_BIT'b1011) ) else #1 exit_on_error;
 
 		
+		@(negedge clock);
+		branch_taken = 1'b1;
+		pc_in = 32'b1000;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict not taken, PHT[1011][2] is updated to 1, GHT is updated to 0111");
+		display_table;
+		assert( (!prediction) & pht_out[11][2] & (ght_out==`GHT_BIT'b0111) ) else #1 exit_on_error;
 
-		// Pick some value
 
+		@(negedge clock);
+		branch_taken = 1'b0;
+		pc_in = 32'b0;
+		@(posedge clock);
+		`DELAY;
+		$display("\n predict taken, PHT[0111][0] is updated- need to do synthesize to 0, GHT is updated to 1110");
+		display_table;
+		assert( (prediction) & !pht_out[7][0] & (ght_out==`GHT_BIT'b1110) ) else #1 exit_on_error;
 		
+
+		// RESET
+
+		@(negedge clock);
+		$display("--------------------------------RESET----------------------------------"); 
+		reset = 1'b1;
+		pc_in = 32'h0;
+	
+		
+		@(negedge clock);
+		reset = 1'b0;
+
 		// For loop check
-	/*	$display("-----------------------for loop testing (9T 1N) and check accuracy --------------------");
+		$display("-----------------------for loop testing (9T 1N) and check accuracy --------------------");
 
 		for(j=0;j<100;j=j+1) begin
 			for(l=0;l<9;l=l+1) begin
@@ -203,7 +247,6 @@ module testbench;
 				pc_in = pc_in + 4;
 				@(posedge clock);
 				`DELAY;
-				display_table;
 				accuracy_check_for;				
 			end
 				@(negedge clock);
@@ -211,16 +254,15 @@ module testbench;
 				pc_in = pc_in + 4;
 				@(posedge clock);
 				`DELAY;
-				display_table;
 				accuracy_check_for;
 		end	
-*/
 
+		display_table;
 
 		// Random update and check
-		/*$display("---------------------------------RANDOM testing and check accuracy------------------------");
+		$display("---------------------------------RANDOM testing and check accuracy------------------------");
 		
-		for(i=0;i<10;i=i+1) begin
+		for(i=0;i<100;i=i+1) begin
 			@(negedge clock);
 			branch_taken = $urandom()%2;
 			pc_in	     = $urandom();
@@ -228,17 +270,9 @@ module testbench;
 			`DELAY;
 			display_table;
 			accuracy_check_random;
-		end*/
+		end
 	
-		// RESET	
-		$display("------------------------------RESET----------------------------------");
-		@(negedge clock);
-		reset = 1'b1;
-		pc_in = 0;
-		@(negedge clock);
-		reset = 1'b0;
-		enable = 1'b1;
-
+		display_table;
 			
 
 		$display("-----------------------------------------------------------------");

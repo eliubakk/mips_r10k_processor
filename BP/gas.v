@@ -16,13 +16,15 @@ module GAS(
 		output	[`GHT_BIT-1:0]					ght_out,
 		output	[2**(`GHT_BIT)-1:0][2**(`PHT_PC_BIT)-1:0]	pht_out,
 		`endif
-		output		prediction
+		output							prediction_out
 		
 	);
 	// 0 : not taken, 1 : taken
 	//
-	// ght is updated in this cycle, but ght finds its value from pht by
-	// indexing previous ght value
+	// first : find the prediction value based on the GHT and PHT
+	// Second : update the PHT
+	// Third : update the GHT
+	//
 
 
 		logic		[`GHT_BIT-1:0]					ght;
@@ -30,21 +32,26 @@ module GAS(
 		logic		[2**(`GHT_BIT)-1:0][2**(`PHT_PC_BIT)-1:0]	pht;
 		logic		[2**(`GHT_BIT)-1:0][2**(`PHT_PC_BIT)-1:0]	next_pht;
 		logic		[(`PHT_PC_BIT+1):2]				pc_partial;
+		logic								prediction;
+		logic								next_prediction;
 
 	`ifdef DEBUG_OUT
 	assign pht_out 	= pht;
 	assign ght_out	= ght;
 	`endif	
 
+	assign prediction_out	= prediction;
+
 	assign pc_partial	=  pc_in [(`PHT_PC_BIT)+1:2]; // do not consider the byte offset
-	assign prediction	=  pht[ght][pc_partial]; 
-	
+
 	always_comb begin
 		next_pht	= pht;
 		next_ght	= ght;
-		
-				
+		next_prediction	= prediction;
+
 		if(enable) begin
+
+			next_prediction			= pht	[ght] [pc_partial];
 
 			if(branch_taken) begin
 				next_pht[ght][pc_partial] = 1'b1;
@@ -62,11 +69,13 @@ module GAS(
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			pht	<=  {(2**`GHT_BIT)*(2**`PHT_PC_BIT){1'b0}}; // Initialized to not taken
-			ght	<=  {`GHT_BIT{1'b0}};
+			pht		<=  {(2**`GHT_BIT)*(2**`PHT_PC_BIT){1'b0}}; // Initialized to not taken
+			ght		<=  {`GHT_BIT{1'b0}};
+			prediction	<= 1'b0;;
 		end else begin
-			pht	<= next_pht;
-			ght	<= next_ght;
+			pht		<= next_pht;
+			ght		<= next_ght;
+			prediction	<= next_prediction;
 		end
 
 	end
