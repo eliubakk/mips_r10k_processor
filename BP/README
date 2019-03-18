@@ -7,11 +7,10 @@ Global per PC counter(GAS) (synthesized)
 	(9T1N loop : 78%, random test : 48% @ 4 GHT bit, 2 bit per PC)
 	(9T1N loop : 97%, random test : 49% @ 10 GHT bit, 2 bit per PC)
 	(9T1N loop : 91%, random test : 49% @ 10 GHT bit, 4 bit per PC)
-BTB (need to do testing for more testcases & synthesize) : Doublecheck which bit to compare and which bit to save
-
+BTB(synthesized) 
 -------------------Things to do left
 
-**BTB(ongoing)
+
 **Speculate update of GHT and roll back
 **Big branch predictor module
 

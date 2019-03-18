@@ -1,4 +1,4 @@
-// [5:2] is used for indexing, [16:6] is used for tag, [13:2] is stored as
+// [5:2] is used for indexing, [15:6] is used for tag, [13:2] is stored as
 // a target PC
 
 `define	DEBUG_OUT
@@ -6,7 +6,7 @@
 `define TAG_SIZE 10	// Tag bit size
 `define TARGET_SIZE 12	// Target address size, BTB will store [TARGET_SIZE+1:2]
 `define BTB_ROW	16	// BTB row size : 5~10% of I$ size
-//Tag will store pc [(TAG_SIZE+$clog2(BTB_ROW)+2):($clog2(BTB_ROW)+2)], index will use pc[$clog2(BTB_ROW)+1:2]
+//Tag will store pc [(TAG_SIZE+$clog2(BTB_ROW)+1):($clog2(BTB_ROW)+2)], index will use pc[$clog2(BTB_ROW)+1:2]
 
 module  BTB(
 	input clock,    // Clock
@@ -69,21 +69,17 @@ module  BTB(
 
 			// Access to the BTB index and see whether it is valid
 			// & tag matched
-			// 1. it is in the BTB -> Just update the target
+			// 1. index is in the BTB -> update the tag and target
 			// address
-			if ( valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)] == tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ) ) begin
-				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]] = calculated_pc[`TARGET_SIZE+1:2];	
+			/*if ( valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] == tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ) ) begin
+				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]] 	= calculated_pc[`TARGET_SIZE+1:2];	
 			// 2. it is not in the BTB (not valid or valid but tag
 			// is different -> Update valid, tag, target address
-			end else if ( !valid[ex_pc[$clog2(`BTB_ROW)+1:2]] | (valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)] != tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ))) begin
+			end else if ( !valid[ex_pc[$clog2(`BTB_ROW)+1:2]] | (valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] != tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ))) begin*/
 				next_valid[ex_pc[$clog2(`BTB_ROW)+1:2]] 		= 1'b1;
-				next_tag[ex_pc[$clog2(`BTB_ROW)+1:2]]			= calculated_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)];
-				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]]	= calculated_pc[`TARGET_SIZE+1:2]; 	
-			end else begin		// No need to update BTB table
-				next_valid		= valid;
-				next_tag		= tag;
-				next_target_address 	= target_address;
-			end
+				next_tag[ex_pc[$clog2(`BTB_ROW)+1:2]]			= ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)];
+				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]]	= calculated_pc[`TARGET_SIZE+1:2];
+				
 		end else begin			// No need to update BTB table
 			next_valid		= valid;
 			next_tag		= tag;
@@ -100,9 +96,9 @@ module  BTB(
 	//
 	
 
-		if (enable & if_branch & valid[current_pc[$clog2(`BTB_ROW)+1:2]] & ( current_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)] == tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  )) begin
+		if (enable & if_branch & next_valid[current_pc[$clog2(`BTB_ROW)+1:2]] & ( current_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] == next_tag[current_pc[$clog2(`BTB_ROW)+1:2]]  )) begin
 			valid_target			= 1'b1;
-			target_pc[`TARGET_SIZE+1:2]	= target_address[current_pc[$clog2(`BTB_ROW)+1:2]];  		
+			target_pc[`TARGET_SIZE+1:2]	= next_target_address[current_pc[$clog2(`BTB_ROW)+1:2]];  		
 		end else begin
 			target_pc 		= current_pc;
 			valid_target		= 1'b0;
