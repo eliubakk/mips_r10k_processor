@@ -174,6 +174,7 @@ typedef struct packed{
   PHYS_REG     T2;
   logic        busy;
   logic [31:0]  inst_opcode;
+  logic [63:0]  npc;
 } RS_ROW_T;
 
 typedef struct packed {
@@ -250,7 +251,7 @@ typedef enum logic [1:0] {
 `define LDWU_INST	6'h0c
 `define STW_INST	6'h0d
 `define STB_INST	6'h0e
-`define STQ_U_INST	6'h0f
+`define ST	6'h0f
 `define INTA_GRP	6'h10
 `define INTL_GRP	6'h11
 `define INTS_GRP	6'h12

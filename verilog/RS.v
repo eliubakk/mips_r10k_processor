@@ -43,7 +43,9 @@ module RS(
 	input RS_ROW_T [(`SS_SIZE)-1:0]	inst_in,
 	input [1:0]						LSQ_busy, // 00 : not busy, 01: LQ busy, 10: SQ busy, 11: Both of them busy
 	input							branch_not_taken, // signal to mention the status of the branch
-	
+	input 
+	input [31:0]  					inst_opcode;
+  	input [63:0]  					npc;
 	// OUTPUTS
 	`ifdef DEBUG 
 	output RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out,		
@@ -171,6 +173,9 @@ module RS(
 			issue_out[i].T1 = `DUMMY_REG;
 			issue_out[i].T2 = `DUMMY_REG;
 			issue_out[i].busy = 1'b0;
+			issue_out[i].inst_opcode = `NOOP_INST;
+			issue_out[i].npc = 0;
+			
 		end
 	
 		for(i = 0; i < `NUM_FU; i = i + 1) begin
@@ -243,6 +248,8 @@ module RS(
 				rs_table[i].T1 <= `DUMMY_REG;
 				rs_table[i].T2 <=  `DUMMY_REG;
 				rs_table[i].busy <=  1'b0;
+				rs_table[i].inst_opcode <= `NOOP_INST;
+				rs_table[i].npc <= 0;
 			end
 			rs_busy_cnt <=  {($clog2(`RS_SIZE)){1'b0}};
 		end
