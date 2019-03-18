@@ -46,6 +46,7 @@ module RS(
 	input 
 	input [31:0]  					inst_opcode;
   	input [63:0]  					npc;
+	
 	// OUTPUTS
 	`ifdef DEBUG 
 	output RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out,		
