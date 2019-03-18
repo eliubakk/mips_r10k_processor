@@ -18,7 +18,7 @@ set design_name CAM
 ##############################################
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 1
+set CLK_PERIOD 2
 
 
 
