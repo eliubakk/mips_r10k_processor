@@ -28,14 +28,15 @@ VERILOG_SRC = $(wildcard $(VERILOG_DIR)/*.v)
 MODULES = $(patsubst $(VERILOG_DIR)/%.v, %, $(VERILOG_SRC))
 SYN_SIMV = $(patsubst $(VERILOG_DIR)/%.v, syn_simv_%, $(VERILOG_SRC))
 
-
 %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v
-	dc_shell-t -f $< | tee $*_synth.out
+	cd $(SYN_DIR) && \
+	dc_shell-t -f $*.tcl | tee $*_synth.out
 
 $(SYN_SIMV): syn_simv_% : %.vg $(TEST_DIR)/%_test.v
-	$(VCS) $^ $(LIB) -o $@
+	$(VCS) $(SYN_DIR)/$^ $(LIB) -o $(SYN_DIR)/$@
 
 %: syn_simv_%
+	cd $(SYN_DIR) && \
 	./syn_simv_$* | tee $@_program.out
 
 #####

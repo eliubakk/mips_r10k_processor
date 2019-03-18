@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : mult_stage.tcl                          */
+#/*   FILE        : psel_single.tcl                         */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -10,12 +10,12 @@
 #/* new design                                              */
 #/***********************************************************/
 
-analyze -f sverilog [list "verilog/psel_single.v"]
+analyze -f sverilog [list "../verilog/psel_single.v"]
 elaborate psel_single -param WIDTH=16
 set design_name psel_single_WIDTH16
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 4.25
+set CLK_PERIOD 1
 
 
 

@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : psel_generic.tcl                        */
+#/*   FILE        : encoder.tcl                             */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,23 +11,14 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f ddc [list "psel_single_WIDTH16.ddc"]
-set_dont_touch psel_single_WIDTH16
 
-#############################################
-# the follwoing two lines for RS_test
-#analyze -f sverilog [list "../verilog/psel_generic.v"]
-#elaborate psel_generic -param NUM_REQS=3
-#set design_name psel_generic_NUM_REQS3
-##############################################
-#the following for psel_generic_test
-analyze -f sverilog [list "../verilog/psel_generic.v"]
-elaborate psel_generic
-set design_name psel_generic
+analyze -f sverilog [list "../verilog/encoder.v"]
+elaborate encoder
+set design_name encoder
 ##############################################
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 3
+set CLK_PERIOD 2
 
 
 
