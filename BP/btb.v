@@ -1,9 +1,12 @@
+// [5:2] is used for indexing, [16:6] is used for tag, [13:2] is stored as
+// a target PC
+
 `define	DEBUG_OUT
 
 `define TAG_SIZE 10	// Tag bit size
 `define TARGET_SIZE 12	// Target address size, BTB will store [TARGET_SIZE+1:2]
-`define BTB_ROW	10	// BTB row size : 5~10% of I$ size
-`define PC_ALIAS 10   // Tag will store pc [(PC_ALIAS+TAG_SIZE-1):PC_ALIAS]
+`define BTB_ROW	16	// BTB row size : 5~10% of I$ size
+//Tag will store pc [(TAG_SIZE+$clog2(BTB_ROW)+2):($clog2(BTB_ROW)+2)], index will use pc[$clog2(BTB_ROW)+1:2]
 
 module  BTB(
 	input clock,    // Clock
@@ -19,7 +22,6 @@ module  BTB(
 	
 	`ifdef DEBUG_OUT
 	output logic 	[`BTB_ROW-1:0]				valid_out,
-	output logic 	[$clog2(`BTB_ROW):0]			BTB_count_out,
 	output logic	[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		tag_out,
 	output logic	[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address_out,
 	`endif
@@ -30,20 +32,15 @@ module  BTB(
 );
 
 	// BTB table
-	logic		[`BTB_ROW-1:0]				valid,next_valid;
-	logic		[$clog2(`BTB_ROW):0]			BTB_count, next_BTB_count;
-	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		tag, next_tag; // PC[19:10]
-	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address, next_target_address; // PC[13:2]
 
-	//BTB CAM
-	logic							CAM_ex_hit, CAM_if_hit;
-	logic		[($clog2(`BTB_ROW)-1):0]		CAM_ex_idx, CAM_if_idx;
-	integer							i,j;
+	
+	logic		[`BTB_ROW-1:0]				valid,next_valid;
+	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		tag, next_tag; // PC[16:6], The index of each tag is pc[5:2]
+	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address, next_target_address; // PC[13:2]
 
 
 	`ifdef DEBUG_OUT
 	assign valid_out		= valid;
-	assign BTB_count_out		= BTB_count;
 	assign tag_out			= tag;
 	assign target_address_out	= target_address;
 	`endif
@@ -56,11 +53,9 @@ module  BTB(
 	// Q3. The predict is not taken but in the btb : Remove value? or do
 	// nothing? - I have implemented with do nothing
 	// 4. The predict is not taken and not in the btb : nothing to do  
-	// Q5. Exception : when BTB is full - I have implemented with removing
-	// the first entry in the BTB    
+	//  
 
 		next_valid		= valid;
-		next_BTB_count		= BTB_count;
 		next_tag		= tag;
 		next_target_address 	= target_address;
 		
@@ -68,86 +63,62 @@ module  BTB(
 		valid_target		= 1'b0;
 
 
-		if( enable & ex_en_branch) begin
+		//1,2 The predict is taken
+		if( enable & ex_en_branch & ex_branch_taken) begin
 
 
-			// CAM logic
-			CAM_ex_hit		= 1'b0;
-			CAM_ex_idx	= {($clog2(`BTB_ROW)-1){1'b0}};
-		
-			for (i=`BTB_ROW-1;i>=0;i=i-1) begin
-				if(valid[i] & (ex_pc[`TAG_SIZE-1:2] == tag[i][`TAG_SIZE-1:2])) begin
-					CAM_ex_hit		= 1'b1;
-					CAM_ex_idx		= i;
-				end
-			end
- 
-			if(ex_branch_taken & CAM_ex_hit) begin // 1. Predict is taken, and in the btb
-				next_target_address [CAM_ex_idx]	=	calculated_pc [`TARGET_SIZE-1:2]; 
-			end else if (ex_branch_taken & !CAM_ex_hit) begin // 2. Predict is taken, but not in the btb (When BTB is full?)
-				if (BTB_count == `BTB_ROW) begin 
-				// When BTB is full, remove the first entry in the BTB, and add new entry at the latest entry in the BTB
-					next_tag		= {calculated_pc[(`PC_ALIAS+`TAG_SIZE-1):`PC_ALIAS],tag[`BTB_ROW-1:1]};
-					next_target_address 	= {calculated_pc[`TARGET_SIZE+1:2],target_address[`BTB_ROW-1:1]}; 
-						
-				end else begin
-					next_valid [BTB_count]		= 1'b1;
-					next_BTB_count			= BTB_count + 1;
-					next_tag [BTB_count]		= calculated_pc[(`PC_ALIAS+`TAG_SIZE-1):`PC_ALIAS];
-					next_target_address[BTB_count] 	= calculated_pc[`TARGET_SIZE+1:2]; 
-											
-				end	
-
-			end else begin // No need to update the btb table
+			// Access to the BTB index and see whether it is valid
+			// & tag matched
+			// 1. it is in the BTB -> Just update the target
+			// address
+			if ( valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)] == tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ) ) begin
+				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]] = calculated_pc[`TARGET_SIZE+1:2];	
+			// 2. it is not in the BTB (not valid or valid but tag
+			// is different -> Update valid, tag, target address
+			end else if ( !valid[ex_pc[$clog2(`BTB_ROW)+1:2]] | (valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)] != tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ))) begin
+				next_valid[ex_pc[$clog2(`BTB_ROW)+1:2]] 		= 1'b1;
+				next_tag[ex_pc[$clog2(`BTB_ROW)+1:2]]			= calculated_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)];
+				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]]	= calculated_pc[`TARGET_SIZE+1:2]; 	
+			end else begin		// No need to update BTB table
 				next_valid		= valid;
-				next_BTB_count		= BTB_count;
 				next_tag		= tag;
 				next_target_address 	= target_address;
 			end
+		end else begin			// No need to update BTB table
+			next_valid		= valid;
+			next_tag		= tag;
+			next_target_address 	= target_address;
+
 		end
+				
 
 
 
-	// Fetch : CAM
+	// Fetch
 	// Update the target_PC when there is a match and the instruction is
 	// branch
 	//
 	
 
-		if(enable & if_branch) begin
-			// CAM the current_pc
-			CAM_if_hit		= 1'b0;
-			CAM_if_idx	= {($clog2(`BTB_ROW)-1){1'b0}};
-		
-			for (i=`BTB_ROW-1;i>=0;i=i-1) begin
-				if(valid[i] & (current_pc[`TAG_SIZE-1:2] == tag[i])) begin
-					CAM_if_hit		= 1'b1;
-					CAM_if_idx		= i;
-				end
-			end
- 
-			// update the target_pc and valid_target 
-			if(CAM_if_hit) begin
-				target_pc = {current_pc[31:`TARGET_SIZE+2],target_address[CAM_if_idx],current_pc[1:0]}; 
-				valid_target = 1'b1;
-			end else begin
-				valid_target = 1'b0;
-			end
-			
-		end 
+		if (enable & if_branch & valid[current_pc[$clog2(`BTB_ROW)+1:2]] & ( current_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+2):($clog2(`BTB_ROW)+2)] == tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  )) begin
+			valid_target			= 1'b1;
+			target_pc[`TARGET_SIZE+1:2]	= target_address[current_pc[$clog2(`BTB_ROW)+1:2]];  		
+		end else begin
+			target_pc 		= current_pc;
+			valid_target		= 1'b0;
+
+		end
 	end
 
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			valid		<= `BTB_ROW'b0;
-			BTB_count	<= {($clog2(`BTB_ROW)+1){1'b0}};	
 			tag		<= {(`BTB_ROW*`TAG_SIZE){1'b0}}; 
 			target_address  <= {(`BTB_ROW*`TARGET_SIZE){1'b0}}; 
 		
 		end else begin
 			valid		<= next_valid;
-			BTB_count	<= next_BTB_count;
 			tag		<= next_tag;
 			target_address  <= next_target_address;
 		end	
