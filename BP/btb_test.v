@@ -2,12 +2,9 @@
 `define DELAY #2
 
 
-`define TAG_SIZE 10	
+`define TAG_SIZE 10
 `define TARGET_SIZE 12	
-`define BTB_ROW	10	
-`define PC_ALIAS 10   
-
-
+`define BTB_ROW	16
 
 module testbench;
 	logic clock, reset, enable;
@@ -21,7 +18,6 @@ module testbench;
 	
 	`ifdef DEBUG_OUT
 	logic 	[`BTB_ROW-1:0]				valid;
-	logic 	[$clog2(`BTB_ROW):0]			BTB_count;
 	logic	[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		tag;
 	logic	[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address;
 	`endif
@@ -49,7 +45,6 @@ module testbench;
 		// outputs 
 		`ifdef DEBUG_OUT
 		.valid_out(valid),
-		.BTB_count_out(BTB_count),
 		.tag_out(tag),
 		.target_address_out(target_address),
 		`endif	
@@ -75,9 +70,9 @@ module testbench;
 	task display_table;
 		begin
 			$display("--------------------------BTB-----------------------------------");
-			$display("BTB_count : %d // valid_target : %b, target_pc : %h", BTB_count, valid_target, target_pc);
+			$display("Valid_target : %b, target_pc : %h", valid_target, target_pc);
 			$display("---------------------------------------------------------");
-			$display("index			valid		tag		target_address");
+			$display("index(pc[%2.0d:2]		valid		tag(pc[%2.0d,%2.0d])	target_address(pc[%2.0d,2]",$clog2(`BTB_ROW)+1, `TAG_SIZE+$clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+1 );
 			for(i=0;i<`BTB_ROW;i=i+1) begin
 			$display("%d		 %1.0b		%h		%h",i,valid[i], tag[i], target_address[i] );
 			end
@@ -124,7 +119,8 @@ module testbench;
 		// 2. Predict is taken but not in the btb
 		// 3. Predict is not taken but in the btb
 		// 4. Predict is not taken and not in the btb
-		// 5. When the entry is full
+		// 
+		// Check for different tag/different index (random testing)	
 		
 		$display("--------------------------------Execute Check----------------------------------"); 
 		
