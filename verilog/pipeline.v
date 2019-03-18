@@ -68,7 +68,7 @@ module pipeline (
   );
 
   // Pipeline register enables
-  logic   if_id_enable, id_ex_enable, ex_mem_enable, mem_wb_enable;
+  logic   if_id_enable, RS_enable, issue_ex_enable, ex_mem_enable, CDB_en, ROB_enable, co_re_enable;
 
   // Outputs from ID stage
   logic [63:0]   id_rega_out;
@@ -84,7 +84,26 @@ module pipeline (
   logic          id_halt_out;
   logic          id_illegal_out;
   logic          id_valid_inst_out;
+  logic [4:0]    ra_idx, rb_idx, rc_idx ; 
 
+  //outputs from the maptable
+  logic MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out;
+  logic PHYS_REG 		T1, 		// Output for Dispatch and goes to RS
+	logic PHYS_REG 		T2, 		// Output for Dispatch and goes to RS
+	logic PHYS_REG 		T 		// Output for Dispatch and goes to RS and ROB
+);
+  
+  // outputs from dispatch stage
+  RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
+  RS_ROW_T [`NUM_FU-1:0]			issue_next;
+  logic 	[$clog2(`NUM_FU) - 1:0]	issue_cnt;
+  wand								rs_full;
+
+  
+  //Outputs from IS/EX Pipeline Register
+   RS_ROW_T [`NUM_FU-1:0]			issue_reg;
+  
+  
   // Outputs from ID/EX Pipeline Register
   logic  [63:0]   id_ex_rega;
   logic  [63:0]   id_ex_regb;
@@ -273,6 +292,7 @@ module pipeline (
     .id_opb_select_out(id_opb_select_out),
     .id_dest_reg_idx_out(id_dest_reg_idx_out),
     .id_alu_func_out(id_alu_func_out),
+    .id_fu_name(id_fu_name_out),
     .id_rd_mem_out(id_rd_mem_out),
     .id_wr_mem_out(id_wr_mem_out),
     .id_ldl_mem_out(id_ldl_mem_out),
@@ -283,7 +303,98 @@ module pipeline (
     .id_cpuid_out(id_cpuid_out),
     .id_illegal_out(id_illegal_out),
     .id_valid_inst_out(id_valid_inst_out)
+    .ra_idx(id_ra_idx),
+    .rb_idx(id_rb_idx),
+    .rc_idx(id_rc_idx)
+
   );
+
+// Instantiating the map table
+  Map_Table m1( //Inputs
+  .clock(clock),
+	.reset(reset),
+	.enable(enable),
+	.reg_a(id_ra_idx), 		// Comes from Decode during Dispatch
+	.reg_b(id_rb_idx), 		// Comes from Decode during Dispatch 
+	.reg_dest(id_dest_reg_idx_out), 	// Comes from Decode during Dispatch
+	.free_reg(free_reg), 	// Comes from Free List during Dispatch
+	.CDB_tag_in(CDB_tag_in), 	// Comes from CDB during Commit
+	.CDB_en(CDB_en), 	// Comes from CDB during Commit
+	.map_check_point(map_check_point),
+	.branch_incorrect(branch_incorrect),
+	
+  .map_table_out(map_table_out),
+	.T1(T1), 		// Output for Dispatch and goes to RS
+	.T2(T2), 		// Output for Dispatch and goes to RS
+	.T(T) 		// Output for Dispatch and goes to RS and ROB
+
+  )
+
+
+
+  // Instantiate the physical register file used by this pipeline
+  
+
+  //////////////////////////////////////////////////
+  //                                              //
+  //                  DI/ISSUE-Stage                    //
+  //                                              //
+  //////////////////////////////////////////////////
+  
+  RS RS0(
+      // inputs
+      .clock(clock), 
+      .reset(reset), 
+      .enable(RS_enable), 
+      .CAM_en(CAM_en), 
+      .CDB_in(CDB_in), 
+      .dispatch_valid(dispatch_valid),
+      .inst_in({id_opa_select_out, id_opb_select_out, id_dest_reg_idx_out, id_alu_func_out, id_fu_name_out, id_rd_mem_out, id_wr_mem_out,
+       id_ldl_mem_out, id_stc_mem_out, id_cond_branch_out, id_uncond_branch_out, id_halt_out, id_cpuid_out, id_illegal_out, id_valid_inst_out,T , T1, T2, 0}), 
+      .LSQ_busy(LSQ_busy),                //black box
+      .branch_not_taken(!ex_take_branch_out),     //check for this
+
+      // outputs
+      .rs_table_out(rs_table_out), 
+      .issue_out(issue_next), 
+      .issue_cnt(issue_cnt), 
+      .rs_full(rs_full)
+    );
+
+  //////////////////////////////////////////////////
+  //                                              //
+  //                  ISSUE/EX-Stage                    //
+  //                                              //
+  //////////////////////////////////////////////////
+
+  assign issue_ex_enable = 1'b1; // always enabled
+  // synopsys sync_set_reset "reset"
+  always_ff @(posedge clock) begin
+    if(reset) begin
+      issue_reg<= `SD 0;
+    end
+    else begin
+      issue_reg<= `SD issue_next;
+    end
+  end
+
+
+//Instantiating the physical register
+phys_regfile regf_0 (
+    .rda_idx(T1),
+    .rda_out(T1_value), 
+
+    .rdb_idx(T2),
+    .rdb_out(T2_value),
+
+    .wr_clk(clock),
+    .wr_en(wb_phys_reg_wr_en_out),
+    .wr_idx(T),
+    .wr_data(T_value)
+  );
+
+
+
 
   // Note: Decode signals for load-lock/store-conditional and "get CPU ID"
   //  instructions (id_{ldl,stc}_mem_out, id_cpuid_out) are not connected
@@ -293,14 +404,14 @@ module pipeline (
 
   //////////////////////////////////////////////////
   //                                              //
-  //            ID/EX Pipeline Register           //
+  //            IS/EX Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
   assign id_ex_enable = 1'b1; // always enabled
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset) begin
-      id_ex_NPC           <= `SD 0;
+      id_ex_NPC           <= `SD 0;//don't change this
       id_ex_IR            <= `SD `NOOP_INST;
       id_ex_rega          <= `SD 0;
       id_ex_regb          <= `SD 0;
@@ -317,7 +428,7 @@ module pipeline (
       id_ex_valid_inst    <= `SD 0;
     end else begin // if (reset)
       if (id_ex_enable) begin
-        id_ex_NPC           <= `SD if_id_NPC;
+        id_ex_NPC           <= `SD if_id_NPC;//don't change this
         id_ex_IR            <= `SD if_id_IR;
         id_ex_rega          <= `SD id_rega_out;
         id_ex_regb          <= `SD id_regb_out;
