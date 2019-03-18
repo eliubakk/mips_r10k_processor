@@ -19,107 +19,25 @@ all:    simv
 ##### 
 # Modify starting here
 #####
-## Testing for CDB.v
-TESTBENCH = testbench/free_list_test.v
-SIMFILES = verilog/free_list.v
-SYNFILES = Free_List.vg 
+TEST_DIR = testbench
+VERILOG_DIR = verilog
+SYN_DIR = synth
 
-PSELSINFILES = verilog/psel_single.v
-PSELSINSYN = psel_single.vg
+TEST_SRC = $(wildcard $(TEST_DIR)/*.v)
+VERILOG_SRC = $(wildcard $(VERILOG_DIR)/*.v)
+MODULES = $(patsubst $(VERILOG_DIR)/%.v, %, $(VERILOG_SRC))
+SYN_SIMV = $(patsubst $(VERILOG_DIR)/%.v, syn_simv_%, $(VERILOG_SRC))
 
-PSELGENFILES = verilog/psel_generic.v
-PSELGENSYN = psel_generic.vg
-PSELGENTEST= testbench/psel_generic_test.v
 
-# RS files
-RSFILES = verilog/RS.v
-RSSYN = RS.vg
-RSTEST = testbench/RS_test.v
 
-# free list files
-FREELISTFILES = verilog/free_list.v
-FREELISTSYN = Free_List.vg
-FREELISTTEST = testbench/free_list_test.v
+%.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v
+	dc_shell-t -f $< | tee $*_synth.out
 
-# map table files
-MAPTABLEFILES = verilog/map_table.v
-MAPTABLESYN = Map_Table.vg
-MAPTABLETEST = testbench/map_table_test.v
+$(SYN_SIMV): syn_simv_% : %.vg $(TEST_DIR)/%_test.v
+	$(VCS) $^ $(LIB) -o $@
 
-# CDB files
-CDBFILES = verilog/cdb.v
-CDBSYN = CDB.vg
-CDBTEST = testbench/CDB_test.v
-
-# Arch Map Table files
-ARCHFILES = verilog/arch_map.v
-ARCHSYN = Arch_Map_Table.vg
-ARCHTEST = testbench/Arch_test.v
-
-psel_single.vg: $(PSELSINFILES) synth/psel_single.tcl
-	dc_shell-t -f synth/psel_single.tcl | tee psel_single_synth.out
-
-psel_generic.vg: $(PSELSINSYN) $(PSELGENFILES) synth/psel_generic.tcl
-	dc_shell-t -f synth/psel_generic.tcl | tee psel_generic_synth.out
-
-RS.vg: $(PSELGENSYN) $(RSFILES) synth/RS.tcl
-	dc_shell-t -f synth/RS.tcl | tee RS_synth.out
-
-Arch_Map_Table.vg: $(ARCHFILES) synth/arch_map.tcl
-	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
-
-CDB.vg: $(CDBFILES) synth/cdb.tcl
-	 dc_shell-t -f synth/cdb.tcl | tee cdb_synth.out
-
-Free_List.vg: $(FREELISTFILES) synth/free_list.tcl
-	dc_shell-t -f synth/free_list.tcl | tee free_list_synth.out
-
-Map_Table.vg: $(MAPTABLEFILES) synth/map_table.tcl
-	dc_shell-t -f synth/map_table.tcl | tee map_table_synth.out
-
-## Testing for arch_map.v
-#TESTBENCH = testbench/Arch_test.v
-#SIMFILES = verilog/arch_map.v
-#SYNFILES = Arch_Map_Table.vg 
-
-#Arch_Map_Table.vg: $(SIMFILES) synth/arch_map.tcl
-#	 dc_shell-t -f synth/arch_map.tcl | tee arch_map_synth.out
-
-syn_simv_psel_generic: $(PSELGENSYN) $(PSELGENTEST)
-	$(VCS) $(PSELGENTEST) $(PSELGENSYN) $(LIB) -o syn_simv_psel_generic
-
-psel_generic: syn_simv_psel_generic
-	./syn_simv_psel_generic | tee syn_psel_generic_program.out
-
-syn_simv_RS: $(RSSYN) $(RSTEST)
-	$(VCS) $(RSTEST) $(RSSYN) $(LIB) -o syn_simv_RS
-
-RS: syn_simv_RS
-	./syn_simv_RS | tee syn_RS_program.out
-
-syn_simv_arch: $(ARCHSYN) $(ARCHTEST)
-	$(VCS) $(ARCHTEST) $(ARCHSYN) $(LIB) -o syn_simv_arch
-
-arch_map: syn_simv_arch
-	./syn_simv_arch | tee syn_arch_program.out
-
-syn_simv_cdb: $(CDBSYN) $(CDBTEST)
-	$(VCS) $(CDBTEST) $(CDBSYN) $(LIB) -o syn_simv_cdb
-
-cdb: syn_simv_cdb
-	./syn_simv_cdb | tee syn_cdb_program.out
-
-syn_simv_free_list: $(FREELISTSYN) $(FREELISTTEST)
-	$(VCS) $(FREELISTTEST) $(FREELISTSYN) $(LIB) -o syn_simv_free_list
-
-free_list: syn_simv_free_list
-	./syn_simv_free_list | tee syn_free_list_program.out
-
-syn_simv_map_table: $(MAPTABLESYN) $(MAPTABLETEST)
-	$(VCS) $(MAPTABLETEST) $(MAPTABLESYN) $(LIB) -o syn_simv_map_table
-
-map_table: syn_simv_map_table
-	./syn_simv_map_table | tee syn_map_table_program.out
+%: syn_simv_%
+	./syn_simv_$* | tee $@_program.out
 
 #####
 # Should be no need to modify after here
