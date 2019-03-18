@@ -72,7 +72,7 @@ module testbench;
 			$display("--------------------------BTB-----------------------------------");
 			$display("Valid_target : %b, target_pc : %h", valid_target, target_pc);
 			$display("---------------------------------------------------------");
-			$display("index(pc[%2.0d:2]		valid		tag(pc[%2.0d,%2.0d])	target_address(pc[%2.0d,2]",$clog2(`BTB_ROW)+1, `TAG_SIZE+$clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+1 );
+			$display("index(pc[%2.0d:2]		valid		tag(pc[%2.0d,%2.0d])	target_address(pc[%2.0d,2])",$clog2(`BTB_ROW)+1, `TAG_SIZE+$clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+2, `TARGET_SIZE+1 );
 			for(i=0;i<`BTB_ROW;i=i+1) begin
 			$display("%d		 %1.0b		%h		%h",i,valid[i], tag[i], target_address[i] );
 			end
@@ -133,7 +133,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		display_table;
-		assert (!valid_target & (target_pc==32'h0) & valid[0] & (tag[0]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b10) & (BTB_count == 1) ) else #1 exit_on_error;
+		assert (!valid_target & (target_pc==32'h0) & valid[1] & (tag[1]==`TAG_SIZE'b0) & (target_address[1]==`TARGET_SIZE'b10)) else #1 exit_on_error;
 
 		
 		@(negedge clock);
@@ -144,26 +144,107 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		display_table;
-		assert (!valid_target & (target_pc==32'h0) & valid[0] & valid[1] & (tag[1]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b100) & (BTB_count == 2) ) else #1 exit_on_error;
+		assert (!valid_target & (target_pc==32'h0) & valid[1] & valid[2] & (tag[2]==`TAG_SIZE'b0) & (target_address[2]==`TARGET_SIZE'b100) ) else #1 exit_on_error;
 
-
-		$display("------------------------Predict is taken and in the btb------------------------");
 		@(negedge clock);
-		ex_pc		= 32'h4;
-		calculated_pc	= 32'hc;
+		ex_pc		= 32'b1111_111100;
+		calculated_pc	= 32'hffff_ffff;
 		ex_branch_taken	= 1'b1;
 		ex_en_branch	=1'b1;
 		@(posedge clock);
 		`DELAY;
 		display_table;
-		assert (!valid_target & (target_pc==32'h0) & valid[0] & (tag[0]==`TAG_SIZE'b0) & (target_address[0]==`TARGET_SIZE'b11) & (BTB_count == 2) ) else #1 exit_on_error;
+		assert (!valid_target & (target_pc==32'h0) & valid[1] & valid[2] & valid[15] & (tag[15]==`TAG_SIZE'b1111) & (target_address[15]=={`TARGET_SIZE{1'b1}} )) else #1 exit_on_error;
+
+		@(negedge clock);
+		ex_pc		= 32'b111_0010_00;
+		calculated_pc	= 32'hffff_ffff;
+		ex_branch_taken	= 1'b1;
+		ex_en_branch	=1'b1;
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (!valid_target & (target_pc==32'h0) & valid[1] & valid[2] & valid[15] & (tag[2]==`TAG_SIZE'b111) & (target_address[2]=={`TARGET_SIZE{1'b1}}) ) else #1 exit_on_error;
 
 
+		@(negedge clock);
+		ex_pc		= 32'b100_0110_00;
+		calculated_pc	= 32'b110110_00;
+		ex_branch_taken	= 1'b1;
+		ex_en_branch	=1'b1;
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (!valid_target & (target_pc==32'h0) & valid[1] & valid[2] & valid[15] & valid[6] & (tag[6]==`TAG_SIZE'b100) & (target_address[6]==`TARGET_SIZE'b110110) ) else #1 exit_on_error;
+
+
+		$display("------------------------Predict is taken and in the btb------------------------");
+
+		@(negedge clock);
+		ex_pc		= 32'h4;
+		calculated_pc	= 32'hffff_ffff;
+		ex_branch_taken	= 1'b1;
+		ex_en_branch	=1'b1;
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (!valid_target & (target_pc==32'h0) & valid[1] & valid[2] & valid[15] & (tag[1]==`TAG_SIZE'b0) & (target_address[1]=={`TARGET_SIZE{1'b1}}) ) else #1 exit_on_error;
+
+
+	
+		
+		$display("------------------------Predict is not taken ------------------------");
+			@(negedge clock);
+			ex_pc		= 32'h8;
+			calculated_pc	= 32'h0;
+			ex_branch_taken	= 1'b0;
+			ex_en_branch	=1'b1;
+			@(posedge clock);
+			`DELAY;
+			display_table;
+			assert (!valid_target & (target_pc==32'h0) & valid[1] & valid[2] & valid[15] & (tag[2]==`TAG_SIZE'b111) & (target_address[2]=={`TARGET_SIZE{1'b1}}) ) else #1 exit_on_error;
+
+	
+		$display("--------------------------------Fetch Check----------------------------------"); 
 
 		// Fetch (When BTB reads value)
 		//
 		//
+		
+
+		@(negedge clock);
+		current_pc		= 32'b10000000000000100_0110_00;
+		if_branch		= 1'b1;
+		ex_pc			= 32'h0;
+		calculated_pc		= 32'h0;
+		ex_branch_taken		= 1'b0;
+		ex_en_branch		= 1'b0;
+
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (valid_target & (target_pc==32'b10000000000000011_0110_00)) else #1 exit_on_error;
+
+
+
+		$display("--------------------------------Fetch and Execute Check----------------------------------"); 
 		// Fetch and Execute at the same time	
+		//
+		
+
+		@(negedge clock);
+		current_pc		= 32'h14;
+		if_branch		= 1'b1;
+		ex_pc			= 32'h14;
+		calculated_pc		= 32'b101_1001_00;
+		ex_branch_taken		= 1'b1;
+		ex_en_branch		= 1'b1;
+
+		@(posedge clock);
+		`DELAY;
+		display_table;
+		assert (valid_target & (target_pc==32'b101_1001_00) & valid[5] & (tag[5]==`TAG_SIZE'b0) & (target_address[5]==`TARGET_SIZE'b101_1001) ) else #1 exit_on_error;
+
 		//
 		$display("@@@passed");
 		$finish;
