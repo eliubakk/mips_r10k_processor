@@ -1,5 +1,15 @@
 // 4 bit global history - 4 entry per-set PHT  - 1 bit predictor bit
 //
+// For speculation and Roll back, we will record the BHT value (for ex, 10
+// more bits of BHT) & counter, Everytime we find the misprediction, we roll
+// back the GHT (How about indexing?)
+//
+// Also, PHT is updated only when we figure out the prediction result
+//
+// OBQ : 16 entry, OBQ tag is 4 bit
+// OBQ length : 10 bit 
+//
+//
 `define DEBUG_OUT
 `define GHT_BIT		4
 `define PHT_PC_BIT	2
