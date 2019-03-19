@@ -1,5 +1,5 @@
 `include "sys_defs.vh"
-
+`define DEBUG
 `define DELAY #2
 `define CLOCK_PERIOD #10
 
@@ -15,48 +15,37 @@ module testbench;
 	// input wires
 	logic clock;
 	logic reset;
-	logic enable;
-	PHYS_REG T_old;
-	logic dispatch_en;
-
-	logic branch_incorrect = ZERO;
-	PHYS_REG [`NUM_PHYS_REG-1:0] free_check_point;
-	logic [$clog2(`NUM_PHYS_REG):0] tail_check_point;
+	logic write_en;
+	OBQ_ROW_T bh_row;
+	logic clear_en;
+	logic [$clog2(`OBQ_SIZE)-1:0] index;
 
 	// output wires
-	logic [$clog2(`NUM_PHYS_REG):0] num_free_entries;
-	logic empty;
-	PHYS_REG free_reg;
-	PHYS_REG last_free_reg;
+	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out;
+	logic [$clog2(`OBQ_SIZE)-1:0] tail_out;
+	logic bh_pred_valid;
+	OBQ_ROW_T bh_pred;
 
-	PHYS_REG [`NUM_PHYS_REG-1:0] free_list_out;
-	logic [$clog2(`NUM_PHYS_REG):0] tail_out;
-
-
+	// test wires
+	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_test;
+	logic [$clog2(`OBQ_SIZE)-1:0] tail_test;
 	
 	// initialize module
-
-	`DUT(Free_List) fl0(
+	`DUT(OBQ) obq0(
 		// inputs
 		.clock(clock),
 		.reset(reset),
-		.enable(enable),
-		.T_old(T_old),
+		.write_en(write_en),
+		.bh_row(bh_row),
+		.clear_en(clear_en),
+		.index(index),
 
-		.branch_incorrect(branch_incorrect),
-		.free_check_point(free_check_point),
-		.tail_check_point(tail_check_point),
-
-		.dispatch_en(dispatch_en),
 		// outputs
-		.num_free_entries(num_free_entries),
-		.empty(empty),
-		.free_reg(free_reg),
-
-		.free_list_out(free_list_out),
-		.tail_out(tail_out)
+		.obq_out(obq_out),
+		.tail_out(tail_out),
+		.bh_pred_valid(bh_pred_valid),
+		.bh_pred(bh_pred)
 	);
-
 
 	// TASKS
 	task exit_on_error;
@@ -67,7 +56,18 @@ module testbench;
 		end
 	endtask
 
-
+	task obq_equal;
+		input OBQ_ROW_T [`OBQ_SIZE-1:0] obq;
+		input OBQ_ROW_T [`OBQ_SIZE-1:0] test;
+		input [$clog2(`OBQ_SIZE)-1:0] tail;
+		input [$clog2(`OBQ_SIZE)-1:0] tail_test;
+		begin
+			assert(tail == tail_test) else #1 exit_on_error;
+			for (int i = 0; i < tail; ++i) begin
+				assert(obq[i] == test[i]) else #1 exit_on_error;
+			end
+		end
+	endtask
 
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
@@ -75,10 +75,31 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b enable: %b T_old: %d dispatch_en: %b num_free_entries: %d empty: %b free_reg: %d branch_incorrect: %b", 
-				clock, reset, enable, T_old, dispatch_en, num_free_entries, empty, free_reg, branch_incorrect);
+		$monitor("clock: %b reset: %b write_en: %b bh_row: %b clear_en: %b index: %d bh_pred_valid: %b bh_pred: %b",
+				clock, reset, write_en, bh_row, clear_en, index, bh_pred_valid, bh_pred);
 
 		// initialize
+		clock = ZERO;
+		reset = ZERO;
+		write_en = ZERO;
+		bh_row.branch_history = 0;
+		clear_en = ZERO;
+		index = 0;
+
+		$display("Testing Reset...");
+		@(negedge clock);
+		reset = ONE;
+
+		for (int i = 0; i < `OBQ_SIZE; ++i) begin
+			obq_test[i].branch_history = 0;
+		end
+		tail_test = 0;
+
+		@(posedge clock);
+		`DELAY;
+		obq_equal(obq_out, obq_test, tail_out, tail_test);
+
+		$display("Reset Test Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;

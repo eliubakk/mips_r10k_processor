@@ -1,4 +1,5 @@
 `include "sys_defs.vh"
+`define DEBUG
 
 `define index_t ($clog2(`OBQ_SIZE) - 1)
 
@@ -19,6 +20,7 @@ module OBQ(
 	output OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out,
 	output [`index_t:0] tail_out,
 	`endif
+	output bh_pred_valid,
 	output OBQ_ROW_T bh_pred // predicted branch history path
 );
 
@@ -34,6 +36,7 @@ module OBQ(
 	assign obq_out = obq;
 	assign tail_out = tail;
 	`endif
+	assign bh_pred_valid = (tail > 0);
 
 	// combinational next state logic
 	always_comb begin
