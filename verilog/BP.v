@@ -26,8 +26,8 @@ module  BP(
 	input 					reset,  // Asynchronous reset active low
 	input 					enable, // Clock Enable
 
-	input					if_branch,		// input PC is for valid branch instruction
-	input		[31:0]			pc_in,			// PC
+	input					if_branch,		// Valid branch instruction
+	input		[31:0]			pc_in,			// input PC
 	// Comes after execute state(after branch calculation)
 	input					ex_en_branch,		// enabled when the instruction is branch  
 	input					ex_branch_taken,	// enabled when the branch is taken
@@ -58,7 +58,8 @@ module  BP(
 		// OBQ signals
 		logic 				bh_pred_valid;		// Same as Gshare obq_bh_pred_valid
 		OBQ_ROW_T 			bh_pred;		// Same as [`GHT_BIT-1:0] obq_gh_in
-		logic	[$clog2(`OBQ_SIZE)-1:0]	bh_index;			// *******Index from OBQ
+		logic	[$clog2(`OBQ_SIZE)-1:0]	bh_index;		// *******Index from OBQ
+									// *******Was the branch predicted taken or not taken?
 
 		// GSHARE signals
 		logic	[`GHT_BIT-1:0]		ght;
@@ -69,10 +70,6 @@ module  BP(
 	//
 	assign clear_en		= ex_en_branch &  // **************** When the branch prediction was wrong 
 
-	assign next_pc_valid	= ;		  // ****************Whether next PC is valid or not
-	assign next_pc		= ;		  // ***************Next PC value
-
-	assign next_pc_index	= bh_index; 	
 
 
 	// BTB module	
@@ -134,7 +131,23 @@ module  BP(
 
 
 	always_ff @(posedge clock) begin
-	
+
+
+		// Next PC value,	
+		if(prediction_valid & prediction & valid_target) begin
+		// PC=target_PC if the prediction is valid and taken, and BTB has the target PC
+		// value 
+			next_pc		<= target_pc;
+			next_pc_index	<= bh_idx;
+			next_pc_valid	<= 1'b1; 
+		end else if begin
+		// PC=PC+4 for the other cases  (Prediction is valid but not
+		// taken, or Prediction is valid but not in the BTB)
+			next_pc		<= pc_in +4;
+			next_pc_index	<= bh_idx; //*********************default bh_idx
+			next_pc_valid	<= prediction_valid; 
+		end
+
 
 	end
 
