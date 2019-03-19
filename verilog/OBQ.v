@@ -1,4 +1,4 @@
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
 `define DEBUG
 
 `define index_t ($clog2(`OBQ_SIZE) - 1)
@@ -45,8 +45,12 @@ module OBQ(
 			// insert the new branch history table
 
 			// clear all the entries from counter onwards
-			for (int i = index; i < `OBQ_SIZE; ++i) begin
-				obq_next[i].branch_history = (`BH_SIZE-1)'d0;
+			for (int i = 0; i < `OBQ_SIZE; ++i) begin
+				if (i >= index) begin
+					obq_next[i].branch_history = 0;
+				end else begin
+					obq_next[i].branch_history = obq[i].branch_history;
+				end
 			end
 
 			// insert the new branch history
@@ -63,9 +67,14 @@ module OBQ(
 				tail_next = tail;
 			end
 		end else if (clear_en) begin
+
 			// clear all the entries from counter onwards
-			for (int i = index; i < `OBQ_SIZE; ++i) begin
-				obq_next[i].branch_history = (`BH_SIZE-1)'d0;
+			for (int i = 0; i < `OBQ_SIZE; ++i) begin
+				if (i >= index) begin
+					obq_next[i].branch_history = 0;
+				end else begin
+					obq_next[i].branch_history = obq[i].branch_history;
+				end
 			end
 			tail_next = index;
 		end else begin
@@ -78,9 +87,9 @@ module OBQ(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `OBQ_SIZE; ++i) begin
-				obq[i].branch_history <= (`BH_SIZE-1)'d0; // reset to all not taken
+				obq[i].branch_history <= 0; // reset to all not taken
 			end
-			tail <= ($clog2(`BH_SIZE)-1)'d0;
+			tail <= 0;
 		end else begin
 			obq <= obq_next;
 			tail <= tail_next;
