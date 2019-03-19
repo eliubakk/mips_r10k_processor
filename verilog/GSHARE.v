@@ -17,9 +17,9 @@ module GSHARE(
 		input							clear_en,	   // When branch prediction is wrong, flip the PHT bit of obq_gh_in
 
 		`ifdef DEBUG_OUT
-		output	[`GHT_BIT-1:0]					ght_out,
-		output	[2**(`GHT_BIT)-1:0]				pht_out,
+				output	[2**(`GHT_BIT)-1:0]				pht_out,
 		`endif
+		output	[`GHT_BIT-1:0]					ght_out,
 		output							prediction_valid, // Prediction is not valid when the instruction is not branch or during the roll back 
 		output							prediction_out
 		

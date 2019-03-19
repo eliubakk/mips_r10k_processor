@@ -9,8 +9,8 @@
 
 // Need to define parameters in sys_defs.vh
 // For GSHARE
-`define GHT_BIT	4
-`define PC_BIT	4
+`define GHT_BIT	10
+`define PC_BIT	10
 // For BTB
 `define TAG_SIZE 10	// Tag bit size
 `define TARGET_SIZE 12	// Target address size, BTB will store [TARGET_SIZE+1:2]
@@ -22,17 +22,18 @@
 
 
 module  BP(
-	input 				clock,    // Clock
-	input 				reset,  // Asynchronous reset active low
-	input 				enable, // Clock Enable
+	input 					clock,    // Clock
+	input 					reset,  // Asynchronous reset active low
+	input 					enable, // Clock Enable
 
-	input				if_branch,		// input PC is for valid branch instruction
-	input		[31:0]		pc_in,			// PC
+	input					if_branch,		// input PC is for valid branch instruction
+	input		[31:0]			pc_in,			// PC
 	// Comes after execute state(after branch calculation)
-	input				ex_en_branch,		// enabled when the instruction is branch  
-	input				ex_branch_taken,	// enabled when the branch is taken
-	input		[31:0]		ex_pc,			// PC of the executed branch instruction
-	input		[31:0]		calculated_pc,  	// Calculated target PC
+	input					ex_en_branch,		// enabled when the instruction is branch  
+	input					ex_branch_taken,	// enabled when the branch is taken
+	input		[31:0]			ex_pc,			// PC of the executed branch instruction
+	input		[31:0]			calculated_pc,  	// Calculated target PC
+	input	[$clog2(`OBQ_SIZE)-1:0]		ex_branch_index		// Executed branch's OBQ index 
 		
 
 		
@@ -40,44 +41,40 @@ module  BP(
 	
 	`ifdef DEBUG_OUT
 	`endif
-	output				next_pc_valid,		// Enabled when next_pc value is valid pc
-	output		
-	output		[31:0]		next_pc			
+	output					next_pc_valid,		// Enabled when next_pc value is valid pc
+	//output [$clog2(`OBQ_SIZE)-1:0]	next_pc_index, 		// ************Index from OBQ	
+	output		[31:0]			next_pc			
 	
 );
+	// Input
+		// For GSHARE and OBQ
+		logic clear_en;
 
-	// BTB signals
-	logic	[31:0]	target_pc; 	
-	logic		valid_target;
+	// Outputs
+		// BTB signals
+		logic	[31:0]			target_pc; 	
+		logic				valid_target;
+
+		// OBQ signals
+		logic 				bh_pred_valid;		// Same as Gshare obq_bh_pred_valid
+		OBQ_ROW_T 			bh_pred;		// Same as [`GHT_BIT-1:0] obq_gh_in
+		logic	[$clog2(`OBQ_SIZE)-1:0]	bh_index;			// *******Index from OBQ
+
+		// GSHARE signals
+		logic	[`GHT_BIT-1:0]		ght;
+		logic				prediction_valid;
+		logic				prediction;
+
+	//Value evaluation
+	//
+	assign clear_en		= ex_en_branch &  // **************** When the branch prediction was wrong 
+
+	assign next_pc_valid	= ;		  // ****************Whether next PC is valid or not
+	assign next_pc		= ;		  // ***************Next PC value
+
+	assign next_pc_index	= bh_index; 	
 
 
-	// OBQ signals
-	logic write_en;
-	OBQ_ROW_T bh_row;
-
-	logic clear_en;
-	logic [$clog2(`OBQ_SIZE)-1:0] index;
-	
-	logic bh_pred_valid;
-	OBQ_ROW_T bh_pred;
-
-
-	// output wires
-	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out;
-	logic [$clog2(`OBQ_SIZE)-1:0] tail_out;
-	logic bh_pred_valid;
-	OBQ_ROW_T bh_pred;
-
-
-
-	// GSHARE signals
- 
-	logic							obq_bh_pred_valid;
-	logic	[`GHT_BIT-1:0]					obq_gh_in;
-	logic							clear_en;
-
-	logic							prediction_valid;
-	logic	 						prediction;
 	// BTB module	
 
 
@@ -105,14 +102,13 @@ module  BP(
 		// inputs
 		.clock(clock),
 		.reset(reset),
-		.write_en(write_en),
-		.bh_row(bh_row),
+		.write_en(prediction_valid),
+		.bh_row(ght),
 		.clear_en(clear_en),
-		.index(index),
+		.index(ex_branch_index),
 
 		// outputs
-		.obq_out(obq_out),
-		.tail_out(tail_out),
+		.bh_index(bh_index),//****************	
 		.bh_pred_valid(bh_pred_valid),
 		.bh_pred(bh_pred)
 	);
@@ -126,15 +122,15 @@ module  BP(
 		.enable(enable),
 		.if_branch(if_branch), 
 		.pc_in(pc_in),
-		.obq_bh_pred_valid(obq_bh_pred_valid),
-		.obq_gh_in(obq_gh_in),
+		.obq_bh_pred_valid(bh_pred_valid),
+		.obq_gh_in(bh_pred.branch_history),
 		.clear_en(clear_en),
 		
-		// outputs 
+		// outputs
+		.ght_out(ght), 
 		.prediction_valid(prediction_valid),
 		.prediction_out(prediction)
 	);
-
 
 
 	always_ff @(posedge clock) begin

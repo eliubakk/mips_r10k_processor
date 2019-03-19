@@ -16,8 +16,9 @@ module testbench;
 
 	logic							prediction_valid;
 	logic	 						prediction;
-	`ifdef DEBUG_OUT
 	logic 	[`GHT_BIT-1:0] 					ght_out;
+
+	`ifdef DEBUG_OUT
 	logic	[2**(`GHT_BIT)-1:0]				pht_out;
 	`endif
 
@@ -44,9 +45,9 @@ module testbench;
 		
 		// outputs 
 		`ifdef DEBUG_OUT
-		.ght_out(ght_out),
 		.pht_out(pht_out),
 		`endif	
+		.ght_out(ght_out),
 		.prediction_valid(prediction_valid),
 		.prediction_out(prediction)
 	);
