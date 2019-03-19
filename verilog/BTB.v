@@ -13,7 +13,7 @@ module  BTB(
 	input reset,  // Asynchronous reset active low
 	input enable, // Clock Enable
 
-	input		[31:0]	current_pc, 	// During fetch, current pc value
+	input		[31:0]	pc_in, 	// During fetch, current pc value
 	input	 		if_branch,	// During fetch, valid when the instruction is branch
 	input		[31:0]	ex_pc,		// After execute, original PC value 
 	input		[31:0]	calculated_pc,  // After execute, calculated PC value from execution unit	
@@ -59,7 +59,7 @@ module  BTB(
 		next_tag		= tag;
 		next_target_address 	= target_address;
 		
-		target_pc 		= current_pc;
+		target_pc 		= pc_in;
 		valid_target		= 1'b0;
 
 
@@ -96,11 +96,11 @@ module  BTB(
 	//
 	
 
-		if (enable & if_branch & next_valid[current_pc[$clog2(`BTB_ROW)+1:2]] & ( current_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] == next_tag[current_pc[$clog2(`BTB_ROW)+1:2]]  )) begin
+		if (enable & if_branch & next_valid[pc_in[$clog2(`BTB_ROW)+1:2]] & ( pc_in[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] == next_tag[pc_in[$clog2(`BTB_ROW)+1:2]]  )) begin
 			valid_target			= 1'b1;
-			target_pc[`TARGET_SIZE+1:2]	= next_target_address[current_pc[$clog2(`BTB_ROW)+1:2]];  		
+			target_pc[`TARGET_SIZE+1:2]	= next_target_address[pc_in[$clog2(`BTB_ROW)+1:2]];  		
 		end else begin
-			target_pc 		= current_pc;
+			target_pc 		= pc_in;
 			valid_target		= 1'b0;
 
 		end

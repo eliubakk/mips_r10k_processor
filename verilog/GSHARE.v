@@ -11,7 +11,7 @@ module GSHARE(
 		input							reset,
 		input							enable,
 		input							if_branch,	   // Enable when the instruction is branch 
-		input	[32:0]						pc_in,
+		input	[31:0]						pc_in,
 		input							obq_bh_pred_valid, // Enabled when obq is not empty(OBQ.bh_pred_valid),
 		input	[`GHT_BIT-1:0]					obq_gh_in,	   // roll back global history bits from obq (OBQ.bh_pred.branch_history
 		input							clear_en,	   // When branch prediction is wrong, flip the PHT bit of obq_gh_in

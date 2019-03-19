@@ -9,7 +9,7 @@
 module testbench;
 	logic clock, reset, enable;
 
-	logic		[31:0]	current_pc; 
+	logic		[31:0]	pc_in; 
 	logic	 		if_branch; 
 	logic		[31:0]	ex_pc;		
 	logic		[31:0]	calculated_pc;  	
@@ -35,7 +35,7 @@ module testbench;
 		.clock(clock), 
 		.reset(reset), 
 		.enable(enable), 
-		.current_pc(current_pc),
+		.pc_in(pc_in),
 		.if_branch(if_branch),	
 		.ex_pc(ex_pc),
 		.calculated_pc(calculated_pc),
@@ -83,7 +83,7 @@ module testbench;
 	
 	initial begin
 		
-		$monitor("Clock: %4.0f, reset: %b, enable: %b, current_pc : %h, if_branch : %b, ex_pc : %h, calculated_pc : %h, ex_branch_taken : %b, ex_en_branch : %b, target_pc : %h, valid_target : %b",clock, reset, enable,current_pc, if_branch, ex_pc, calculated_pc, ex_branch_taken, ex_en_branch, target_pc, valid_target);   
+		$monitor("Clock: %4.0f, reset: %b, enable: %b, pc_in : %h, if_branch : %b, ex_pc : %h, calculated_pc : %h, ex_branch_taken : %b, ex_en_branch : %b, target_pc : %h, valid_target : %b",clock, reset, enable,pc_in, if_branch, ex_pc, calculated_pc, ex_branch_taken, ex_en_branch, target_pc, valid_target);   
 
 
 
@@ -91,7 +91,7 @@ module testbench;
 		clock 			= 1'b0;
 		reset 			= 1'b0;
 		enable 			= 1'b0;
-		current_pc		= 32'h0;
+		pc_in		= 32'h0;
 		if_branch		= 1'b0;
 		ex_pc			= 32'h0;
 		calculated_pc		= 32'h0;
@@ -213,7 +213,7 @@ module testbench;
 		
 
 		@(negedge clock);
-		current_pc		= 32'b10000000000000100_0110_00;
+		pc_in		= 32'b10000000000000100_0110_00;
 		if_branch		= 1'b1;
 		ex_pc			= 32'h0;
 		calculated_pc		= 32'h0;
@@ -233,7 +233,7 @@ module testbench;
 		
 
 		@(negedge clock);
-		current_pc		= 32'h14;
+		pc_in		= 32'h14;
 		if_branch		= 1'b1;
 		ex_pc			= 32'h14;
 		calculated_pc		= 32'b101_1001_00;

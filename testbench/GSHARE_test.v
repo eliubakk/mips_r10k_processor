@@ -9,7 +9,7 @@
 module testbench;
 	logic clock, reset, enable;
 	logic							if_branch;
-	logic	[32:0]						pc_in;
+	logic	[31:0]						pc_in;
 	logic							obq_bh_pred_valid;
 	logic	[`GHT_BIT-1:0]					obq_gh_in;
 	logic							clear_en;
