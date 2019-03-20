@@ -167,7 +167,20 @@ module pipeline (
   logic  [3:0][63:0] mem_co_result;
   logic         mem_co_take_branch;
 
-  
+  //Outputs from the complete stage
+  logic              mem_co_halt_selected;
+  logic              mem_co_illegal_selected;
+  logic   PHYS_REG   co_reg_wr_idx_out;
+  logic  [63:0]      co_reg_wr_data_out;
+  logic              co_reg_wr_en_out;
+  logic              mem_co_take_branch_selected;
+  logic              mem_co_NPC_selected ;
+  logic              mem_co_valid_inst_selected;
+
+
+
+
+
   // Outputs from COM/RETIRE Pipeline Register    //
   logic            co_ret_halt;
   logic            co_ret_illegal;
@@ -332,16 +345,16 @@ module pipeline (
 	.reg_a(id_ra_idx), 		// Comes from Decode duringmem2proc_data
 	.reg_b(id_rb_idx), 		// Comes from Decode duringmem2proc_data
 	.reg_dest(id_dest_reg_idx_out), 	// Comes from Dmem2proc_data
-	.free_reg(free_reg), 	// Comes from Free List durmem2proc_data
-	.CDB_tag_in(CDB_tag_in), 	// Comes from CDB durinmem2proc_data
-	.CDB_en(CDB_en), 	// Comes from CDB during Commitmem2proc_data
+	.free_reg(fr_free_reg_T), 	// Comes from Free List durmem2proc_data
+	.CDB_tag_in(CDB_tag_out), 	// Comes from CDB durinmem2proc_data
+	.CDB_en(CDB_en),     	// Comes from CDB during Commitmem2proc_data
 	.map_check_point(map_check_point),
 	.branch_incorrect(branch_incorrect),
 	
   .map_table_out(map_table_out),
 	.T1(T1), 		// Output for Dispatch and goes to RS
 	.T2(T2), 		// Output for Dispatch and goes to RS
-	.T(mt_rob_T) 		// Output for Dispatch and goes to RS and ROB
+	.T(T) 		// Output for Dispatch and goes to RS and ROB
 
   )
 
@@ -355,6 +368,7 @@ module pipeline (
   //                  DI/ISSUE-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
+  assign branch_not_taken = !co_ret_take_branch;
   assign RS_enable=1;
   RS RS0(
       // inputs
@@ -365,9 +379,10 @@ module pipeline (
       .CDB_in(CDB_in), 
       .dispatch_valid(dispatch_valid),
       .inst_in({id_opa_select_out, id_opb_select_out, id_dest_reg_idx_out, id_alu_func_out, id_fu_name_out, id_rd_mem_out, id_wr_mem_out,
-       id_ldl_mem_out, id_stc_mem_out, id_cond_branch_out, id_uncond_branch_out, id_halt_out, id_cpuid_out, id_illegal_out, id_valid_inst_out,T , T1, T2, 0}), 
+       id_ldl_mem_out, id_stc_mem_out, id_cond_branch_out, id_uncond_branch_out, id_halt_out, id_cpuid_out, id_illegal_out, id_valid_inst_out, fr_free_reg_T 
+       , T1, T2, 0}), 
       .LSQ_busy(LSQ_busy),                //black box
-      .branch_not_taken(!ex_take_branch_out),   //check for this
+      .branch_not_taken(branch_not_taken),   //check for this
       .inst_opcode(if_id_IR),
       .npc(if_id_NPC),
 
@@ -406,9 +421,9 @@ phys_regfile regf_0 (
     .rdb_out(pr_T2_value),
 
     .wr_clk(clock),
-    .wr_en(wb_phys_reg_wr_en_out),
-    .wr_idx(T),
-    .wr_data(T_value)
+    .wr_en(co_reg_wr_en_out),
+    .wr_idx(co_reg_wr_idx_out),
+    .wr_data(co_reg_wr_en_out)
   );
 
 
@@ -600,7 +615,9 @@ assign mem_co_enable = 1'b1; // always enabled
         mem_co_halt         <= `SD ex_mem_halt;
         mem_co_illegal      <= `SD ex_mem_illegal;
         mem_co_valid_inst[]   <= `SD mem_valid_inst_out;
-        mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
+        mem_co_dest_reg_idx[1:0]  <= `SD ex_mem_dest_reg_idx[1:0];
+        mem_co_dest_reg_idx[2] <= `SD mem_dest_reg_idx_out;
+        mem_co_dest_reg_idx[3] <= `SD ex_mem_dest_reg_idx[3];
         mem_co_take_branch  <= `SD ex_mem_take_branch;
         // these are results of MEM stage
         mem_co_result[3:0]  <= `SD ex_mem_alu_result[3:0]
@@ -637,63 +654,88 @@ assign mem_co_enable = 1'b1; // always enabled
   )
 
 
+wb_stage wb_stage_0 (
+    // Inputs
+    .clock(clock),
+    .reset(reset),
+    .mem_wb_NPC(mem_co_NPC_selected),
+    .mem_wb_result(co_reg_wr_data_out),
+    .mem_wb_dest_reg_idx(co_reg_wr_idx_out),
+    .mem_wb_take_branch(mem_co_take_branch_selected),
+    .mem_wb_valid_inst(mem_co_valid_inst_selected),
+
+    // Outputs
+    .reg_wr_data_out(co_reg_wr_data_out),
+    .reg_wr_idx_out(co_reg_wr_idx_out),
+    .reg_wr_en_out(co_reg_wr_en_out)
+  );
+
+
+
+// the Ored output from the priority selector will work as the enable signal for the cdb 
+// the enable signal from the cdb is used as the enable signal for the cam
+// need to create dispatch en signal
+// need to writeback to the physical reg nad store some values in the complete/retire stage
+// Declare the signals which you created for connecting the modules
 
   //////////////////////////////////////////////////
   //                                              //
   //           COMPLETE/RETIRE Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  // assign co_ret_enable = 1'b1; // always enabled
-  // // synopsys sync_set_reset "reset"
-  // always_ff @(posedge clock) begin
-  //   if (reset) begin
-  //     co_ret_NPC          <= `SD 0;
-  //     co_ret_IR           <= `SD `NOOP_INST;
-  //     co_ret_halt         <= `SD 0;
-  //     co_ret_illegal      <= `SD 0;
-  //     co_ret_valid_inst   <= `SD 0;
-  //     co_ret_dest_reg_idx <= `SD `ZERO_REG;
-  //     co_ret_take_branch  <= `SD 0;
-  //     co_ret_result       <= `SD 0;
-  //   end else begin
-  //     if (co_ret_enable) begin
-  //       // these are forwarded directly from EX/MEM latches
-  //       co_ret_NPC          <= `SD mem_co_NPC;
-  //       co_ret_IR           <= `SD mem_co_IR;
-  //       co_ret_halt         <= `SD mem_co_halt;
-  //       co_ret_illegal      <= `SD mem_co_illegal;
-  //       co_ret_valid_inst   <= `SD mem_valid_inst_out;
-  //       co_ret_dest_reg_idx <= `SD mem_dest_reg_idx_out;
-  //       co_ret_take_branch  <= `SD ex_mem_take_branch;
-  //       // these are results of MEM stage
-  //       co_ret_result       <= `SD mem_result_out;
-  //     end // if
-  //   end // else: !if(reset)
-  // end // always
+  assign co_ret_enable = 1'b1; // always enabled
+  // synopsys sync_set_reset "reset"
+  always_ff @(posedge clock) begin
+    if (reset) begin
+      co_ret_NPC          <= `SD 0;
+      co_ret_IR           <= `SD `NOOP_INST;
+      co_ret_halt         <= `SD 0;
+      co_ret_illegal      <= `SD 0;
+      co_ret_valid_inst   <= `SD 0;
+      co_ret_dest_reg_idx <= `SD `ZERO_REG;
+      co_ret_take_branch  <= `SD 0;
+      co_ret_result       <= `SD 0;
+    end else begin
+      if (co_ret_enable) begin
+        // these are forwarded directly from EX/MEM latches
+        co_ret_NPC          <= `SD mem_co_NPC_selected;
+        co_ret_IR           <= `SD mem_co_IR_selected;
+        co_ret_halt         <= `SD mem_co_halt_selected;
+        co_ret_illegal      <= `SD mem_co_illegal_selected;
+        co_ret_valid_inst   <= `SD mem_co_valid_inst_out_selected;
+        co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
+        co_ret_take_branch  <= `SD mem_co_take_branch_selected;
+        // these are results of MEM stage
+        //co_ret_result       <= `SD mem_co_result_out_selected;
+      end // if
+    end // else: !if(reset)
+  end // always
 
 // INSTANTIATING THE ROB
+ 
   ROB R0(
 	.clock(clock),
 	.reset(reset),
 	.enable(enable),
-	.T_old_in(mt_rob_T), // Comes from Map Table During Dispatch
-	.T_new_in, // Comes from Free List During Dispatch
-	input PHYS_REG 		CDB_tag_in, // Comes from CDB during Commit
-	input				CAM_en, // Comes from CDB during Commit
-	input				dispatch_en, // Structural Hazard detection during Dispatch
-	input 				branch_not_taken,
+	.T_old_in(T), // Comes from Map Table During Dispatch
+	.T_new_in(fr_rs_rob_T), // Comes from Free List During Dispatch
+	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
+	.CAM_en(CDB_enable), // Comes from CDB during Commit
+	dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+	.branch_not_taken(branch_not_taken),
 
 	// OUTPUTS
 	
-	.T_free(rob_fl_free_reg), // Output for Retire Stage goes to Free List
-	output PHYS_REG     T_arch, // Output for Retire Stage goes to Arch Map
+	.T_free(rob_fl_arch_Told), // Output for Retire Stage goes to Free List
+	.T_arch(rob_arch_retire_reg), // Output for Retire Stage goes to Arch Map
 
-	output logic		T_out_valid,
-	output logic [$clog2(`ROB_SIZE):0] rob_free_entries,
-	output logic							 rob_full, // Used for Dispatch Hazard
+	.T_out_valid(arch_fr_enable),
+	.rob_free_entries(rob_free_entries),
+	.rob_full(rob_full), // Used for Dispatch Hazard
 	
-	output  ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out,
-	output logic [$clog2(`ROB_SIZE):0] tail_reg, head_reg
+	.ROB_table_out(ROB_table_out),
+	.tail_reg(tail_reg), 
+  .head_reg(head_reg)
 
 );
 
@@ -703,33 +745,33 @@ assign mem_co_enable = 1'b1; // always enabled
 Free_List f0(
 	.clock(clock),
 	.reset(reset),
-	.enable(enable),
-	.PHYS_REG T_old(rob_fl_free_reg), // Comes from ROB during Retire Stage
-	input dispatch_en, // Structural Hazard detection during Dispatch
+	.enable(arch_fr_enable),
+	.PHYS_REG T_old(rob_fl_arch_Told), // Comes from ROB during Retire Stage
+	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
 
 	// inputs for branch misprediction
-	input branch_incorrect,
-	input PHYS_REG [`FL_SIZE-1:0] free_check_point,
-	input [$clog2(`FL_SIZE):0] tail_check_point,
+	.branch_incorrect(branch_not_taken),
+	free_check_point(free_check_point),
+	.tail_check_point(tail_check_point),
 
 	`ifdef DEBUG
-	output PHYS_REG [`FL_SIZE-1:0] free_list_out,
-	output logic [$clog2(`FL_SIZE):0] tail_out,
+	.free_list_out(fr_rs_rob_T),
+	.tail_out(fr_tail_out),
 	`endif
 
-	output [$clog2(`FL_SIZE):0] num_free_entries, // Used for Dispatch Hazard
-	output logic empty, // Used for Dispatch Hazard
-	output PHYS_REG free_reg // Output for Dispatch for other modules
+	.num_free_entries(fr_num_free_entries), // Used for Dispatch Hazard
+	.empty(fr_empty), // Used for Dispatch Hazard
+	.free_reg(fr_free_reg_T) // Output for Dispatch for other modules
 );
 
 Arch_Map_Table a0(
 	.clock(clock),
 	.reset(reset),
-	.enable(enable),
-	input PHYS_REG	T_new_in, // Comes from ROB during Retire
-	input PHYS_REG	T_old_in, //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
+	.enable(arch_enable),
+	.T_new_in(rob_arch_retire_reg), // Comes from ROB during Retire
+  .T_old_in(rob_fl_arch_Told), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
-	output PHYS_REG [`NUM_GEN_REG-1:0] arch_table // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
+	.arch_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
 );
 
 
@@ -738,20 +780,24 @@ Arch_Map_Table a0(
   //                  WB-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
-  wb_stage wb_stage_0 (
-    // Inputs
-    .clock(clock),
-    .reset(reset),
-    .mem_wb_NPC(mem_wb_NPC),
-    .mem_wb_result(mem_wb_result),
-    .mem_wb_dest_reg_idx(mem_wb_dest_reg_idx),
-    .mem_wb_take_branch(mem_wb_take_branch),
-    .mem_wb_valid_inst(mem_wb_valid_inst),
+  // wb_stage wb_stage_0 (
+  //   // Inputs
+  //   .clock(clock),
+  //   .reset(reset),
+  //   .mem_wb_NPC(mem_wb_NPC),
+  //   .mem_wb_result(mem_wb_result),
+  //   .mem_wb_dest_reg_idx(mem_wb_dest_reg_idx),
+  //   .mem_wb_take_branch(mem_wb_take_branch),
+  //   .mem_wb_valid_inst(mem_wb_valid_inst),
 
-    // Outputs
-    .reg_wr_data_out(wb_reg_wr_data_out),
-    .reg_wr_idx_out(wb_reg_wr_idx_out),
-    .reg_wr_en_out(wb_reg_wr_en_out)
-  );
+  //   // Outputs
+  //   .reg_wr_data_out(wb_reg_wr_data_out),
+  //   .reg_wr_idx_out(wb_reg_wr_idx_out),
+  //   .reg_wr_en_out(wb_reg_wr_en_out)
+  // );
+
+
+
+
 
 endmodule  // module verisimple

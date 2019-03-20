@@ -44,7 +44,7 @@ module wb_stage(
   // reg_wr_en_out computation is sort of overkill since the reg file
   // has a special way of handling `ZERO_REG but there is no harm 
   // in putting this here.  Hopefully it illustrates how the pipeline works.
-  assign reg_wr_en_out  = mem_wb_dest_reg_idx != `ZERO_REG;
+  assign reg_wr_en_out  = mem_wb_dest_reg_idx != `DUMMY_REG;
   assign reg_wr_idx_out = mem_wb_dest_reg_idx;
   assign reg_wr_data_out = result_mux;
 
