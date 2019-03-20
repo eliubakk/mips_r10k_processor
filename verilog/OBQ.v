@@ -52,15 +52,29 @@ module OBQ(
 	always_comb begin
 
 		if (write_en & clear_en & shift_en) begin
-			// we want to clear everything and then
-			// insert the new branch history table
-			
+
+			// determine tail_next
+			if (shift_index < tail & index < tail) begin
+				tail_next = index - shift_index;
+			end else if (shift_index < tail) begin
+				tail_next = tail - shift_index;
+			end else if (index < tail) begin
+				tail_next = index + 1;
+			end else begin
+				tail_next = tail + 1;
+			end
+
+
 			// shift all the entries over
-			for (int i = 0; i < `OBQ_SIZE; ++i) begin
-				if (i - shift_index > 0) begin
-					obq_next[i - shift_index - 1] = obq[i];
+			if (shift_index < tail) begin
+				for (int i = 0; i < `OBQ_SIZE; ++i) begin
+					if (i - shift_index > 0) begin
+						obq_next[i - shift_index - 1] = obq[i];
+					end
 				end
 			end
+			// we want to clear everything and then
+			// insert the new branch history table
 
 			// clear the entries just by updating the tail ptr
 
@@ -73,9 +87,8 @@ module OBQ(
 			end
 
 			// insert the new branch history
-			tail_next = tail - shift_index - index + 1;
-			obq_next[tail - shift_index - index + 1] = bh_row;
-			row_tag_next = tail - shift_index - index + 1;
+			obq_next[tail_next - 1] = bh_row;
+			row_tag_next = tail_next - 1;
 		end else if (write_en & clear_en) begin
 			// clear everything and place new branch history at
 			// new end
@@ -100,36 +113,66 @@ module OBQ(
 		end else if (write_en & shift_en) begin
 			// shift and append at end
 
-			// shift all the entries over
-			for (int i = 0; i < `OBQ_SIZE; ++i) begin
-				if (i - shift_index > 0) begin
-					obq_next[i - shift_index - 1] = obq[i];
+			if (shift_index < tail) begin
+			
+				// shift all the entries over
+				for (int i = 0; i < `OBQ_SIZE; ++i) begin
+					if (i - shift_index > 0) begin
+						obq_next[i - shift_index - 1] = obq[i];
+					end
 				end
+				tail_next = tail - shift_index;
+	
+				// insert new entry
+				obq_next[tail - shift_index - 1] = bh_row;
+				row_tag_next = tail - shift_index - 1;
+			end else if (tail < `OBQ_SIZE) begin
+				obq_next = obq;
+				obq_next[tail] = bh_row;
+				tail_next = tail + 1;
+				row_tag_next = tail;
+			end else begin
+				obq_next = obq;
+				tail_next = tail;
+				row_tag_next = row_tag_index;
 			end
-			tail_next = tail - shift_index + 1;
-
-			// insert new entry
-			obq_next[tail - shift_index] = bh_row;
-			row_tag_next = tail - shift_index;
 		end else if (clear_en & shift_en) begin
+			tail_next = tail;
+			obq_next = obq;
+
+			// decide tail_next
+			if (shift_index < tail & index < tail) begin
+				tail_next = index - shift_index - 1;
+			end else if (shift_index < tail) begin
+				tail_next = tail - shift_index - 1;
+			end else if (index < tail) begin
+				tail_next = index;
+			end else begin
+				tail_next = tail;
+			end
+
 			// shift all the entries over
-			for (int i = 0; i < `OBQ_SIZE; ++i) begin
-				if (i - shift_index > 0) begin
-					obq_next[i - shift_index - 1] = obq[i];
+			if (shift_index < tail) begin
+				for (int i = 0; i < `OBQ_SIZE; ++i) begin
+					if (i - shift_index > 0) begin
+						obq_next[i - shift_index - 1] = obq[i];
+					end
 				end
 			end
 
 			// clear the entries just by updating the tail ptr
-
-			if (index != 0) begin
-				// if we are clearing the table, this implies
-				// that our prediction was incorrect and
-				// therefore we need to update the last bit
-				// of the most recent valid branch history
-				obq_next[index - 1].branch_history[`BH_SIZE-1] = ~obq_next[index - 1].branch_history[`BH_SIZE-1];
+			if (index < tail) begin
+				if (index != 0) begin
+					// if we are clearing the table, this implies
+					// that our prediction was incorrect and
+					// therefore we need to update the last bit
+					// of the most recent valid branch history
+					obq_next[index - shift_index - 2].branch_history[`BH_SIZE-1] = ~obq_next[index - shift_index - 2].branch_history[`BH_SIZE-1];
+				end
+				// tail_next = index - shift_index - 1;
+			end else if (index == tail) begin
+				// tail_next = index - shift_index - 1;
 			end
-
-			tail_next = tail - shift_index - index;
 		end else if (shift_en) begin
 			// shift all the entries over
 			if (shift_index < tail) begin
@@ -138,7 +181,7 @@ module OBQ(
 						obq_next[i - shift_index - 1] = obq[i];
 					end
 				end
-				tail_next = tail - shift_index;
+				tail_next = tail - shift_index - 1;
 			end else begin
 				tail_next = tail;
 				obq_next = obq;

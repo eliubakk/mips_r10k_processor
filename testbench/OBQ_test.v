@@ -24,14 +24,14 @@ module testbench;
 
 	// output wires
 	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out;
-	logic [$clog2(`OBQ_SIZE)-1:0] tail_out;
+	logic [$clog2(`OBQ_SIZE):0] tail_out;
 	logic [$clog2(`OBQ_SIZE):0] row_tag;
 	logic bh_pred_valid;
 	OBQ_ROW_T bh_pred;
 
 	// test wires
 	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_test;
-	logic [$clog2(`OBQ_SIZE)-1:0] tail_test;
+	logic [$clog2(`OBQ_SIZE):0] tail_test;
 	logic [$clog2(`OBQ_SIZE):0] row_tag_test;
 	
 	// initialize module
@@ -109,7 +109,6 @@ module testbench;
 	task shift_test;
 		input int idx;
 		begin
-			$display("here tail_test: %d", tail_test);
 			if (idx < tail_test) begin
 				int count;
 				count = 0;
@@ -117,7 +116,7 @@ module testbench;
 					obq_test[count] = obq_test[i];
 					++count;
 				end
-				tail_test -= idx;
+				tail_test -= idx + 1;
 			end
 		end
 	endtask
@@ -351,7 +350,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		assert(bh_pred_valid == ONE) else #1 exit_on_error;
+		assert(bh_pred_valid == ZERO) else #1 exit_on_error;
 		obq_equal(obq_out, obq_test, tail_out, tail_test);
 
 		$display("Multiple Shift Passed");
@@ -367,8 +366,6 @@ module testbench;
 		obq_test = obq_out;
 		tail_test = tail_out;
 
-		$display("at start tail_out: %d tail_test: %d", tail_out, tail_test);
-
 		for (int i = 0; i < 100; ++i) begin
 			@(negedge clock);
 			reset = ZERO;
@@ -376,10 +373,6 @@ module testbench;
 			shift_en = $urandom_range(1, 0);
 			bh_row.branch_history = $urandom_range(2**10 - 1, 0);
 			shift_index = $urandom_range(2**4 - 1, 0);
-			$display("look here");
-			$display("tail_out: %d tail_test: %d", tail_out, tail_test);
-			print_obq(obq_out);
-			print_obq(obq_test);
 			if (shift_en) begin
 				shift_test(shift_index);
 			end
@@ -389,9 +382,6 @@ module testbench;
 
 			@(posedge clock);
 			`DELAY;
-			$display("tail_out: %d tail_test: %d", tail_out, tail_test);
-			print_obq(obq_out);
-			print_obq(obq_test);
 			assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
 			obq_equal(obq_out, obq_test, tail_out, tail_test);
 			if (write_en) begin
@@ -400,6 +390,125 @@ module testbench;
 		end
 
 		$display("Multiple Write and Multiple Shift Passed");
+
+		$display("Testing Multiple Clear and Multiple Shift...");
+
+		@(negedge clock);
+		shift_en = ZERO;
+		write_en = ZERO;
+		reset = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		obq_test = obq_out;
+		tail_test = tail_out;
+
+		for (int i = 0; i < 100; ++i) begin
+			@(negedge clock);
+			if (i % 10 == 0) begin
+				for (int j = 0; j < 10; ++j) begin
+					@(negedge clock);
+					reset = ZERO;
+					write_en = ONE;
+					shift_en = ZERO;
+					clear_en = ZERO;
+					bh_row.branch_history = $urandom_range(2**10 - 1, 0);
+					insert_into_test(bh_row);
+
+					@(posedge clock);
+					`DELAY;
+					assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
+					obq_equal(obq_out, obq_test, tail_out, tail_test);
+					assert(row_tag == row_tag_test) else #1 exit_on_error;
+				end
+			end else begin
+				reset = ZERO;
+				write_en = ZERO;
+				clear_en = $urandom_range(1, 0);
+				shift_en = $urandom_range(1, 0);
+				index = $urandom_range(2**4 - 1, 0);
+
+				if (shift_en & clear_en) begin
+					shift_index = $urandom_range(index, 0);
+				end else begin
+					shift_index = $urandom_range(2**4 - 1, 0);
+				end
+
+				if (clear_en) begin
+					clear_from_test(index);
+				end
+
+				if (shift_en) begin
+					shift_test(shift_index);
+				end
+	
+				@(posedge clock);
+				`DELAY;
+				assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
+				obq_equal(obq_out, obq_test, tail_out, tail_test);
+			end
+
+		end		
+
+		$display("Multiple Clear and Multiple Shift Passed");
+
+		$display("Testing Multiple Write, Clear, and Shift...");
+		
+		@(negedge clock);
+		shift_en = ZERO;
+		write_en = ZERO;
+		clear_en = ZERO;
+		reset = ONE;
+
+		@(posedge clock);
+		`DELAY;
+		obq_test = obq_out;
+		tail_test = tail_out;
+
+		for (int i = 0; i < 100; ++i) begin
+			@(negedge clock);
+			$display("after negedge");
+			reset = ZERO;
+			write_en = $urandom_range(1, 0);
+			shift_en = $urandom_range(1, 0);
+			clear_en = $urandom_range(1, 0);
+			bh_row.branch_history = $urandom_range(2**10 - 1, 0);
+			index = $urandom_range(2**4 - 1, 0);
+			$display("got some random vals");
+			if (shift_en & clear_en) begin
+				shift_index = $urandom_range(index, 0);
+			end else begin
+				shift_index = $urandom_range(2**4 - 1, 0);
+			end
+	
+			if (clear_en) begin
+				clear_from_test(index);
+			end
+
+			if (shift_en) begin
+				shift_test(shift_index);
+			end
+
+			if (write_en) begin
+				insert_into_test(bh_row);
+			end
+			$display("end negedge");
+
+			@(posedge clock);
+			$display("clocky");
+			`DELAY;
+			$display("here");
+			assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
+			$display("tail_out: %d tail_test: %d", tail_out, tail_test);
+			obq_equal(obq_out, obq_test, tail_out, tail_test);
+			$display("after equal?");
+			if (write_en) begin
+				assert(row_tag == row_tag_test) else #1 exit_on_error;
+			end
+			$display("i = %d", i);
+		end
+
+		$display("Multiple Write, Clear, and Shift Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
