@@ -182,9 +182,6 @@ module OBQ(
 					// of the most recent valid branch history
 					obq_next[index - shift_index - 2].branch_history[`BH_SIZE-1] = ~obq_next[index - shift_index - 2].branch_history[`BH_SIZE-1];
 				end
-				// tail_next = index - shift_index - 1;
-			end else if (index == tail) begin
-				// tail_next = index - shift_index - 1;
 			end
 		end else if (shift_en) begin
 			// shift all the entries over

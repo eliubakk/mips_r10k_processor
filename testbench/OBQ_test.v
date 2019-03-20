@@ -2,7 +2,7 @@
 `define DEBUG
 `define DELAY #2
 `define CLOCK_PERIOD #10
-`define NUM_RAND_ITER 20
+`define NUM_RAND_ITER 100
 
 module testbench;
 
@@ -419,6 +419,9 @@ module testbench;
 
 					@(posedge clock);
 					`DELAY;
+					$display("tail_out: %d tail_test: %d", tail_out, tail_test);
+					print_obq(obq_out);
+					print_obq(obq_test);
 					assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
 					obq_equal(obq_out, obq_test, tail_out, tail_test);
 					assert(row_tag == row_tag_test) else #1 exit_on_error;
@@ -431,7 +434,7 @@ module testbench;
 				index = $urandom_range(2**4 - 1, 0);
 
 				if (shift_en & clear_en) begin
-					shift_index = $urandom_range(index, 0);
+					shift_index = $urandom_range(index - 1, 0);
 				end else begin
 					shift_index = $urandom_range(2**4 - 1, 0);
 				end
@@ -507,6 +510,7 @@ module testbench;
 			$display("end negedge");
 			// print_obq(obq_out);
 			// print_obq(obq_test);
+			$display("here");
 
 			@(posedge clock);
 			$display("clocky");
