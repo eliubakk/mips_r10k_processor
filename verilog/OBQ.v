@@ -55,7 +55,11 @@ module OBQ(
 
 			// determine tail_next
 			if (shift_index < tail & index < tail) begin
-				tail_next = index - shift_index;
+				if (shift_index == index) begin
+					tail_next = 1;
+				end else begin
+					tail_next = index - shift_index;
+				end
 			end else if (shift_index < tail) begin
 				tail_next = tail - shift_index;
 			end else if (index < tail) begin
@@ -87,8 +91,13 @@ module OBQ(
 			end
 
 			// insert the new branch history
-			obq_next[tail_next - 1] = bh_row;
-			row_tag_next = tail_next - 1;
+			if (tail_next == 0) begin
+				obq_next[0] = bh_row;
+				row_tag_next = 0;
+			end else begin
+				obq_next[tail_next - 1] = bh_row;
+				row_tag_next = tail_next - 1;
+			end
 		end else if (write_en & clear_en) begin
 			// clear everything and place new branch history at
 			// new end
@@ -142,7 +151,11 @@ module OBQ(
 
 			// decide tail_next
 			if (shift_index < tail & index < tail) begin
-				tail_next = index - shift_index - 1;
+				if (shift_index == index) begin
+					tail_next = 0;
+				end else begin
+					tail_next = index - shift_index - 1;
+				end
 			end else if (shift_index < tail) begin
 				tail_next = tail - shift_index - 1;
 			end else if (index < tail) begin

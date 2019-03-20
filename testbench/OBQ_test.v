@@ -2,6 +2,7 @@
 `define DEBUG
 `define DELAY #2
 `define CLOCK_PERIOD #10
+`define NUM_RAND_ITER 20
 
 module testbench;
 
@@ -69,6 +70,7 @@ module testbench;
 		input [$clog2(`OBQ_SIZE):0] tail;
 		input [$clog2(`OBQ_SIZE):0] tail_test;
 		begin
+			$display("in obq_equal");
 			assert(tail == tail_test) else #1 exit_on_error;
 			for (int i = 0; i < tail; ++i) begin
 				assert(obq[i] == test[i]) else #1 exit_on_error;
@@ -99,6 +101,7 @@ module testbench;
 	task clear_from_test;
 		input int idx;
 		begin
+			$display("clearing index: %d", idx);
 			if (idx < tail_test) begin
 				tail_test = idx;
 				obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
@@ -139,7 +142,6 @@ module testbench;
 		index = 0;
 		shift_en = ZERO;
 		shift_index = 0;
-
 		$display("Testing Reset...");
 		@(negedge clock);
 		reset = ONE;
@@ -275,7 +277,7 @@ module testbench;
 		tail_test = tail_out;
 
 		// random iterations
-		for (int i = 0; i < 100; ++i) begin
+		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
 			@(negedge clock);
 			reset = ZERO;
 			write_en = $urandom_range(1, 0);
@@ -366,7 +368,7 @@ module testbench;
 		obq_test = obq_out;
 		tail_test = tail_out;
 
-		for (int i = 0; i < 100; ++i) begin
+		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
 			@(negedge clock);
 			reset = ZERO;
 			write_en = $urandom_range(1, 0);
@@ -403,7 +405,7 @@ module testbench;
 		obq_test = obq_out;
 		tail_test = tail_out;
 
-		for (int i = 0; i < 100; ++i) begin
+		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
 			@(negedge clock);
 			if (i % 10 == 0) begin
 				for (int j = 0; j < 10; ++j) begin
@@ -444,6 +446,9 @@ module testbench;
 	
 				@(posedge clock);
 				`DELAY;
+				$display("tail_out: %d tail_test: %d", tail_out, tail_test);
+				print_obq(obq_out);
+				print_obq(obq_test);
 				assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
 				obq_equal(obq_out, obq_test, tail_out, tail_test);
 			end
@@ -451,7 +456,6 @@ module testbench;
 		end		
 
 		$display("Multiple Clear and Multiple Shift Passed");
-
 		$display("Testing Multiple Write, Clear, and Shift...");
 		
 		@(negedge clock);
@@ -465,34 +469,44 @@ module testbench;
 		obq_test = obq_out;
 		tail_test = tail_out;
 
-		for (int i = 0; i < 100; ++i) begin
+		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
 			@(negedge clock);
-			$display("after negedge");
+			// $display("after negedge");
 			reset = ZERO;
+			// $display("shift_en starts at: %b", shift_en);
 			write_en = $urandom_range(1, 0);
 			shift_en = $urandom_range(1, 0);
+			// $display("shift_en is now: %b", shift_en);
 			clear_en = $urandom_range(1, 0);
 			bh_row.branch_history = $urandom_range(2**10 - 1, 0);
 			index = $urandom_range(2**4 - 1, 0);
-			$display("got some random vals");
+			// $display("got some random vals");
 			if (shift_en & clear_en) begin
 				shift_index = $urandom_range(index, 0);
 			end else begin
 				shift_index = $urandom_range(2**4 - 1, 0);
 			end
-	
+
+			// $display("before clear");
+			// print_obq(obq_test);	
 			if (clear_en) begin
 				clear_from_test(index);
 			end
-
+			// $display("after clear");
+			// print_obq(obq_test);
+			// $display("shift_en: %b", shift_en);
 			if (shift_en) begin
 				shift_test(shift_index);
 			end
+			// $display("after shift");
+			// print_obq(obq_test);
 
 			if (write_en) begin
 				insert_into_test(bh_row);
 			end
 			$display("end negedge");
+			// print_obq(obq_out);
+			// print_obq(obq_test);
 
 			@(posedge clock);
 			$display("clocky");
@@ -500,6 +514,8 @@ module testbench;
 			$display("here");
 			assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
 			$display("tail_out: %d tail_test: %d", tail_out, tail_test);
+			print_obq(obq_out);
+			print_obq(obq_test);
 			obq_equal(obq_out, obq_test, tail_out, tail_test);
 			$display("after equal?");
 			if (write_en) begin
