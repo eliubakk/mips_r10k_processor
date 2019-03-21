@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : ISR.tcl                          */
+#/*   FILE        : RS.tcl                                  */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,9 +11,12 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.dcc"]
-set_dont_touch psel_generic_NUM_REQS1
-read_file -f sverilog [list "verilog/RS.v"]
+#read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.ddc" "CAM_NUM_TAG1.ddc" "encoder.ddc"]
+#set_dont_touch psel_generic_NUM_REQS1
+#set_dont_touch CAM_NUM_TAG1
+#set_dont_touch encoder
+analyze -f sverilog [list "../verilog/RS.v" "../verilog/psel_generic.v" "../verilog/psel_single.v" "../verilog/CAM.v" "../verilog/encoder.v" "../sys_defs.vh"]
+elaborate RS
 set design_name RS
 set clock_name clock
 set reset_name reset

@@ -3,33 +3,8 @@
 // RS_SIZE : 12
 // NUM_FU : 5
 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
 `define DEBUG
-module RS_CAM(
-		input				enable,
-		input 				CAM_en, 
-		input PHYS_REG  		CDB_tag,
-		input RS_ROW_T  [`RS_SIZE-1:0] rs_table,
-		output 	 logic [`RS_SIZE-1:0] T1_hit,
-		output 	 logic [`RS_SIZE-1:0] T2_hit
-		
-	);
-		
-	always_comb begin
-		T1_hit = {`RS_SIZE{1'b0}};
-		T2_hit = {`RS_SIZE{1'b0}};	
-		if(CAM_en & enable) begin
-			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				T1_hit[i] = (rs_table[i].T1[5:0] == CDB_tag[5:0]);
-			 	T2_hit[i] = (rs_table[i].T2[5:0] == CDB_tag[5:0]);
-			end		
-		end else begin
-			T1_hit = {`RS_SIZE{1'b0}};
-			T2_hit = {`RS_SIZE{1'b0}};	
-		end	
-	end		
-
-endmodule
 
 //-----------------------------------------------------------------------------------------
 module RS(
@@ -37,19 +12,18 @@ module RS(
 	input 		    				clock,
 	input 		    				reset,
 	input 		    				enable, // enable input comes from ROB's "dispatch" output
-	input [`SS_SIZE-1:0] 			CAM_en,
-	input PHYS_REG					CDB_in, 
+	input [(`SS_SIZE-1):0] 			CAM_en,
+	input PHYS_REG [(`SS_SIZE-1):0]	CDB_in, 
 	input							dispatch_valid, // FU from ROB or Free list
-	input RS_ROW_T [(`SS_SIZE)-1:0]	inst_in,
-	input [1:0]						LSQ_busy, // 00 : not busy, 01: LQ busy, 10: SQ busy, 11: Both of them busy
+	input RS_ROW_T [(`SS_SIZE-1):0]	inst_in,
 	input							branch_not_taken, // signal to mention the status of the branch
 	
 	// OUTPUTS
 	`ifdef DEBUG 
-	output RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out,		
+	output RS_ROW_T [(`RS_SIZE-1):0]		rs_table_out,		
 	`endif
-	output RS_ROW_T [`NUM_FU-1:0]			issue_out, 
-	output logic 	[$clog2(`NUM_FU) - 1:0]	issue_cnt,
+	output RS_ROW_T [(`NUM_FU_TOTAL-1):0]			issue_out, 
+	output logic 	[($clog2(`NUM_FU_TOTAL)-1):0]	issue_cnt,
 	output wand								rs_full
 	);
 	
@@ -58,17 +32,25 @@ module RS(
 	////////////////////////////
 
 	//STATE VARIABLES 
-	RS_ROW_T [(`RS_SIZE - 1):0]		rs_table, rs_table_next; 
+	RS_ROW_T [(`RS_SIZE-1):0]		rs_table, rs_table_next; 
 	logic    [$clog2(`RS_SIZE):0]	rs_busy_cnt, rs_busy_cnt_next;
 
-	//CDB CAM VARIABLES
-	logic [(`RS_SIZE -1):0] MSB_T1, MSB_T2; // MSB bits for each CAM modules	
+	//CAM VARIABLES
+	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tag_in;
+	logic [(`RS_SIZE-1):0][1:0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
+	logic [(`RS_SIZE-1):0][1:0] cam_hits;	
 
 	// DISPATCH LOGIC VARIABLES
-	logic [`RS_SIZE-1:0] dispatch_reqs, dispatch_gnt;
+	logic [(`RS_SIZE-1):0] dispatch_reqs, dispatch_gnt;
+	logic [((`SS_SIZE*`RS_SIZE)-1):0] dispatch_gnt_bus;
+	logic [(`SS_SIZE-1):0][$clog2(`RS_SIZE)-1:0] dispatch_idx;
+	logic [(`SS_SIZE-1):0] dispatch_idx_valid;
 
 	// ISSUE LOGIC VARIABLEs
-	logic [`NUM_FU-1:0][`RS_SIZE-1:0] issue_reqs, issue_gnts;
+	logic [(`NUM_TYPE_FU-1):0][(`RS_SIZE-1):0] issue_reqs, issue_gnts;
+	logic [((`NUM_FU_TOTAL*`RS_SIZE)-1):0] issue_gnt_bus;
+	logic [(`NUM_FU_TOTAL-1):0][$clog2(`RS_SIZE)-1:0] issue_idx;
+	logic [(`NUM_FU_TOTAL-1):0] issue_idx_valid;
 
 
 	////////////////////////////
@@ -87,25 +69,22 @@ module RS(
 	end
 
 	//ISSUE LOGIC
-	for(ig = 0; ig < `NUM_FU; ig = ig + 1) begin
+	for(ig = 0; ig < `NUM_TYPE_FU; ig = ig + 1) begin
+		//localparam curr_idx = NUM_OF_FU_TYPE[ig-:(ig+1)].sum() - 1;
+		//issue table end index of FU type (non-inclusive) 
+		localparam unsigned end_idx = FU_BASE_IDX[ig]+NUM_OF_FU_TYPE[ig];
 		// psel for each FU type
-		if(FU_NAME_VAL[ig] == FU_LD) begin 
-			psel_generic #(`RS_SIZE, NUM_FU_TYPE[ig]) psel(
-				.req(issue_reqs[ig]),
-				.en(enable & ~LSQ_busy[0]),
-				.gnt(issue_gnts[ig])
-			);
-		end else if(FU_NAME_VAL[ig] == FU_ST) begin
-			psel_generic #(`RS_SIZE, NUM_FU_TYPE[ig]) psel(
-				.req(issue_reqs[ig]),
-				.en(enable & ~LSQ_busy[1]),
-				.gnt(issue_gnts[ig])
-			);
-		end else begin
-			psel_generic #(`RS_SIZE, NUM_FU_TYPE[ig]) psel(
-				.req(issue_reqs[ig]),
-				.en(enable),
-				.gnt(issue_gnts[ig])
+		psel_generic #(.WIDTH(`RS_SIZE), .NUM_REQS(NUM_OF_FU_TYPE[ig])) psel(
+			.req(issue_reqs[ig]),
+			.en(enable),
+			.gnt_bus(issue_gnt_bus[((end_idx)*`RS_SIZE-1)-:(`RS_SIZE*NUM_OF_FU_TYPE[ig])]),
+			.gnt(issue_gnts[ig])
+		);
+		for(jg = 0; jg < NUM_OF_FU_TYPE[ig]; jg = jg + 1) begin
+			encoder #(.WIDTH(`RS_SIZE)) encode_issue(
+				.in(issue_gnt_bus[((end_idx-jg)*`RS_SIZE-1)-:`RS_SIZE]),
+				.out(issue_idx[end_idx-jg-1]),
+				.valid(issue_idx_valid[end_idx-jg-1])
 			);
 		end
 	end
@@ -119,22 +98,36 @@ module RS(
 	psel_generic #(`RS_SIZE, `SS_SIZE) psel_dispatch(
 		.req(dispatch_reqs),
 		.en(enable & dispatch_valid),
+		.gnt_bus(dispatch_gnt_bus),
 		.gnt(dispatch_gnt)
 	);
 
-	// CAM
-	// Initiate one RS_CAM modules, parallelly process CDB broadcasting & CAM
-	RS_CAM rscam ( 
-		.enable(enable),
-		.CAM_en(CAM_en), 
-		.CDB_tag(CDB_in),
-		.rs_table(rs_table[`RS_SIZE-1:0]),
-		.T1_hit(MSB_T1),
-		.T2_hit(MSB_T2)
-	);
+	for(ig = 0; ig < `SS_SIZE; ig = ig + 1) begin
+		encoder #(.WIDTH(`RS_SIZE)) encode_dispatch(
+			.in(dispatch_gnt_bus[((ig+1)*`RS_SIZE-1)-:`RS_SIZE]),
+			.out(dispatch_idx[ig]),
+			.valid(dispatch_idx_valid[ig])
+		);
+	end
 
-	// Merge the MSB resultf from 3 CAMS, and update the next rs table,
-	// This will be used for issue stage
+	//CAM LOGIC
+	for(ig = 0; ig < `RS_SIZE; ig = ig + 1) begin
+		assign cam_tags_in[ig][0] = rs_table[ig].T1[($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_tags_in[ig][1] = rs_table[ig].T2[($clog2(`NUM_PHYS_REG)-1):0];
+	end
+	for(ig = 0; ig < `SS_SIZE; ig = ig + 1) begin
+		assign cam_tag_in[ig] = CDB_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
+	end
+	// Instantiate CAM module for CBD
+	CAM #(.LENGTH(`RS_SIZE),
+		  .WIDTH(2),
+		  .NUM_TAG (`SS_SIZE),
+		  .TAG_SIZE($clog2(`NUM_PHYS_REG))) rscam ( 
+		.enable({`SS_SIZE{enable}} & CAM_en),
+		.tag(cam_tag_in),
+		.tags_in(cam_tags_in),
+		.hits(cam_hits)
+	);
 	
 	assign issue_cnt = | issue_gnts[0] + | issue_gnts[1] + | issue_gnts[2] + | issue_gnts[3] + | issue_gnts[4];
 	//assign issue_idx = ALU_issue_gnt | LD_issue_gnt | ST_issue_gnt | MULT_issue_gnt | BR_issue_gnt;
@@ -145,13 +138,13 @@ module RS(
 		rs_table_next = rs_table;
 		
 		for(i=0;i<=`RS_SIZE;i=i+1) begin
-			rs_table_next[i].T1[6] = MSB_T1[i] | rs_table[i].T1[6];
-			rs_table_next[i].T2[6] = MSB_T2[i] | rs_table[i].T2[6];
+			rs_table_next[i].T1[6] = cam_hits[i][0] | rs_table[i].T1[6];
+			rs_table_next[i].T2[6] = cam_hits[i][1] | rs_table[i].T2[6];
 		end 
 	
 		// ISSUE STAGE //
 		//Initialization to prevent latch
-		for(i=0; i<`NUM_FU; i=i+1) begin // Another way to do this?
+		for(i=0; i<`NUM_FU_TOTAL; i=i+1) begin // Another way to do this?
 			issue_out[i].inst.opa_select = ALU_OPA_IS_REGA;
 			issue_out[i].inst.opb_select = ALU_OPB_IS_REGB;
 			issue_out[i].inst.dest_reg = DEST_IS_REGC;
@@ -171,31 +164,29 @@ module RS(
 			issue_out[i].T1 = `DUMMY_REG;
 			issue_out[i].T2 = `DUMMY_REG;
 			issue_out[i].busy = 1'b0;
+			issue_out[i].inst_opcode = 32'b0;
 		end
 	
-		for(i = 0; i < `NUM_FU; i = i + 1) begin
+		for(i = 0; i < `NUM_TYPE_FU; i = i + 1) begin
 			for(j = 0; j < `RS_SIZE; j = j + 1) begin 
-				issue_reqs[i][j] = (rs_table_next[j].inst.fu_name == FU_NAME_VAL[i] &
-										 rs_table_next[j].T1[6] & rs_table_next[j].T2[6] 
-										 & rs_table_next[j].busy);
+				issue_reqs[i][j] = (rs_table[j].inst.fu_name == FU_NAME_VAL[i] &
+									(rs_table[j].T1[6] | cam_hits[j][0]) &
+									(rs_table[j].T2[6] | cam_hits[j][1]) & 
+									rs_table[j].busy);
 			end
 		end
 
-		// loop through each FU_TYPE psel 
-		for(i = 0; i < `NUM_FU; i = i + 1) begin
-			// loop through RS table
-			for(j = 0; j < `RS_SIZE; j = j+1) begin
-				if(issue_gnts[i][j]) begin
-					// if statment for all FU of each type
-					for(k = 0; k < NUM_FU_TYPE[i]; k = k + 1) begin
-						if(~issue_out[FU_IDX_VAL[i] + k].busy & rs_table_next[j].busy) begin
-							issue_out[FU_IDX_VAL[i] + k] = rs_table_next[j];
-							issue_out[FU_IDX_VAL[i] + k].busy = 1'b1;
-							rs_table_next[j].busy = 1'b0; //Free the RS table
-						end
-					end
-				end
+		// loop through each FU encoder
+		for(i = 0; i < `NUM_FU_TOTAL; i = i + 1) begin
+			// loop through each of each type
+			//for(j = 0; j < NUM_OF_FU_TYPE[i]; j = j + 1) begin
+			if(issue_idx_valid[i]) begin
+				issue_out[i] = rs_table[issue_idx[i]];
+				issue_out[i].T1[6] = 1'b1;
+				issue_out[i].T2[6] = 1'b1;
+				rs_table_next[issue_idx[i]].busy = 1'b0;
 			end
+			//end
 		end
 
 		//make into encoder?
@@ -204,14 +195,10 @@ module RS(
 			
 		// DISPATCH STAGE
 		for(i = 0; i < `SS_SIZE; i = i + 1) begin
-			if(inst_in[i].inst.valid_inst) begin
-				for(j = 0; j < `RS_SIZE; j = j + 1) begin
-					if(dispatch_gnt[j] & ~rs_table_next[j].busy) begin
-						rs_table_next[j] = inst_in[i];
-						rs_table_next[j].busy = 1'b1;
-					end 
-				end	
-			end
+			if(inst_in[i].inst.valid_inst & dispatch_idx_valid[i]) begin
+				rs_table_next[dispatch_idx[i]] = inst_in[i];
+				rs_table_next[dispatch_idx[i]].busy = 1'b1;
+			end 
 		end
 
 	end
@@ -243,6 +230,7 @@ module RS(
 				rs_table[i].T1 <= `DUMMY_REG;
 				rs_table[i].T2 <=  `DUMMY_REG;
 				rs_table[i].busy <=  1'b0;
+				rs_table[i].inst_opcode <= 32'b0;
 			end
 			rs_busy_cnt <=  {($clog2(`RS_SIZE)){1'b0}};
 		end

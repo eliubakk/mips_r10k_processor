@@ -9,16 +9,15 @@ module testbench;
 	PHYS_REG 		CDB_in;
 	logic			dispatch_valid;
 	RS_ROW_T		inst_in;
-	logic	 [1:0]		LSQ_busy;
 	logic 					branch_not_taken;
 	
 
 	RS_ROW_T   	 [(`RS_SIZE - 1):0] 	rs_table_out;
-	RS_ROW_T 	 [(`NUM_FU -1 ):0] issue_next  ; 
+	RS_ROW_T 	 [(`NUM_FU_TOTAL - 1):0] issue_next  ; 
 	logic				rs_full;
-	logic [$clog2(`NUM_FU) - 1:0]	issue_cnt;
+	logic [($clog2(`NUM_FU_TOTAL) - 1):0]	issue_cnt;
 	RS_ROW_T   	[(`RS_SIZE - 1):0] 	rs_table_test ;
-	RS_ROW_T 	[(`NUM_FU -1 ):0]	issue_next_test   ; 
+	RS_ROW_T 	[(`NUM_FU_TOTAL - 1):0]	issue_next_test   ; 
 
 	
 	RS RS0(
@@ -29,8 +28,7 @@ module testbench;
 		.CAM_en(CAM_en), 
 		.CDB_in(CDB_in), 
 		.dispatch_valid(dispatch_valid),
-		.inst_in(inst_in), 
-		.LSQ_busy(LSQ_busy),
+		.inst_in(inst_in),
 		.branch_not_taken(branch_not_taken),
 
 		// outputs
@@ -71,15 +69,16 @@ module testbench;
 				clear_rs_table_test[i].T1 = `DUMMY_REG;
 				clear_rs_table_test[i].T2 = `DUMMY_REG;
 				clear_rs_table_test[i].busy = 1'b0;
+				clear_rs_table_test[i].inst_opcode = 32'b0;
 			end
 		end
 	endfunction
 
-	typedef RS_ROW_T [`NUM_FU] issue_t;
+	typedef RS_ROW_T [`NUM_FU_TOTAL] issue_t;
 
 	function issue_t clear_issue_next_test;
 	begin
-		for (integer i = 0; i < `NUM_FU; i += 1) begin
+		for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin
 			clear_issue_next_test[i].inst.opa_select = ALU_OPA_IS_REGA;
 			clear_issue_next_test[i].inst.opb_select = ALU_OPB_IS_REGB;
 			clear_issue_next_test[i].inst.dest_reg = DEST_IS_REGC;
@@ -99,6 +98,7 @@ module testbench;
 			clear_issue_next_test[i].T1 = `DUMMY_REG;
 			clear_issue_next_test[i].T2 = `DUMMY_REG;
 			clear_issue_next_test[i].busy = 1'b0;
+			clear_issue_next_test[i].inst_opcode = 32'b0;
 		end
 	end
 	endfunction
@@ -140,12 +140,12 @@ module testbench;
 	endtask
 
 	task print_issue_table;
-		input RS_ROW_T [`NUM_FU-1:0] issue_table;
+		input RS_ROW_T [`NUM_FU_TOTAL-1:0] issue_table;
 		begin
 			$display("**********************************************************\n");
 			$display("------------------------ISSUE TABLE----------------------------\n");
 
-			for(integer i=0;i<`NUM_FU;i=i+1) begin
+			for(integer i=0;i<`NUM_FU_TOTAL;i=i+1) begin
 				$display("Entry: %d", i);
 				print_rs_entry(issue_table[i]);
 			end
@@ -164,7 +164,7 @@ module testbench;
 			end
 				$display("RS full = %b, issue_cnt = %d",rs_full, issue_cnt);
 				$display("-----------------------Issue table-----------------------------------\n");
-			for(integer i=0;i<`NUM_FU;i=i+1) begin
+			for(integer i=0;i<`NUM_FU_TOTAL;i=i+1) begin
 				$display("Issue_row = %d, busy = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[i].busy, issue_next[i].T, issue_next[i].T1, issue_next[i].T2 );
 			
 			end
@@ -183,7 +183,7 @@ module testbench;
 			end
 				$display("RS full = %b, issue_cnt = %d",rs_full, issue_cnt);
 				$display("-----------------------Issue table-----------------------------------\n");
-			for(integer i=0;i<`NUM_FU;i=i+1) begin
+			for(integer i=0;i<`NUM_FU_TOTAL;i=i+1) begin
 				$display("Issue_row = %d, busy = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ",i, issue_next[i].busy, issue_next[i].T, issue_next[i].T1, issue_next[i].T2 );
 			
 			end
@@ -262,10 +262,10 @@ module testbench;
 	endtask
 
 	task check_issue_next_correct;
-		input RS_ROW_T [(`NUM_FU -1 ):0] issue_next;
-		input RS_ROW_T [(`NUM_FU -1 ):0] issue_next_test;
+		input RS_ROW_T [(`NUM_FU_TOTAL - 1):0] issue_next;
+		input RS_ROW_T [(`NUM_FU_TOTAL - 1):0] issue_next_test;
 		begin
-			for (int i = 0; i < `NUM_FU; i += 1) begin
+			for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
 				if (issue_next[i] != issue_next_test[i]) begin
 					$display("failed at check_issue_next_correct");
 					exit_on_error;
@@ -317,7 +317,6 @@ module testbench;
 		CAM_en = 1'b0;
 		CDB_in = {($clog2(`NUM_PHYS_REG) - 1){1'b0}};
 		dispatch_valid = 1'b0;
-		LSQ_busy = 2'b0;	
 		branch_not_taken = 1'b0;
 
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -339,6 +338,7 @@ module testbench;
 		inst_in.T1 = 7'b1111111;
 		inst_in.T2 = 7'b1111111;
 		inst_in.busy = 1'b0;
+		inst_in.inst_opcode = 32'b0;
 	
 	///Things to do
 	//For 1-way superscalar, multiple issue
@@ -361,7 +361,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;	
 		$display("****************************************DISPATCH MULT R1 R2 R3************************************************");
 
 		// At this cycle, rs_table should be empty
@@ -389,13 +388,16 @@ module testbench;
 		inst_in.busy = 1'b0;
 		branch_not_taken=1'b0;
 
+		table_out();
 		@(posedge clock);
 		`DELAY;
-
+		table_out();
 		table_has_N_entries(1, rs_table_out);
+		table_out();
 		inst_in.busy = 1'b1;
+		table_out();
 		entry_exists_in_table(inst_in, rs_table_out);
-
+		table_out();
 		inst_in.busy = 1'b1;
 		issue_next_test = clear_issue_next_test();
 		issue_next_test[3] = inst_in;
@@ -539,6 +541,7 @@ module testbench;
 		reset = 1'b1;
 		
 		@(posedge clock);
+		table_out();
 		`DELAY;
 
 		rs_table_test = clear_rs_table_test();
@@ -554,7 +557,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 		$display("****************************************DISPATCH MULT R1(Xready) R2 R3************************************************");
 
@@ -597,7 +599,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;
 
 		$display("****************************************DISPATCH ADD R1(Xready) R2 R4************************************************");
@@ -640,7 +641,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;
 
 		$display("****************************************DISPATCH ADD R1(Xready) R2 R5************************************************");
@@ -687,7 +687,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 0;
-		LSQ_busy = 0;
 		branch_not_taken = 0;
 
 		$display("****************************************Commit R1, Issue MULT R1 R2 R3, Issue ADD R1 R2 R4, Not issue Add R1 R2 R5************************************************");
@@ -770,7 +769,6 @@ module testbench;
 			reset = 0;
 			enable = 1;
 			dispatch_valid = 1;
-			LSQ_busy = 0;
 			branch_not_taken = 0;		
 		
 			inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -805,7 +803,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -835,7 +832,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 	
 		// dispatch branch
@@ -865,7 +861,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 
 		// dispatch alu
@@ -895,7 +890,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 
 		// dispatch load
@@ -930,7 +924,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -972,7 +965,6 @@ module testbench;
 		reset = 0;
 		enable = 1;
 		dispatch_valid = 1;
-		LSQ_busy = 0;
 		branch_not_taken = 0;		
 	
 		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
@@ -1007,7 +999,7 @@ module testbench;
 		CDB_in = 7'b0001001;
 		`DELAY;
 		// check issue_next all valid
-		for (int i = 0; i < `NUM_FU; i += 1) begin
+		for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
 			assert(issue_next[i].busy) else #1 exit_on_error;
 			assert(issue_next[i].inst.valid_inst) else #1 exit_on_error;
 		end
@@ -1019,7 +1011,7 @@ module testbench;
 		table_has_N_entries(11, rs_table_out);
 		// check all of the previously issued instructions are
 		// no longer in the table
-		for (int i = 0; i < `NUM_FU; i += 1) begin
+		for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
 			entry_not_in_table(issue_next_test[i], rs_table_out);
 		end
 
@@ -1076,69 +1068,69 @@ module testbench;
 		`DELAY;
 		table_has_N_entries(0, rs_table_out);
 
-		@(negedge clock);
-		$display("------------------------Check for dispatch LSQ busy----------");
-		LSQ_busy = 2'b01;
-		dispatch_valid = 1'b1;
-		// dispatch load
-		inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
-		inst_in.inst.opb_select = ALU_OPB_IS_REGB;
-		inst_in.inst.dest_reg = DEST_IS_REGA;
-		inst_in.inst.alu_func = ALU_ADDQ;
-		inst_in.inst.fu_name = FU_LD;
-		inst_in.inst.rd_mem = 1'b1;
-		inst_in.inst.wr_mem = 1'b0;
-		inst_in.inst.ldl_mem = 1'b1;
-		inst_in.inst.stc_mem = 1'b0;
-		inst_in.inst.cond_branch = 1'b0;
-		inst_in.inst.uncond_branch = 1'b0;
-		inst_in.inst.halt = 1'b0;
-		inst_in.inst.cpuid = 1'b0;
-		inst_in.inst.illegal = 1'b0;
-		inst_in.inst.valid_inst = 1'b1;
-		inst_in.T = 7'd7;
-		inst_in.T1 = 7'b1001001;
-		inst_in.T2 = 7'b1001010;
-		inst_in.busy = 1'b0;
-		branch_not_taken=1'b0;
+		// @(negedge clock);
+		// $display("------------------------Check for dispatch LSQ busy----------");
+		// LSQ_busy = 2'b01;
+		// dispatch_valid = 1'b1;
+		// // dispatch load
+		// inst_in.inst.opa_select = ALU_OPA_IS_MEM_DISP;
+		// inst_in.inst.opb_select = ALU_OPB_IS_REGB;
+		// inst_in.inst.dest_reg = DEST_IS_REGA;
+		// inst_in.inst.alu_func = ALU_ADDQ;
+		// inst_in.inst.fu_name = FU_LD;
+		// inst_in.inst.rd_mem = 1'b1;
+		// inst_in.inst.wr_mem = 1'b0;
+		// inst_in.inst.ldl_mem = 1'b1;
+		// inst_in.inst.stc_mem = 1'b0;
+		// inst_in.inst.cond_branch = 1'b0;
+		// inst_in.inst.uncond_branch = 1'b0;
+		// inst_in.inst.halt = 1'b0;
+		// inst_in.inst.cpuid = 1'b0;
+		// inst_in.inst.illegal = 1'b0;
+		// inst_in.inst.valid_inst = 1'b1;
+		// inst_in.T = 7'd7;
+		// inst_in.T1 = 7'b1001001;
+		// inst_in.T2 = 7'b1001010;
+		// inst_in.busy = 1'b0;
+		// branch_not_taken=1'b0;
 
-		@(posedge clock);
-		`DELAY;
-		inst_in.busy = 1'b1;
-		entry_exists_in_table(inst_in, rs_table_out);
-		assert(!issue_next[1].busy) else #1 exit_on_error;
-		assert(!issue_cnt);
+		// @(posedge clock);
+		// `DELAY;
+		// inst_in.busy = 1'b1;
+		// entry_exists_in_table(inst_in, rs_table_out);
+		// assert(!issue_next[1].busy) else #1 exit_on_error;
+		// assert(!issue_cnt);
 
-		@(negedge clock);
+		// @(negedge clock);
 
-		LSQ_busy = 2'b10;
-		inst_in.inst.opa_select = ALU_OPA_IS_REGA;
-		inst_in.inst.opb_select = ALU_OPB_IS_ALU_IMM;
-		inst_in.inst.dest_reg = DEST_NONE;
-		inst_in.inst.alu_func = ALU_ADDQ;
-		inst_in.inst.fu_name = FU_ST;
-		inst_in.inst.rd_mem = 1'b0;
-		inst_in.inst.wr_mem = 1'b1;
-		inst_in.inst.ldl_mem = 1'b0;
-		inst_in.inst.stc_mem = 1'b1;
-		inst_in.inst.cond_branch = 1'b0;
-		inst_in.inst.uncond_branch = 1'b0;
-		inst_in.inst.halt = 1'b0;
-		inst_in.inst.cpuid = 1'b0;
-		inst_in.inst.illegal = 1'b0;
-		inst_in.inst.valid_inst = 1'b1;
-		inst_in.T = 7'd7;
-		inst_in.T1 = 7'b1001001;
-		inst_in.T2 = 7'b1001010;
-		inst_in.busy = 1'b0;
-		branch_not_taken=1'b0;
+		// LSQ_busy = 2'b10;
+		// inst_in.inst.opa_select = ALU_OPA_IS_REGA;
+		// inst_in.inst.opb_select = ALU_OPB_IS_ALU_IMM;
+		// inst_in.inst.dest_reg = DEST_NONE;
+		// inst_in.inst.alu_func = ALU_ADDQ;
+		// inst_in.inst.fu_name = FU_ST;
+		// inst_in.inst.rd_mem = 1'b0;
+		// inst_in.inst.wr_mem = 1'b1;
+		// inst_in.inst.ldl_mem = 1'b0;
+		// inst_in.inst.stc_mem = 1'b1;
+		// inst_in.inst.cond_branch = 1'b0;
+		// inst_in.inst.uncond_branch = 1'b0;
+		// inst_in.inst.halt = 1'b0;
+		// inst_in.inst.cpuid = 1'b0;
+		// inst_in.inst.illegal = 1'b0;
+		// inst_in.inst.valid_inst = 1'b1;
+		// inst_in.T = 7'd7;
+		// inst_in.T1 = 7'b1001001;
+		// inst_in.T2 = 7'b1001010;
+		// inst_in.busy = 1'b0;
+		// branch_not_taken=1'b0;
 
-		@(posedge clock);
-		`DELAY;
-		inst_in.busy = 1'b1;
-		entry_exists_in_table(inst_in, rs_table_out);
-		assert(!issue_next[2].busy) else #1 exit_on_error;
-		assert(!issue_cnt);
+		// @(posedge clock);
+		// `DELAY;
+		// inst_in.busy = 1'b1;
+		// entry_exists_in_table(inst_in, rs_table_out);
+		// assert(!issue_next[2].busy) else #1 exit_on_error;
+		// assert(!issue_cnt);
 
 		@(negedge clock);	
 

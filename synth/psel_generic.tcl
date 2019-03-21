@@ -16,14 +16,14 @@ set_dont_touch psel_single_WIDTH16
 
 #############################################
 # the follwoing two lines for RS_test
-#analyze -f sverilog [list "../verilog/psel_generic.v"]
-#elaborate psel_generic -param NUM_REQS=3
-#set design_name psel_generic_NUM_REQS3
+analyze -f sverilog [list "../verilog/psel_generic.v"]
+elaborate psel_generic -param NUM_REQS=1
+set design_name psel_generic_NUM_REQS1
 ##############################################
 #the following for psel_generic_test
-analyze -f sverilog [list "../verilog/psel_generic.v"]
-elaborate psel_generic
-set design_name psel_generic
+#analyze -f sverilog [list "../verilog/psel_generic.v"]
+#elaborate psel_generic
+#set design_name psel_generic
 ##############################################
 set clock_name clock
 set reset_name reset
