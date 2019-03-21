@@ -164,7 +164,8 @@ module RS(
 			issue_out[i].T1 = `DUMMY_REG;
 			issue_out[i].T2 = `DUMMY_REG;
 			issue_out[i].busy = 1'b0;
-			issue_out[i].inst_opcode = 32'b0;
+			issue_out[i].inst_opcode = `NOOP_INST;
+			issue_out[i].npc = 0;
 		end
 	
 		for(i = 0; i < `NUM_TYPE_FU; i = i + 1) begin
@@ -230,7 +231,8 @@ module RS(
 				rs_table[i].T1 <= `DUMMY_REG;
 				rs_table[i].T2 <=  `DUMMY_REG;
 				rs_table[i].busy <=  1'b0;
-				rs_table[i].inst_opcode <= 32'b0;
+				rs_table[i].inst_opcode <= `NOOP_INST;
+				rs_table[i].npc <= 0;
 			end
 			rs_busy_cnt <=  {($clog2(`RS_SIZE)){1'b0}};
 		end

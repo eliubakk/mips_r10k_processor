@@ -221,9 +221,9 @@ module id_stage(
         input         clock,                // system clock
         input         reset,                // system reset
         input  [31:0] if_id_IR,             // incoming instruction
-        input         wb_reg_wr_en_out,     // Reg write enable from WB Stage
-        input   [4:0] wb_reg_wr_idx_out,    // Reg write index from WB Stage
-        input  [63:0] wb_reg_wr_data_out,   // Reg write data from WB Stage
+        //input         wb_reg_wr_en_out,     // Reg write enable from WB Stage
+        //input   [4:0] wb_reg_wr_idx_out,    // Reg write index from WB Stage
+       // input  [63:0] wb_reg_wr_data_out,   // Reg write data from WB Stage
         input         if_id_valid_inst,
 
         output logic [63:0] id_ra_value_out,      // reg A value
@@ -258,18 +258,18 @@ module id_stage(
   wire    [4:0] rc_idx = if_id_IR[4:0];     // inst operand C register index
 
   // Instantiate the register file used by this pipeline
-  regfile regf_0 (
-    .rda_idx(ra_idx),
-    .rda_out(id_ra_value_out), 
+  // regfile regf_0 (
+  //   .rda_idx(ra_idx),
+  //   .rda_out(id_ra_value_out), 
 
-    .rdb_idx(rb_idx),
-    .rdb_out(id_rb_value_out),
+  //   .rdb_idx(rb_idx),
+  //   .rdb_out(id_rb_value_out),
 
-    .wr_clk(clock),
-    .wr_en(wb_reg_wr_en_out),
-    .wr_idx(wb_reg_wr_idx_out),
-    .wr_data(wb_reg_wr_data_out)
-  );
+  //   .wr_clk(clock),
+  //   .wr_en(wb_reg_wr_en_out),
+  //   .wr_idx(wb_reg_wr_idx_out),
+  //   .wr_data(wb_reg_wr_data_out)
+  // );
 
 
 

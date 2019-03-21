@@ -7,7 +7,7 @@
 module Free_List(
 	input clock,
 	input reset,
-	input enable,
+	input enable,	// enable signal for the writing of the freelist i.e the new freed regiter
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
 	input dispatch_en, // Structural Hazard detection during Dispatch
 

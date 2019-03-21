@@ -69,7 +69,8 @@ module testbench;
 				clear_rs_table_test[i].T1 = `DUMMY_REG;
 				clear_rs_table_test[i].T2 = `DUMMY_REG;
 				clear_rs_table_test[i].busy = 1'b0;
-				clear_rs_table_test[i].inst_opcode = 32'b0;
+				clear_rs_table_test[i].inst_opcode = `NOOP_INST;
+				clear_rs_table_test[i].npc = 0;
 			end
 		end
 	endfunction
@@ -98,7 +99,8 @@ module testbench;
 			clear_issue_next_test[i].T1 = `DUMMY_REG;
 			clear_issue_next_test[i].T2 = `DUMMY_REG;
 			clear_issue_next_test[i].busy = 1'b0;
-			clear_issue_next_test[i].inst_opcode = 32'b0;
+			clear_issue_next_test[i].inst_opcode = `NOOP_INST;
+			clear_issue_next_test[i].npc = 0;
 		end
 	end
 	endfunction
@@ -338,7 +340,8 @@ module testbench;
 		inst_in.T1 = 7'b1111111;
 		inst_in.T2 = 7'b1111111;
 		inst_in.busy = 1'b0;
-		inst_in.inst_opcode = 32'b0;
+		inst_in.inst_opcode = `NOOP_INST;
+		inst_in.npc = 0;
 	
 	///Things to do
 	//For 1-way superscalar, multiple issue

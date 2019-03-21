@@ -23,3 +23,6 @@ DVEfiles
 *.swp
 synth/*.sv
 synth/*.svf
+synth/*.pvl
+synth/*.syn
+synth/*.mr

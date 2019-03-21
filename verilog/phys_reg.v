@@ -20,7 +20,7 @@ module phys_regfile(
           
       );
   
-  logic    [63:0] [63:0] phys_registers;   // 64, 64-bit Physical Registers
+  logic    [31 + `ROB_SIZE :0] [63:0] phys_registers;   // 64, 64-bit Physical Registers
 
   wire   [63:0] rda_reg = registers[rda_idx];
   wire   [63:0] rdb_reg = registers[rdb_idx];

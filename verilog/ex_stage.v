@@ -100,20 +100,15 @@ endmodule // brcond
 module ex_stage(
     input          clock,               // system clock
     input          reset,               // system reset
-    input  [63:0]  id_ex_NPC,           // incoming instruction PC+4
-    input  [31:0]  id_ex_IR,            // incoming instruction
+    
+    //input  [31:0]  id_ex_IR,            // incoming instruction
     input  RS_ROW_T [`NUM_FU-1:0]			issue_reg,           // Input from the issue register
-    
+    input [4:0][63:0] T1_value,
+    input [4:0][63:0]  T2_value,
 
-    output [63:0]  ex_alu0_result_out,   // ALU0 result
+    output [3:0][63:0]  ex_alu_result_out,   // ALU0 result
     
-    output [63:0]  ex_alu1_result_out,   // ALU1 result
-    
-    output [63:0]  ex_alu_load_result_out,   // ALU_load result
-    
-    output [63:0]  ex_alu_store_result_out,   // ALU_store result
-    
-    output [63:0]  ex_mult_result_out,   // MULT result
+   
 		output done,
    
    
@@ -122,7 +117,7 @@ module ex_stage(
   );
 
 
-  logic  [63:0] opa_mux_out, opb_mux_out;
+  logic  [3:0][63:0] opa_mux_out, opb_mux_out;
   logic         brcond_result;
 
   // set up possible immediates:
@@ -134,7 +129,7 @@ module ex_stage(
   wire [63:0] alu_imm_alu0  = { 56'b0, issue_reg[0].inst_opcode[20:13] };
    
 
-  wire [63:0] mem_disp_alu1 = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0] };
+  wire [63:0] mem_disp_alu1 = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
   wire [63:0] br_disp_alu1  = { {41{issue_reg[1].inst_opcode[20]}}, issue_reg[1].inst_opcode[20:0], 2'b00 };
   wire [63:0] alu_imm_alu1  = { 56'b0, issue_reg[1].inst_opcode[20:13] };
   
@@ -158,10 +153,10 @@ module ex_stage(
   always_comb begin
     
     case (issue_reg[0].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out_alu0 = T1_value[0];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out_alu0 = mem_disp_alu0;
-      ALU_OPA_IS_NPC:      opa_mux_out_alu0 = id_ex_NPC;
-      ALU_OPA_IS_NOT3:     opa_mux_out_alu0 = ~64'h3;
+      ALU_OPA_IS_REGA:     opa_mux_out[0] = T1_value[0];
+      ALU_OPA_IS_MEM_DISP:  opa_mux_out[0] = mem_disp_alu0;
+      ALU_OPA_IS_NPC:       opa_mux_out[0] = issue_reg[0].npc;
+      ALU_OPA_IS_NOT3:      opa_mux_out[0] = ~64'h3;
     endcase
   end
 
@@ -171,10 +166,10 @@ module ex_stage(
   always_comb begin
     
     case (issue_reg[1].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out_alu1 = T1_value[1];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out_alu1 = mem_disp_alu1;
-      ALU_OPA_IS_NPC:      opa_mux_out_alu1 = id_ex_NPC;
-      ALU_OPA_IS_NOT3:     opa_mux_out_alu1 = ~64'h3;
+      ALU_OPA_IS_REGA:      opa_mux_out[1] = T1_value[1];
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[1] = mem_disp_alu1;
+      ALU_OPA_IS_NPC:      opa_mux_out[1] = issue_reg[1].npc;
+      ALU_OPA_IS_NOT3:     opa_mux_out[1] = ~64'h3;
     endcase
   end
 
@@ -183,10 +178,10 @@ module ex_stage(
   always_comb begin
     
     case (issue_reg[2].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out_alu_ls = T1_value[2];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out_alu_ls = mem_disp_alu_ls;
-      ALU_OPA_IS_NPC:      opa_mux_out_alu_ls = id_ex_NPC;
-      ALU_OPA_IS_NOT3:     opa_mux_out_alu_ls = ~64'h3;
+      ALU_OPA_IS_REGA:     opa_mux_out[2] = T1_value[2];
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[2] = mem_disp_alu_ls;
+      ALU_OPA_IS_NPC:      opa_mux_out[2] = issue_reg[2].npc;
+      ALU_OPA_IS_NOT3:     opa_mux_out[2] = ~64'h3;
     endcase
   end
 
@@ -206,10 +201,10 @@ module ex_stage(
 always_comb begin
     
     case (issue_reg[3].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out_alu_mult = T1_value[3];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out_alu_mult = mem_disp_mult;
-      ALU_OPA_IS_NPC:      opa_mux_out_alu_mult = id_ex_NPC;
-      ALU_OPA_IS_NOT3:     opa_mux_out_alu_mult = ~64'h3;
+      ALU_OPA_IS_REGA:     opa_mux_out[3] = T1_value[3];
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[3] = mem_disp_mult;
+      ALU_OPA_IS_NPC:      opa_mux_out[3] = issue_reg[3].npc;
+      ALU_OPA_IS_NOT3:     opa_mux_out[3] = ~64'h3;
     endcase
   end
 
@@ -222,9 +217,9 @@ always_comb begin
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[0].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out_alu0 = T2_value[0]//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM: opb_mux_out_alu0 = alu_imm;
-      ALU_OPB_IS_BR_DISP: opb_mux_out_alu0 = br_disp;
+      ALU_OPB_IS_REGB:    opb_mux_out[0]= T2_value[0];//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[0] = alu_imm;
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[0] = br_disp;
     endcase 
   end
 
@@ -235,9 +230,9 @@ always_comb begin
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[1].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out_alu1 = T2_value[1]//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM: opb_mux_out_alu1 = alu_imm;
-      ALU_OPB_IS_BR_DISP: opb_mux_out_alu1 = br_disp;
+      ALU_OPB_IS_REGB:    opb_mux_out[1] = T2_value[1];//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM: opb_mux_out[1] = alu_imm;
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[1]= br_disp;
     endcase 
   end
   
@@ -248,9 +243,9 @@ always_comb begin
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[2].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out_alu_ls = T2_value[2]//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM: opb_mux_out_alu_ls = alu_imm;
-      ALU_OPB_IS_BR_DISP: opb_mux_out_alu_ls = br_disp;
+      ALU_OPB_IS_REGB:     opb_mux_out[2] = T2_value[2]//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[2] = alu_imm;
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[2] = br_disp;
     endcase 
   end
   
@@ -274,36 +269,36 @@ always_comb begin
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[3].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out_alu_mult = T2_value[3]//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM: opb_mux_out_alu_mult = alu_imm;
-      ALU_OPB_IS_BR_DISP: opb_mux_out_alu_mult = br_disp;
+      ALU_OPB_IS_REGB:    opb_mux_out[3] = T2_value[3]//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[3] = alu_imm;
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[3] = br_disp;
     endcase 
   end
   
   //
   // instantiate the ALU
   //
-  alu alu_0 (// Inputs
-    .opa(opa_mux_out_alu0),
-    .opb(opb_mux_out_alu0),
+  alu alu_0 (// Inputs                //    *******ALU_0**********
+    .opa(opa_mux_out[0]),
+    .opb(opb_mux_out[0]),
     .func(id_ex_alu0_func),
 
     // Output
-    .result(ex_alu0_result_out)
+    .result(ex_alu_result_out[0])
   );
 
-  alu alu_1 (// Inputs
-    .opa(opa_mux_out_alu1),
-    .opb(opb_mux_out_alu1),
+  alu alu_1 (// Inputs                //    *******ALU_1**********
+    .opa(opa_mux_out[1]),
+    .opb(opb_mux_out[1]),
     .func(id_ex_alu1_func),
 
     // Output
-    .result(ex_alu1_result_out)
+    .result(ex_alu1_result_out[1])
   );  
 
-  alu alu_ls (// Inputs
-    .opa(opa_mux_out_alu_ls),
-    .opb(opb_mux_out_alu_ls),
+  alu alu_ls (// Inputs                //    *******LOAD AND STORE**********
+    .opa(opa_mux_out[2]),
+    .opb(opb_mux_out[2]),
     .func(id_ex_alu_ls_func),
 
     // Output
@@ -320,7 +315,7 @@ always_comb begin
   // );  
   
 
-  mult mult0 (// Inputs)
+  mult mult0 (// Inputs)                 //********MULT************
     .clock(clock),
     .reset(reset),
 	  .mcand(mcand),
@@ -338,7 +333,7 @@ always_comb begin
    // instantiate the branch condition tester
    //
   brcond brcond (// Inputs
-    .opa(T1),       // always check regA value
+    .opa(T1_value[4]),       // always check regA value
     .func(issue_reg[4].inst_opcode[28:26]), // inst bits to determine check
 
     // Output
