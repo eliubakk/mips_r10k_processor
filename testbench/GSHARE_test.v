@@ -1,8 +1,8 @@
 `define DEBUG_OUT
 `define DELAY #2
 
-`define GHT_BIT		4
-`define PC_BIT		4
+`define BH_SIZE		4
+`define PC_SIZE		4
 
 
 
@@ -11,15 +11,15 @@ module testbench;
 	logic							if_branch;
 	logic	[31:0]						pc_in;
 	logic							obq_bh_pred_valid;
-	logic	[`GHT_BIT-1:0]					obq_gh_in;
+	logic	[`BH_SIZE-1:0]					obq_gh_in;
 	logic							clear_en;
 
 	logic							prediction_valid;
 	logic	 						prediction;
-	logic 	[`GHT_BIT-1:0] 					ght_out;
+	logic 	[`BH_SIZE-1:0] 					ght_out;
 
 	`ifdef DEBUG_OUT
-	logic	[2**(`GHT_BIT)-1:0]				pht_out;
+	logic	[2**(`BH_SIZE)-1:0]				pht_out;
 	`endif
 
 	integer i,j,k,l;	
@@ -72,8 +72,8 @@ module testbench;
 			$display("GHT : %b // Prediction valid : %b, Prediction : %b", ght_out, prediction_valid, prediction);
 			$display("----------------------------PHT-----------------------------");
 				$display("GHT idx           PHT");
-			for(k=0;k<(2**`GHT_BIT);k=k+1) begin
-				$display("Idx %b : Prediction %b", k[`GHT_BIT-1:0], pht_out[k]);
+			for(k=0;k<(2**`BH_SIZE);k=k+1) begin
+				$display("Idx %b : Prediction %b", k[`BH_SIZE-1:0], pht_out[k]);
 			end
 			$display("-------------------------------------------\n");
 		end
@@ -110,7 +110,7 @@ module testbench;
 		if_branch		= 1'b0;
 		pc_in 			= 32'h0;
 		obq_bh_pred_valid 	= 1'b0;
-		obq_gh_in		= `GHT_BIT'b0;
+		obq_gh_in		= `BH_SIZE'b0;
 		clear_en		= 1'b0; 
 
 
@@ -142,64 +142,64 @@ module testbench;
 		@(negedge clock);
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b1010;
+		obq_gh_in		= `BH_SIZE'b1010;
 		@(posedge clock);
 		`DELAY;
 		$display("\n GHT is updated to 1010, PHT[1010] is updated to be taken");
 		display_table;
-		assert( (!prediction_valid) & pht_out[`GHT_BIT'b1010] & (ght_out==`GHT_BIT'b1010) ) else #1 exit_on_error;
+		assert( (!prediction_valid) & pht_out[`BH_SIZE'b1010] & (ght_out==`BH_SIZE'b1010) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b0110;
+		obq_gh_in		= `BH_SIZE'b0110;
 		@(posedge clock);
 		`DELAY;
 		$display("\n GHT is updated to 0110, PHT[0110] is updated to be taken");
 		display_table;
-		assert( (!prediction_valid) & pht_out[`GHT_BIT'b0110] & (ght_out==`GHT_BIT'b0110) ) else #1 exit_on_error;
+		assert( (!prediction_valid) & pht_out[`BH_SIZE'b0110] & (ght_out==`BH_SIZE'b0110) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b1111;
+		obq_gh_in		= `BH_SIZE'b1111;
 		@(posedge clock);
 		`DELAY;
 		$display("\n GHT is updated to 1111, PHT[1111] is updated to be taken");
 		display_table;
-		assert( (!prediction_valid) & pht_out[`GHT_BIT'b1111] & (ght_out==`GHT_BIT'b1111) ) else #1 exit_on_error;
+		assert( (!prediction_valid) & pht_out[`BH_SIZE'b1111] & (ght_out==`BH_SIZE'b1111) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b0001;
+		obq_gh_in		= `BH_SIZE'b0001;
 		@(posedge clock);
 		`DELAY;
 		$display("\n GHT is updated to 0001, PHT[0001] is updated to be taken");
 		display_table;
-		assert( (!prediction_valid) & pht_out[`GHT_BIT'b0001] & (ght_out==`GHT_BIT'b0001) ) else #1 exit_on_error;
+		assert( (!prediction_valid) & pht_out[`BH_SIZE'b0001] & (ght_out==`BH_SIZE'b0001) ) else #1 exit_on_error;
 
 		@(negedge clock);
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b0000;
+		obq_gh_in		= `BH_SIZE'b0000;
 		@(posedge clock);
 		`DELAY;
 		$display("\n GHT is updated to 0000, PHT[0000] is updated to be taken");
 		display_table;
-		assert( (!prediction_valid) & pht_out[`GHT_BIT'b0000] & (ght_out==`GHT_BIT'b0000) ) else #1 exit_on_error;
+		assert( (!prediction_valid) & pht_out[`BH_SIZE'b0000] & (ght_out==`BH_SIZE'b0000) ) else #1 exit_on_error;
 
 
 		// Modify already existed PHT
 		@(negedge clock);
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b0110;
+		obq_gh_in		= `BH_SIZE'b0110;
 		@(posedge clock);
 		`DELAY;
 		$display("\n GHT is updated to 0110, PHT[0110] is updated to be not taken");
 		display_table;
-		assert( (!prediction_valid) & !pht_out[`GHT_BIT'b0110] & (ght_out==`GHT_BIT'b0110) ) else #1 exit_on_error;
+		assert( (!prediction_valid) & !pht_out[`BH_SIZE'b0110] & (ght_out==`BH_SIZE'b0110) ) else #1 exit_on_error;
 
 
 		$display("------------------------------Prediction based on PHT------------------");
@@ -211,12 +211,12 @@ module testbench;
 		pc_in			= 32'h0;
 		clear_en		= 1'b0;
 		obq_bh_pred_valid 	= 1'b0;
-		obq_gh_in		= `GHT_BIT'b0110;
+		obq_gh_in		= `BH_SIZE'b0110;
 		@(posedge clock);
 		`DELAY;
 		$display("\n prediction = PHT[0110] = not taken, GHT is updated to 1100, PHT[0110] should remain to be not taken");
 		display_table;
-		assert( (prediction_valid) & (!prediction) & !pht_out[`GHT_BIT'b0110] & (ght_out==`GHT_BIT'b1100) ) else #1 exit_on_error;
+		assert( (prediction_valid) & (!prediction) & !pht_out[`BH_SIZE'b0110] & (ght_out==`BH_SIZE'b1100) ) else #1 exit_on_error;
 
 		
 
@@ -227,12 +227,12 @@ module testbench;
 		pc_in			= 32'b1100_00;
 		clear_en		= 1'b0;
 		obq_bh_pred_valid 	= 1'b0;
-		obq_gh_in		= `GHT_BIT'b0110;
+		obq_gh_in		= `BH_SIZE'b0110;
 		@(posedge clock);
 		`DELAY;
 		$display("\n prediction = PHT[0000] = taken, GHT is updated to 1001,  PHT[0110] should remain to be not taken");
 		display_table;
-		assert( (prediction_valid) & (prediction) & !pht_out[`GHT_BIT'b0110] & (ght_out==`GHT_BIT'b1001) ) else #1 exit_on_error;
+		assert( (prediction_valid) & (prediction) & !pht_out[`BH_SIZE'b0110] & (ght_out==`BH_SIZE'b1001) ) else #1 exit_on_error;
 
 	
 
@@ -245,12 +245,12 @@ module testbench;
 		pc_in			= 32'b0;
 		clear_en		= 1'b1;
 		obq_bh_pred_valid 	= 1'b1;
-		obq_gh_in		= `GHT_BIT'b1110;
+		obq_gh_in		= `BH_SIZE'b1110;
 		@(posedge clock);
 		`DELAY;
 		$display("\n prediction not valid, GHT is updated to 1110,  PHT[1110] should be taken");
 		display_table;
-		assert( !(prediction_valid) & pht_out[`GHT_BIT'b1110] & (ght_out==`GHT_BIT'b1110) ) else #1 exit_on_error;
+		assert( !(prediction_valid) & pht_out[`BH_SIZE'b1110] & (ght_out==`BH_SIZE'b1110) ) else #1 exit_on_error;
 
 		// RESET
 

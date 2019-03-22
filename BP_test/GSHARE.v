@@ -87,7 +87,7 @@ module GSHARE(
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			pht		<=  {(2**`BH_SIZE){1'b0}}; // Initialized to not taken
-			ght		<=  {`BH_SIZE{1'b0};
+			ght		<=  {`BH_SIZE{1'b0}};
 			prediction	<= 1'b0;;
 		end else begin
 			pht		<= next_pht;

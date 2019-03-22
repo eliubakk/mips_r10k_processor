@@ -1,9 +1,7 @@
 // Entire branch predictor module
 // Should include BTB, GSHARE, OBQ 
-`include "../sys_defs.vh"
-`include "./BTB.v"
-`include "./GSHARE.v"
-`include "./OBQ.v"	
+`include "sys_defs.vh"
+
 
 `define	DEBUG_OUT
 
@@ -31,7 +29,7 @@ module  BP(
 	input					ex_prediction_correct,  // enabled when the branch prediction is correct 
 	input		[31:0]			ex_pc,			// PC of the executed branch instruction
 	input		[31:0]			calculated_pc,  	// Calculated target PC
-	input	[$clog2(`OBQ_SIZE):0]		ex_branch_index		// Executed branch's OBQ index 
+	input	[$clog2(`OBQ_SIZE):0]		ex_branch_index,		// Executed branch's OBQ index 
 		
 
 		
@@ -39,9 +37,9 @@ module  BP(
 	
 	`ifdef DEBUG_OUT
 	`endif
-	output					next_pc_valid,		// Enabled when next_pc value is valid pc
-	output [$clog2(`OBQ_SIZE):0]		next_pc_index, 		// ************Index from OBQ	
-	output		[31:0]			next_pc			
+	output		logic				next_pc_valid,		// Enabled when next_pc value is valid pc
+	output 		logic 	[$clog2(`OBQ_SIZE):0]	next_pc_index, 		// ************Index from OBQ	
+	output		logic	[31:0]			next_pc			
 	
 );
 	// Input
@@ -66,7 +64,7 @@ module  BP(
 
 	//Value evaluation
 	//
-	assign clear_en		= ex_en_branch & ex_branch_correct;  // **************** When the branch prediction was wrong 
+	assign clear_en		= ex_en_branch & ex_prediction_correct;  // **************** When the branch prediction was wrong 
 
 
 	// BTB module	
@@ -100,7 +98,9 @@ module  BP(
 		.bh_row(ght),
 		.clear_en(clear_en),
 		.index(ex_branch_index),
-ft_index].branch_hist
+		.shift_en(),			//??
+		.shift_index(),			//??
+
 		// outputs
 		.row_tag(bh_index),//****************	
 		.bh_pred_valid(bh_pred_valid),
