@@ -86,6 +86,7 @@ module pipeline (
   // Pipeline register enables
   logic   if_id_enable, RS_enable, is_pr_enable, is_ex_enable, ex_mem_enable, CDB_enable, ROB_enable, co_re_enable, mem_co_enable, co_ret_enable;
 
+  
   // Outputs from ID stage
   logic [63:0]   id_rega_out;
   logic [63:0]   id_regb_out;
@@ -108,7 +109,26 @@ module pipeline (
 	logic PHYS_REG 		T2, 		// Output for Dispatch and goes to RS
 	logic PHYS_REG 		T 		// Output for Dispatch and goes to RS and ROB
 );
-  
+  // outputs of is/di stage
+  logic id_di_NPC;
+  logic id_di_IR;
+  logic id_di_rega;
+  logic id_di_regb;
+  logic id_di_opa_select;
+  logic id_di_opb_select;
+  logic id_di_dest_reg_idx;
+  logic id_di_alu_func;
+  logic id_di_rd_mem;
+  logic id_di_wr_mem;
+  logic id_di_ldl_mem_out;
+  logic id_di_stc_mem_out;
+  logic id_di_cond_branch;
+  logic id_di_uncond_branch;
+  logic id_di_halt;
+  logic id_di_cpuid_out;
+  logic id_di_illegal;
+  logic id_di_valid_inst;
+
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
   wand								rs_full;
@@ -166,6 +186,7 @@ module pipeline (
   logic   PHYS_REG [4:0] mem_co_dest_reg_idx;
   logic  [3:0][63:0] mem_co_result;
   logic         mem_co_take_branch;
+  wor         psel_enable;
 
   //Outputs from the complete stage
   logic              mem_co_halt_selected;
@@ -176,6 +197,8 @@ module pipeline (
   logic              mem_co_take_branch_selected;
   logic              mem_co_NPC_selected ;
   logic              mem_co_valid_inst_selected;
+  logic  [4:0]       mem_co_selected;
+
 
 
 
@@ -187,6 +210,35 @@ module pipeline (
   logic   PHYS_REG co_ret_dest_reg_idx;
   logic   [63:0]   co_ret_result;
   logic            co_ret_take_branch;
+  logic            co_ret_NPC;
+  logic            co_ret_IR;
+  logic            co_ret_valid_inst;
+
+
+  //outputs from teh ROB
+  PHYS_REG                        rob_fl_arch_Told;
+  PHYS_REG                        rob_arch_retire_reg;
+  logic                           arch_fr_enable;
+  logic [$clog2(`ROB_SIZE):0]     rob_free_entries;
+  logic							              rob_full;
+  ROB_ROW_T [`ROB_SIZE:1]		      ROB_table_out;
+  logic [$clog2(`ROB_SIZE):0]     tail_reg, head_reg;
+
+  //Outputs for the free list
+  PHYS_REG [`FL_SIZE-1:0] fr_rs_rob_T;
+  logic [$clog2(`FL_SIZE):0] fr_tail_out;
+  logic [$clog2(`FL_SIZE):0] fr_num_free_entries; 
+	logic fr_empty; 
+  PHYS_REG fr_free_reg_T;
+
+  //Outputs from the arch map
+  PHYS_REG [`NUM_GEN_REG-1:0] arch_table;
+
+  //Outputs form cdb
+  PHYS_REG  CDB_tag_out;
+  logic 		CDB_en_out; 
+  logic 		busy;
+           
   
   // // Outputs from MEM/WB Pipeline Register
   // logic         mem_wb_halt;
@@ -285,7 +337,7 @@ module pipeline (
   //            IF/ID Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  assign if_id_enable = 1'b1; // always enabled
+  assign if_id_enable = dispatch_en; // always enabled
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
@@ -347,7 +399,7 @@ module pipeline (
 	.reg_dest(id_dest_reg_idx_out), 	// Comes from Dmem2proc_data
 	.free_reg(fr_free_reg_T), 	// Comes from Free List durmem2proc_data
 	.CDB_tag_in(CDB_tag_out), 	// Comes from CDB durinmem2proc_data
-	.CDB_en(CDB_en),     	// Comes from CDB during Commitmem2proc_data
+	.CDB_en(CDB_enable),     	// Comes from CDB during Commitmem2proc_data
 	.map_check_point(map_check_point),
 	.branch_incorrect(branch_incorrect),
 	
@@ -358,9 +410,56 @@ module pipeline (
 
   )
 
+ //////////////////////////////////////////////////
+  //                                              //
+  //                  ID/DI-Stage                    //
+  //                                              //
+  //////////////////////////////////////////////////
 
-
-  // Instantiate the physical register file used by this pipeline
+  assign id_di_enable = dispatch_en; // always enabled
+  // synopsys sync_set_reset "reset"
+  always_ff @(posedge clock) begin
+    if (reset) begin
+      id_di_NPC           <= `SD 0;
+      id_di_IR            <= `SD `NOOP_INST;
+      id_di_rega          <= `SD 0;
+      id_di_regb          <= `SD 0;
+      id_di_opa_select    <= `SD ALU_OPA_IS_REGA;
+      id_di_opb_select    <= `SD ALU_OPB_IS_REGB;
+      id_di_dest_reg_idx  <= `SD `ZERO_REG;
+      id_di_alu_func      <= `SD ALU_ADDQ;
+      id_di_rd_mem        <= `SD 0;
+      id_di_wr_mem        <= `SD 0;
+      id_di_ldl_mem_out   <= `SD 0;
+      id_di_stc_mem_out   <= `SD 0;
+      id_di_cond_branch   <= `SD 0;
+      id_di_uncond_branch <= `SD 0;
+      id_di_halt          <= `SD 0;
+      id_di_cpuid_out     <= `SD 0;
+      id_di_illegal       <= `SD 0;
+      id_di_valid_inst    <= `SD 0;
+      end
+      else begin
+        id_di_NPC           <= `SD if_id_NPC;
+        id_di_IR            <= `SD if_id_IR;
+        id_di_rega          <= `SD id_rega_out;
+        id_di_regb          <= `SD id_regb_out;
+        id_di_opa_select    <= `SD id_opa_select_out;
+        id_di_opb_select    <= `SD id_opb_select_out;
+        id_di_dest_reg_idx  <= `SD id_dest_reg_idx_out;
+        id_di_alu_func      <= `SD id_alu_func_out;
+        id_di_rd_mem        <= `SD id_rd_mem_out;
+        id_di_wr_mem        <= `SD id_wr_mem_out;
+        id_di_ldl_mem_out   <= `SD id_ldl_mem_out;
+        id_di_stc_mem_out   <= `SD id_stc_mem_out;
+        id_di_cond_branch   <= `SD id_cond_branch_out;
+        id_di_uncond_branch <= `SD id_uncond_branch_out;
+        id_di_halt          <= `SD id_halt_out;
+        id_di_cpuid_out     <= `SD id_cpuid_out;
+        id_di_illegal       <= `SD id_illegal_out;
+        id_di_valid_inst    <= `SD id_valid_inst_out;
+      end
+  
   
 
   //////////////////////////////////////////////////
@@ -368,6 +467,8 @@ module pipeline (
   //                  DI/ISSUE-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
+  
+  assign dispatch_en= ~(rs_full & fr_empty & rob_full) ;
   assign branch_not_taken = !co_ret_take_branch;
   assign RS_enable=1;
   RS RS0(
@@ -375,21 +476,18 @@ module pipeline (
       .clock(clock), 
       .reset(reset), 
       .enable(RS_enable), 
-      .CAM_en(CAM_en), 
+      .CAM_en(CDB_enable), 
       .CDB_in(CDB_in), 
-      .dispatch_valid(dispatch_valid),
-      .inst_in({id_opa_select_out, id_opb_select_out, id_dest_reg_idx_out, id_alu_func_out, id_fu_name_out, id_rd_mem_out, id_wr_mem_out,
-       id_ldl_mem_out, id_stc_mem_out, id_cond_branch_out, id_uncond_branch_out, id_halt_out, id_cpuid_out, id_illegal_out, id_valid_inst_out, fr_free_reg_T 
-       , T1, T2, 0}), 
-      .LSQ_busy(LSQ_busy),                //black box
+      .dispatch_valid(dispatch_en),
+      .inst_in({id_di_opa_select_out, id_di_opb_select_out, id_di_dest_reg_idx_out, id_di_alu_func_out, id_di_fu_name_out, id_di_rd_mem_out, id_di_wr_mem_out,
+       id_di_ldl_mem_out, id_di_stc_mem_out, id_di_cond_branch_out, id_di_uncond_branch_out, id_di_halt_out, id_di_cpuid_out, id_di_illegal_out, id_di_valid_inst_out, fr_free_reg_T 
+       , T1, T2, 0, if_id_IR, if_id_NPC}), 
       .branch_not_taken(branch_not_taken),   //check for this
-      .inst_opcode(if_id_IR),
-      .npc(if_id_NPC),
-
+      
       // outputs
       .rs_table_out(rs_table_out), 
       .issue_out(issue_next), 
-      .issue_cnt(issue_cnt), 
+      .free_rows_next(free_rows_next),
       .rs_full(rs_full)
     );
 
@@ -444,8 +542,8 @@ phys_regfile regf_0 (
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset) begin
-     // id_ex_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
-     // id_ex_IR            <= `SD `NOOP_INST;
+     // id_di_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
+     // id_di_IR            <= `SD `NOOP_INST;
       is_ex_T1_value[0]           <= `SD 0;
       is_ex_T1_value[1]           <= `SD 0;
       is_ex_T1_value[2]           <= `SD 0;
@@ -458,7 +556,7 @@ phys_regfile regf_0 (
       is_ex_T2_value[3]           <= `SD 0;
       is_ex_T2_value[4]           <= `SD 0;
       is_ex_T2_value[5]           <= `SD 0;
-      // id_ex_opa_select    <= `SD ALU_OPA_Iid_ex_rega
+      // id_di_opa_select    <= `SD ALU_OPA_Iid_ex_rega
       // id_ex_opb_select    <= `SD ALU_OPB_Iid_ex_rega
       // id_ex_dest_reg_idx  <= `SD `ZERO_REGid_ex_rega
       // id_ex_alu_func      <= `SD ALU_ADDQ;id_ex_rega
@@ -589,6 +687,9 @@ phys_regfile regf_0 (
              mem_stall_out ? `ZERO_REG : issue_reg[2].T;
   wire mem_valid_inst_out = ex_mem_valid_inst[2] & ~mem_stall_out;
 
+  for (i=0; i<5; i=i+1) begin
+    if ()
+  end
 
 //////////////////////////////////////////////////
   //                                              //
@@ -614,7 +715,7 @@ assign mem_co_enable = 1'b1; // always enabled
         mem_co_IR           <= `SD ex_mem_IR;
         mem_co_halt         <= `SD ex_mem_halt;
         mem_co_illegal      <= `SD ex_mem_illegal;
-        mem_co_valid_inst[]   <= `SD mem_valid_inst_out;
+        mem_co_valid_inst[4:0]   <= `SD mem_valid_inst_out;
         mem_co_dest_reg_idx[1:0]  <= `SD ex_mem_dest_reg_idx[1:0];
         mem_co_dest_reg_idx[2] <= `SD mem_dest_reg_idx_out;
         mem_co_dest_reg_idx[3] <= `SD ex_mem_dest_reg_idx[3];
@@ -627,25 +728,43 @@ assign mem_co_enable = 1'b1; // always enabled
   end // always
 
 
-//////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   //                                              //
   //           complete stage                     //
   //                                              //
   //////////////////////////////////////////////////
-
+  assign psel_enable = mem_co_valid_inst[4 -: 0];
 //priority encoder to select the results of the execution stage to put in cdb
-  // psel_generic #(5, NUM_FU_TYPE[ig]) psel(
-	// 			.req(issue_reqs[ig]),
-	// 			.en(enable & ~LSQ_busy[0]),
-	// 			.gnt(issue_gnts[ig])
-	// 		);
-  assign CDB_enable = 1'b1;
+  psel_complete #(5, 1) psel(
+				.req(mem_co_valid_inst),
+				.en(psel_enable),
+				.gnt(mem_co_selected)
+			);
+  for (i = 0, i < 5, i=i+1) begin
+    if (mem_co_selected[i]== 1) begin
+        mem_co_NPC_selected               =    mem_co_NPC[i] ;
+        mem_co_IR_selected                =    mem_co_IR[i];
+        mem_co_halt_selected              =    mem_co_halt[i];
+        mem_co_illegal_selected           =    mem_co_illegal[i];
+        mem_co_valid_inst_out_selected    =    mem_co_valid_inst_out[i];
+        co_reg_wr_idx_out                 =    mem_co_dest_reg_idx[i];
+        mem_co_take_branch_selected       =    mem_co_take_branch;
+        if(mem_co_IR[i] == )  branch_valid= 1;            // To check whether the inst is branch or not
+        else                  branch_valid= 0;       
+    end
+  end
+
+
+
+
+
+  assign CDB_enable = psel_enable & ~branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
   CDB CDB_0(// Inputs
      .clock(clock),    // Clock
 	   .reset(reset),  // Asynchronous reset active low
 	   .enable(CDB_enable), // Clock Enable
-	   .tag_in(mem_co_dest_reg_idx),	// Comes from FU, during commit
-	   .ex_valid(ex_mem_valid_inst),
+	   .tag_in(co_reg_wr_idx_out),	// Comes from FU, during commit
+	   .ex_valid(mem_co_valid_inst_selected),
 
      // Outputs
 	   .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules
@@ -672,11 +791,12 @@ wb_stage wb_stage_0 (
 
 
 
-// the Ored output from the priority selector will work as the enable signal for the cdb 
-// the enable signal from the cdb is used as the enable signal for the cam
-// need to create dispatch en signal
-// need to writeback to the physical reg nad store some values in the complete/retire stage
-// Declare the signals which you created for connecting the modules
+
+
+
+//  Things to do
+// backtrack from priority selector to issue stage for the issuing of the signals
+// add branch registers that heewoo mentioned
 
   //////////////////////////////////////////////////
   //                                              //
@@ -764,6 +884,8 @@ Free_List f0(
 	.free_reg(fr_free_reg_T) // Output for Dispatch for other modules
 );
 
+
+//Intsantiating the arch map
 Arch_Map_Table a0(
 	.clock(clock),
 	.reset(reset),
