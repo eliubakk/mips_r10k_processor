@@ -418,9 +418,6 @@ module testbench;
 
 					@(posedge clock);
 					`DELAY;
-					$display("tail_out: %d tail_test: %d", tail_out, tail_test);
-					print_obq(obq_out);
-					print_obq(obq_test);
 					assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
 					obq_equal(obq_out, obq_test, tail_out, tail_test);
 					assert(row_tag == row_tag_test) else #1 exit_on_error;
