@@ -1,4 +1,4 @@
-`include "../sys_defs.vh"
+//`include "sys_defs.vh"
 `define DEBUG
 
 `define index_t ($clog2(`OBQ_SIZE))
@@ -51,10 +51,14 @@ module OBQ(
 	// combinational next state logic
 	always_comb begin
 
+		obq_next = obq;
+		tail_next = tail;
+		row_tag_next = row_tag;
+
 		if (write_en & clear_en & shift_en) begin
 
 			// determine tail_next
-			if (shift_index < tail & index < tail) begin
+			if ((shift_index < tail) & (index < tail)) begin
 				if (shift_index == index) begin
 					tail_next = 1;
 				end else begin
@@ -67,7 +71,6 @@ module OBQ(
 			end else begin
 				tail_next = tail + 1;
 			end
-
 
 			// shift all the entries over
 			if (shift_index < tail) begin
@@ -82,13 +85,21 @@ module OBQ(
 
 			// clear the entries just by updating the tail ptr
 
-			if (index != 0) begin
+			if (shift_index < tail & index < tail) begin
+				obq_next[index - 2 - shift_index].branch_history[`BH_SIZE - 1] = ~obq_next[index - 2 - shift_index].branch_history[`BH_SIZE - 1];
+			end else if (index < tail) begin
+				obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq_next[index - 1].branch_history[`BH_SIZE - 1];
+			end
+
+			/*
+			if (index != 0 & (index < tail)) begin
 				// if we are clearing the table, this implies
 				// that our prediction was incorrect and
 				// therefore we need to update the last bit
 				// of the most recent valid branch history
-				obq_next[index - 1].branch_history[`BH_SIZE-1] = ~obq_next[index - 1].branch_history[`BH_SIZE-1];
+				obq_next[index - 1 - shift_index].branch_history[`BH_SIZE-1] = ~obq_next[index - 1 - shift_index].branch_history[`BH_SIZE-1];
 			end
+			*/
 
 			// insert the new branch history
 			if (tail_next == 0) begin
@@ -183,7 +194,7 @@ module OBQ(
 					obq_next[index - shift_index - 2].branch_history[`BH_SIZE-1] = ~obq_next[index - shift_index - 2].branch_history[`BH_SIZE-1];
 				end
 			end
-		end else if (shift_en) begin
+		end else if (shift_en & ~write_en & ~clear_en) begin
 			// shift all the entries over
 			if (shift_index < tail) begin
 				for (int i = 0; i < `OBQ_SIZE; ++i) begin
@@ -196,7 +207,7 @@ module OBQ(
 				tail_next = tail;
 				obq_next = obq;
 			end
-		end else if (write_en) begin
+		end else if (write_en & ~shift_en & ~clear_en) begin
 			// write the newest branch history table into the 
 			// tail index of the obq
 			if (tail < `OBQ_SIZE) begin
@@ -209,7 +220,7 @@ module OBQ(
 				tail_next = tail;
 				row_tag_next = row_tag_index;
 			end
-		end else if (clear_en) begin
+		end else if (clear_en & ~shift_en & ~write_en) begin
 			if (index < tail) begin
 				obq_next = obq;
 				obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq[index - 1].branch_history[`BH_SIZE - 1];
