@@ -153,32 +153,6 @@ typedef enum logic [2:0]{
 
 const FU_IDX [(`NUM_TYPE_FU - 1):0] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
 
-
-
-typedef struct packed {
-  ALU_OPA_SELECT opa_select; // use this for T1 valid
-  ALU_OPB_SELECT opb_select; // use this for T2 valid
-  DEST_REG_SEL   dest_reg; // mux selects use this for T valid
-  ALU_FUNC       alu_func;
-  FU_NAME        fu_name;
-  logic rd_mem, wr_mem, ldl_mem, stc_mem, cond_branch, uncond_branch;
-  logic halt;      // non-zero on a halt
-  logic cpuid;     // get CPUID instruction
-  logic illegal;   // non-zero on an illegal instruction
-  logic valid_inst; // for counting valid instructions executed
-} DECODED_INST;
-
-// RS_ROWS
-typedef struct packed{
-  DECODED_INST inst;
-  PHYS_REG     T;
-  PHYS_REG     T1;
-  PHYS_REG     T2;
-  logic        busy;
-  logic [31:0]  inst_opcode;
-  logic [63:0]  npc;
-} RS_ROW_T;
-
 typedef struct packed {
 	PHYS_REG phys_tag;
 } MAP_ROW_T;
@@ -402,5 +376,59 @@ typedef enum logic [1:0] {
 `define JSR_INST	2'h1
 `define RET_INST	2'h2
 `define JSR_CO_INST	2'h3
+
+typedef struct packed {
+  ALU_OPA_SELECT opa_select; // use this for T1 valid
+  ALU_OPB_SELECT opb_select; // use this for T2 valid
+  DEST_REG_SEL   dest_reg; // mux selects use this for T valid
+  ALU_FUNC       alu_func;
+  FU_NAME        fu_name;
+  logic rd_mem, wr_mem, ldl_mem, stc_mem, cond_branch, uncond_branch;
+  logic halt;      // non-zero on a halt
+  logic cpuid;     // get CPUID instruction
+  logic illegal;   // non-zero on an illegal instruction
+  logic valid_inst; // for counting valid instructions executed
+} DECODED_INST;
+
+const DECODED_INST EMPTY_INST = 
+{
+  ALU_OPA_IS_REGA, 
+  ALU_OPB_IS_REGB, 
+  DEST_IS_REGC, 
+  ALU_ADDQ, 
+  FU_ALU, 
+  1'b0, 
+  1'b0, 
+  1'b0,
+  1'b0,
+  1'b0,
+  1'b0,
+  1'b0,
+  1'b0,
+  1'b0,
+  1'b0
+};
+
+// RS_ROWS
+typedef struct packed{
+  DECODED_INST inst;
+  PHYS_REG     T;
+  PHYS_REG     T1;
+  PHYS_REG     T2;
+  logic        busy;
+  logic [31:0]  inst_opcode;
+  logic [63:0]  npc;
+} RS_ROW_T;
+
+const RS_ROW_T EMPTY_ROW = 
+{
+  EMPTY_INST,
+  `DUMMY_REG,
+  `DUMMY_REG,
+  `DUMMY_REG,
+  1'b0,
+  `NOOP_INST,
+  64'b0
+};
 
 `endif
