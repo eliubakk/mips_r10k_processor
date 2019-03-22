@@ -1,5 +1,5 @@
 //`include "sys_defs.vh"
-`define DEBUG
+`define DEBUG_OUT
 
 `define index_t ($clog2(`OBQ_SIZE))
 
@@ -18,7 +18,7 @@ module OBQ(
 	input [`index_t:0] shift_index,
 
 	// outputs
-	`ifdef DEBUG
+	`ifdef DEBUG_OUT
 	output OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out,
 	output [`index_t:0] tail_out,
 	`endif
@@ -39,7 +39,7 @@ module OBQ(
 	logic [`index_t:0] row_tag_next;
 
 	// assign statements
-	`ifdef DEBUG
+	`ifdef DEBUG_OUT
 	assign obq_out = obq;
 	assign tail_out = tail;
 	`endif
