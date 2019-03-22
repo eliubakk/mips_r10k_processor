@@ -1,7 +1,9 @@
 // Entire branch predictor module
 // Should include BTB, GSHARE, OBQ 
 `include "sys_defs.vh"
-
+`include "BTB.v"
+`include "GSHARE.v"
+`include "OBQ.v"
 
 `define	DEBUG_OUT
 
@@ -22,14 +24,13 @@ module  BP(
 	input 					enable, // Clock Enable
 
 	input					if_branch,		// Valid branch instruction
-	input		[31:0]			pc_in,			// input PC
+	input		[31:0]			if_pc_in,			// input PC
 	// Comes after execute state(after branch calculation)
-	input					ex_en_branch,		// enabled when the instruction is branch  
-	//input					ex_branch_taken,	// enabled when the branch is taken, not come from branch anymore 
-	input					ex_prediction_correct,  // enabled when the branch prediction is correct 
-	input		[31:0]			ex_pc,			// PC of the executed branch instruction
-	input		[31:0]			calculated_pc,  	// Calculated target PC
-	input	[$clog2(`OBQ_SIZE):0]		ex_branch_index,		// Executed branch's OBQ index 
+	input					rt_en_branch,		// enabled when the instruction is branch  
+	input					rt_prediction_correct,  // enabled when the branch prediction is correct 
+	input		[31:0]			rt_pc,			// PC of the executed branch instruction
+	input		[31:0]			rt_calculated_pc,  	// Calculated target PC
+	input	[$clog2(`OBQ_SIZE):0]		rt_branch_index,	// Executed branch's OBQ index 
 		
 
 		
@@ -45,6 +46,7 @@ module  BP(
 	// Input
 		// For GSHARE and OBQ
 		logic clear_en;
+		logic shift_en;
 
 	// Outputs
 		// BTB signals
@@ -64,8 +66,8 @@ module  BP(
 
 	//Value evaluation
 	//
-	assign clear_en		= ex_en_branch & ex_prediction_correct;  // **************** When the branch prediction was wrong 
-
+	assign clear_en		= rt_en_branch & ~rt_prediction_correct;  // **************** When the branch prediction was wrong 
+	assign shift_en		= rt_en_branch & rt_prediction_correct;
 
 	// BTB module	
 
@@ -75,12 +77,12 @@ module  BP(
 		.clock(clock), 
 		.reset(reset), 
 		.enable(enable), 
-		.pc_in(pc_in),
+		.pc_in(if_pc_in),
 		.if_branch(if_branch),	
-		.ex_pc(ex_pc),
-		.calculated_pc(calculated_pc),
-		.ex_branch_taken(ex_branch_taken),
-		.ex_en_branch(ex_en_branch),
+		.ex_pc(rt_pc),
+		.calculated_pc(rt_calculated_pc),
+		.ex_branch_taken(rt_branch_taken),
+		.ex_en_branch(rt_en_branch),
 		
 		// outputs 
 	
@@ -96,10 +98,10 @@ module  BP(
 		.reset(reset),
 		.write_en(prediction_valid),
 		.bh_row(ght),
-		.clear_en(clear_en),
-		.index(ex_branch_index),
-		.shift_en(),			//??
-		.shift_index(),			//??
+		.clear_en(clear_en),		// When the prediction is mispredicted
+		.index(if_branch_index),
+		.shift_en(shift_en),			// When the branch instruction's prediction is correct, and is retiring
+		.shift_index(if_branch_index),			//??
 
 		// outputs
 		.row_tag(bh_index),//****************	
@@ -115,7 +117,7 @@ module  BP(
 		.reset(reset), 
 		.enable(enable),
 		.if_branch(if_branch), 
-		.pc_in(pc_in),
+		.pc_in(if_pc_in),
 		.obq_bh_pred_valid(bh_pred_valid),
 		.obq_gh_in(bh_pred.branch_history),
 		.clear_en(clear_en),
@@ -135,13 +137,13 @@ module  BP(
 		// PC=target_PC if the prediction is valid and taken, and BTB has the target PC
 		// value 
 			next_pc		<= target_pc;
-			next_pc_index	<= bh_idx;
+			next_pc_index	<= bh_index;
 			next_pc_valid	<= 1'b1; 
-		end else if begin
+		end else begin
 		// PC=PC+4 for the other cases  (Prediction is valid but not
 		// taken, or Prediction is valid but not in the BTB)
-			next_pc		<= pc_in +4;
-			next_pc_index	<= bh_idx; //*********************default bh_idx
+			next_pc		<= if_pc_in +4;
+			next_pc_index	<= bh_index; //*********************default bh_idx
 			next_pc_valid	<= prediction_valid; 
 		end
 
