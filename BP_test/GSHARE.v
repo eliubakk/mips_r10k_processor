@@ -62,7 +62,7 @@ module GSHARE(
 			//next_pht[obq_gh_in]	= ~pht[obq_gh_in]; // Should
 			//update the hashed obq_gh_in
 			hash_idx_rt		= next_ght ^ rt_pc[(`PC_SIZE)+1:2];
-			next_pht[hash_idx_rt]		= ~pht[obq_gh_in];		
+			next_pht[hash_idx_rt]	= ~pht[hash_idx_rt];		
 		end
 	 
 	// Second : xor the ght and pc, and find the prediction, this is done

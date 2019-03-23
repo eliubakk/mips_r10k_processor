@@ -38,7 +38,7 @@ module testbench;
 
 
 	integer i,j,k,l;	
-
+	int temp_pc;
 
 	BP bp(
 		// inputs
@@ -140,7 +140,6 @@ module testbench;
 
 			@(posedge clock);
 			`DELAY;
-			if_branch = 1'b0;
 			rt_branch_index = next_pc_index;
 			
 			$display("AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -155,6 +154,7 @@ module testbench;
 
 		begin
 			@(negedge clock);
+			if_branch = 1'b0;
 			rt_en_branch = 1'b1;
 			rt_branch_taken = 1'b1;
 			rt_prediction_correct = 1'b0;
@@ -172,8 +172,8 @@ module testbench;
 		input int calc_pc;
 
 		begin
-			$display("BEFORE FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			display_table;
+			//$display("BEFORE FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			//display_table;
 			insert_through_fetch(pc);
 			
 
@@ -233,7 +233,7 @@ module testbench;
 		// Reset, Update BTB and OBQ, roll back, predict the address
 		// and prediction based on the BP   
 
-		@(negedge clock);
+	/*	@(negedge clock);
 		$display("--------------------------------Testing when the instruction is branch but not in BTB ----------------------------------"); 
 		if_branch		= 1'b1;
 		if_pc_in 		= 32'h20;
@@ -284,40 +284,49 @@ module testbench;
 		//$display("prediction_valid: %b prediction: %b valid_target: %b target_pc: %b", bp.prediction_valid, bp.prediction, bp.valid_target, bp.target_pc);
 		// assert () else #1 exit_on_error;
 
-	
-		@(negedge clock);
+	*/
+	/*	@(negedge clock);
 		$display("--------------------------------RESET----------------------------------"); 
 		reset = 1'b1;
 		enable = 1'b0;
 
-		@(negedge clock);
-		reset = 1'b0;
-		enable = 1'b1;
+	//	@(negedge clock);
+	//	reset = 1'b0;
+	//	enable = 1'b1;
 		@(posedge clock);
 		`DELAY;
-		display_table;
-
-
+		display_table;*/
 	
-		@(negedge clock);
+		//@(negedge clock);
 		$display("--------------------------------Check the roll back ----------------------------------"); 
-
-		insert_branch_into_bp(20, 28);
-		insert_branch_into_bp(24, 32);
-		insert_branch_into_bp(16, 36);
-		insert_through_fetch(20);
-		insert_through_fetch(20);
-		insert_through_fetch(20);
+		//insert_branch_into_bp(12, 160);
+		//insert_branch_into_bp(20, 28);
+		//insert_branch_into_bp(24, 32);
+		// insert_branch_into_bp(16, 36);
+		//insert_through_fetch(20);
+		//insert_through_fetch(20);
+		//insert_through_fetch(20);
+		//
+		temp_pc = 48;
+		for (int i = 0; i < 6; ++i) begin
+			$display("temp_pc = %d", temp_pc);
+			insert_branch_into_bp(temp_pc, 3*temp_pc);
+			temp_pc += 4;
+		end
 		
 		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+		//insert_through_fetch(16);
 
+	//	insert_branch_into_bp(8, 12);
+	
+	//	insert_branch_into_bp(4, 32);
 		//insert_branch_into_bp(20, 100);
 		//insert_branch_into_bp(32, 40);
 		//insert_branch_into_bp(36,44);
 
-		@(posedge clock);
+		/*@(posedge clock);
 		`DELAY;
-		display_table;
+		display_table;*/
 
 
 
