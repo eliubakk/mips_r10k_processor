@@ -47,7 +47,14 @@ module pipeline (
     output logic [31:0] if_id_IR,
     output logic        if_id_valid_inst,
 
-   // Outputs from ID/IS Pipeline Register       // can output the values from the RS
+    //outputs from ID/DI Pipeline Register
+    output logic [63:0] id_di_NPC,
+    output logic [31:0] id_di_IR,
+    output logic        id_di_valid_inst,
+
+
+
+   // Outputs from DI/IS Pipeline Register       // can output the values from the RS
    output logic [`RS_SIZE-1:0][63:0] rs_table_out.npc,
    output logic [`RS_SIZE-1:0][31:0] rs_table_out.inst_opcode,
    output logic [`RS_SIZE-1:0]       rs_table_out.inst.valid_inst,
@@ -776,10 +783,10 @@ assign mem_co_enable = 1'b1; // always enabled
 			);
   for (i = 0, i < 5, i=i+1) begin
     if (mem_co_selected[i]== 1) begin
-        mem_co_NPC_selected               =    mem_co_NPC[i] ;
-        mem_co_IR_selected                =    mem_co_IR[i];
-        mem_co_halt_selected              =    mem_co_halt[i];
-        mem_co_illegal_selected           =    mem_co_illegal[i];
+        assign mem_co_NPC_selected               =    mem_co_NPC[i] ;
+        assign mem_co_IR_selected                =    mem_co_IR[i];
+        assign mem_co_halt_selected              =    mem_co_halt[i];
+        assign mem_co_illegal_selected           =    mem_co_illegal[i];
         mem_co_valid_inst_out_selected    =    mem_co_valid_inst_out[i];
         co_reg_wr_idx_out                 =    mem_co_dest_reg_idx[i];
         mem_co_take_branch_selected       =    mem_co_take_branch;
@@ -829,10 +836,10 @@ wb_stage wb_stage_0 (
 
 
 //  Things to do
-// backtrack from priority selector to issue stage for the issuing of the signals
-
+// backtrack from priority selector to issue stage for the issuing of the signal
 // add condiytion for the branch opcode in the psel
-
+// update the FETCH STAGE
+// check the caches
   //////////////////////////////////////////////////
   //                                              //
   //           COMPLETE/RETIRE Pipeline Register           //
