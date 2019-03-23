@@ -7,14 +7,11 @@
 
 `define	DEBUG_OUT
 
+// Branch misprediction : input is index and clear_en is 1
+
 // Need to define parameters in sys_defs.vh
 // For GSHARE
-`define GHT_BIT	10
-`define PC_BIT	10
 // For BTB
-`define TAG_SIZE 10	// Tag bit size
-`define TARGET_SIZE 12	// Target address size, BTB will store [TARGET_SIZE+1:2]
-`define BTB_ROW	16	// BTB row size : 5~10% of I$ size
 //Index : 		pc[$clog2(BTB_ROW)+1:2]
 //Tag : 		pc [(TAG_SIZE+$clog2(BTB_ROW)+1):($clog2(BTB_ROW)+2)], 
 //Target address : 	pc[TARGET_SIZE+1:2]
@@ -30,10 +27,11 @@ module  BP(
 	input		[31:0]			pc_in,			// input PC
 	// Comes after execute state(after branch calculation)
 	input					ex_en_branch,		// enabled when the instruction is branch  
-	input					ex_branch_taken,	// enabled when the branch is taken
+	//input					ex_branch_taken,	// enabled when the branch is taken, not come from branch anymore 
+	input					ex_prediction_correct,  // enabled when the branch prediction is correct 
 	input		[31:0]			ex_pc,			// PC of the executed branch instruction
 	input		[31:0]			calculated_pc,  	// Calculated target PC
-	input	[$clog2(`OBQ_SIZE)-1:0]		ex_branch_index		// Executed branch's OBQ index 
+	input	[$clog2(`OBQ_SIZE):0]		ex_branch_index		// Executed branch's OBQ index 
 		
 
 		
@@ -42,7 +40,7 @@ module  BP(
 	`ifdef DEBUG_OUT
 	`endif
 	output					next_pc_valid,		// Enabled when next_pc value is valid pc
-	//output [$clog2(`OBQ_SIZE)-1:0]	next_pc_index, 		// ************Index from OBQ	
+	output [$clog2(`OBQ_SIZE):0]		next_pc_index, 		// ************Index from OBQ	
 	output		[31:0]			next_pc			
 	
 );
@@ -57,19 +55,18 @@ module  BP(
 
 		// OBQ signals
 		logic 				bh_pred_valid;		// Same as Gshare obq_bh_pred_valid
-		OBQ_ROW_T 			bh_pred;		// Same as [`GHT_BIT-1:0] obq_gh_in
-		logic	[$clog2(`OBQ_SIZE)-1:0]	bh_index;		// *******Index from OBQ
+		OBQ_ROW_T 			bh_pred;		// Same as [`BH_SIZE-1:0] obq_gh_in
+		logic	[$clog2(`OBQ_SIZE):0]	bh_index;		// *******Index from OBQ
 									// *******Was the branch predicted taken or not taken?
 
 		// GSHARE signals
-		logic	[`GHT_BIT-1:0]		ght;
+		logic	[`BH_SIZE-1:0]		ght;
 		logic				prediction_valid;
 		logic				prediction;
 
 	//Value evaluation
 	//
-	assign clear_en		= ex_en_branch &  // **************** When the branch prediction was wrong 
-
+	assign clear_en		= ex_en_branch & ex_branch_correct;  // **************** When the branch prediction was wrong 
 
 
 	// BTB module	
@@ -103,9 +100,9 @@ module  BP(
 		.bh_row(ght),
 		.clear_en(clear_en),
 		.index(ex_branch_index),
-
+ft_index].branch_hist
 		// outputs
-		.bh_index(bh_index),//****************	
+		.row_tag(bh_index),//****************	
 		.bh_pred_valid(bh_pred_valid),
 		.bh_pred(bh_pred)
 	);
