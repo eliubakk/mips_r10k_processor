@@ -142,6 +142,9 @@ module testbench;
 			`DELAY;
 			if_branch = 1'b0;
 			rt_branch_index = next_pc_index;
+			
+			$display("AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			display_table;
 			// assert statements for correctness
 		end
 	endtask
@@ -172,8 +175,7 @@ module testbench;
 			$display("BEFORE FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			display_table;
 			insert_through_fetch(pc);
-			$display("AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			display_table;
+			
 
 			fix_through_retire(pc, calc_pc);
 			$display("AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -226,8 +228,12 @@ module testbench;
 		// branch
 		// Retire Input : branch prediction correct, branch prediction
 		// incorrect
+		//
+		// -------------------------------------------What we have done :----------------------------------------
+		// Reset, Update BTB and OBQ, roll back, predict the address
+		// and prediction based on the BP   
 
-	/*	@(negedge clock);
+		@(negedge clock);
 		$display("--------------------------------Testing when the instruction is branch but not in BTB ----------------------------------"); 
 		if_branch		= 1'b1;
 		if_pc_in 		= 32'h20;
@@ -278,13 +284,34 @@ module testbench;
 		//$display("prediction_valid: %b prediction: %b valid_target: %b target_pc: %b", bp.prediction_valid, bp.prediction, bp.valid_target, bp.target_pc);
 		// assert () else #1 exit_on_error;
 
-		*/
+	
+		@(negedge clock);
+		$display("--------------------------------RESET----------------------------------"); 
+		reset = 1'b1;
+		enable = 1'b0;
+
+		@(negedge clock);
+		reset = 1'b0;
+		enable = 1'b1;
+		@(posedge clock);
+		`DELAY;
+		display_table;
+
+
+	
 		@(negedge clock);
 		$display("--------------------------------Check the roll back ----------------------------------"); 
 
 		insert_branch_into_bp(20, 28);
-		//insert_branch_into_bp(24, 32);
-		//insert_branch_into_bp(28, 36);
+		insert_branch_into_bp(24, 32);
+		insert_branch_into_bp(16, 36);
+		insert_through_fetch(20);
+		insert_through_fetch(20);
+		insert_through_fetch(20);
+		
+		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+
+		//insert_branch_into_bp(20, 100);
 		//insert_branch_into_bp(32, 40);
 		//insert_branch_into_bp(36,44);
 

@@ -42,7 +42,7 @@ module GSHARE(
 	`endif	
 
 	assign prediction_out	= next_prediction;
-	assign prediction_valid = if_branch & !(clear_en & obq_bh_pred_valid); 
+	assign prediction_valid = if_branch & !(clear_en); 
 
 	assign pc_partial	=  pc_in [(`PC_SIZE)+1:2]; // do not consider the byte offset
 

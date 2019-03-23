@@ -94,7 +94,7 @@ module  BP(
 	assign ght_out		= ght;
 
 	// internal registers
-	OBQ_ROW_T last_pred;
+//	OBQ_ROW_T last_pred;
 
 	// BTB module	
 
@@ -155,8 +155,9 @@ module  BP(
 		.if_branch(if_branch), 
 		.pc_in(if_pc_in),
 		.obq_bh_pred_valid(bh_pred_valid),
-		.obq_gh_in(last_pred.branch_history),
+		.obq_gh_in(bh_pred.branch_history),
 		.clear_en(clear_en),
+		.rt_pc(rt_pc),
 		
 		// outputs
 		`ifdef DEBUG_OUT
@@ -170,6 +171,12 @@ module  BP(
 
 	always_ff @(posedge clock) begin
 
+		if(reset) begin
+			next_pc		<= 32'h0;
+			next_pc_index	<= 0;
+			next_pc_valid	<= 1'b1;
+		end
+
 
 		// Next PC value,	
 		if(prediction_valid & prediction & valid_target) begin
@@ -178,14 +185,12 @@ module  BP(
 			next_pc		<= target_pc;
 			next_pc_index	<= bh_index;
 			next_pc_valid	<= 1'b1;
-			last_pred.branch_history <= 0;
 		end else begin
 		// PC=PC+4 for the other cases  (Prediction is valid but not
 		// taken, or Prediction is valid but not in the BTB)
 			next_pc		<= if_pc_in +4;
 			next_pc_index	<= bh_index; //*********************default bh_idx
 			next_pc_valid	<= prediction_valid;
-			last_pred	<= bh_pred; 
 		end
 
 
