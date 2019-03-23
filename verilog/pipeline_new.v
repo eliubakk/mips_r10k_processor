@@ -72,16 +72,16 @@ module pipeline (
 
     
 
-    // Outputs from EX/MEM Pipeline Register
-    output logic [4:0][63:0] ex_mem_NPC,
-    output logic [4:0] ex_mem_IR,
-    output logic [4:0]       ex_mem_valid_inst,
+    // // Outputs from EX/MEM Pipeline Register
+    // output logic [4:0][63:0] ex_mem_NPC,
+    // output logic [4:0] ex_mem_IR,
+    // output logic [4:0]       ex_mem_valid_inst,
 
 
-    // Outputs from MEM/COM Pipeline Register
-    output logic [4:0][63:0] mem_co_NPC,
-    output logic [4:0][31:0] mem_co_IR,
-    output logic [4:0]       mem_co_valid_inst
+    // Outputs from EX/COM Pipeline Register
+    output logic [4:0][63:0] ex_co_NPC,
+    output logic [4:0][31:0] ex_co_IR,
+    output logic [4:0]       ex_co_valid_inst
 
     // Outputs from COM/RET Pipeline Register
     output logic [63:0] co_ret_NPC,
@@ -91,7 +91,7 @@ module pipeline (
   );
 
   // Pipeline register enables
-  logic   if_id_enable, RS_enable, is_pr_enable, is_ex_enable, ex_mem_enable, CDB_enable, ROB_enable, co_re_enable, mem_co_enable, co_ret_enable;
+  logic   if_id_enable, RS_enable, is_pr_enable, is_ex_enable, ex_co_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable;
 
   // Output from the branch predictor
   logic   bp_output;
@@ -175,38 +175,38 @@ module pipeline (
 	logic         done,
   logic         ex_take_branch_out 
 
-  // Outputs from EX/MEM Pipeline Register
-  logic   PHYS_REG [4:0] ex_mem_dest_reg_idx;//Physical register index[T]
-  logic   [4:0]      ex_mem_rd_mem;
-  logic   [4:0]      ex_mem_wr_mem;
-  logic   [4:0]      ex_mem_halt;
-  logic   [4:0]      ex_mem_illegal;
-  logic  [4:0][63:0] ex_mem_rega;
-  logic  [3:0][63:0] ex_mem_alu_result;
-  logic              ex_mem_take_branch;
+//   // Outputs from EX/MEM Pipeline Register
+//   logic   PHYS_REG [4:0] ex_mem_dest_reg_idx;//Physical register index[T]
+//   logic   [4:0]      ex_mem_rd_mem;
+//   logic   [4:0]      ex_mem_wr_mem;
+//   logic   [4:0]      ex_mem_halt;
+//   logic   [4:0]      ex_mem_illegal;
+//   logic  [4:0][63:0] ex_mem_rega;
+//   logic  [3:0][63:0] ex_mem_alu_result;
+//   logic              ex_mem_take_branch;
 
   // Outputs from MEM-Stage
   logic [63:0] mem_result_out;
   logic        mem_stall_out;
 
   // Outputs from MEM/COM Pipeline Register
-  logic   [4:0]      mem_co_halt;
-  logic   [4:0]      mem_co_illegal;
-  logic   PHYS_REG [4:0] mem_co_dest_reg_idx;
-  logic  [3:0][63:0] mem_co_result;
-  logic         mem_co_take_branch;
+  logic   [4:0]      ex_co_halt;
+  logic   [4:0]      ex_co_illegal;
+  logic   PHYS_REG [4:0] ex_co_dest_reg_idx;
+  logic  [3:0][63:0] ex_co_result;
+  logic         ex_co_take_branch;
   wor         psel_enable;
 
   //Outputs from the complete stage
-  logic              mem_co_halt_selected;
-  logic              mem_co_illegal_selected;
+  logic              ex_co_halt_selected;
+  logic              ex_co_illegal_selected;
   logic   PHYS_REG   co_reg_wr_idx_out;
   logic  [63:0]      co_reg_wr_data_out;
   logic              co_reg_wr_en_out;
-  logic              mem_co_take_branch_selected;
-  logic              mem_co_NPC_selected ;
-  logic              mem_co_valid_inst_selected;
-  logic  [4:0]       mem_co_selected;
+  logic              ex_co_take_branch_selected;
+  logic              ex_co_NPC_selected ;
+  logic              ex_co_valid_inst_selected;
+  logic  [4:0]       ex_co_selected;
   logic              co_branch_valid;
   logic              co_branch_prediction;
 
@@ -659,114 +659,114 @@ phys_regfile regf_0 (
 
   //////////////////////////////////////////////////
   //                                              //
-  //           EX/MEM Pipeline Register           //
+  //           EX/CO Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  assign ex_mem_enable = ~mem_stall_out;
+  assign ex_co_enable = ~mem_stall_out;
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin//Initialize all registers once
     if (reset) begin
-      ex_mem_NPC          <= `SD 0;
-      ex_mem_IR           <= `SD `NOOP_INST;
-      ex_mem_dest_reg_idx <= `SD `ZERO_REG;
-      ex_mem_rd_mem       <= `SD 0;
-      ex_mem_wr_mem       <= `SD 0;
-      ex_mem_halt         <= `SD 0;
-      ex_mem_illegal      <= `SD 0;
-      ex_mem_valid_inst   <= `SD 0;
-      ex_mem_rega         <= `SD 0;
-      ex_mem_alu_result   <= `SD 0;
-      ex_mem_take_branch  <= `SD 0;
+      ex_co_NPC          <= `SD 0;
+      ex_co_IR           <= `SD `NOOP_INST;
+      ex_co_dest_reg_idx <= `SD `ZERO_REG;
+      ex_co_rd_mem       <= `SD 0;
+      ex_co_wr_mem       <= `SD 0;
+      ex_co_halt         <= `SD 0;
+      ex_co_illegal      <= `SD 0;
+      ex_co_valid_inst   <= `SD 0;
+      ex_co_rega         <= `SD 0;
+      ex_co_alu_result   <= `SD 0;
+      ex_co_take_branch  <= `SD 0;
     end else begin
-      if (ex_mem_enable) begin
+      if (ex_co_enable) begin
         // these are forwarded directly from ID/EX latches
-        ex_mem_NPC          <= `SD issue_reg.npc;
-        ex_mem_IR           <= `SD issue_reg.inst_opcode;
-        ex_mem_dest_reg_idx <= `SD issue_reg.T;
-        ex_mem_rd_mem       <= `SD issue_reg.inst.rd_mem;
-        ex_mem_wr_mem       <= `SD issue_reg.inst.wr_mem;
-        ex_mem_halt         <= `SD issue_reg.inst.halt;
-        ex_mem_illegal      <= `SD issue_reg.inst.illegal;
-        ex_mem_valid_inst   <= `SD issue_reg.inst.valid_inst;
-        ex_mem_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
+        ex_co_NPC          <= `SD issue_reg.npc;
+        ex_co_IR           <= `SD issue_reg.inst_opcode;
+        ex_co_dest_reg_idx <= `SD issue_reg.T;
+        ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
+        ex_co_wr_mem       <= `SD issue_reg.inst.wr_mem;
+        ex_co_halt         <= `SD issue_reg.inst.halt;
+        ex_co_illegal      <= `SD issue_reg.inst.illegal;
+        ex_co_valid_inst   <= `SD issue_reg.inst.valid_inst;
+        ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
         // these are results of EX stage
-        ex_mem_alu_result[0]   <= `SD ex_alu_result_out;
+        ex_co_alu_result[0]   <= `SD ex_alu_result_out;
         
         
-        ex_mem_take_branch  <= `SD ex_take_branch_out;
+        ex_co_take_branch  <= `SD ex_take_branch_out;
       end // if
     end // else: !if(reset)
   end // always
    
-  //////////////////////////////////////////////////
-  //                                              //
-  //                 MEM-Stage                    //
-  //                                              //
-  //////////////////////////////////////////////////
-  mem_stage mem_stage_0 (// Inputs
-     .clock(clock),
-     .reset(reset),
-     .ex_mem_rega(ex_mem_rega),
-     .ex_mem_alu_result(ex_mem_ls_result), 
-     .ex_mem_rd_mem(ex_mem_rd_mem[2]),
-     .ex_mem_wr_mem(ex_mem_wr_mem[2]),
-     .Dmem2proc_data(mem2proc_data),
-     .Dmem2proc_tag(mem2proc_tag),
-     .Dmem2proc_response(Dmem2proc_response),
+//   //////////////////////////////////////////////////
+//   //                                              //
+//   //                 MEM-Stage                    //
+//   //                                              //
+//   //////////////////////////////////////////////////
+//   mem_stage mem_stage_0 (// Inputs
+//      .clock(clock),
+//      .reset(reset),
+//      .ex_mem_rega(ex_mem_rega),
+//      .ex_mem_alu_result(ex_mem_ls_result), 
+//      .ex_mem_rd_mem(ex_mem_rd_mem[2]),
+//      .ex_mem_wr_mem(ex_mem_wr_mem[2]),
+//      .Dmem2proc_data(mem2proc_data),
+//      .Dmem2proc_tag(mem2proc_tag),
+//      .Dmem2proc_response(Dmem2proc_response),
      
-     // Outputs
-     .mem_result_out(mem_result_out),
-     .mem_stall_out(mem_stall_out),
-     .proc2Dmem_command(proc2Dmem_command),
-     .proc2Dmem_addr(proc2Dmem_addr),
-     .proc2Dmem_data(proc2mem_data)
-            );
+//      // Outputs
+//      .mem_result_out(mem_result_out),
+//      .mem_stall_out(mem_stall_out),
+//      .proc2Dmem_command(proc2Dmem_command),
+//      .proc2Dmem_addr(proc2Dmem_addr),
+//      .proc2Dmem_data(proc2mem_data)
+//             );
 
-  wire [4:0] mem_dest_reg_idx_out =
-             mem_stall_out ? `ZERO_REG : issue_reg[2].T;
-  wire mem_valid_inst_out = ex_mem_valid_inst[2] & ~mem_stall_out;
+//   wire [4:0] mem_dest_reg_idx_out =
+//              mem_stall_out ? `ZERO_REG : issue_reg[2].T;
+//   wire mem_valid_inst_out = ex_mem_valid_inst[2] & ~mem_stall_out;
 
-  for (i=0; i<5; i=i+1) begin
-    if ()
-  end
+//   for (i=0; i<5; i=i+1) begin
+//     if ()
+//   end
 
-//////////////////////////////////////////////////
-  //                                              //
-  //           MEM/COMP Pipeline Register           //
-  //                                              //
-  //////////////////////////////////////////////////
-assign mem_co_enable = 1'b1; // always enabled
-  // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if (reset) begin
-      mem_co_NPC          <= `SD 0;
-      mem_co_IR           <= `SD `NOOP_INST;
-      mem_co_halt         <= `SD 0;
-      mem_co_illegal      <= `SD 0;
-      mem_co_valid_inst   <= `SD 0;
-      mem_co_dest_reg_idx <= `SD `ZERO_REG;
-      mem_co_take_branch  <= `SD 0;
-      mem_co_result       <= `SD 0;
-      mem_co_clear_valid  <= `SD 0;
-    end else begin
-      if (mem_co_enable) begin
-        // these are forwarded directly from EX/MEM latches
-        mem_co_NPC          <= `SD ex_mem_NPC;
-        mem_co_IR           <= `SD ex_mem_IR;
-        mem_co_halt         <= `SD ex_mem_halt;
-        mem_co_illegal      <= `SD ex_mem_illegal;
-        mem_co_valid_inst[4:0]   <= `SD mem_valid_inst_out;
-        mem_co_dest_reg_idx[1:0]  <= `SD ex_mem_dest_reg_idx[1:0];
-        mem_co_dest_reg_idx[2] <= `SD mem_dest_reg_idx_out;
-        mem_co_dest_reg_idx[3] <= `SD ex_mem_dest_reg_idx[3];
-        mem_co_take_branch  <= `SD ex_mem_take_branch;
-        // these are results of MEM stage
-        mem_co_result[3:0]  <= `SD ex_mem_alu_result[3:0]
-        mem_co_result[4]       <= `SD mem_result_out;
-        mem_co_clear_valid[mem_co_selected]    <= `SD 1;
-      end // if
-    end // else: !if(reset)
-  end // always
+// //////////////////////////////////////////////////
+//   //                                              //
+//   //           MEM/COMP Pipeline Register           //
+//   //                                              //
+//   //////////////////////////////////////////////////
+// assign ex_co_enable = 1'b1; // always enabled
+//   // synopsys sync_set_reset "reset"
+//   always_ff @(posedge clock) begin
+//     if (reset) begin
+//       mem_co_NPC          <= `SD 0;
+//       mem_co_IR           <= `SD `NOOP_INST;
+//       mem_co_halt         <= `SD 0;
+//       mem_co_illegal      <= `SD 0;
+//       mem_co_valid_inst   <= `SD 0;
+//       mem_co_dest_reg_idx <= `SD `ZERO_REG;
+//       mem_co_take_branch  <= `SD 0;
+//       mem_co_result       <= `SD 0;
+//       mem_co_clear_valid  <= `SD 0;
+//     end else begin
+//       if (mem_co_enable) begin
+//         // these are forwarded directly from EX/MEM latches
+//         mem_co_NPC          <= `SD ex_mem_NPC;
+//         mem_co_IR           <= `SD ex_mem_IR;
+//         mem_co_halt         <= `SD ex_mem_halt;
+//         mem_co_illegal      <= `SD ex_mem_illegal;
+//         mem_co_valid_inst[4:0]   <= `SD mem_valid_inst_out;
+//         mem_co_dest_reg_idx[1:0]  <= `SD ex_mem_dest_reg_idx[1:0];
+//         mem_co_dest_reg_idx[2] <= `SD mem_dest_reg_idx_out;
+//         mem_co_dest_reg_idx[3] <= `SD ex_mem_dest_reg_idx[3];
+//         mem_co_take_branch  <= `SD ex_mem_take_branch;
+//         // these are results of MEM stage
+//         mem_co_result[3:0]  <= `SD ex_mem_alu_result[3:0]
+//         mem_co_result[4]       <= `SD mem_result_out;
+//         mem_co_clear_valid[mem_co_selected]    <= `SD 1;
+//       end // if
+//     end // else: !if(reset)
+//   end // always
 
 
   //////////////////////////////////////////////////
@@ -774,23 +774,23 @@ assign mem_co_enable = 1'b1; // always enabled
   //           complete stage                     //
   //                                              //
   //////////////////////////////////////////////////
-  assign psel_enable = mem_co_valid_inst[4 -: 0];
+  assign psel_enable = ex_co_valid_inst[4 -: 0];
 //priority encoder to select the results of the execution stage to put in cdb
   psel_complete #(5, 1) psel(
-				.req(mem_co_valid_inst),
+				.req(ex_co_valid_inst),
 				.en(psel_enable),
-				.gnt(mem_co_selected)
+				.gnt(ex_co_selected)
 			);
   for (i = 0, i < 5, i=i+1) begin
-    if (mem_co_selected[i]== 1) begin
-        assign mem_co_NPC_selected               =    mem_co_NPC[i] ;
-        assign mem_co_IR_selected                =    mem_co_IR[i];
-        assign mem_co_halt_selected              =    mem_co_halt[i];
-        assign mem_co_illegal_selected           =    mem_co_illegal[i];
-        mem_co_valid_inst_out_selected    =    mem_co_valid_inst_out[i];
-        co_reg_wr_idx_out                 =    mem_co_dest_reg_idx[i];
-        mem_co_take_branch_selected       =    mem_co_take_branch;
-        if(mem_co_IR[i] == )  co_branch_valid= 1;            // To check whether the inst is branch or not
+    if (ex_co_selected[i]== 1) begin
+        assign ex_co_NPC_selected               =    ex_co_NPC[i] ;
+        assign ex_co_IR_selected                =    ex_co_IR[i];
+        assign ex_co_halt_selected              =    ex_co_halt[i];
+        assign ex_co_illegal_selected           =    ex_co_illegal[i];
+        ex_co_valid_inst_out_selected    =    ex_co_valid_inst_out[i];
+        co_reg_wr_idx_out                 =    ex_co_dest_reg_idx[i];
+        ex_co_take_branch_selected       =    ex_co_take_branch;
+        if(ex_co_IR[i] == )  co_branch_valid= 1;            // To check whether the inst is branch or not
         else                  co_branch_valid= 0;       
     end
   end
@@ -798,14 +798,14 @@ assign mem_co_enable = 1'b1; // always enabled
 
 
 
-  assign co_branch_prediction = (mem_co_take_branch_selected == bp_output) ? 1:0 ;// Branch prediction or misprediction
+  assign co_branch_prediction = (ex_co_take_branch_selected == bp_output) ? 1:0 ;// Branch prediction or misprediction
   assign CDB_enable = psel_enable & ~branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
   CDB CDB_0(// Inputs
      .clock(clock),    // Clock
 	   .reset(reset),  // Asynchronous reset active low
 	   .enable(CDB_enable), // Clock Enable
 	   .tag_in(co_reg_wr_idx_out),	// Comes from FU, during commit
-	   .ex_valid(mem_co_valid_inst_selected),
+	   .ex_valid(ex_co_valid_inst_selected),
 
      // Outputs
 	   .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules
@@ -818,11 +818,11 @@ wb_stage wb_stage_0 (
     // Inputs
     .clock(clock),
     .reset(reset),
-    .mem_wb_NPC(mem_co_NPC_selected),
+    .mem_wb_NPC(ex_co_NPC_selected),
     .mem_wb_result(co_reg_wr_data_out),
     .mem_wb_dest_reg_idx(co_reg_wr_idx_out),
-    .mem_wb_take_branch(mem_co_take_branch_selected),
-    .mem_wb_valid_inst(mem_co_valid_inst_selected),
+    .mem_wb_take_branch(ex_co_take_branch_selected),
+    .mem_wb_valid_inst(ex_co_valid_inst_selected),
 
     // Outputs
     .reg_wr_data_out(co_reg_wr_data_out),
@@ -867,13 +867,13 @@ wb_stage wb_stage_0 (
     end else begin
       if (co_ret_enable) begin
         // these are forwarded directly from EX/MEM latches
-        co_ret_NPC          <= `SD mem_co_NPC_selected;
-        co_ret_IR           <= `SD mem_co_IR_selected;
-        co_ret_halt         <= `SD mem_co_halt_selected;
-        co_ret_illegal      <= `SD mem_co_illegal_selected;
-        co_ret_valid_inst   <= `SD mem_co_valid_inst_out_selected;
+        co_ret_NPC          <= `SD ex_co_NPC_selected;
+        co_ret_IR           <= `SD ex_co_IR_selected;
+        co_ret_halt         <= `SD ex_co_halt_selected;
+        co_ret_illegal      <= `SD ex_co_illegal_selected;
+        co_ret_valid_inst   <= `SD ex_co_valid_inst_out_selected;
         co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
-        co_ret_take_branch  <= `SD mem_co_take_branch_selected;
+        co_ret_take_branch  <= `SD ex_co_take_branch_selected;
         co_branch_valid        <= `SD co_branch_valid;
         co_ret_branch_prediction <= `SD co_branch_prediction;
         // these are results of MEM stage
