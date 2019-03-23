@@ -41,6 +41,7 @@ module  BP(
 	output		logic	[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address_out,
 	output		OBQ_ROW_T 		[`OBQ_SIZE-1:0]		obq_out,
 	output		logic [$clog2(`OBQ_SIZE):0] 			tail_out,
+	output		logic	[`BH_SIZE-1:0]				ght_out,
 	output		logic	[2**(`BH_SIZE)-1:0]			pht_out,
 	`endif
 
@@ -90,6 +91,10 @@ module  BP(
 	//
 	assign clear_en		= rt_en_branch & ~rt_prediction_correct;  // **************** When the branch prediction was wrong 
 	assign shift_en		= rt_en_branch & rt_prediction_correct;
+	assign ght_out		= ght;
+
+	// internal registers
+	OBQ_ROW_T last_pred;
 
 	// BTB module	
 
@@ -150,7 +155,7 @@ module  BP(
 		.if_branch(if_branch), 
 		.pc_in(if_pc_in),
 		.obq_bh_pred_valid(bh_pred_valid),
-		.obq_gh_in(bh_pred.branch_history),
+		.obq_gh_in(last_pred.branch_history),
 		.clear_en(clear_en),
 		
 		// outputs
@@ -172,13 +177,15 @@ module  BP(
 		// value 
 			next_pc		<= target_pc;
 			next_pc_index	<= bh_index;
-			next_pc_valid	<= 1'b1; 
+			next_pc_valid	<= 1'b1;
+			last_pred.branch_history <= 0;
 		end else begin
 		// PC=PC+4 for the other cases  (Prediction is valid but not
 		// taken, or Prediction is valid but not in the BTB)
 			next_pc		<= if_pc_in +4;
 			next_pc_index	<= bh_index; //*********************default bh_idx
-			next_pc_valid	<= prediction_valid; 
+			next_pc_valid	<= prediction_valid;
+			last_pred	<= bh_pred; 
 		end
 
 

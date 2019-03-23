@@ -31,6 +31,7 @@ module testbench;
 	OBQ_ROW_T [`OBQ_SIZE-1:0] 				obq_out;
 	logic [$clog2(`OBQ_SIZE):0] 				tail_out;
 	//GSHARE
+	logic	[`BH_SIZE-1:0]					ght_out;
 	logic	[2**(`BH_SIZE)-1:0]				pht_out;
 	`endif
 
@@ -65,6 +66,7 @@ module testbench;
 		.obq_out(obq_out),
 		.tail_out(tail_out),
 		//GSHARE
+		.ght_out(ght_out),
 		.pht_out(pht_out),		
 
 		`endif
@@ -94,9 +96,10 @@ module testbench;
 			$display("*******************************************************************************");
 			$display("*******************************************************************************");
 		
-			$display("FETCH_IN @@@ if_branch : %d, if_pc_in : %h", if_branch, if_pc_in);
+			$display("FETCH_IN  @@@ if_branch : %d, if_pc_in : %h", if_branch, if_pc_in);
 			$display("RETIRE_IN @@@ rt_en_branch : %b, rt_branch_taken : %b, rt_prediction_correct : %b", rt_en_branch, rt_branch_taken, rt_prediction_correct);
-			$display("FETCH_OUT @@@ rt_pc : %h, rt_calculated_pc : %h, rt_branch_index : %5.0b", rt_pc, rt_calculated_pc, rt_branch_index);
+			$display("	    @@@ rt_pc : %h, rt_calculated_pc : %h, rt_branch_index : %5.0b", rt_pc, rt_calculated_pc, rt_branch_index);
+			$display("FETCH_OUT @@@ next_pc_valid : %b, next_pc_index : %5.0b, next_pc : %h", next_pc_valid, next_pc_index, next_pc);
 			$display("--------------------------BTB-----------------------------------");
 			$display("index(pc[%2.0d:2]		valid		tag(pc[%2.0d,%2.0d])	target_address(pc[%2.0d,2])",$clog2(`BTB_ROW)+1, `TAG_SIZE+$clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+2, `TARGET_SIZE+1 );
 			for(i=0;i<`BTB_ROW;i=i+1) begin
@@ -104,7 +107,8 @@ module testbench;
 			end
 			$display("*******************************************************************************");
 			$display("--------------------------GSHARE PHT-----------------------------------");
-				$display("GHT idx           PHT");
+			$display("GHT : %b",ght_out[`BH_SIZE-1:0]);
+			$display("GHT idx           PHT");
 			for(i=0;i<(2**`BH_SIZE);i=i+1) begin
 				$display("Idx %b : Prediction %b", i[`BH_SIZE-1:0], pht_out[i]);
 			end
@@ -112,12 +116,69 @@ module testbench;
 			$display("*******************************************************************************");
 			$display("---------------------------OBQ-----------------------------------------");
 			
-			// From Ash	
+			// From Ash
+			$display("tail_out: %d", tail_out);
+			for (i = 0; i < `OBQ_SIZE; ++i) begin
+				$display("index: %d branch_history: %b", i, obq_out[i].branch_history);
+			end	
 			
 			$display("*******************************************************************************");
 			$display("*******************************************************************************");
 
 
+		end
+	endtask
+
+	task insert_through_fetch;
+		input int pc;
+
+		begin
+			@(negedge clock);
+			if_branch = 1'b1;
+			if_pc_in = pc;
+			rt_en_branch = 1'b0;
+
+			@(posedge clock);
+			`DELAY;
+			if_branch = 1'b0;
+			rt_branch_index = next_pc_index;
+			// assert statements for correctness
+		end
+	endtask
+
+	task fix_through_retire;
+		input int pc;
+		input int calc_pc;
+
+		begin
+			@(negedge clock);
+			rt_en_branch = 1'b1;
+			rt_branch_taken = 1'b1;
+			rt_prediction_correct = 1'b0;
+			rt_pc = pc;
+			rt_calculated_pc = calc_pc;
+
+			@(posedge clock);
+			`DELAY;
+			// at this point should be inserted`
+		end
+	endtask
+
+	task insert_branch_into_bp;
+		input int pc;
+		input int calc_pc;
+
+		begin
+			$display("BEFORE FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			display_table;
+			insert_through_fetch(pc);
+			$display("AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			display_table;
+
+			fix_through_retire(pc, calc_pc);
+			$display("AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			display_table;
+			
 		end
 	endtask
 
@@ -166,7 +227,7 @@ module testbench;
 		// Retire Input : branch prediction correct, branch prediction
 		// incorrect
 
-		@(negedge clock);
+	/*	@(negedge clock);
 		$display("--------------------------------Testing when the instruction is branch but not in BTB ----------------------------------"); 
 		if_branch		= 1'b1;
 		if_pc_in 		= 32'h20;
@@ -179,7 +240,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		//display_table;
+		display_table;
 		// assert () else #1 exit_on_error;
 		//
 		@(negedge clock);
@@ -212,11 +273,25 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		//display_table;
+		display_table;
+		//$display("look here");
+		//$display("prediction_valid: %b prediction: %b valid_target: %b target_pc: %b", bp.prediction_valid, bp.prediction, bp.valid_target, bp.target_pc);
 		// assert () else #1 exit_on_error;
 
+		*/
+		@(negedge clock);
+		$display("--------------------------------Check the roll back ----------------------------------"); 
 
-		
+		insert_branch_into_bp(20, 28);
+		//insert_branch_into_bp(24, 32);
+		//insert_branch_into_bp(28, 36);
+		//insert_branch_into_bp(32, 40);
+		//insert_branch_into_bp(36,44);
+
+		@(posedge clock);
+		`DELAY;
+		display_table;
+
 
 
 		$display("@@@passed");
