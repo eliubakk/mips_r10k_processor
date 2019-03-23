@@ -86,6 +86,8 @@ module pipeline (
   // Pipeline register enables
   logic   if_id_enable, RS_enable, is_pr_enable, is_ex_enable, ex_mem_enable, CDB_enable, ROB_enable, co_re_enable, mem_co_enable, co_ret_enable;
 
+  // Output from the branch predictor
+  logic   bp_output;
   
   // Outputs from ID stage
   logic [63:0]   id_rega_out;
@@ -198,6 +200,8 @@ module pipeline (
   logic              mem_co_NPC_selected ;
   logic              mem_co_valid_inst_selected;
   logic  [4:0]       mem_co_selected;
+  logic              co_branch_valid;
+  logic              co_branch_prediction;
 
 
 
@@ -213,6 +217,8 @@ module pipeline (
   logic            co_ret_NPC;
   logic            co_ret_IR;
   logic            co_ret_valid_inst;
+  logic            co_ret_branch_valid;
+  logic            co_ret_branch_prediction;
 
 
   //outputs from teh ROB
@@ -330,6 +336,32 @@ module pipeline (
     .last_tag(Icache_wr_tag),
     .data_write_enable(Icache_wr_en)
   );
+
+
+
+//////////////////////////////////////////////////
+  //                                              //
+  //                  IF-Stage                    //
+  //                                              //
+  //////////////////////////////////////////////////
+  if_stage if_stage_0 (
+    // Inputs
+    .clock (clock),
+    .reset (reset),
+    .mem_wb_valid_inst(mem_wb_valid_inst),
+    .ex_mem_take_branch(ex_mem_take_branch),
+    .ex_mem_target_pc(ex_mem_alu_result),
+    .Imem2proc_data(mem2proc_data),
+    .ex_mem_valid_inst(ex_mem_valid_inst),
+    
+
+    // Outputs
+    .if_NPC_out(if_NPC_out), 
+    .if_IR_out(if_IR_out),
+    .proc2Imem_addr(proc2Imem_addr),
+    .if_valid_inst_out(if_valid_inst_out)
+  );
+
 
 
   //////////////////////////////////////////////////
@@ -708,6 +740,7 @@ assign mem_co_enable = 1'b1; // always enabled
       mem_co_dest_reg_idx <= `SD `ZERO_REG;
       mem_co_take_branch  <= `SD 0;
       mem_co_result       <= `SD 0;
+      mem_co_clear_valid  <= `SD 0;
     end else begin
       if (mem_co_enable) begin
         // these are forwarded directly from EX/MEM latches
@@ -723,6 +756,7 @@ assign mem_co_enable = 1'b1; // always enabled
         // these are results of MEM stage
         mem_co_result[3:0]  <= `SD ex_mem_alu_result[3:0]
         mem_co_result[4]       <= `SD mem_result_out;
+        mem_co_clear_valid[mem_co_selected]    <= `SD 1;
       end // if
     end // else: !if(reset)
   end // always
@@ -749,15 +783,15 @@ assign mem_co_enable = 1'b1; // always enabled
         mem_co_valid_inst_out_selected    =    mem_co_valid_inst_out[i];
         co_reg_wr_idx_out                 =    mem_co_dest_reg_idx[i];
         mem_co_take_branch_selected       =    mem_co_take_branch;
-        if(mem_co_IR[i] == )  branch_valid= 1;            // To check whether the inst is branch or not
-        else                  branch_valid= 0;       
+        if(mem_co_IR[i] == )  co_branch_valid= 1;            // To check whether the inst is branch or not
+        else                  co_branch_valid= 0;       
     end
   end
 
 
 
 
-
+  assign co_branch_prediction = (mem_co_take_branch_selected == bp_output) ? 1:0 ;// Branch prediction or misprediction
   assign CDB_enable = psel_enable & ~branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
   CDB CDB_0(// Inputs
      .clock(clock),    // Clock
@@ -796,7 +830,8 @@ wb_stage wb_stage_0 (
 
 //  Things to do
 // backtrack from priority selector to issue stage for the issuing of the signals
-// add branch registers that heewoo mentioned
+
+// add condiytion for the branch opcode in the psel
 
   //////////////////////////////////////////////////
   //                                              //
@@ -815,6 +850,8 @@ wb_stage wb_stage_0 (
       co_ret_dest_reg_idx <= `SD `ZERO_REG;
       co_ret_take_branch  <= `SD 0;
       co_ret_result       <= `SD 0;
+      co_ret_branch_valid        <= 'SD 0;
+      co_ret_branch_prediction  <= `SD 0;
     end else begin
       if (co_ret_enable) begin
         // these are forwarded directly from EX/MEM latches
@@ -825,6 +862,8 @@ wb_stage wb_stage_0 (
         co_ret_valid_inst   <= `SD mem_co_valid_inst_out_selected;
         co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
         co_ret_take_branch  <= `SD mem_co_take_branch_selected;
+        co_branch_valid        <= `SD co_branch_valid;
+        co_ret_branch_prediction <= `SD co_branch_prediction;
         // these are results of MEM stage
         //co_ret_result       <= `SD mem_co_result_out_selected;
       end // if
