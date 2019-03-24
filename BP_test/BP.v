@@ -1,9 +1,9 @@
 // Entire branch predictor module
 // Should include BTB, GSHARE, OBQ 
 `include "sys_defs.vh"
-`include "BTB.v"
-`include "GSHARE.v"
-`include "OBQ.v"
+//`include "BTB.v"
+//`include "GSHARE.v"
+//`include "OBQ.v"
 
 `define	DEBUG_OUT
 

@@ -23,7 +23,7 @@ all:    simv
 #####
 
 TESTBENCH = BP_test.v
-SIMFILES = BP.v
+SIMFILES = BP.v BTB.v GSHARE.v OBQ.v
 SYNFILES = BP.vg
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 

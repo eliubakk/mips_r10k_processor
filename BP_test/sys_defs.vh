@@ -67,7 +67,7 @@ typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
 
 // OBQ Rows
-`define BH_SIZE 4  // Need to change it to 10
+`define BH_SIZE 10  // Need to change it to 10
 `define OBQ_SIZE 16
 typedef struct packed {
   logic [`BH_SIZE-1:0] branch_history;

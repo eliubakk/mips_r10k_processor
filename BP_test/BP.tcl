@@ -14,7 +14,7 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 
-analyze -f sverilog [list "BP.v BTB.v GSHARE.v OBQ.v sys_def.vh"]
+analyze -f sverilog "BP.v BTB.v GSHARE.v OBQ.v sys_defs.vh"
 elaborate BP
 set design_name BP
 ##############################################
