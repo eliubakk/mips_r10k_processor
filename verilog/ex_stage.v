@@ -105,8 +105,8 @@ module ex_stage(
     input  RS_ROW_T [`NUM_FU-1:0]			issue_reg,           // Input from the issue register
     input [4:0][63:0] T1_value,
     input [4:0][63:0]  T2_value,
-
-    output [3:0][63:0]  ex_alu_result_out,   // ALU0 result
+    
+    output [4:0][63:0]  ex_alu_result_out,   // ALU0 result
     
    
 		output done,
@@ -281,7 +281,7 @@ always_comb begin
   alu alu_0 (// Inputs                //    *******ALU_0**********
     .opa(opa_mux_out[0]),
     .opb(opb_mux_out[0]),
-    .func(id_ex_alu0_func),
+    .func(issue_reg[0].inst.alu_func),
 
     // Output
     .result(ex_alu_result_out[0])
@@ -290,19 +290,19 @@ always_comb begin
   alu alu_1 (// Inputs                //    *******ALU_1**********
     .opa(opa_mux_out[1]),
     .opb(opb_mux_out[1]),
-    .func(id_ex_alu1_func),
+    .func(issue_reg[1].inst.alu_func),
 
     // Output
-    .result(ex_alu1_result_out[1])
+    .result(ex_alu_result_out[1])
   );  
 
   alu alu_ls (// Inputs                //    *******LOAD AND STORE**********
     .opa(opa_mux_out[2]),
     .opb(opb_mux_out[2]),
-    .func(id_ex_alu_ls_func),
+    .func(issue_reg[2].inst.alu_func),
 
     // Output
-    .result(ex_alu_ls_result_out)
+    .result(ex_alu_result_out[2])
   );  
 
   // alu alu_store (// Inputs
@@ -318,16 +318,23 @@ always_comb begin
   mult mult0 (// Inputs)                 //********MULT************
     .clock(clock),
     .reset(reset),
-	  .mcand(mcand),
+	  .mcand(opa_mux_out[]),
     .mplier(mplier),
-	  .start(start),
-	  .product(ex_mult_result_out),
+	  .start(issue_reg[3].inst.valid_inst),
+	  .product(ex_mult_result_out[3]),
 		.done(done)
   );
 
   
+    alu alu_branch (// Inputs                //    *******LOAD AND STORE**********
+    .opa(opa_mux_out[4]),
+    .opb(opb_mux_out[4]),
+    .func(issue_reg[4].inst.alu_func),
 
-
+    // Output
+    .result(ex_alu_ls_result_out[4])
+  ); 
+  
 
    //
    // instantiate the branch condition tester
