@@ -51,7 +51,7 @@ module pipeline (
     output logic [63:0] id_di_NPC,
     output logic [31:0] id_di_IR,
     output logic        id_di_valid_inst,
-    if 
+    
 
 
 
@@ -829,7 +829,7 @@ phys_regfile regf_0 (
         assign co_reg_wr_idx_out                    =    ex_co_dest_reg_idx[i];
         assign co_take_branch_selected              =    ex_co_take_branch[i];
         assign co_alu_result_selected               =    ex_co_alu_result[i];
-        if(ex_co_IR[i] == )  assign co_branch_valid =    1;            // To check whether the inst is branch or not
+        if(ex_co_IR[i] == 6'h18 )  assign co_branch_valid =    1;            // To check whether the inst is branch or not
         else                 assign co_branch_valid =    0;       
     end
     else begin

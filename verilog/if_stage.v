@@ -52,7 +52,7 @@ module if_stage(
   assign next_PC = (co_ret_take_branch & co_ret_branch_valid & co_ret_valid_inst) ? ex_mem_target_pc : PC_plus_4;
 
   // The take-branch signal must override stalling (otherwise it may be lost)
-  assign PC_enable = if_valid_inst_out || ex_mem_take_branch;
+  //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;
 
   // Pass PC+4 down pipeline w/instruction
   assign if_NPC_out = PC_plus_4;
