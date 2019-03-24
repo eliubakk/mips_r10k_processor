@@ -3,11 +3,6 @@
 
 `define	DEBUG_OUT
 
-`define TAG_SIZE 10	// Tag bit size
-`define TARGET_SIZE 12	// Target address size, BTB will store [TARGET_SIZE+1:2]
-`define BTB_ROW	16	// BTB row size : 5~10% of I$ size
-//Tag will store pc [(TAG_SIZE+$clog2(BTB_ROW)+1):($clog2(BTB_ROW)+2)], index will use pc[$clog2(BTB_ROW)+1:2]
-
 module  BTB(
 	input clock,    // Clock
 	input reset,  // Asynchronous reset active low
@@ -48,8 +43,8 @@ module  BTB(
 
 	always_comb begin
 	// After execute, update the btb when
-	// 1. The predict is taken and in the btb : update the previous target_address in the BTB   
-	// 2. The predict is taken but not in the btb : add new row in the BTB
+	// 1. The branch is taken and in the btb : update the previous target_address in the BTB   
+	// 2. The branch is taken but not in the btb : add new row in the BTB
 	// Q3. The predict is not taken but in the btb : Remove value? or do
 	// nothing? - I have implemented with do nothing
 	// 4. The predict is not taken and not in the btb : nothing to do  
@@ -63,19 +58,11 @@ module  BTB(
 		valid_target		= 1'b0;
 
 
-		//1,2 The predict is taken
+		//1,2 The branch is taken : update the BTB table regardless
+		//of it is in the btb or not
 		if( enable & ex_en_branch & ex_branch_taken) begin
 
 
-			// Access to the BTB index and see whether it is valid
-			// & tag matched
-			// 1. index is in the BTB -> update the tag and target
-			// address
-			/*if ( valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] == tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ) ) begin
-				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]] 	= calculated_pc[`TARGET_SIZE+1:2];	
-			// 2. it is not in the BTB (not valid or valid but tag
-			// is different -> Update valid, tag, target address
-			end else if ( !valid[ex_pc[$clog2(`BTB_ROW)+1:2]] | (valid[ex_pc[$clog2(`BTB_ROW)+1:2]] & ( ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] != tag[ex_pc[$clog2(`BTB_ROW)+1:2]]  ))) begin*/
 				next_valid[ex_pc[$clog2(`BTB_ROW)+1:2]] 		= 1'b1;
 				next_tag[ex_pc[$clog2(`BTB_ROW)+1:2]]			= ex_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)];
 				next_target_address[ex_pc[$clog2(`BTB_ROW)+1:2]]	= calculated_pc[`TARGET_SIZE+1:2];

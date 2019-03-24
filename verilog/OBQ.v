@@ -49,7 +49,6 @@ module OBQ(
 
 	// bh_pred is the most recent prediction entry
 	assign bh_pred 		= obq[tail-1];
-
 	// row_tag is the index at which the last branch history was inserted
 	assign row_tag 		= row_tag_index; // tail - 1;
 
