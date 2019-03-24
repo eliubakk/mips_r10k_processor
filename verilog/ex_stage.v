@@ -10,7 +10,7 @@
 //                                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+`include "sys_defs.vh"
 `timescale 1ns/100ps
 
 //
@@ -102,7 +102,7 @@ module ex_stage(
     input          reset,               // system reset
     
     //input  [31:0]  id_ex_IR,            // incoming instruction
-    input  RS_ROW_T [`NUM_FU-1:0]			issue_reg,           // Input from the issue register
+    input  RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_reg,           // Input from the issue register
     input [4:0][63:0] T1_value,
     input [4:0][63:0]  T2_value,
     
@@ -124,26 +124,26 @@ module ex_stage(
   //   mem_disp: sign-extended 16-bit immediate for memory format
   //   br_disp: sign-extended 21-bit immediate * 4 for branch displacement
   //   alu_imm: zero-extended 8-bit immediate for ALU ops
-  wire [63:0] mem_disp_alu0 = { {48{issue_reg[0].inst_opcode[15]}}, issue_reg[0].inst_opcode[15:0] };
-  wire [63:0] br_disp_alu0  = { {41{issue_reg[0].inst_opcode[20]}}, issue_reg[0].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm_alu0  = { 56'b0, issue_reg[0].inst_opcode[20:13] };
+  wire [63:0] mem_disp[0] = { {48{issue_reg[0].inst_opcode[15]}}, issue_reg[0].inst_opcode[15:0] };
+  wire [63:0] br_disp[0]  = { {41{issue_reg[0].inst_opcode[20]}}, issue_reg[0].inst_opcode[20:0], 2'b00 };
+  wire [63:0] alu_imm[0]  = { 56'b0, issue_reg[0].inst_opcode[20:13] };
    
 
-  wire [63:0] mem_disp_alu1 = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
-  wire [63:0] br_disp_alu1  = { {41{issue_reg[1].inst_opcode[20]}}, issue_reg[1].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm_alu1  = { 56'b0, issue_reg[1].inst_opcode[20:13] };
+  wire [63:0] mem_disp[1] = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
+  wire [63:0] br_disp[1]  = { {41{issue_reg[1].inst_opcode[20]}}, issue_reg[1].inst_opcode[20:0], 2'b00 };
+  wire [63:0] alu_imm[1]  = { 56'b0, issue_reg[1].inst_opcode[20:13] };
   
-  wire [63:0] mem_disp_alu_ls = { {48{issue_reg[2].inst_opcode[15]}}, issue_reg[2].inst_opcode[15:0] };
-  wire [63:0] br_disp_alu_ls  = { {41{issue_reg[2].inst_opcode[20]}}, issue_reg[2].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm_alu_ls  = { 56'b0, issue_reg[2].inst_opcode[20:13] };
+  wire [63:0] mem_disp[2] = { {48{issue_reg[2].inst_opcode[15]}}, issue_reg[2].inst_opcode[15:0] };
+  wire [63:0] br_disp[2]  = { {41{issue_reg[2].inst_opcode[20]}}, issue_reg[2].inst_opcode[20:0], 2'b00 };
+  wire [63:0] alu_imm[2]  = { 56'b0, issue_reg[2].inst_opcode[20:13] };
   
-  // wire [63:0] mem_disp_alu_store = { {48{issue_reg[3].inst_opcode[15]}}, issue_reg[3].inst_opcode[15:0] };
-  // wire [63:0] br_disp_alu_store  = { {41{issue_reg[3].inst_opcode[20]}}, issue_reg[3].inst_opcode[20:0], 2'b00 };
-  // wire [63:0] alu_imm_alu_store  = { 56'b0, issue_reg[3].inst_opcode[20:13] };
+  wire [63:0] mem_disp[3] = { {48{issue_reg[3].inst_opcode[15]}}, issue_reg[3].inst_opcode[15:0] };
+  wire [63:0] br_disp[3]  = { {41{issue_reg[3].inst_opcode[20]}}, issue_reg[3].inst_opcode[20:0], 2'b00 };
+  wire [63:0] alu_imm[3]  = { 56'b0, issue_reg[3].inst_opcode[20:13] };
    
-  wire [63:0] mem_disp_mult = { {48{issue_reg[4].inst_opcode[15]}}, issue_reg[4].inst_opcode[15:0] };
-  wire [63:0] br_disp_mult  = { {41{issue_reg[4].inst_opcode[20]}}, issue_reg[4].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm_mult  = { 56'b0, issue_reg[4].inst_opcode[20:13] };
+  wire [63:0] mem_disp[4] = { {48{issue_reg[4].inst_opcode[15]}}, issue_reg[4].inst_opcode[15:0] };
+  wire [63:0] br_disp[4]  = { {41{issue_reg[4].inst_opcode[20]}}, issue_reg[4].inst_opcode[20:0], 2'b00 };
+  wire [63:0] alu_imm[4]  = { 56'b0, issue_reg[4].inst_opcode[20:13] };
   
 
   
@@ -154,7 +154,7 @@ module ex_stage(
     
     case (issue_reg[0].inst.opa_select)
       ALU_OPA_IS_REGA:     opa_mux_out[0] = T1_value[0];
-      ALU_OPA_IS_MEM_DISP:  opa_mux_out[0] = mem_disp_alu0;
+      ALU_OPA_IS_MEM_DISP:  opa_mux_out[0] = mem_disp[0];
       ALU_OPA_IS_NPC:       opa_mux_out[0] = issue_reg[0].npc;
       ALU_OPA_IS_NOT3:      opa_mux_out[0] = ~64'h3;
     endcase
@@ -167,7 +167,7 @@ module ex_stage(
     
     case (issue_reg[1].inst.opa_select)
       ALU_OPA_IS_REGA:      opa_mux_out[1] = T1_value[1];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[1] = mem_disp_alu1;
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[1] = mem_disp[1];
       ALU_OPA_IS_NPC:      opa_mux_out[1] = issue_reg[1].npc;
       ALU_OPA_IS_NOT3:     opa_mux_out[1] = ~64'h3;
     endcase
@@ -179,7 +179,7 @@ module ex_stage(
     
     case (issue_reg[2].inst.opa_select)
       ALU_OPA_IS_REGA:     opa_mux_out[2] = T1_value[2];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[2] = mem_disp_alu_ls;
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[2] = mem_disp[2];
       ALU_OPA_IS_NPC:      opa_mux_out[2] = issue_reg[2].npc;
       ALU_OPA_IS_NOT3:     opa_mux_out[2] = ~64'h3;
     endcase
@@ -202,12 +202,22 @@ always_comb begin
     
     case (issue_reg[3].inst.opa_select)
       ALU_OPA_IS_REGA:     opa_mux_out[3] = T1_value[3];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[3] = mem_disp_mult;
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[3] = mem_disp[3];
       ALU_OPA_IS_NPC:      opa_mux_out[3] = issue_reg[3].npc;
       ALU_OPA_IS_NOT3:     opa_mux_out[3] = ~64'h3;
     endcase
   end
 
+//Branch opA
+always_comb begin
+    
+    case (issue_reg[4].inst.opa_select)
+      ALU_OPA_IS_REGA:     opa_mux_out[4] = T1_value[4];
+      ALU_OPA_IS_MEM_DISP: opa_mux_out[4] = mem_disp[4];
+      ALU_OPA_IS_NPC:      opa_mux_out[4] = issue_reg[4].npc;
+      ALU_OPA_IS_NOT3:     opa_mux_out[4] = ~64'h3;
+    endcase
+  end
 
    // 
    // ALU0 opB mux
@@ -218,8 +228,8 @@ always_comb begin
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[0].inst.opb_select)
       ALU_OPB_IS_REGB:    opb_mux_out[0]= T2_value[0];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[0] = alu_imm;
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[0] = br_disp;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[0] = alu_imm[0];
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[0] = br_disp[0];
     endcase 
   end
 
@@ -231,8 +241,8 @@ always_comb begin
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[1].inst.opb_select)
       ALU_OPB_IS_REGB:    opb_mux_out[1] = T2_value[1];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM: opb_mux_out[1] = alu_imm;
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[1]= br_disp;
+      ALU_OPB_IS_ALU_IMM: opb_mux_out[1] = alu_imm[1];
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[1]= br_disp[1];
     endcase 
   end
   
@@ -243,9 +253,9 @@ always_comb begin
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[2].inst.opb_select)
-      ALU_OPB_IS_REGB:     opb_mux_out[2] = T2_value[2]//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[2] = alu_imm;
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[2] = br_disp;
+      ALU_OPB_IS_REGB:     opb_mux_out[2] = T2_value[2];//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[2] = alu_imm[2];
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[2] = br_disp[2];
     endcase 
   end
   
@@ -269,12 +279,26 @@ always_comb begin
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
     case (issue_reg[3].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out[3] = T2_value[3]//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[3] = alu_imm;
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[3] = br_disp;
+      ALU_OPB_IS_REGB:    opb_mux_out[3] = T2_value[3];//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[3] = alu_imm[3];
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[3] = br_disp[3];
     endcase 
   end
   
+
+// Branch opB mux
+   //
+  always_comb begin
+    // Default value, Set only because the case isnt full.  If you see this
+    // value on the output of the mux you have an invalid opb_select
+    opb_mux_out = 64'hbaadbeefdeadbeef;
+    case (issue_reg[4].inst.opb_select)
+      ALU_OPB_IS_REGB:    opb_mux_out[4] = T2_value[4];//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[4] = alu_imm[4];
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[4] = br_disp[4];
+    endcase 
+  end
+
   //
   // instantiate the ALU
   //
@@ -318,8 +342,8 @@ always_comb begin
   mult mult0 (// Inputs)                 //********MULT************
     .clock(clock),
     .reset(reset),
-	  .mcand(opa_mux_out[]),
-    .mplier(mplier),
+	  .mcand(opa_mux_out[3]),
+    .mplier(opb_mux_out[3]),
 	  .start(issue_reg[3].inst.valid_inst),
 	  .product(ex_mult_result_out[3]),
 		.done(done)

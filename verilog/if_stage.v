@@ -20,8 +20,8 @@ module if_stage(
     input  [63:0] co_ret_target_pc,        // target pc: use if take_branch is TRUE
     input  [63:0] Imem2proc_data,          // Data coming back from instruction-memory
     input         Imem_valid,
-    input dispatch_en;                    /// dispatch enable signal
-    input co_ret_branch_valid;                   // whether the inst is branch or not
+    input dispatch_en,                   /// dispatch enable signal
+    input co_ret_branch_valid,                  // whether the inst is branch or not
 
     output logic [63:0] proc2Imem_addr,    // Address sent to Instruction memory
     output logic [63:0] if_NPC_out,        // PC of instruction after fetched (PC+4).
@@ -49,7 +49,7 @@ module if_stage(
   // next PC is target_pc if there is a taken branch or
   // the next sequential PC (PC+4) if no branch
   // (halting is handled with the enable PC_enable;
-  assign next_PC = (co_ret_take_branch & co_ret_branch_valid & co_ret_valid_inst) ? ex_mem_target_pc : PC_plus_4;
+  assign next_PC = (co_ret_take_branch & co_ret_branch_valid & co_ret_valid_inst) ? co_ret_target_pc : PC_plus_4;
 
   // The take-branch signal must override stalling (otherwise it may be lost)
   //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;
@@ -59,7 +59,7 @@ module if_stage(
 
   assign if_valid_inst_out = ready_for_valid && Imem_valid;
 
-  assign next_ready_for_valid = (ready_for_valid || mem_wb_valid_inst) && 
+  assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
                                 !if_valid_inst_out;
 
   // This register holds the PC value

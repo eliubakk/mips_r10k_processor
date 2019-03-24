@@ -190,6 +190,9 @@ typedef struct packed{
   logic busy;
 } ROB_ROW_T;
 
+//Freelist
+`define FL_SIZE `NUM_PHYS_REG
+
 
 
 //////////////////////////////////////////////

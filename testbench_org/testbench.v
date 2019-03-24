@@ -62,21 +62,21 @@ module testbench;
   // logic [63:0] mem_wb_NPC;
   // logic [31:0] mem_wb_IR;
   // logic        mem_wb_valid_inst;
-  logic [63:0] id_di_NPC;
-  logic [31:0] id_di_IR;
-  logic        id_di_valid_inst;
-  logic [`RS_SIZE-1:0][63:0] rs_table_out_npc;
-  logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode;
-  logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst;  
-  logic [`NUM_FU-1:0][63:0] issue_reg_npc;
-  logic [`NUM_FU-1:0][31:0] issue_reg_inst_opcode;
-  logic [`NUM_FU-1:0]       issue_reg_inst_valid_inst;
-  logic [4:0][63:0] ex_co_NPC;
-  logic [4:0] ex_co_IR;
-  logic [4:0]       ex_co_valid_inst;
-  logic [63:0] co_ret_NPC;
-  logic [31:0] co_ret_IR;
-  logic        co_ret_valid_inst;
+  logic [63:0] id_di_NPC,
+  logic [31:0] id_di_IR,
+  logic        id_di_valid_inst,
+  logic [`RS_SIZE-1:0][63:0] rs_table_out_npc,
+  logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode,
+  logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst,  
+  logic [`NUM_FU-1:0][63:0] issue_reg_npc,
+  logic [`NUM_FU-1:0][31:0] issue_reg_inst_opcode,
+  logic [`NUM_FU-1:0]       issue_reg_inst_valid_inst,
+  logic [4:0][63:0] ex_co_NPC,
+  logic [4:0] ex_co_IR,
+  logic [4:0]       ex_co_valid_inst,
+  logic [63:0] co_ret_NPC,
+  logic [31:0] co_ret_IR,
+  logic        co_ret_valid_inst
 
   RS_ROW_T	[(`RS_SIZE-1):0]		rs_table_out;
   PHYS_REG		[`NUM_GEN_REG-1:0]	arch_table;

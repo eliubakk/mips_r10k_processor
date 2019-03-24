@@ -27,6 +27,7 @@ module decoder(
     output ALU_OPB_SELECT opb_select,
     output DEST_REG_SEL   dest_reg, // mux selects
     output ALU_FUNC       alu_func,
+    output FU_NAME        fu_name,
     output logic rd_mem, wr_mem, ldl_mem, stc_mem, cond_branch, uncond_branch,
     output logic halt,      // non-zero on a halt
     output logic cpuid,     // get CPUID instruction
@@ -85,42 +86,49 @@ module decoder(
           dest_reg = DEST_IS_REGC;
           case (inst[31:26])
             `INTA_GRP:
-              case (inst[11:5])
-                `CMPULT_INST:  alu_func = ALU_CMPULT;
-                `ADDQ_INST:    alu_func = ALU_ADDQ;
-                `SUBQ_INST:    alu_func = ALU_SUBQ;
-                `CMPEQ_INST:   alu_func = ALU_CMPEQ;
-                `CMPULE_INST:  alu_func = ALU_CMPULE;
-                `CMPLT_INST:   alu_func = ALU_CMPLT;
-                `CMPLE_INST:   alu_func = ALU_CMPLE;
+              begin
                 fu_name = FU_ALU;
-                default:        illegal = `TRUE;
+                case (inst[11:5])
+                  `CMPULT_INST:  alu_func = ALU_CMPULT;
+                 `ADDQ_INST:    alu_func = ALU_ADDQ;
+                 `SUBQ_INST:    alu_func = ALU_SUBQ;
+                 `CMPEQ_INST:   alu_func = ALU_CMPEQ;
+                 `CMPULE_INST:  alu_func = ALU_CMPULE;
+                 `CMPLT_INST:   alu_func = ALU_CMPLT;
+                 `CMPLE_INST:   alu_func = ALU_CMPLE;
+                 default:        illegal = `TRUE;
               endcase // case(inst[11:5])
+              end
             `INTL_GRP:
-              case (inst[11:5])
-                `AND_INST:    alu_func = ALU_AND;
-                `BIC_INST:    alu_func = ALU_BIC;
-                `BIS_INST:    alu_func = ALU_BIS;
-                `ORNOT_INST:  alu_func = ALU_ORNOT;
-                `XOR_INST:    alu_func = ALU_XOR;
-                `EQV_INST:    alu_func = ALU_EQV;
+              begin
                 fu_name = FU_ALU;
-                default:       illegal = `TRUE;
-              endcase // case(inst[11:5])
+                case (inst[11:5])
+                 `AND_INST:    alu_func = ALU_AND;
+                 `BIC_INST:    alu_func = ALU_BIC;
+                 `BIS_INST:    alu_func = ALU_BIS;
+                 `ORNOT_INST:  alu_func = ALU_ORNOT;
+                 `XOR_INST:    alu_func = ALU_XOR;
+                 `EQV_INST:    alu_func = ALU_EQV;
+                 default:       illegal = `TRUE;
+                endcase // case(inst[11:5])
+              end
             `INTS_GRP:
-              case (inst[11:5])
-                `SRL_INST:  alu_func = ALU_SRL;
-                `SLL_INST:  alu_func = ALU_SLL;
-                `SRA_INST:  alu_func = ALU_SRA;
+              begin
                 fu_name = FU_ALU;
-                default:    illegal = `TRUE;
-              endcase // case(inst[11:5])
-            `INTM_GRP:
-              case (inst[11:5])
+                 case (inst[11:5])
+                 `SRL_INST:  alu_func = ALU_SRL;
+                 `SLL_INST:  alu_func = ALU_SLL;
+                 `SRA_INST:  alu_func = ALU_SRA;
+                 default:    illegal = `TRUE;
+                 endcase // case(inst[11:5])
+              end
+            `INTM_GRP: begin
                 fu_name = FU_MULT;
-                `MULQ_INST:       alu_func = ALU_MULQ;
-                default:          illegal = `TRUE;
-              endcase // case(inst[11:5])
+                case (inst[11:5])
+                 `MULQ_INST:       alu_func = ALU_MULQ;
+                 default:          illegal = `TRUE;
+                endcase // case(inst[11:5])
+              end
             `ITFP_GRP:       illegal = `TRUE;       // unimplemented
             `FLTV_GRP:       illegal = `TRUE;       // unimplemented
             `FLTI_GRP:       illegal = `TRUE;       // unimplemented
@@ -130,11 +138,11 @@ module decoder(
            
         6'h18:
           case (inst[31:26])
-            fu_name = FU_BR;
             `MISC_GRP:       illegal = `TRUE; // unimplemented
             `JSR_GRP:
             begin
               // JMP, JSR, RET, and JSR_CO have identical semantics
+              fu_name = FU_BR;
               opa_select = ALU_OPA_IS_NOT3;
               opb_select = ALU_OPB_IS_REGB;
               alu_func = ALU_AND; // clear low 2 bits (word-align)
@@ -151,10 +159,10 @@ module decoder(
           alu_func = ALU_ADDQ;
           dest_reg = DEST_IS_REGA;
           case (inst[31:26])
-            `LDA_INST:  /* defaults are OK */;
-            begin
-              fu_name = FU_LD;
-            end
+            //`LDA_INST:  /* defaults are OK */;
+            //begin
+            //  fu_name = FU_LD;
+            //end
             `LDQ_INST:
             begin
               rd_mem = `TRUE;
@@ -285,7 +293,7 @@ module id_stage(
     .opa_select(id_opa_select_out),
     .opb_select(id_opb_select_out),
     .alu_func(id_alu_func_out),
-    .fu_name(id_fu_name_out)
+    .fu_name(id_fu_name_out),
     .dest_reg(dest_reg_select),
     .rd_mem(id_rd_mem_out),
     .wr_mem(id_wr_mem_out),
