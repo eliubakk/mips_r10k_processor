@@ -18,12 +18,12 @@ module if_stage(
                                           // makes pipeline behave as single-cycle
     input         co_ret_take_branch,      // taken-branch signal
     input  [63:0] co_ret_target_pc,        // target pc: use if take_branch is TRUE
-    input  [63:0] Imem2proc_data,          // Data coming back from instruction-memory
-    input         Imem_valid,
+    input  [63:0] Icache_data_out,//Imem2proc_data,          // Data coming back from instruction-memory
+    input         Icache_valid_out,//Imem_valid,
     input dispatch_en;                    /// dispatch enable signal
     input co_ret_branch_valid;                   // whether the inst is branch or not
 
-    output logic [63:0] proc2Imem_addr,    // Address sent to Instruction memory
+    output logic [63:0] proc2Icache_addr,//proc2Imem_addr,    // Address sent to Instruction memory
     output logic [63:0] if_NPC_out,        // PC of instruction after fetched (PC+4).
     output logic [31:0] if_IR_out,        // fetched instruction out
     output logic        if_valid_inst_out  // when low, instruction is garbage
@@ -38,10 +38,10 @@ module if_stage(
   logic           PC_enable;
   logic           next_ready_for_valid;
 
-  assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
+  assign proc2Icache_addr = {PC_reg[63:3], 3'b0};
 
   // this mux is because the Imem gives us 64 bits not 32 bits
-  assign if_IR_out = PC_reg[2] ? Imem2proc_data[63:32] : Imem2proc_data[31:0];
+  assign if_IR_out = PC_reg[2] ? Icache_data_out[63:32] : Icache_data_out[31:0];
 
   // default next PC value
   assign PC_plus_4 = PC_reg + 4;
@@ -49,7 +49,7 @@ module if_stage(
   // next PC is target_pc if there is a taken branch or
   // the next sequential PC (PC+4) if no branch
   // (halting is handled with the enable PC_enable;
-  assign next_PC = (co_ret_take_branch & co_ret_branch_valid & co_ret_valid_inst) ? ex_mem_target_pc : PC_plus_4;
+  assign next_PC = (co_ret_take_branch & co_ret_branch_valid & co_ret_valid_inst) ? co_ret_target_pc : PC_plus_4;
 
   // The take-branch signal must override stalling (otherwise it may be lost)
   //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;
@@ -57,7 +57,7 @@ module if_stage(
   // Pass PC+4 down pipeline w/instruction
   assign if_NPC_out = PC_plus_4;
 
-  assign if_valid_inst_out = ready_for_valid && Imem_valid;
+  assign if_valid_inst_out = ready_for_valid & Icache_valid_out;
 
   assign next_ready_for_valid = (ready_for_valid || mem_wb_valid_inst) && 
                                 !if_valid_inst_out;

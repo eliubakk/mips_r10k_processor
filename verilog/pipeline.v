@@ -347,25 +347,35 @@ module pipeline (
     .data_write_enable(Icache_wr_en)
   );
 
+  //Morteza Ash
+  
 
 
-//////////////////////////////////////////////////
+  //////////////////////////////////////////////////
   //                                              //
   //                  IF-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
-  if_stage if_stage_0 (
+  if_stage if_stage_0_morteza (
     // Inputs
     .clock (clock),
     .reset (reset),
-    .mem_wb_valid_inst(mem_wb_valid_inst),
-    .ex_mem_take_branch(co_ret_take_branch),
-    .ex_mem_target_pc(co_ret_alu_result),
-    .Imem2proc_data(mem2proc_data),
-    .ex_mem_valid_inst(co_ret_valid_inst),
+    .co_ret_valid_inst(co_ret_valid_inst),
+    .co_ret_take_branch(co_ret_take_branch),
+    .co_ret_target_pc(co_ret_target_pc),
+    .Icache_data_out(Icache_data_out),
+    .Icache_valid_out(Icache_valid_out),
+    .dispatch_en(dispatch_en),
+    .co_ret_branch_valid(co_ret_branch_valid)
+    // .mem_wb_valid_inst(mem_wb_valid_inst),
+    // .ex_mem_take_branch(co_ret_take_branch),
+    // .ex_mem_target_pc(co_ret_alu_result),
+    // .Imem2proc_data(mem2proc_data),
+    // .ex_mem_valid_inst(co_ret_valid_inst),
     
 
     // Outputs
+    .proc2Icache_addr(proc2Icache_addr),
     .if_NPC_out(if_NPC_out), 
     .if_IR_out(if_IR_out),
     .proc2Imem_addr(proc2Imem_addr),
