@@ -2,7 +2,7 @@
 // pipelined multiplier that multiplies 2 64-bit integers and returns
 // the low 64 bits of the result.  This is not an ideal multiplier but
 // is sufficient to allow a faster clock period than straight *
-`define PIPE_DEPTH 2
+`define PIPE_DEPTH 4
 
 module mult_stage(
 					input clock, reset, start,

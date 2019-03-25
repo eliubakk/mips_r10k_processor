@@ -50,6 +50,29 @@ typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define NUM_GEN_REG 32
 typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
+//////////////////////////////////////////////
+//
+// Branch Predictor Parameters
+//
+//////////////////////////////////////////////
+
+// GSHARE
+//GHT_BIT is BH_SIZE in OBQ row
+`define PC_SIZE 10
+
+// BTB
+`define TAG_SIZE 10 		//Tag bit size
+`define TARGET_SIZE 12		//Target address size
+`define BTB_ROW	16		//BTB row size : 5~10% of I$ size
+
+
+// OBQ Rows
+`define BH_SIZE 4		// Need to change this to 10
+`define OBQ_SIZE 16
+typedef struct packed {
+  logic [`BH_SIZE-1:0] branch_history;
+} OBQ_ROW_T;
+
 
 //////////////////////////////////////////////
 //
@@ -172,12 +195,8 @@ typedef struct packed{
   logic busy;
 } ROB_ROW_T;
 
-// OBQ Rows
-`define BH_SIZE 10
-`define OBQ_SIZE 16
-typedef struct packed {
-  logic [`BH_SIZE-1:0] branch_history;
-} OBQ_ROW_T;
+//Freelist
+`define FL_SIZE `NUM_PHYS_REG
 
 
 
