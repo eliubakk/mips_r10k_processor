@@ -364,6 +364,7 @@ module pipeline (
   //   .rd1_data(cachemem_data),
   //   .rd1_valid(cachemem_valid)
   // );
+
   //////////////////////////////////////////////////
   //                                              //
   //                  IF-Stage                    //
@@ -378,6 +379,7 @@ module pipeline (
     .co_ret_target_pc(co_ret_target_pc),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
+
     .dispatch_en(dispatch_en),
     .co_ret_branch_valid(co_ret_branch_valid)
     // .mem_wb_valid_inst(mem_wb_valid_inst),
