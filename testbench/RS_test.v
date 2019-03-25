@@ -986,6 +986,77 @@ module testbench;
 		assert(free_rows_next == `RS_SIZE) else #1 exit_on_error;
 		assert(~rs_full) else #1 exit_on_error;
 
+		reset = 1'b1;
+		@(posedge clock);
+		`DELAY;
+		reset = 1'b0;
+		enable = 1'b1;
+		$display("###########################################################################");
+		$display("****************** TEST7 : Test multiple commit *****************");
+		$display("###########################################################################\n");
+
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			inst_T = $unsigned(`NUM_GEN_REG - i);
+			if(i % 2) begin
+				inst_T1 = $unsigned(i);
+				inst_T2 = $unsigned(`NUM_PHYS_REG - i);
+			end else begin
+				inst_T1 = $unsigned(`NUM_PHYS_REG - i);
+				inst_T2 = $unsigned(i);
+			end
+			inst_in[i].inst.fu_name = i;
+			inst_in[i].inst.valid_inst = 1'b1;
+			inst_in[i].T[$clog2(`NUM_PHYS_REG)-1:0] = inst_T;
+			inst_in[i].T[$clog2(`NUM_PHYS_REG)] = 1'b0;
+			inst_in[i].T1[$clog2(`NUM_PHYS_REG)-1:0] = inst_T1;
+			inst_in[i].T2[$clog2(`NUM_PHYS_REG)-1:0] = inst_T2;
+			dispatch_valid[i] = 1'b1;
+			if(i%2) begin
+				inst_in[i].T1[$clog2(`NUM_PHYS_REG)] = 1'b0;
+				inst_in[i].T2[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			end else begin
+				inst_in[i].T1[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				inst_in[i].T2[$clog2(`NUM_PHYS_REG)] = 1'b0;
+			end
+		end
+
+		//check they are in table
+		@(posedge clock)
+		`DELAY;
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			dispatch_valid[i] = 1'b0;
+			inst_in[i].busy = 1'b1;
+		end
+		@(negedge clock)
+		`DELAY;
+		table_out();
+		table_has_N_entries(`SS_SIZE, rs_table_out);
+		for(int i = `SS_SIZE - 1; i >= 0; i -= 1) begin
+			entry_exists_in_table(inst_in[i], rs_table_out);
+		end
+		issue_next_test = clear_issue_next_test();
+		check_issue_next_correct(issue_next_test, issue_next);
+		assert(~rs_full) else #1 exit_on_error;
+		assert(free_rows_next == (`RS_SIZE-`SS_SIZE)) else #1 exit_on_error;
+
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			issue_next_test[FU_BASE_IDX[i]+NUM_OF_FU_TYPE[i]-1] = inst_in[i];
+			issue_next_test[FU_BASE_IDX[i]+NUM_OF_FU_TYPE[i]-1].T1[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			issue_next_test[FU_BASE_IDX[i]+NUM_OF_FU_TYPE[i]-1].T2[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			CDB_in[i] = i;
+			CAM_en[i] = 1'b1;
+		end
+		`DELAY;
+		table_out();
+		check_issue_next_correct(issue_next_test, issue_next);
+		assert(~rs_full) else #1 exit_on_error;
+		assert(free_rows_next == (`RS_SIZE)) else #1 exit_on_error;
+		@(posedge clock)
+		`DELAY;
+
+		table_has_N_entries(0, rs_table_out);
+		assert(~rs_full) else #1 exit_on_error;
+		assert(free_rows_next == (`RS_SIZE)) else #1 exit_on_error;
 
 		$display("@@@Passed");
 		$finish;
