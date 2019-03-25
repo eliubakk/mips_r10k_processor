@@ -1,10 +1,11 @@
 // MODULARIZED SUPER-SCALAR RS
 
-`include "../sys_defs.vh"
+`include "sys_defs.vh"
 `define DEBUG
 
 //-----------------------------------------------------------------------------------------
-module RS(
+module RS
+	(
 	// INPUTS
 	input 		    				clock,
 	input 		    				reset,
@@ -25,6 +26,9 @@ module RS(
 	output logic 	[$clog2(`RS_SIZE):0]	free_rows_next,
 	output wand	rs_full
 	);
+	parameter FU_NAME_VAL = {FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR};
+	parameter FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
+	parameter NUM_OF_FU_TYPE = {2'b11,2'b01,2'b01,2'b10,2'b01};
 	
 	////////////////////////////
 	//	INTERNAL VARIABLES    //

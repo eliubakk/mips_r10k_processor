@@ -11,8 +11,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`timescale 1ns/100ps
-
+`include "sys_defs.vh"
 module mem_stage(
     input         clock,              // system clock
     input         reset,              // system reset

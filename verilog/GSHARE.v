@@ -1,6 +1,7 @@
 // Gshare
 //
 //
+`include "sys_defs.vh"
 `define DEBUG_OUT
 
 

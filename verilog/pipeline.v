@@ -11,7 +11,6 @@
 `include "sys_defs.vh"
 `define DEBUG
 `define SD #1
-`timescale 1ns/100ps
 
 module pipeline (
     input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
@@ -221,6 +220,7 @@ module pipeline (
   logic [31:0]       co_IR_selected;
   logic [63:0]       co_alu_result_selected;
   wor         psel_enable;
+  logic  [4:0] gnt_bus;
 
 
 
@@ -600,12 +600,11 @@ phys_regfile regf_0 (
   //            IS/EX Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-generate 
-  genvar i;
-    for (i=0; i<5; i=i+1) begin
+  always_comb begin
+    for (integer i=0; i<5; i=i+1) begin
       assign is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
     end
-  endgenerate
+  end
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset) begin
@@ -691,8 +690,10 @@ generate
   //                                              //
   //////////////////////////////////////////////////
   // not sure whether it can be directly assigned
-  for (i=0; i<2; i=i+1) begin
-    assign ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i]| & co_selected[i]);
+  always_comb begin
+    for (integer i=0; i<2; i=i+1) begin
+      ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i]| & co_selected[i]);
+    end
   end
  
  //enable signal for the multipler  register
@@ -833,15 +834,15 @@ generate
   
   assign psel_enable = ex_co_valid_inst[2 -: 0] & done & ex_co_valid_inst[4]; // ask the use of wor
 //priority encoder to select the results of the execution stage to put in cdb
-  psel_complete #(5, 1) psel(
+  psel_generic #(5, 1) psel(
 				.req({ex_co_valid_inst[2:0], ex_co_done, ex_co_valid_inst[4]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 				.en(psel_enable),
-				.gnt(co_selected)
+				.gnt(co_selected),
+        .gnt_bus(gnt_bus)
 			);
   
-  generate
-    genvar i;
-      for (i = 0; i < 5; i=i+1) begin
+    always_comb begin
+      for (integer i = 0; i < 5; i=i+1) begin
         if (co_selected[i]== 1) begin
             assign co_NPC_selected               =    ex_co_NPC[i] ;
             assign co_IR_selected                =    ex_co_IR[i];
@@ -866,7 +867,7 @@ generate
             assign co_branch_valid                    =    0;
         end
       end
-    endgenerate
+    end
 
 
 
