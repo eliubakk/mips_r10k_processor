@@ -27,6 +27,7 @@ TEST_SRC = $(wildcard $(TEST_DIR)/*.v)
 VERILOG_SRC = $(wildcard $(VERILOG_DIR)/*.v)
 MODULES = $(patsubst $(VERILOG_DIR)/%.v, %, $(VERILOG_SRC))
 SYN_SIMV = $(patsubst $(VERILOG_DIR)/%.v, syn_simv_%, $(VERILOG_SRC))
+SIMV = $(patsubst $(VERILOG_DIR)/%.v, simv_%, $(VERILOG_SRC))
 
 %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v
 	cd $(SYN_DIR) && \
@@ -38,6 +39,9 @@ $(SYN_SIMV): syn_simv_% : %.vg $(TEST_DIR)/%_test.v
 %: syn_simv_%
 	cd $(SYN_DIR) && \
 	./syn_simv_$* | tee $@_program.out
+
+$(SIMV): simv_%: $(TEST_DIR)/%_test.v $(VERILOG_DIR)/%.v
+	$(VCS) $^ -o $@
 
 #####
 # Should be no need to modify after here

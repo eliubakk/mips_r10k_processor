@@ -1,6 +1,6 @@
 // cachemem32x64
 
-`timescale 1ns/100ps
+`include "sys_defs.vh"
 
 module cache(
         input clock, reset, wr1_en,

@@ -12,8 +12,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`timescale 1ns/100ps
-
+`include "sys_defs.vh"
 
 module wb_stage(
     input         clock,                // system clock

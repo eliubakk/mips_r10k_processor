@@ -8,9 +8,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 
-`timescale 1ns/100ps
 
-
+`include "sys_defs.vh"
 module phys_regfile(
         input   [5:0] rda_idx, rdb_idx, wr_idx,    // read/write index
         input  [63:0] wr_data,            // write data
@@ -22,8 +21,8 @@ module phys_regfile(
   
   logic    [31 + `ROB_SIZE :0] [63:0] phys_registers;   // 64, 64-bit Physical Registers
 
-  wire   [63:0] rda_reg = registers[rda_idx];
-  wire   [63:0] rdb_reg = registers[rdb_idx];
+  wire   [63:0] rda_reg = phys_registers[rda_idx];
+  wire   [63:0] rdb_reg = phys_registers[rdb_idx];
 
   //
   // Read port A
@@ -52,7 +51,7 @@ module phys_regfile(
   //
   always_ff @(posedge wr_clk)
     if (wr_en) begin
-      registers[wr_idx] <= `SD wr_data;
+      phys_registers[wr_idx] <= `SD wr_data;
     end
 
 endmodule // regfile

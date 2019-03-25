@@ -1,3 +1,5 @@
+`include "sys_defs.vh"
+
 module encoder(in, out, valid);
 	parameter WIDTH = 16; //number of bits in.
 	input [WIDTH-1:0] in;

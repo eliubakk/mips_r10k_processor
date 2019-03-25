@@ -1,4 +1,4 @@
-//`include "sys_defs.vh"
+`include "sys_defs.vh"
 `define DEBUG
 
 `define index_t ($clog2(`OBQ_SIZE))
