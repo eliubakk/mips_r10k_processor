@@ -229,8 +229,6 @@ module testbench;
 				$display("ROB_Row = %d,  busy = %d, T_new_out = %7.0b T_old_out = %7.0b ", i, ROB_table_out[i].busy, ROB_table_out[i].T_new_out, ROB_table_out[i].T_old_out);
 			end
 				$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
-			
-			
 			$display("*******************************************************************\n");
 
 		end
@@ -239,8 +237,11 @@ module testbench;
   task display_free_list_table;
 		input	PHYS_REG [`NUM_PHYS_REG-1:0] list;
 		begin
+    $display("**********************************************************\n");
+				$display("------------------------Freelist TABLE----------------------------\n");
 			for (integer i = 0; i < `NUM_PHYS_REG; ++i) begin
 				$display("i = %d tag: %d", i, list[i]);
+        $display("*******************************************************************\n");
 			end	
 		end
 	endtask
