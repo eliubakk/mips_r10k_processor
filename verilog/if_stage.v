@@ -18,13 +18,8 @@ module if_stage(
                                           // makes pipeline behave as single-cycle
     input         co_ret_take_branch,      // taken-branch signal
     input  [63:0] co_ret_target_pc,        // target pc: use if take_branch is TRUE
-<<<<<<< HEAD
     input  [63:0] Imem2proc_data,//comes from  Icache_data_out from Icache         // Data coming back from instruction-memory
     input         Imem_valid,//comes from  Icache_valid_out from Icache 
-=======
-    input  [63:0] Icache_data_out,//Imem2proc_data,          // Data coming back from instruction-memory
-    input         Icache_valid_out,//Imem_valid,
->>>>>>> 34b76ac8ffdf99970fa35f2e180c038999c0f129
     input dispatch_en;                    /// dispatch enable signal
     input co_ret_branch_valid;                   // whether the inst is branch or not
 

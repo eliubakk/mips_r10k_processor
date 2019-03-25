@@ -322,7 +322,7 @@ module pipeline (
   );
 
   // Cache controller
-  icache icache_0_Morteza(// inputs 
+  icache icache_0(// inputs 
     .clock(clock),
     .reset(reset),
 
@@ -347,30 +347,12 @@ module pipeline (
     .data_write_enable(Icache_wr_en)
   );
 
-  // //Morteza Ash
-  
-
-  // cache cache0_morteza_Ash(
-  //   //input
-  //   .clock(clock),
-  //   .reset(reset),
-  //   .wr1_en(data_write_enable),
-  //   .wr1_idx(Icache_current_index),
-  //   .rd1_idx(Icache_current_index),
-  //   .wr1_tag(Icache_current_tag),
-  //   .rd1_tag(Icache_current_tag),
-  //   .wr1_data(Icache_data_out),
-  //   //output
-  //   .rd1_data(cachemem_data),
-  //   .rd1_valid(cachemem_valid)
-  // );
-
   //////////////////////////////////////////////////
   //                                              //
   //                  IF-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
-  if_stage if_stage_0_morteza (
+  if_stage if_stage_0 (
     // Inputs
     .clock (clock),
     .reset (reset),
