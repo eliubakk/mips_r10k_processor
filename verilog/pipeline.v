@@ -369,8 +369,8 @@ module pipeline (
     .co_ret_valid_inst(co_ret_valid_inst),
     .co_ret_take_branch(co_ret_take_branch),
     .co_ret_target_pc(co_ret_alu_result),
-    .Imem2proc_data(mem2proc_data),
-    .Imem_valid(Imem_valid),
+    .Imem2proc_data(Icache_data_out),
+    .Imem_valid(Icache_valid_out),
     .dispatch_en(dispatch_en),
 
 
