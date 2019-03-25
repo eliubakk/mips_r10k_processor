@@ -73,6 +73,8 @@ typedef struct packed {
   logic [`BH_SIZE-1:0] branch_history;
 } OBQ_ROW_T;
 
+// RAS
+`define RAS_SIZE 64
 
 //////////////////////////////////////////////
 //
