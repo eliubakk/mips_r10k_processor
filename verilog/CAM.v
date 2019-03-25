@@ -1,3 +1,4 @@
+`include "sys_defs.vh"
 module CAM(enable, tag, tags_in, hits);
 	parameter LENGTH=16;
 	parameter WIDTH=2;

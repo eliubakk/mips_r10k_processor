@@ -1,6 +1,6 @@
 // [5:2] is used for indexing, [15:6] is used for tag, [13:2] is stored as
 // a target PC
-
+`include "sys_defs.vh"
 `define	DEBUG_OUT
 
 module  BTB(

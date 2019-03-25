@@ -1,3 +1,4 @@
+`include "sys_defs.vh"
 module psel_single(req, en, gnt);
 	parameter WIDTH=16;
 	input  [WIDTH-1:0] req;

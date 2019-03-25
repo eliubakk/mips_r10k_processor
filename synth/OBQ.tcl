@@ -12,7 +12,7 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 
-analyze -f sverilog "../sys_defs.vh ../verilog/OBQ.v"
+analyze -f sverilog "sys_defs.vh ../verilog/OBQ.v"
 elaborate OBQ
 set design_name OBQ
 ##############################################
