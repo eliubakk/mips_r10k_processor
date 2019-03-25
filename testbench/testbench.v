@@ -62,21 +62,21 @@ module testbench;
   // logic [63:0] mem_wb_NPC;
   // logic [31:0] mem_wb_IR;
   // logic        mem_wb_valid_inst;
-  logic [63:0] id_di_NPC,
-  logic [31:0] id_di_IR,
-  logic        id_di_valid_inst,
-  logic [`RS_SIZE-1:0][63:0] rs_table_out_npc,
-  logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode,
-  logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst,  
-  logic [`NUM_FU-1:0][63:0] issue_reg_npc,
-  logic [`NUM_FU-1:0][31:0] issue_reg_inst_opcode,
-  logic [`NUM_FU-1:0]       issue_reg_inst_valid_inst,
-  logic [4:0][63:0] ex_co_NPC,
-  logic [4:0] ex_co_IR,
-  logic [4:0]       ex_co_valid_inst,
-  logic [63:0] co_ret_NPC,
-  logic [31:0] co_ret_IR,
-  logic        co_ret_valid_inst
+  logic [63:0] id_di_NPC;
+  logic [31:0] id_di_IR;
+  logic        id_di_valid_inst;
+  logic [`RS_SIZE-1:0][63:0] rs_table_out_npc;
+  logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode;
+  logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst;  
+  logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc;
+  logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode;
+  logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst;
+  logic [4:0][63:0] ex_co_NPC;
+  logic [4:0] ex_co_IR;
+  logic [4:0]       ex_co_valid_inst;
+  logic [63:0] co_ret_NPC;
+  logic [31:0] co_ret_IR;
+  logic        co_ret_valid_inst;
 
   RS_ROW_T	[(`RS_SIZE-1):0]		rs_table_out;
   PHYS_REG		[`NUM_GEN_REG-1:0]	arch_table;
@@ -120,12 +120,12 @@ module testbench;
     // .mem_wb_NPC(mem_wb_NPC),
     // .mem_wb_IR(mem_wb_IR),
     // .mem_wb_valid_inst(mem_wb_valid_inst)
-    .rs_table_out.npc(rs_table_out_npc),
-    .rs_table_out.inst_opcode(rs_table_out_inst_opcode),
-    .rs_table_out.inst.valid_inst(rs_table_out_inst_valid_inst),  
-    .issue_reg.npc(issue_reg_npc),
-    .issue_reg.inst_opcode(issue_reg_inst_opcode),
-    .issue_reg.inst.valid_inst(issue_reg_inst_valid_inst),
+    .rs_table_out_npc(rs_table_out_npc),
+    .rs_table_out_inst_opcode(rs_table_out_inst_opcode),
+    .rs_table_out_inst_valid_inst(rs_table_out_inst_valid_inst),  
+    .issue_reg_npc(issue_reg_npc),
+    .issue_reg_inst_opcode(issue_reg_inst_opcode),
+    .issue_reg_inst_valid_inst(issue_reg_inst_valid_inst),
     .ex_mem_NPC(ex_co_NPC),
     .ex_mem_IR(ex_co_IR),
     .ex_mem_valid_inst(ex_co_valid_inst),
@@ -211,7 +211,7 @@ module testbench;
   task display_arch_table;
 		begin
 			$display("-----------Archtecture Map Table-----------");
-			for(k=0;k<`NUM_GEN_REG;k=k+1) begin
+			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
 				$display("Reg:%d, Phys Reg : %d", k, arch_table[k]); 
 			end
 			$display("------------------------------------------\n");	
@@ -239,7 +239,7 @@ module testbench;
   task display_free_list_table;
 		input	PHYS_REG [`NUM_PHYS_REG-1:0] list;
 		begin
-			for (int i = 0; i < `NUM_PHYS_REG; ++i) begin
+			for (integer i = 0; i < `NUM_PHYS_REG; ++i) begin
 				$display("i = %d tag: %d", i, list[i]);
 			end	
 		end
@@ -298,7 +298,7 @@ module testbench;
        display_RS_table();
        display_arch_table();
        display_ROB_table();
-       display_free_list_table();
+       display_free_list_table(free_list_out);
 
        
        // print the piepline stuff via c code to the pipeline.out
@@ -306,10 +306,10 @@ module testbench;
        print_stage(" ", if_IR_out, if_NPC_out[31:0], {31'b0,if_valid_inst_out});
        print_stage("|", if_id_IR, if_id_NPC[31:0], {31'b0,if_id_valid_inst});
        print_stage("|", id_di_IR, id_di_NPC[31:0], {31'b0,id_di_valid_inst});
-       for (int i = 0, i<`RS_SIZE, i=i+1) begin
+       for (integer i = 0; i < `RS_SIZE; i=i+1) begin
         print_stage("|", rs_table_out_inst_opcode[i], rs_table_out_npc[i][31:0], {31'b0,rs_table_out_inst_valid_inst[i]});
        end
-       for (int i = 0, i<`NUM_FU, i=i+1) begin
+       for (integer i = 0; i < `NUM_FU_TOTAL; i=i+1) begin
         print_stage("|", issue_reg_inst_opcode[i], issue_reg_npc[i][31:0], {31'b0,issue_reg_inst_valid_inst[i]});
        end
        print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
