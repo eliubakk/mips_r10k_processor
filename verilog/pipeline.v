@@ -8,14 +8,11 @@
 //                                                                     //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
-`include "sys_defs.vh"
-`define DEBUG
-`define SD #1
+
 `timescale 1ns/100ps
 
 module pipeline (
-    input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
-    input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
+
     input         clock,                    // System clock
     input         reset,                    // System reset
     input [3:0]   mem2proc_response,        // Tag from memory about current request
@@ -59,14 +56,14 @@ module pipeline (
 
 
    // Outputs from DI/IS Pipeline Register       // can output the values from the RS
-   output logic [`RS_SIZE-1:0][63:0] rs_table_out_npc,
-   output logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode,
-   output logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst,
+   output logic [`RS_SIZE-1:0][63:0] rs_table_out.npc,
+   output logic [`RS_SIZE-1:0][31:0] rs_table_out.inst_opcode,
+   output logic [`RS_SIZE-1:0]       rs_table_out.inst.valid_inst,
 
   // Outputs from IS/EX Pipeline Register   
-  output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
-  output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
-  output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
+  output logic [`NUM_FU-1:0][63:0] issue_reg.npc,
+  output logic [`NUM_FU-1:0][31:0] issue_reg.inst_opcode,
+  output logic [`NUM_FU-1:0]       issue_reg.inst.valid_inst,
 
 
     // // Outputs from ID/EX Pipeline Register
@@ -82,10 +79,10 @@ module pipeline (
     // output logic [4:0]       ex_mem_valid_inst,
 
 
-     // Outputs from EX/COM Pipeline Register
-     output logic [4:0][63:0] ex_co_NPC,
-     output logic [4:0][31:0] ex_co_IR,
-     output logic [4:0]       ex_co_valid_inst,
+    // // Outputs from /COM Pipeline Register
+    // output logic [4:0][63:0] ex_co_NPC,
+    // output logic [4:0][31:0] ex_co_IR,
+    // output logic [4:0]       ex_co_valid_inst
 
     // Outputs from COM/RET Pipeline Register
     output logic [63:0] co_ret_NPC,
@@ -95,7 +92,7 @@ module pipeline (
   );
 
   // Pipeline register enables
-  logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
+  logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable;
   logic [4:0]   is_ex_enable, ex_co_enable;
   // Output from the branch predictor
   logic   bp_output;
@@ -117,14 +114,14 @@ module pipeline (
   logic [4:0]    ra_idx, rb_idx, rc_idx ; 
 
   //outputs from the maptable
-  MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out;
-  PHYS_REG 		T1; 		// Output for Dispatch and goes to RS
-	PHYS_REG 		T2; 		// Output for Dispatch and goes to RS
- PHYS_REG 		T;		// Output for Dispatch and goes to RS and ROB
-
+  logic MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out;
+  logic PHYS_REG 		T1, 		// Output for Dispatch and goes to RS
+	logic PHYS_REG 		T2, 		// Output for Dispatch and goes to RS
+	logic PHYS_REG 		T 		// Output for Dispatch and goes to RS and ROB
+);
   // outputs of ID/DI stage
-  // logic id_di_NPC;
-  // logic id_di_IR;
+  logic id_di_NPC;
+  logic id_di_IR;
   logic id_di_rega;
   logic id_di_regb;
   logic id_di_opa_select;
@@ -140,19 +137,19 @@ module pipeline (
   logic id_di_halt;
   logic id_di_cpuid_out;
   logic id_di_illegal;
-  //logic id_di_valid_inst;
+  logic id_di_valid_inst;
 
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
   wand								rs_full;
   
   // outputs from dispatch stage
-  RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next;
-  logic 	[$clog2(`NUM_FU_TOTAL) - 1:0]	issue_cnt;
+  RS_ROW_T [`NUM_FU-1:0]			issue_next;
+  logic 	[$clog2(`NUM_FU) - 1:0]	issue_cnt;
 
   
   //Outputs from IS/EX Pipeline Register
-   RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_reg;
+   RS_ROW_T [`NUM_FU-1:0]			issue_reg;
   logic [4:0][63:0] is_ex_T1_value;
   logic [4:0][63:0] is_ex_T2_value;
   logic [4:0][63:0] pr_T1_value; 
@@ -176,7 +173,7 @@ module pipeline (
   // Outputs from EX-Stage
   logic [4:0][63:0] ex_alu_result_out;
   logic             ex_take_branch_out;
-	logic         done;
+	logic         done,
   
 
 //   // Outputs from EX/MEM Pipeline Register
@@ -196,30 +193,25 @@ module pipeline (
   // Outputs from EX/COM Pipeline Register
   logic   [4:0]      ex_co_halt;
   logic   [4:0]      ex_co_illegal;
-  PHYS_REG [4:0]     ex_co_dest_reg_idx;
-  logic  [4:0][63:0] ex_co_alu_result;
+  logic   PHYS_REG [4:0] ex_co_dest_reg_idx;
+  logic  [4:0][63:0] ex_co_result;
   logic              ex_co_take_branch;
   logic              ex_co_done;
-  logic [4:0]       ex_co_wr_mem;
-  
-  
   
 
   //Outputs from the complete stage
   logic              co_halt_selected;
   logic              co_illegal_selected;
-  PHYS_REG            co_reg_wr_idx_out;
+  logic   PHYS_REG   co_reg_wr_idx_out;
   logic  [63:0]      co_reg_wr_data_out;
   logic              co_reg_wr_en_out;
   logic              co_take_branch_selected;
   logic              co_NPC_selected ;
-    logic              co_valid_inst_selected;
+  logic              co_valid_inst_selected;
   logic  [4:0]       co_selected;
   logic              co_branch_valid;
   logic              co_branch_prediction;
   logic [4:0]        co_selected;        // alu which is granted the request from priority selector
-  logic [31:0]       co_IR_selected;
-  logic [63:0]       co_alu_result_selected;
   wor         psel_enable;
 
 
@@ -229,7 +221,7 @@ module pipeline (
   // Outputs from COM/RETIRE Pipeline Register    //
   logic            co_ret_halt;
   logic            co_ret_illegal;
-  PHYS_REG          co_ret_dest_reg_idx;
+  logic   PHYS_REG co_ret_dest_reg_idx;
   logic   [63:0]   co_ret_result;
   logic            co_ret_take_branch;
   logic            co_ret_NPC;
@@ -292,15 +284,15 @@ module pipeline (
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
 
-  assign pipeline_completed_insts = {3'b0, co_ret_valid_inst};
-  assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
-                                  co_ret_halt     ? HALTED_ON_HALT :
+  assign pipeline_completed_insts = {3'b0, mem_wb_valid_inst};
+  assign pipeline_error_status =  mem_wb_illegal  ? HALTED_ON_ILLEGAL :
+                                  mem_wb_halt     ? HALTED_ON_HALT :
                                   NO_ERROR;
 
-  // assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
-  // assign pipeline_commit_wr_data = wb_reg_wr_data_out;
-  // assign pipeline_commit_wr_en = wb_reg_wr_en_out;
-  // assign pipeline_commit_NPC = mem_wb_NPC;
+  assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
+  assign pipeline_commit_wr_data = wb_reg_wr_data_out;
+  assign pipeline_commit_wr_en = wb_reg_wr_en_out;
+  assign pipeline_commit_NPC = mem_wb_NPC;
 
   assign proc2mem_command =
       (proc2Dmem_command == BUS_NONE) ? proc2Imem_command:proc2Dmem_command;
@@ -330,7 +322,7 @@ module pipeline (
   );
 
   // Cache controller
-  icache icache_0(// inputs 
+  icache icache_0_Morteza(// inputs 
     .clock(clock),
     .reset(reset),
 
@@ -355,28 +347,48 @@ module pipeline (
     .data_write_enable(Icache_wr_en)
   );
 
+  // //Morteza Ash
+  
 
-
-//////////////////////////////////////////////////
+  // cache cache0_morteza_Ash(
+  //   //input
+  //   .clock(clock),
+  //   .reset(reset),
+  //   .wr1_en(data_write_enable),
+  //   .wr1_idx(Icache_current_index),
+  //   .rd1_idx(Icache_current_index),
+  //   .wr1_tag(Icache_current_tag),
+  //   .rd1_tag(Icache_current_tag),
+  //   .wr1_data(Icache_data_out),
+  //   //output
+  //   .rd1_data(cachemem_data),
+  //   .rd1_valid(cachemem_valid)
+  // );
+  //////////////////////////////////////////////////
   //                                              //
   //                  IF-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
-  if_stage if_stage_0 (
+  if_stage if_stage_0_morteza (
     // Inputs
     .clock (clock),
     .reset (reset),
     .co_ret_valid_inst(co_ret_valid_inst),
     .co_ret_take_branch(co_ret_take_branch),
-    .co_ret_target_pc(co_ret_alu_result),
-    .Imem2proc_data(mem2proc_data),
-    .Imem_valid(Imem_valid),
+    .co_ret_target_pc(co_ret_target_pc),
+    .Imem2proc_data(Icache_data_out),
+    .Imem_valid(Icache_valid_out),
     .dispatch_en(dispatch_en),
-
-
+    .co_ret_branch_valid(co_ret_branch_valid)
+    // .mem_wb_valid_inst(mem_wb_valid_inst),
+    // .ex_mem_take_branch(co_ret_take_branch),
+    // .ex_mem_target_pc(co_ret_alu_result),
+    // .Imem2proc_data(mem2proc_data),
+    // .ex_mem_valid_inst(co_ret_valid_inst),
     
 
     // Outputs
+    .proc2Icache_addr(proc2Icache_addr),
     .if_NPC_out(if_NPC_out), 
     .if_IR_out(if_IR_out),
     .proc2Imem_addr(proc2Imem_addr),
@@ -402,8 +414,6 @@ module pipeline (
       if_id_NPC        <= `SD if_NPC_out;
       if_id_IR         <= `SD if_IR_out;
       if_id_valid_inst <= `SD if_valid_inst_out;
-    end
-  end
     
   
   //////////////////////////////////////////////////
@@ -437,7 +447,7 @@ module pipeline (
     .id_halt_out(id_halt_out),
     .id_cpuid_out(id_cpuid_out),
     .id_illegal_out(id_illegal_out),
-    .id_valid_inst_out(id_valid_inst_out),
+    .id_valid_inst_out(id_valid_inst_out)
     .ra_idx(id_ra_idx),
     .rb_idx(id_rb_idx),
     .rc_idx(id_rc_idx)
@@ -463,7 +473,7 @@ module pipeline (
 	.T2(T2), 		// Output for Dispatch and goes to RS
 	.T(T) 		// Output for Dispatch and goes to RS and ROB
 
-  );
+  )
 
  //////////////////////////////////////////////////
   //                                              //
@@ -514,7 +524,7 @@ module pipeline (
         id_di_illegal       <= `SD id_illegal_out;
         id_di_valid_inst    <= `SD id_valid_inst_out;
       end
-  end
+  
   
 
   //////////////////////////////////////////////////
@@ -524,7 +534,7 @@ module pipeline (
   //////////////////////////////////////////////////
   
   assign dispatch_en= ~(rs_full & fr_empty & rob_full) ;
-  assign branch_not_taken = !co_ret_take_branch;    // for flushing
+  assign branch_not_taken = !co_ret_take_branch;
   assign RS_enable=1;
   RS RS0(
       // inputs
@@ -546,10 +556,6 @@ module pipeline (
       .rs_full(rs_full)
     );
 
-
-  assign rs_table_out_npc = rs_table_out.npc;
-  assign rs_table_out_inst_opcode = rs_table_out.inst.opcode;
-  assign rs_table_out_inst_valid_inst = rs_table_out.inst.valid_inst;
   //////////////////////////////////////////////////
   //                                              //
   //                  ISSUE/EX-Stage                    //
@@ -600,12 +606,11 @@ phys_regfile regf_0 (
   //            IS/EX Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-generate 
-  genvar i;
-    for (i=0; i<5; i=i+1) begin
-      assign is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
-    end
-  endgenerate
+  
+  
+  for (i=0; i<5; i=i+1) begin
+    assign is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
+  end
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset) begin
@@ -680,7 +685,7 @@ generate
     // Outputs
     .ex_alu0_result_out(ex_alu_result_out),
    
-    .ex_take_branch_out(ex_take_branch_out),
+    .ex_take_branch_out(ex_take_branch_out)
     .done(done)
     );
 
@@ -691,7 +696,7 @@ generate
   //                                              //
   //////////////////////////////////////////////////
   // not sure whether it can be directly assigned
-  for (i=0; i<2; i=i+1) begin
+  for (i=0; i<2, i=i+1) begin
     assign ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i]| & co_selected[i]);
   end
  
@@ -715,7 +720,7 @@ generate
             ex_co_valid_inst[i]   <= `SD 0;
             //ex_co_rega[i]         <= `SD 0;
             ex_co_alu_result[i]   <= `SD 0;
-          
+            ex_co_take_branch[i]  <= `SD 0;
 
         end else begin
         if (ex_co_enable[i]) begin
@@ -731,7 +736,7 @@ generate
             //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
             // these are results of EX stage
             ex_co_alu_result[i]   <= `SD ex_alu_result_out;      
-            
+            ex_co_take_branch[i]  <= `SD ex_take_branch_out;
         end // if
         end // else: !if(reset)
     end // for loop end
@@ -740,12 +745,10 @@ generate
   always_ff @(posedge clock) begin
     if (reset) begin
       ex_co_done <= `SD 0;
-        ex_co_take_branch  <= `SD 0;
     end
     else begin
       if(ex_co_enable[3]) begin
        ex_co_done  <= `SD done;
-       ex_co_take_branch  <= `SD ex_take_branch_out;
       end
     end
   end
@@ -834,46 +837,42 @@ generate
   assign psel_enable = ex_co_valid_inst[2 -: 0] & done & ex_co_valid_inst[4]; // ask the use of wor
 //priority encoder to select the results of the execution stage to put in cdb
   psel_complete #(5, 1) psel(
-				.req({ex_co_valid_inst[2:0], ex_co_done, ex_co_valid_inst[4]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+				.req({ex_co_valid_inst[2:0], ex_co_done, ex_co_valid_inst[4]),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 				.en(psel_enable),
 				.gnt(co_selected)
 			);
   
-  generate
-    genvar i;
-      for (i = 0; i < 5; i=i+1) begin
-        if (co_selected[i]== 1) begin
-            assign co_NPC_selected               =    ex_co_NPC[i] ;
-            assign co_IR_selected                =    ex_co_IR[i];
-            assign co_halt_selected              =    ex_co_halt[i];
-            assign co_illegal_selected           =    ex_co_illegal[i];
-            assign co_valid_inst_selected           =    ex_co_valid_inst[i];
-            assign co_reg_wr_idx_out                    =    ex_co_dest_reg_idx[i];
-            assign co_take_branch_selected              =    ex_co_take_branch[i];
-            assign co_alu_result_selected               =    ex_co_alu_result[i];
-            if(ex_co_IR[i] == 6'h18 )  assign co_branch_valid =    1;            // To check whether the inst is branch or not
-            else                 assign co_branch_valid =    0;       
-        end
-        else begin
-          assign co_NPC_selected               =    0 ;
-            assign co_IR_selected              =   `NOOP_INST;
-            assign co_halt_selected            =    0;
-            assign co_illegal_selected         =    0;
-            assign co_valid_inst_selected         =    0;
-            assign co_reg_wr_idx_out                  =   `DUMMY_REG;
-            assign co_take_branch_selected            =    0;
-            assign co_alu_result_selected             =    0;
-            assign co_branch_valid                    =    0;
-        end
-      end
-    endgenerate
+  for (i = 0, i < 5, i=i+1) begin
+    if (co_selected[i]== 1) begin
+        assign co_NPC_selected               =    ex_co_NPC[i] ;
+        assign co_IR_selected                =    ex_co_IR[i];
+        assign co_halt_selected              =    ex_co_halt[i];
+        assign co_illegal_selected           =    ex_co_illegal[i];
+        assign co_valid_inst_out_selected           =    ex_co_valid_inst_out[i];
+        assign co_reg_wr_idx_out                    =    ex_co_dest_reg_idx[i];
+        assign co_take_branch_selected              =    ex_co_take_branch[i];
+        assign co_alu_result_selected               =    ex_co_alu_result[i];
+        if(ex_co_IR[i] == 6'h18 )  assign co_branch_valid =    1;            // To check whether the inst is branch or not
+        else                 assign co_branch_valid =    0;       
+    end
+    else begin
+      assign co_NPC_selected               =    0 ;
+        assign co_IR_selected              =   `NOOP_INST;
+        assign co_halt_selected            =    0;
+        assign co_illegal_selected         =    0;
+        assign co_valid_inst_out_selected         =    0;
+        assign co_reg_wr_idx_out                  =   `DUMMY_REG;
+        assign co_take_branch_selected            =    0;
+        assign co_alu_result_selected             =    0;
+        assign co_branch_valid                    =    0;
+    end
+  end
 
 
 
 
-
-  assign co_branch_prediction = (co_take_branch_selected  == bp_output) ? 1:0 ;// Branch prediction or misprediction
-  assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
+  assign co_branch_prediction = (ex_co_take_branch_selected == bp_output) ? 1:0 ;// Branch prediction or misprediction
+  assign CDB_enable = psel_enable & ~branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
   CDB CDB_0(// Inputs
      .clock(clock),    // Clock
 	   .reset(reset),  // Asynchronous reset active low
@@ -885,7 +884,7 @@ generate
 	   .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules
 	   .CDB_en_out(CDB_en_out),  // Output for commit, goes to modules
 	   .busy(busy)
-  );
+  )
 
 
 // wb_stage wb_stage_0 (
@@ -944,11 +943,10 @@ generate
         co_ret_IR           <= `SD co_IR_selected;
         co_ret_halt         <= `SD co_halt_selected;
         co_ret_illegal      <= `SD co_illegal_selected;
-        co_ret_valid_inst   <= `SD co_valid_inst_selected;
+        co_ret_valid_inst   <= `SD co_valid_inst_out_selected;
         co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
         co_ret_take_branch  <= `SD co_take_branch_selected;
-        co_ret_result       <= `SD co_alu_result_selected;
-        co_ret_branch_valid        <= `SD co_branch_valid;
+        co_branch_valid        <= `SD co_branch_valid;
         co_ret_branch_prediction <= `SD co_branch_prediction;
         // these are results of MEM stage
         //co_ret_result       <= `SD mem_co_result_out_selected;
@@ -966,7 +964,7 @@ generate
 	.T_new_in(fr_rs_rob_T), // Comes from Free List During Dispatch
 	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
 	.CAM_en(CDB_enable), // Comes from CDB during Commit
-	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+	dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
 	.branch_not_taken(branch_not_taken),
 
 	// OUTPUTS
@@ -991,12 +989,12 @@ Free_List f0(
 	.clock(clock),
 	.reset(reset),
 	.enable(arch_fr_enable),
-	.T_old(rob_fl_arch_Told), // Comes from ROB during Retire Stage
+	.PHYS_REG T_old(rob_fl_arch_Told), // Comes from ROB during Retire Stage
 	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
 
 	// inputs for branch misprediction
 	.branch_incorrect(branch_not_taken),
-	.free_check_point(free_check_point),
+	free_check_point(free_check_point),
 	.tail_check_point(tail_check_point),
 
 	`ifdef DEBUG

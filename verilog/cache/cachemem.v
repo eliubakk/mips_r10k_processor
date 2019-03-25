@@ -3,13 +3,13 @@
 `timescale 1ns/100ps
 
 module cache(
-        input clock, reset, wr1_en,
-        input  [4:0] wr1_idx, rd1_idx,
-        input  [7:0] wr1_tag, rd1_tag,
-        input [63:0] wr1_data, 
+        input clock, reset, wr1_en,//comes from data_write_enable of Icache
+        input  [4:0] wr1_idx, rd1_idx,//comes from current_index Icache
+        input  [7:0] wr1_tag, rd1_tag,//
+        input [63:0] wr1_data,//comes from Icache_data_out of Icache 
 
-        output [63:0] rd1_data,
-        output rd1_valid
+        output [63:0] rd1_data,//goes to cachemem_data of Icache
+        output rd1_valid//goes to cachemem_valid of Icache
         
       );
 
