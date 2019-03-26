@@ -4,8 +4,6 @@
 `define BH_SIZE		4
 `define PC_SIZE		4
 
-
-
 module testbench;
 	logic clock, reset, enable;
 	logic							if_branch;

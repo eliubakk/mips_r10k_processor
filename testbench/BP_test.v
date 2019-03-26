@@ -1,7 +1,7 @@
 `define DEBUG_OUT
 `define DELAY #2
 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
 
 	
 module testbench;

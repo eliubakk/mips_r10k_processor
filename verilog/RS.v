@@ -1,6 +1,7 @@
 // MODULARIZED SUPER-SCALAR RS
 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
 `define DEBUG
 
 //-----------------------------------------------------------------------------------------
@@ -26,9 +27,9 @@ module RS
 	output logic 	[$clog2(`RS_SIZE):0]	free_rows_next,
 	output wand	rs_full
 	);
-	parameter FU_NAME_VAL = {FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR};
-	parameter FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
-	parameter NUM_OF_FU_TYPE = {2'b11,2'b01,2'b01,2'b10,2'b01};
+	parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
+	parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
+	parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 	
 	////////////////////////////
 	//	INTERNAL VARIABLES    //
@@ -175,7 +176,7 @@ module RS
 		.hits(cam_hits)
 	);
 	
-	integer i;
+	integer i,j;
 	always_comb begin
 		//DEFAULT STATE
 		free_rows_next = 0;
@@ -224,8 +225,8 @@ module RS
 	//////////////////////////////////////////////////
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
-			for(i=0; i<`RS_SIZE; i=i+1) begin // Other way to do this?
-				rs_table[i] <= EMPTY_ROW;
+			for(j=0; j<`RS_SIZE; j=j+1) begin // Other way to do this?
+				rs_table[j] <= EMPTY_ROW;
 			end
 		end
 		else begin

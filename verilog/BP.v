@@ -1,6 +1,7 @@
 // Entire branch predictor module
 // Should include BTB, GSHARE, OBQ 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
 //`include "BTB.v"
 //`include "GSHARE.v"
 //`include "OBQ.v"

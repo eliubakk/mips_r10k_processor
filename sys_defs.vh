@@ -10,8 +10,6 @@
 `ifndef __SYS_DEFS_VH__
 `define __SYS_DEFS_VH__
 
-`timescale 1ns/100ps
-
 /* Synthesis testing definition, used in DUT module instantiation */
 
 `ifdef  SYNTH_TEST
@@ -154,36 +152,34 @@ typedef enum logic [4:0] {
 //                                         0000    0001    0010    0011    0100    0101    0110    0111    1000    1001    1010    1011    1100    1101    1110    1111
 const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001, 3'b010, 3'b010, 3'b011, 3'b001, 3'b010, 3'b010, 3'b011, 3'b010, 3'b011, 3'b011, 3'b100};
 
-`define NUM_FU_TOTAL 8 // total number of functional units
-`define NUM_TYPE_FU 5 // number of different types of functional units
+`define NUM_FU_TOTAL 5 // total number of functional units
+`define NUM_TYPE_FU 4 // number of different types of functional units
 `define NUM_LD 1
 `define RS_SIZE 16
 `define MAX_RS_SIZE 16
-`define SS_SIZE 3 // superscalar size
+`define SS_SIZE 1 // superscalar size
 `define ROB_SIZE 16
 
 // the number of functional units of each specific type we instantiate.
-const logic [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b11,2'b01,2'b01,2'b10,2'b01};
+const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 
 typedef enum logic [2:0]{
   FU_ALU,
   FU_LD,
-  FU_ST,
   FU_MULT,
   FU_BR
 } FU_NAME;
 
-const FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR};
+const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
 
 typedef enum logic [3:0]{
   FU_ALU_IDX = 0,
-  FU_LD_IDX = 3,
-  FU_ST_IDX = 4,
-  FU_MULT_IDX = 5,
-  FU_BR_IDX = 7
+  FU_LD_IDX = 2,
+  FU_MULT_IDX = 3,
+  FU_BR_IDX = 4
 } FU_IDX;
 
-const FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
+const FU_IDX [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
 
 typedef struct packed {
 	PHYS_REG phys_tag;

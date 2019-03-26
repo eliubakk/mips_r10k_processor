@@ -3,7 +3,8 @@
 // the low 64 bits of the result.  This is not an ideal multiplier but
 // is sufficient to allow a faster clock period than straight *
 `define PIPE_DEPTH 4
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
 module mult_stage(
 					input clock, reset, start,
 					input [63:0] product_in, mplier_in, mcand_in,

@@ -9,7 +9,8 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
 module if_stage(
     input         clock,                  // system clock
     input         reset,                  // system reset

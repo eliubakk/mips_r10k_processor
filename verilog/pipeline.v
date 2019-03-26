@@ -8,7 +8,8 @@
 //                                                                     //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
 `define DEBUG
 `define SD #1
 
@@ -92,6 +93,9 @@ module pipeline (
     output logic        co_ret_valid_inst
 
   );
+  parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
+  parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
+  parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 
   // Pipeline register enables
   logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
@@ -526,7 +530,9 @@ module pipeline (
   assign dispatch_en= ~(rs_full & fr_empty & rob_full) ;
   assign branch_not_taken = !co_ret_take_branch;    // for flushing
   assign RS_enable=1;
-  RS RS0(
+  RS #(.FU_NAME_VAL(FU_NAME_VAL),
+       .FU_BASE_IDX(FU_BASE_IDX),
+       .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
       // inputs
       .clock(clock), 
       .reset(reset), 

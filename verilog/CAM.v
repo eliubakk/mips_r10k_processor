@@ -1,4 +1,5 @@
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
 module CAM(enable, tag, tags_in, hits);
 	parameter LENGTH=16;
 	parameter WIDTH=2;
