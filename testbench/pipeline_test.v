@@ -180,9 +180,9 @@ module testbench;
       $display("Oututs3");
       $display("if_NPC_out = %d if_IR_out: %d if_valid_inst_out = %d if_id_NPC: %d if_id_IR: %d if_id_valid_inst: %d id_di_NPC: %d id_di_IR: %d id_di_valid_inst: %d", if_NPC_out, if_IR_out, if_valid_inst_out, if_id_NPC, if_id_IR, if_id_valid_inst, id_di_NPC, id_di_IR, id_di_valid_inst);
       $display("***********************************");
-      $display("Oututs4");
-      $display("rs_table_out_npc = %d rs_table_out_inst_opcode: %d rs_table_out_inst_valid_inst = %d issue_reg_npc: %d issue_reg_inst_opcode: %d issue_reg_inst_valid_inst: %d ex_co_NPC: %d ex_co_IR: %d ex_co_valid_inst: %d co_ret_NPC: %d co_ret_IR: %d rs_table_out: %d arch_table: %d ROB_table_out: %d free_list_out: %d co_ret_valid_inst: %d", rs_table_out_npc, rs_table_out_inst_opcode, rs_table_out_inst_valid_inst, issue_reg_npc, issue_reg_inst_opcode, issue_reg_inst_valid_inst, ex_co_NPC, ex_co_IR, ex_co_valid_inst, co_ret_NPC, co_ret_IR, rs_table_out, arch_table, ROB_table_out, free_list_out, co_ret_valid_inst);
-      $display("***********************************");
+     // $display("Oututs4");
+     // $display("rs_table_out_npc = %d rs_table_out_inst_opcode: %d rs_table_out_inst_valid_inst = %d issue_reg_npc: %d issue_reg_inst_opcode: %d issue_reg_inst_valid_inst: %d ex_co_NPC: %d ex_co_IR: %d ex_co_valid_inst: %d co_ret_NPC: %d co_ret_IR: %d rs_table_out: %d arch_table: %d ROB_table_out: %d free_list_out: %d co_ret_valid_inst: %d", rs_table_out_npc, rs_table_out_inst_opcode, rs_table_out_inst_valid_inst, issue_reg_npc, issue_reg_inst_opcode, issue_reg_inst_valid_inst, ex_co_NPC, ex_co_IR, ex_co_valid_inst, co_ret_NPC, co_ret_IR, rs_table_out, arch_table, ROB_table_out, free_list_out, co_ret_valid_inst);
+     // $display("***********************************");
     end
   endtask  // task show_clk_count 
 
@@ -322,14 +322,14 @@ module testbench;
       `SD;
       `SD;
        //print tables
-       display_RS_table();
-       display_arch_table();
-       display_ROB_table();
-       display_free_list_table(free_list_out);
-       show_input_output_port();
+      //// display_RS_table();
+      //// display_arch_table();
+      //// display_ROB_table();
+      //// display_free_list_table(free_list_out);
+      //// show_input_output_port();
        
        // print the piepline stuff via c code to the pipeline.out
-       print_cycles();
+      print_cycles();
        print_stage(" ", if_IR_out, if_NPC_out[31:0], {31'b0,if_valid_inst_out});
        print_stage("|", if_id_IR, if_id_NPC[31:0], {31'b0,if_id_valid_inst});
        print_stage("|", id_di_IR, id_di_NPC[31:0], {31'b0,id_di_valid_inst});
@@ -337,13 +337,13 @@ module testbench;
         print_stage("|", rs_table_out_inst_opcode[i], rs_table_out_npc[i][31:0], {31'b0,rs_table_out_inst_valid_inst[i]});
        end
        for (integer i = 0; i < `NUM_FU_TOTAL; i=i+1) begin
-        print_stage("|", issue_reg_inst_opcode[i], issue_reg_npc[i][31:0], {31'b0,issue_reg_inst_valid_inst[i]});
+          print_stage("|", issue_reg_inst_opcode[i], issue_reg_npc[i][31:0], {31'b0,issue_reg_inst_valid_inst[i]});
        end
-       print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
-       print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
-       print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
+      print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
+      print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
+      print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
                  {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});
-       print_membus({30'b0,proc2mem_command}, {28'b0,mem2proc_response},
+      print_membus({30'b0,proc2mem_command}, {28'b0,mem2proc_response},
                     proc2mem_addr[63:32], proc2mem_addr[31:0],
                     proc2mem_data[63:32], proc2mem_data[31:0]);
 
