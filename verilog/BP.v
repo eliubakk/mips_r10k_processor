@@ -237,12 +237,25 @@ module  BP(
 		next_pc_prediction_calc			= next_pc_prediction;
 
 		if(enable) begin
-		// Conditional direct/indirect
-			if(if_en_branch & if_cond_branch)		
-		// Unconditional direct
-		
-		// Unconditional indirect 
+			if(if_en_branch & if_cond_branch) begin
+			// ----------Conditional direct/indirect
+			// If prediction is taken, then bring value from BTB
+			// If prediction is not taken or BTB not match, then PC+4
+								
 
+			end else if(if_en_branch & !if_cond_branch & if_direct_branch) begin
+			// ----------Unconditional direct
+			// bring value from BTB when it is in BTB,
+			// PC + 4 when BTB not match
+
+			end else if (if_en_branch & !if_cond_branch & !if_direct_branch) begin
+			// ----------Unconditional indirect
+			// bring value from RAS when it is in RAS
+			// PC + 4 when RAS is empty 
+
+			end else begin
+				next_pc_valid_calc	= 1'b0;
+			end
 		end
 
 			
