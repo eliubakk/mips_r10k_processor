@@ -12,7 +12,7 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 
-analyze -f sverilog [list "../verilog/encoder.v"]
+analyze -f sverilog [list "../../verilog/misc/encoder.v"]
 elaborate encoder
 set design_name encoder
 ##############################################

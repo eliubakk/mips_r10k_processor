@@ -8,7 +8,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 
 extern void print_header(string str);
 extern void print_cycles();

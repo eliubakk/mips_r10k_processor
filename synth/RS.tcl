@@ -15,7 +15,8 @@ set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 #set_dont_touch psel_generic_NUM_REQS1
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
-analyze -f sverilog [list "../verilog/RS.v" "../verilog/psel_generic.v" "../verilog/psel_single.v" "../verilog/CAM.v" "../verilog/encoder.v"]
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/RS.v" $misc_files]
 elaborate RS
 set design_name RS
 set clock_name clock

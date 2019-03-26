@@ -1,12 +1,12 @@
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 `define DEBUG
 
 `define DELAY #2
 
 module testbench;
-	parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR};
-	parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
-	parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b11,2'b01,2'b01,2'b10,2'b01};
+	parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
+	parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
+	parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 
 	logic 	 clock, reset, enable;
 	logic    [(`SS_SIZE-1):0] CAM_en;
@@ -26,9 +26,9 @@ module testbench;
 	RS_ROW_T   	[(`RS_SIZE-1):0] 		rs_table_next_out;
 	RS_ROW_T 	[(`NUM_FU_TOTAL-1):0]	issue_next_test; 
 	
-	RS #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR}),
-	.FU_BASE_IDX({FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX}),
-	.NUM_OF_FU_TYPE({2'b11,2'b01,2'b01,2'b10,2'b01})) RS0(
+	RS #(.FU_NAME_VAL(FU_NAME_VAL),
+	.FU_BASE_IDX(FU_BASE_IDX),
+	.NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 
@@ -389,7 +389,7 @@ module testbench;
 		inst_in[(`SS_SIZE-1)].inst.opb_select = ALU_OPB_IS_REGB;
 		inst_in[(`SS_SIZE-1)].inst.dest_reg = DEST_IS_REGA;
 		inst_in[(`SS_SIZE-1)].inst.alu_func = ALU_ADDQ;
-		inst_in[(`SS_SIZE-1)].inst.fu_name = FU_ST;
+		inst_in[(`SS_SIZE-1)].inst.fu_name = FU_ALU;
 		inst_in[(`SS_SIZE-1)].inst.wr_mem = 1'b1;
 		inst_in[(`SS_SIZE-1)].inst.stc_mem = 1'b1;
 		inst_in[(`SS_SIZE-1)].inst.valid_inst = 1'b1;
@@ -683,11 +683,7 @@ module testbench;
 		table_out();
 		table_has_N_entries(`RS_SIZE, rs_table_out);
 		assert(rs_full) else #1 exit_on_error;
-		check_has_func(rs_table_out, FU_ALU);
-		check_has_func(rs_table_out, FU_LD);
-		check_has_func(rs_table_out, FU_ST);
-		check_has_func(rs_table_out, FU_MULT);
-		check_has_func(rs_table_out, FU_BR);
+		
 
 		check_issue_next_correct(issue_next, issue_next_test);
 		assert(free_rows_next == (0)) else #1 exit_on_error;
@@ -977,11 +973,9 @@ module testbench;
 		@(negedge clock)
 		table_out();
 		table_has_N_entries(`NUM_FU_TOTAL, rs_table_out);
-		check_has_func(rs_table_out, FU_ALU);
-		check_has_func(rs_table_out, FU_LD);
-		check_has_func(rs_table_out, FU_ST);
-		check_has_func(rs_table_out, FU_MULT);
-		check_has_func(rs_table_out, FU_BR);
+		for(int i = 0; i < `NUM_TYPE_FU; i += 1) begin
+			check_has_func(rs_table_out, FU_NAME_VAL[i]);
+		end
 		check_issue_next_correct(issue_next, issue_next_test);
 		assert(free_rows_next == `RS_SIZE) else #1 exit_on_error;
 		assert(~rs_full) else #1 exit_on_error;

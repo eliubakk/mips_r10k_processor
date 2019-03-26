@@ -1,4 +1,4 @@
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 `define DEBUG
 
 `define DELAY #2
@@ -37,7 +37,7 @@ module testbench;
         .T_new_valid(T_new_valid),
         .rob_free_entries(rob_free_entries),
         .rob_full(rob_full)
-    )
+    );
 
     always #10 clock = ~clock;
 

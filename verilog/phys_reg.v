@@ -9,7 +9,7 @@
 
 
 
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 `timescale 1ns/100ps
 module phys_regfile(
         input   [5:0] rda_idx, rdb_idx, wr_idx,    // read/write index

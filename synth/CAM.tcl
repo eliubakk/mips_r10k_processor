@@ -12,9 +12,9 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 
-analyze -f sverilog [list "../verilog/CAM.v"]
-elaborate CAM -param NUM_TAG=1
-set design_name CAM_NUM_TAG1
+analyze -f sverilog [list "../../verilog/misc/CAM.v"]
+elaborate CAM
+set design_name CAM
 ##############################################
 set clock_name clock
 set reset_name reset

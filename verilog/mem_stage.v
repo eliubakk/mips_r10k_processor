@@ -11,7 +11,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 `timescale 1ns/100ps
 module mem_stage(
     input         clock,              // system clock

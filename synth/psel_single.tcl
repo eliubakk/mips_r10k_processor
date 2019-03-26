@@ -10,9 +10,9 @@
 #/* new design                                              */
 #/***********************************************************/
 
-analyze -f sverilog [list "../verilog/psel_single.v"]
-elaborate psel_single -param WIDTH=16
-set design_name psel_single_WIDTH16
+analyze -f sverilog [list "../../verilog/misc/psel_single.v"]
+elaborate psel_single
+set design_name psel_single
 set clock_name clock
 set reset_name reset
 set CLK_PERIOD 1

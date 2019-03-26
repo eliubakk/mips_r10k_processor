@@ -1,4 +1,4 @@
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 `timescale 1ns/100ps
 `define FL_SIZE `NUM_PHYS_REG
 `define DEBUG

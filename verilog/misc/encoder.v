@@ -1,4 +1,4 @@
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 `timescale 1ns/100ps
 module encoder(in, out, valid);
 	parameter WIDTH = 16; //number of bits in.
