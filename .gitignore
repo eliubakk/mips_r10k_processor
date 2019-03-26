@@ -26,3 +26,4 @@ synth/*.svf
 synth/*.pvl
 synth/*.syn
 synth/*.mr
+synth/csrc
