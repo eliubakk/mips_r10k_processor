@@ -116,6 +116,9 @@ module ex_stage(
     
   );
 
+  logic  [4:0][63:0]   mem_disp;
+  logic  [4:0][63:0]   br_disp;
+  logic [4:0][63:0]    alu_imm;
 
   logic  [3:0][63:0] opa_mux_out, opb_mux_out;
   logic         brcond_result;
@@ -124,26 +127,26 @@ module ex_stage(
   //   mem_disp: sign-extended 16-bit immediate for memory format
   //   br_disp: sign-extended 21-bit immediate * 4 for branch displacement
   //   alu_imm: zero-extended 8-bit immediate for ALU ops
-  wire [63:0] mem_disp[0] = { {48{issue_reg[0].inst_opcode[15]}}, issue_reg[0].inst_opcode[15:0] };
-  wire [63:0] br_disp[0]  = { {41{issue_reg[0].inst_opcode[20]}}, issue_reg[0].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm[0]  = { 56'b0, issue_reg[0].inst_opcode[20:13] };
+  assign  mem_disp[0] = { {48{issue_reg[0].inst_opcode[15]}}, issue_reg[0].inst_opcode[15:0] };
+  assign  br_disp[0]  = { {41{issue_reg[0].inst_opcode[20]}}, issue_reg[0].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[0]  = { 56'b0, issue_reg[0].inst_opcode[20:13] };
    
 
-  wire [63:0] mem_disp[1] = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
-  wire [63:0] br_disp[1]  = { {41{issue_reg[1].inst_opcode[20]}}, issue_reg[1].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm[1]  = { 56'b0, issue_reg[1].inst_opcode[20:13] };
+  assign  mem_disp[1] = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
+  assign  br_disp[1]  = { {41{issue_reg[1].inst_opcode[20]}}, issue_reg[1].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[1]  = { 56'b0, issue_reg[1].inst_opcode[20:13] };
   
-  wire [63:0] mem_disp[2] = { {48{issue_reg[2].inst_opcode[15]}}, issue_reg[2].inst_opcode[15:0] };
-  wire [63:0] br_disp[2]  = { {41{issue_reg[2].inst_opcode[20]}}, issue_reg[2].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm[2]  = { 56'b0, issue_reg[2].inst_opcode[20:13] };
+  assign  mem_disp[2] = { {48{issue_reg[2].inst_opcode[15]}}, issue_reg[2].inst_opcode[15:0] };
+  assign  br_disp[2]  = { {41{issue_reg[2].inst_opcode[20]}}, issue_reg[2].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[2]  = { 56'b0, issue_reg[2].inst_opcode[20:13] };
   
-  wire [63:0] mem_disp[3] = { {48{issue_reg[3].inst_opcode[15]}}, issue_reg[3].inst_opcode[15:0] };
-  wire [63:0] br_disp[3]  = { {41{issue_reg[3].inst_opcode[20]}}, issue_reg[3].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm[3]  = { 56'b0, issue_reg[3].inst_opcode[20:13] };
+  assign  mem_disp[3] = { {48{issue_reg[3].inst_opcode[15]}}, issue_reg[3].inst_opcode[15:0] };
+  assign  br_disp[3]  = { {41{issue_reg[3].inst_opcode[20]}}, issue_reg[3].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[3]  = { 56'b0, issue_reg[3].inst_opcode[20:13] };
    
-  wire [63:0] mem_disp[4] = { {48{issue_reg[4].inst_opcode[15]}}, issue_reg[4].inst_opcode[15:0] };
-  wire [63:0] br_disp[4]  = { {41{issue_reg[4].inst_opcode[20]}}, issue_reg[4].inst_opcode[20:0], 2'b00 };
-  wire [63:0] alu_imm[4]  = { 56'b0, issue_reg[4].inst_opcode[20:13] };
+  assign  mem_disp[4] = { {48{issue_reg[4].inst_opcode[15]}}, issue_reg[4].inst_opcode[15:0] };
+  assign  br_disp[4]  = { {41{issue_reg[4].inst_opcode[20]}}, issue_reg[4].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[4]  = { 56'b0, issue_reg[4].inst_opcode[20:13] };
   
 
   

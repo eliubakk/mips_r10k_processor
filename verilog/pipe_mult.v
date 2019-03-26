@@ -4,6 +4,7 @@
 // allow a faster clock period than straight *
 // This module instantiates 8 pipeline stages as an array of submodules.
 `define PIPE_DEPTH 4
+`include "sys_defs.vh"
 module mult(
 				input clock, reset,
 				input [63:0] mcand, mplier,

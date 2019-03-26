@@ -26,10 +26,11 @@ all:    simv
 # Modify starting here
 #####
 
-TESTBENCH = 	verilog/sys_defs.vh\
- 		testbench/testbench.v	\
- 		testbench/mem.v		\
- 		testbench/pipe_print.c	 
+
+TESTBENCH = sys_defs.vh \
+	testbench/testbench.v \
+ 			testbench/mem.v		\
+ 			testbench/pipe_print.c	 
 SIMFILES =	verilog/pipeline.v	\
 		verilog/regfile.v	\
 		verilog/if_stage.v	\
@@ -37,7 +38,6 @@ SIMFILES =	verilog/pipeline.v	\
 		verilog/ex_stage.v	\
 		verilog/mem_stage.v	\
 		verilog/wb_stage.v	\
-		verilog/RS.v		\
 		verilog/ROB.v		\
 		verilog/RS.v		\
 		verilog/arch_map.v	\

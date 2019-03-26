@@ -1,4 +1,4 @@
-
+`include "sys_defs.vh"
 module icache(
     input   clock,
     input   reset,
