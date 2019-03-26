@@ -233,7 +233,7 @@ module  BP(
 		// value initialization
 		next_pc_valid_calc			= next_pc_valid;
 		next_pc_index_calc			= next_pc_index; 		
-		next_pc_calc				= next_pc_calc;			
+		next_pc_calc				= next_pc;			
 		next_pc_prediction_calc			= next_pc_prediction;
 
 		if(enable) begin
@@ -241,17 +241,51 @@ module  BP(
 			// ----------Conditional direct/indirect
 			// If prediction is taken, then bring value from BTB
 			// If prediction is not taken or BTB not match, then PC+4
-								
+				if(gshare_prediction_valid & gshare_prediction & btb_next_pc_valid) begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = bh_index;
+					next_pc_calc		 = btb_next_pc;
+					next_pc_prediction_calc	 = 1'b1;
+				end else begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = bh_index;
+					next_pc_calc		 = next_pc + 4;
+					next_pc_prediction_calc	 = 1'b0;
+				end			
+					
 
 			end else if(if_en_branch & !if_cond_branch & if_direct_branch) begin
 			// ----------Unconditional direct
 			// bring value from BTB when it is in BTB,
 			// PC + 4 when BTB not match
+				if(btb_next_pc_valid) begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_calc		 = btb_next_pc;
+					next_pc_prediction_calc	 = 1'b0;
+				end else begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_calc		 = next_pc + 4;
+					next_pc_prediction_calc	 = 1'b0;
+				end
 
 			end else if (if_en_branch & !if_cond_branch & !if_direct_branch) begin
 			// ----------Unconditional indirect
 			// bring value from RAS when it is in RAS
 			// PC + 4 when RAS is empty 
+				if(ras_next_pc_valid) begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_calc		 = ras_next_pc;
+					next_pc_prediction_calc	 = 1'b0;
+				end else begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_calc		 = next_pc + 4;
+					next_pc_prediction_calc	 = 1'b0;
+				end
+
 
 			end else begin
 				next_pc_valid_calc	= 1'b0;
