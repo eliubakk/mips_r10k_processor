@@ -1,9 +1,13 @@
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
 `define DEBUG
 
 `define DELAY #2
 
 module testbench;
+	parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR};
+	parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX};
+	parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b11,2'b01,2'b01,2'b10,2'b01};
+
 	logic 	 clock, reset, enable;
 	logic    [(`SS_SIZE-1):0] CAM_en;
 	PHYS_REG [(`SS_SIZE-1):0] CDB_in;
@@ -22,9 +26,9 @@ module testbench;
 	RS_ROW_T   	[(`RS_SIZE-1):0] 		rs_table_next_out;
 	RS_ROW_T 	[(`NUM_FU_TOTAL-1):0]	issue_next_test; 
 	
-	RS RS0 #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR}),
+	RS #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_ST, FU_MULT, FU_BR}),
 	.FU_BASE_IDX({FU_ALU_IDX, FU_LD_IDX, FU_ST_IDX, FU_MULT_IDX, FU_BR_IDX}),
-	.NUM_OF_FU_TYPE({2'b11,2'b01,2'b01,2'b10,2'b01}) (
+	.NUM_OF_FU_TYPE({2'b11,2'b01,2'b01,2'b10,2'b01})) RS0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 
@@ -900,6 +904,7 @@ module testbench;
 
 			reset = 1'b1;
 			@(posedge clock)
+			`DELAY
 			reset = 1'b0;
 			$display("\n");
 		end

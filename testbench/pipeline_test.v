@@ -8,7 +8,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
 
 extern void print_header(string str);
 extern void print_cycles();
@@ -84,7 +84,9 @@ module testbench;
   PHYS_REG [`NUM_PHYS_REG-1:0] free_list_out;
 
   // Instantiate the Pipeline
-  pipeline pipeline_0 (
+  pipeline #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_MULT, FU_BR}),
+  .FU_BASE_IDX({FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX}),
+  .NUM_OF_FU_TYPE({2'b10,2'b01,2'b01,2'b01})) pipeline_0(
     // Inputs
     .clock             (clock),
     .reset             (reset),

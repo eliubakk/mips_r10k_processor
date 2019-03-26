@@ -22,26 +22,42 @@ all:    simv
 TEST_DIR = testbench
 VERILOG_DIR = verilog
 SYN_DIR = synth
+PIPELINE_NAME = pipeline
+PIPELINE = $(VERILOG_DIR)/$(PIPELINE_NAME).v 
+MISC_SRC = CAM.v encoder.v psel_single.v psel_generic.v
 
 TEST_SRC = $(wildcard $(TEST_DIR)/*.v)
-VERILOG_SRC = $(wildcard $(VERILOG_DIR)/*.v)
+VERILOG_SRC = $(filter-out $(PIPELINE) $(MISC_SRC),$(wildcard $(VERILOG_DIR)/*.v))
 MODULES = $(patsubst $(VERILOG_DIR)/%.v, %, $(VERILOG_SRC))
-SYN_SIMV = $(patsubst $(VERILOG_DIR)/%.v, syn_simv_%, $(VERILOG_SRC))
-SIMV = $(patsubst $(VERILOG_DIR)/%.v, simv_%, $(VERILOG_SRC))
+SYN_SIMV = $(patsubst $(VERILOG_DIR)/%.v,syn_simv_%,$(wildcard $(VERILOG_DIR)/*.v))
+SIMV = $(patsubst $(VERILOG_DIR)/%.v,simv_%,$(VERILOG_SRC))
+
 
 %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v
 	cd $(SYN_DIR) && \
 	dc_shell-t -f $*.tcl | tee $*_synth.out
 
-$(SYN_SIMV): syn_simv_% : %.vg $(TEST_DIR)/%_test.v
-	$(VCS) $(SYN_DIR)/$^ $(LIB) -o $(SYN_DIR)/$@
+$(SYN_SIMV): syn_simv_% : $(SYN_DIR)/%.vg $(TEST_DIR)/%_test.v
+	cd $(SYN_DIR) && \
+	$(VCS) $*.vg ../$(TEST_DIR)/$*_test.v $(LIB) -o $@
 
 %: syn_simv_%
 	cd $(SYN_DIR) && \
 	./syn_simv_$* | tee $@_program.out
 
-$(SIMV): simv_%: $(TEST_DIR)/%_test.v $(VERILOG_DIR)/%.v
-	$(VCS) $^ -o $@
+$(SIMV): simv_%: $(VERILOG_DIR)/%.v $(patsubst %.v,$(VERILOG_DIR)/%.v,$(MISC_SRC)) $(TEST_DIR)/%_test.v
+	cd $(SYN_DIR) && \
+	$(VCS) $(patsubst %.v,../%.v,$^) -o $@ &&\
+	./$@ | tee $*_program.out
+
+simv_$(PIPELINE_NAME): $(PIPELINE) $(patsubst %.v,$(VERILOG_DIR)/%.v,$(MISC_SRC)) $(VERILOG_SRC) $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+	cd $(SYN_DIR) && \
+	$(VCS) $(patsubst %.v,../%.v,$^) -o $@ &&\
+	./$@ | tee $*_program.out
+
+$(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
+	cd $(SYN_DIR) && \
+	./syn_simv_$@ | tee $@_program.out
 
 #####
 # Should be no need to modify after here

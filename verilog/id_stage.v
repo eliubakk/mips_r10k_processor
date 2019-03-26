@@ -9,7 +9,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 
-`include "sys_defs.vh"
+`include "../sys_defs.vh"
+`timescale 1ns/100ps
   // Decode an instruction: given instruction bits IR produce the
   // appropriate datapath control signals.
   //
@@ -165,27 +166,27 @@ module decoder(
             begin
               rd_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
-              fu_name = FU_LS;
+              fu_name = FU_LD;
             end // case: `LDQ_INST
             `LDQ_L_INST:
               begin
               rd_mem = `TRUE;
               ldl_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
-              fu_name = FU_LS;
+              fu_name = FU_LD;
             end // case: `LDQ_L_INST
             `STQ_INST:
             begin
               wr_mem = `TRUE;
               dest_reg = DEST_NONE;
-              fu_name = FU_LS;
+              fu_name = FU_LD;
             end // case: `STQ_INST
             `STQ_C_INST:
             begin
               wr_mem = `TRUE;
               stc_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
-              fu_name = FU_LS;
+              fu_name = FU_LD;
             end // case: `STQ_INST
             default:       illegal = `TRUE;
           endcase // case(inst[31:26])
