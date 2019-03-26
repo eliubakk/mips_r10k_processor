@@ -78,10 +78,10 @@ $(MISC_SIMV): simv_%: $(MISC_SRC) $(TEST_DIR)/%_test.v
 	$(VCS) $(patsubst %.v,../../%.v,$^) -o $@ &&\
 	./$@ | tee $*_simv_program.out
 
-simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS) $(patsubst %.v,../../%.v,$^) -o $@ &&\
+	$(VCS) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
 $(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
