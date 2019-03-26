@@ -11,7 +11,7 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "verilog/free_list.v"]
+read_file -f sverilog [list "../verilog/Free_List.v" "../sys_defs.vh"]
 set design_name Free_List
 set clock_name clock
 set reset_name reset
