@@ -74,7 +74,7 @@ typedef struct packed {
 } OBQ_ROW_T;
 
 // RAS
-`define RAS_SIZE 64
+`define RAS_SIZE 2**6
 
 //////////////////////////////////////////////
 //

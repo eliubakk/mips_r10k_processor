@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : CAM.tcl                                 */
+#/*   FILE        : ISR.tcl                          */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,14 +11,11 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-
-analyze -f sverilog "../sys_defs.vh ../verilog/RAS.v"
-elaborate RAS
-set design_name RAS
-##############################################
+read_file -f sverilog [list "../verilog/Free_List.v" "../sys_defs.vh"]
+set design_name Free_List
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 3
+set CLK_PERIOD 10
 
 
 
