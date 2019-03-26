@@ -17,7 +17,7 @@ module GSHARE(
 		input							clear_en,	   // When branch prediction is wrong, flip the PHT bit of obq_gh_in
 		input	[31:0]						rt_pc,
 		
-		`ifdef DEBUG_OUT
+		`ifdef DEBUG
 		output	[2**(`BH_SIZE)-1:0]				pht_out,
 		`endif
 		output	[`BH_SIZE-1:0]					ght_out,

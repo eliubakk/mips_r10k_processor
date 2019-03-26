@@ -4,6 +4,7 @@
 `include "../../verilog/BTB.v"
 `include "../../verilog/OBQ.v"
 `include "../../verilog/GSHARE.v"
+`include "../../verilog/RAS.v"
 `timescale 1ns/100ps
 //`include "BTB.v"
 //`include "GSHARE.v"
@@ -121,13 +122,13 @@ module  BP(
 	// During retirement	/ other than uncond-indirect / update when branch is taken
 	assign btb_write_en	= rt_en_branch & (rt_cond_branch | rt_direct_branch) & rt_branch_taken; 				
 	// During fetch		/ other than uncond-indirect
-	assign btb_read_en	= if_en_brnach & (if_cond_branch | if_direct_branch); 				
+	assign btb_read_en	= if_en_branch & (if_cond_branch | if_direct_branch); 				
 
 		
 	// During retirement 	/ unconditional indirect
-	assign ras_write_en	= rt_en_brnach & !rt_cond_branch & !rt_direct_branch;
+	assign ras_write_en	= rt_en_branch & !rt_cond_branch & !rt_direct_branch;
 	// During fetch		/ unconditional indirect
-	assign ras_read_en	= if_en_brnach & !if_cond_branch & !if_direct_branch;				
+	assign ras_read_en	= if_en_branch & !if_cond_branch & !if_direct_branch;				
 
 	// internal registers
 //	OBQ_ROW_T last_pred;
@@ -138,7 +139,7 @@ module  BP(
 		.clock(clock), 
 		.reset(reset), 
 		.enable(enable),
-		.if_en_branch(read_en), 
+		.if_branch(read_en), 
 		.pc_in(if_pc_in),
 		.obq_bh_pred_valid(bh_pred_valid),
 		.obq_gh_in(bh_pred.branch_history),
@@ -187,7 +188,7 @@ module  BP(
 		.reset(reset), 
 		.enable(enable), 
 		.pc_in(if_pc_in),
-		.if_en_branch(btb_read_en),	
+		.if_branch(btb_read_en),	
 		.ex_pc(rt_pc),
 		.calculated_pc(rt_calculated_pc),
 		.ex_branch_taken(rt_branch_taken),
