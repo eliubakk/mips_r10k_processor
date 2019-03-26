@@ -27,3 +27,4 @@ synth/*.pvl
 synth/*.syn
 synth/*.mr
 synth/csrc
+synth/*.res

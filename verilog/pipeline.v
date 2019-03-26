@@ -14,8 +14,8 @@
 `define SD #1
 
 module pipeline (
-    input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
-    input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
+    //input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
+    //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
     input         clock,                    // System clock
     input         reset,                    // System reset
     input [3:0]   mem2proc_response,        // Tag from memory about current request
@@ -90,7 +90,15 @@ module pipeline (
     // Outputs from COM/RET Pipeline Register
     output logic [63:0] co_ret_NPC,
     output logic [31:0] co_ret_IR,
-    output logic        co_ret_valid_inst
+    output logic        co_ret_valid_inst,
+
+    //Module outputs
+  output RS_ROW_T [(`RS_SIZE-1):0]		rs_table_out,
+  output PHYS_REG [`NUM_GEN_REG-1:0] arch_table, 
+  output  ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out,
+  output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
+  output PHYS_REG [`FL_SIZE-1:0] free_list_out,
+	output logic [$clog2(`FL_SIZE):0] tail_out
 
   );
   parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
@@ -266,7 +274,11 @@ module pipeline (
   PHYS_REG  CDB_tag_out;
   logic 		CDB_en_out; 
   logic 		busy;
-           
+
+  //Outputs form the freelist check
+  PHYS_REG [`FL_SIZE - 1:0] free_list_check;
+  logic [$clog2(`FL_SIZE):0] tail_check;
+
   
   // // Outputs from MEM/WB Pipeline Register
   // logic         mem_wb_halt;
@@ -376,6 +388,7 @@ module pipeline (
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(dispatch_en),
+    .co_ret_branch_valid(co_ret_branch_valid),
 
 
     
@@ -420,9 +433,9 @@ module pipeline (
     .reset(reset),
     .if_id_IR(if_id_IR),
     .if_id_valid_inst(if_id_valid_inst),
-    .wb_reg_wr_en_out(wb_reg_wr_en_out),
-    .wb_reg_wr_idx_out(wb_reg_wr_idx_out),
-    .wb_reg_wr_data_out(wb_reg_wr_data_out),
+    // .wb_reg_wr_en_out(wb_reg_wr_en_out),
+    // .wb_reg_wr_idx_out(wb_reg_wr_idx_out),
+    // .wb_reg_wr_data_out(wb_reg_wr_data_out),
 
     // Outputs
     .id_ra_value_out(id_rega_out),
@@ -459,7 +472,7 @@ module pipeline (
 	.free_reg(fr_free_reg_T), 	// Comes from Free List durmem2proc_data
 	.CDB_tag_in(CDB_tag_out), 	// Comes from CDB durinmem2proc_data
 	.CDB_en(CDB_enable),     	// Comes from CDB during Commitmem2proc_data
-	.map_check_point(map_check_point),
+	.map_check_point(arch_table),
 	.branch_incorrect(branch_incorrect),
 	
   .map_table_out(map_table_out),
@@ -683,7 +696,7 @@ phys_regfile regf_0 (
     // .id_ex_uncond_branch(id_ex_uncond_branch),
 
     // Outputs
-    .ex_alu0_result_out(ex_alu_result_out),
+    .ex_alu_result_out(ex_alu_result_out),
    
     .ex_take_branch_out(ex_take_branch_out),
     .done(done)
@@ -1003,8 +1016,8 @@ Free_List f0(
 
 	// inputs for branch misprediction
 	.branch_incorrect(branch_not_taken),
-	.free_check_point(free_check_point),
-	.tail_check_point(tail_check_point),
+	.free_check_point(free_list_check),
+	.tail_check_point(tail_check),
 
 	`ifdef DEBUG
 	.free_list_out(fr_rs_rob_T),
@@ -1016,6 +1029,18 @@ Free_List f0(
 	.free_reg(fr_free_reg_T) // Output for Dispatch for other modules
 );
 
+
+Free_List_Check flc(
+.clock(clock),
+.enable(enable),
+.free_list_in(free_list_in),
+.tail_in(tail_in),
+
+.free_list_check(free_list_check),
+
+.tail_check(tail_check)
+
+);
 
 //Intsantiating the arch map
 Arch_Map_Table a0(

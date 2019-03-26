@@ -1,4 +1,4 @@
-`include "../sys_defs.vh"
+`include "../../sys_defs.vh"
 
 `define DELAY #2
 `define CLOCK_PERIOD #10
@@ -21,6 +21,10 @@ module testbench;
 	// output wires
 	PHYS_REG [`FL_SIZE - 1:0] free_list_check;
 	logic [$clog2(`FL_SIZE):0] tail_check;
+
+	// test wires
+	PHYS_REG [`FL_SIZE - 1:0] free_list_test;
+	logic [$clog2(`FL_SIZE):0] tail_test;
 
 	// initialize module
 
@@ -45,6 +49,14 @@ module testbench;
 		end
 	endtask
 
+	task set_random_free_list;
+		begin
+			for (int i = 0; i < `FL_SIZE; ++i) begin
+				free_list_in[i] = $urandom_range(`NUM_PHYS_REG, 0);
+			end
+			tail_in = $urandom_range(`FL_SIZE, 0);
+		end
+	endtask
 
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
@@ -59,6 +71,54 @@ module testbench;
 		clock = ZERO;
 		enable = ZERO;
 		tail_in = 0;
+
+		$display("Testing Single Write...");
+
+		@(negedge clock);
+		enable = ONE;
+		set_random_free_list;
+		free_list_test = free_list_in;
+		tail_test = tail_in;
+
+		@(posedge clock);
+		`DELAY;
+		enable = ZERO;
+		assert(free_list_test == free_list_check) else #1 exit_on_error;
+		assert(tail_test == tail_check) else #1 exit_on_error;
+
+		$display("Single Write Passed");
+
+		$display("Testing Single No Write...");
+
+		@(negedge clock);
+		enable = ZERO;
+		set_random_free_list;
+
+		@(posedge clock);
+		`DELAY;
+		assert(free_list_test == free_list_check) else #1 exit_on_error;
+		assert(tail_test == tail_check) else #1 exit_on_error;
+
+		$display("No Single Write Passed");
+
+		$display("Testing Multiple Random Enable...");
+
+		for (int i = 0; i < 100; ++i) begin
+			@(negedge clock);
+			enable = $urandom_range(1, 0);
+			set_random_free_list;
+			if (enable) begin
+				free_list_test = free_list_in;
+				tail_test = tail_in;
+			end
+
+			@(posedge clock);
+			`DELAY;
+			assert(free_list_test == free_list_check) else #1 exit_on_error;
+			assert(tail_test == tail_check) else #1 exit_on_error;
+		end
+
+		$display("Multiple Random Enable Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
