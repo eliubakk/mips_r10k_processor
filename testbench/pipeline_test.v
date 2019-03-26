@@ -113,6 +113,9 @@ module testbench;
     .if_id_NPC(if_id_NPC),
     .if_id_IR(if_id_IR),
     .if_id_valid_inst(if_id_valid_inst),
+    .id_di_NPC(id_di_NPC),
+    .id_di_IR(id_di_IR),
+    .id_di_valid_inst(id_di_valid_inst),
     // .id_ex_NPC(id_ex_NPC),
     // .id_ex_IR(id_ex_IR),
     // .id_ex_valid_inst(id_ex_valid_inst),
@@ -128,9 +131,9 @@ module testbench;
     .issue_reg_npc(issue_reg_npc),
     .issue_reg_inst_opcode(issue_reg_inst_opcode),
     .issue_reg_inst_valid_inst(issue_reg_inst_valid_inst),
-    .ex_mem_NPC(ex_co_NPC),
-    .ex_mem_IR(ex_co_IR),
-    .ex_mem_valid_inst(ex_co_valid_inst),
+    .ex_co_NPC(ex_co_NPC),
+    .ex_co_IR(ex_co_IR),
+    .ex_co_valid_inst(ex_co_valid_inst),
     .co_ret_NPC(co_ret_NPC),
     .co_ret_IR(co_ret_IR),
     .rs_table_out(rs_table_out),
@@ -161,6 +164,27 @@ module testbench;
     #(`VERILOG_CLOCK_PERIOD/2.0);
     clock = ~clock;
   end
+
+  //Task to desplay input/output
+  task show_input_output_port;
+    begin
+      $display("Inputs");
+      $display("clock = %d reset: %d mem2proc_response = %d mem2proc_data: %d mem2proc_tag: %d", clock, reset, mem2proc_response, mem2proc_data, mem2proc_tag);
+      $display("***********************************");
+      $display("Oututs1");
+      $display("proc2mem_command = %d proc2mem_addr: %d proc2mem_data = %d", proc2mem_command, proc2mem_addr, proc2mem_data);
+      $display("***********************************");
+      $display("Oututs2");
+      $display("pipeline_completed_insts = %d pipeline_error_status: %d pipeline_commit_wr_data = %d pipeline_commit_wr_idx: %d pipeline_commit_wr_en: %d pipeline_commit_NPC: %d", pipeline_completed_insts, pipeline_error_status, pipeline_commit_wr_data, pipeline_commit_wr_idx, pipeline_commit_wr_en, pipeline_commit_NPC);
+      $display("***********************************");
+      $display("Oututs3");
+      $display("if_NPC_out = %d if_IR_out: %d if_valid_inst_out = %d if_id_NPC: %d if_id_IR: %d if_id_valid_inst: %d id_di_NPC: %d id_di_IR: %d id_di_valid_inst: %d", if_NPC_out, if_IR_out, if_valid_inst_out, if_id_NPC, if_id_IR, if_id_valid_inst, id_di_NPC, id_di_IR, id_di_valid_inst);
+      $display("***********************************");
+      $display("Oututs4");
+      $display("rs_table_out_npc = %d rs_table_out_inst_opcode: %d rs_table_out_inst_valid_inst = %d issue_reg_npc: %d issue_reg_inst_opcode: %d issue_reg_inst_valid_inst: %d ex_co_NPC: %d ex_co_IR: %d ex_co_valid_inst: %d co_ret_NPC: %d co_ret_IR: %d rs_table_out: %d arch_table: %d ROB_table_out: %d free_list_out: %d co_ret_valid_inst: %d", rs_table_out_npc, rs_table_out_inst_opcode, rs_table_out_inst_valid_inst, issue_reg_npc, issue_reg_inst_opcode, issue_reg_inst_valid_inst, ex_co_NPC, ex_co_IR, ex_co_valid_inst, co_ret_NPC, co_ret_IR, rs_table_out, arch_table, ROB_table_out, free_list_out, co_ret_valid_inst);
+      $display("***********************************");
+    end
+  endtask  // task show_clk_count 
 
   // Task to display # of elapsed clock edges
   task show_clk_count;
@@ -302,7 +326,7 @@ module testbench;
        display_arch_table();
        display_ROB_table();
        display_free_list_table(free_list_out);
-
+       show_input_output_port();
        
        // print the piepline stuff via c code to the pipeline.out
        print_cycles();
