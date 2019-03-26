@@ -2438,20 +2438,14 @@ void  hs_0_M_37_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
 void  hs_0_M_38_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
 void  hs_0_M_39_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
 void  hs_0_M_40_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
-void  hs_0_M_40_5__simv_pipeline_daidir (UB  * pcode, UB  val);
-void  hs_0_M_41_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
-void  hs_0_M_41_5__simv_pipeline_daidir (UB  * pcode, U  I900);
-void  hs_0_M_42_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
-void  hs_0_M_42_5__simv_pipeline_daidir (UB  * pcode, U  I900);
+void  hs_0_M_41_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
+void  hs_0_M_42_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
 void  hs_0_M_43_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
-void  hs_0_M_44_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
-void  hs_0_M_45_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
-void  hs_0_M_46_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
-void  hs_0_M_47_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
-void  hs_0_M_48_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
-void  hs_0_M_49_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
-void  hs_0_M_50_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
-void  hs_0_M_51_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
+void  hs_0_M_44_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
+void  hs_0_M_45_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
+void  hs_0_M_46_0__simv_pipeline_daidir (UB  * pcode, vec32  * I987, U  I900);
+void  hs_0_M_47_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
+void  hs_0_M_48_0__simv_pipeline_daidir (UB  * pcode, scalar  val);
 void  hsG_0__0 (struct dummyq_struct * I1253, EBLK  * I1247, U  I675);
 #ifdef __cplusplus
 }
