@@ -96,6 +96,115 @@ module testbench;
 		end
 	endtask
 
+	task print_gshare;
+		begin
+			$display("GSHARE");
+			$display("GHT");
+			for (int i = 0; i < `BH_SIZE; ++i) begin
+				$display("ght[%d] = %b", i, gshare_ght_out[i]);
+			end
+			$display("PHT");
+			for (int i = 0; i < (2**(`BH_SIZE)); ++i) begin
+				$display("pht[%d] = %b", i, gshare_pht_out[i]);
+			end
+		end
+	endtask
+
+	task print_obq;
+		begin
+			$display("OBQ");
+			$display("tail_out: %d", obq_tail_out);
+			for (int i = 0; i < `OBQ_SIZE; ++i) begin
+				$display("obq[%d] = %b", i, obq_out[i].branch_history);
+			end
+		end
+	endtask
+
+	task print_btb;
+		begin
+			$display("BTB");
+			$display("btb_valid_out: %b", btb_valid_out);
+			$display("BTB Tag Out");
+			for (int i = 0; i < `BTB_ROW; ++i) begin
+				$display("btb_tag[%d] = %b", i, btb_tag_out[i]);
+			end
+			$display("BTB Target Address Out");
+			for (int i = 0; i < `BTB_ROW; ++i) begin
+				$display("btb_target[%d] = %d", i, btb_target_address_out[i]);
+			end
+		end
+	endtask
+
+	task print_ras;
+		begin
+			$display("RAS");
+			$display("head: %d tail: %d", ras_head_out, ras_tail_out);
+			for (int i = 0; i < `RAS_SIZE; ++i) begin
+				$display("ras[%d] = %d", i, ras_stack_out[i]);
+			end
+		end
+	endtask
+
+	task print_bp;
+		begin
+			$display("BP");
+			print_gshare;
+			print_obq;
+			print_btb;
+			print_ras;
+		end
+	endtask
+
+	task _check_for_correct_gshare_reset;
+		begin
+			for (int i = 0; i < `BH_SIZE; ++i) begin
+				assert(gshare_ght_out[i] == 0) else #1 exit_on_error;
+			end
+			for (int i = 0; i < (2**(`BH_SIZE)); ++i) begin
+				assert(gshare_pht_out[i] == 0) else #1 exit_on_error;
+			end
+		end
+	endtask
+
+	task _check_for_correct_obq_reset;
+		begin
+			assert(obq_tail_out == 0) else #1 exit_on_error;
+			for (int i = 0; i < `OBQ_SIZE; ++i) begin
+				assert(obq_out[i].branch_history == 0) else #1 exit_on_error;
+			end
+		end
+	endtask
+
+	task _check_for_correct_btb_reset;
+		begin
+			assert(btb_valid_out == 0) else #1 exit_on_error;
+			assert(btb_tag_out == 0) else #1 exit_on_error;
+			for (int i = 0; i < `BTB_ROW; ++i) begin
+				assert(btb_tag_out[i] == 0) else #1 exit_on_error;
+				assert(btb_target_address_out[i] == 0) else #1 exit_on_error;
+			end
+		end
+	endtask
+
+	task _check_for_correct_ras_reset;
+		begin
+			assert(ras_head_out == 0) else #1 exit_on_error;
+			assert(ras_tail_out == 0) else #1 exit_on_error;
+			for (int i = 0; i < `RAS_SIZE; ++i) begin
+				assert(ras_stack_out[i] == 0) else #1 exit_on_error;
+			end
+		end
+	endtask
+
+	task check_for_correct_reset;
+		begin
+			_check_for_correct_gshare_reset;
+			_check_for_correct_obq_reset;
+			_check_for_correct_btb_reset;
+			_check_for_correct_ras_reset;
+		end
+	endtask
+
 /*	task display_table;
 		begin
 			$display("*******************************************************************************");
@@ -227,8 +336,8 @@ module testbench;
 		enable = 1'b1;
 		@(posedge clock);
 		`DELAY;
-		//display_table;
-		// assert () else #1 exit_on_error;
+		check_for_correct_reset;
+		$display("Reset Passed");
 		$display("--------START FROM HERE-----");
 
 		// Need to do : How do we know whether the instruction is
