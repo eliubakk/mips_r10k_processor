@@ -229,7 +229,7 @@ module testbench;
 		`DELAY;
 		//display_table;
 		// assert () else #1 exit_on_error;
-
+		$display("--------START FROM HERE-----");
 
 		// Need to do : How do we know whether the instruction is
 		// branch or not before decode?
