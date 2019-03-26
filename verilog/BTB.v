@@ -2,7 +2,7 @@
 // a target PC
 `include "../../sys_defs.vh"
 `timescale 1ns/100ps
-`define	DEBUG_OUT
+`define	DEBUG
 
 module  BTB(
 	input clock,    // Clock
@@ -16,7 +16,7 @@ module  BTB(
 	input			ex_branch_taken,// After execute, 1 when the branch is taken
 	input			ex_en_branch,	// After execute, 1 when the branch is executed
 	
-	`ifdef DEBUG_OUT
+	`ifdef DEBUG
 	output logic 	[`BTB_ROW-1:0]				valid_out,
 	output logic	[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		tag_out,
 	output logic	[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address_out,
@@ -35,7 +35,7 @@ module  BTB(
 	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	target_address, next_target_address; // PC[13:2]
 
 
-	`ifdef DEBUG_OUT
+	`ifdef DEBUG
 	assign valid_out		= valid;
 	assign tag_out			= tag;
 	assign target_address_out	= target_address;

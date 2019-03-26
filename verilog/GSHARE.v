@@ -3,7 +3,7 @@
 //
 `include "../../sys_defs.vh"
 `timescale 1ns/100ps
-`define DEBUG_OUT
+`define DEBUG
 
 
 module GSHARE(
@@ -38,7 +38,7 @@ module GSHARE(
 		//logic								prediction;
 		logic								next_prediction;
 
-	`ifdef DEBUG_OUT
+	`ifdef DEBUG
 	assign pht_out 	= pht;
 	assign ght_out	= ght;
 	`endif	
