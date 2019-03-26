@@ -14,8 +14,8 @@
 `define SD #1
 
 module pipeline (
-    input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
-    input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
+    //input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
+    //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
     input         clock,                    // System clock
     input         reset,                    // System reset
     input [3:0]   mem2proc_response,        // Tag from memory about current request
@@ -266,7 +266,11 @@ module pipeline (
   PHYS_REG  CDB_tag_out;
   logic 		CDB_en_out; 
   logic 		busy;
-           
+
+  //Outputs form the freelist check
+  PHYS_REG [`FL_SIZE - 1:0] free_list_check;
+  logic [$clog2(`FL_SIZE):0] tail_check;
+
   
   // // Outputs from MEM/WB Pipeline Register
   // logic         mem_wb_halt;
@@ -459,7 +463,7 @@ module pipeline (
 	.free_reg(fr_free_reg_T), 	// Comes from Free List durmem2proc_data
 	.CDB_tag_in(CDB_tag_out), 	// Comes from CDB durinmem2proc_data
 	.CDB_en(CDB_enable),     	// Comes from CDB during Commitmem2proc_data
-	.map_check_point(map_check_point),
+	.map_check_point(arch_table),
 	.branch_incorrect(branch_incorrect),
 	
   .map_table_out(map_table_out),
@@ -1003,8 +1007,8 @@ Free_List f0(
 
 	// inputs for branch misprediction
 	.branch_incorrect(branch_not_taken),
-	.free_check_point(free_check_point),
-	.tail_check_point(tail_check_point),
+	.free_check_point(free_list_check),
+	.tail_check_point(tail_check),
 
 	`ifdef DEBUG
 	.free_list_out(fr_rs_rob_T),
@@ -1016,6 +1020,18 @@ Free_List f0(
 	.free_reg(fr_free_reg_T) // Output for Dispatch for other modules
 );
 
+
+Free_List_Check flc(
+.clock(clock),
+.enable(enable),
+.free_list_in(free_list_in),
+.tail_in(tail_in),
+
+.free_list_check(free_list_check),
+
+.tail_check(tail_check)
+
+);
 
 //Intsantiating the arch map
 Arch_Map_Table a0(
