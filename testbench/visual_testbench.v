@@ -8,6 +8,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
+`include "../../sys_defs.vh"
 `timescale 1ns/100ps
 
 extern void initcurses(int,int,int,int,int,int,int,int,int,int);

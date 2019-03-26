@@ -154,73 +154,74 @@ module ex_stage(
    // ALU0 opA mux
    //
   always_comb begin
-    
-    case (issue_reg[0].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out[0] = T1_value[0];
-      ALU_OPA_IS_MEM_DISP:  opa_mux_out[0] = mem_disp[0];
-      ALU_OPA_IS_NPC:       opa_mux_out[0] = issue_reg[0].npc;
-      ALU_OPA_IS_NOT3:      opa_mux_out[0] = ~64'h3;
-    endcase
+    for (integer i=0; i<5; i=i+1) begin
+      case (issue_reg[i].inst.opa_select)
+        ALU_OPA_IS_REGA:     opa_mux_out[i] = T1_value[i];
+        ALU_OPA_IS_MEM_DISP:  opa_mux_out[i] = mem_disp[i];
+        ALU_OPA_IS_NPC:       opa_mux_out[i] = issue_reg[i].npc;
+        ALU_OPA_IS_NOT3:      opa_mux_out[i] = ~64'h3;
+      endcase
+    end
   end
 
 
-  // ALU1 opA mux
-   //
-  always_comb begin
+//   // ALU1 opA mux
+//    //
+//   always_comb begin
     
-    case (issue_reg[1].inst.opa_select)
-      ALU_OPA_IS_REGA:      opa_mux_out[1] = T1_value[1];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[1] = mem_disp[1];
-      ALU_OPA_IS_NPC:      opa_mux_out[1] = issue_reg[1].npc;
-      ALU_OPA_IS_NOT3:     opa_mux_out[1] = ~64'h3;
-    endcase
-  end
+//     case (issue_reg[1].inst.opa_select)
+//       ALU_OPA_IS_REGA:      opa_mux_out[1] = T1_value[1];
+//       ALU_OPA_IS_MEM_DISP: opa_mux_out[1] = mem_disp[1];
+//       ALU_OPA_IS_NPC:      opa_mux_out[1] = issue_reg[1].npc;
+//       ALU_OPA_IS_NOT3:     opa_mux_out[1] = ~64'h3;
+//     endcase
+//   end
 
-  // ALU_load_store opA mux
-   //
-  always_comb begin
+//   // ALU_load_store opA mux
+//    //
+//   always_comb begin
     
-    case (issue_reg[2].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out[2] = T1_value[2];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[2] = mem_disp[2];
-      ALU_OPA_IS_NPC:      opa_mux_out[2] = issue_reg[2].npc;
-      ALU_OPA_IS_NOT3:     opa_mux_out[2] = ~64'h3;
-    endcase
-  end
+//     case (issue_reg[2].inst.opa_select)
+//       ALU_OPA_IS_REGA:     opa_mux_out[2] = T1_value[2];
+//       ALU_OPA_IS_MEM_DISP: opa_mux_out[2] = mem_disp[2];
+//       ALU_OPA_IS_NPC:      opa_mux_out[2] = issue_reg[2].npc;
+//       ALU_OPA_IS_NOT3:     opa_mux_out[2] = ~64'h3;
+//     endcase
+//   end
 
-  // // ALU_store opA mux
-  //  //
-  // always_comb begin
+//   // // ALU_store opA mux
+//   //  //
+//   // always_comb begin
     
-  //   case (issue_reg[3].inst.opa_select)
-  //     ALU_OPA_IS_REGA:     opa_mux_out_alu_store = T1_value[3];
-  //     ALU_OPA_IS_MEM_DISP: opa_mux_out_alu_store = mem_disp;
-  //     ALU_OPA_IS_NPC:      opa_mux_out_alu_store = id_ex_NPC;
-  //     ALU_OPA_IS_NOT3:     opa_mux_out_alu_store = ~64'h3;
-  //   endcase
-  // end
+//   //   case (issue_reg[3].inst.opa_select)
+//   //     ALU_OPA_IS_REGA:     opa_mux_out_alu_store = T1_value[3];
+//   //     ALU_OPA_IS_MEM_DISP: opa_mux_out_alu_store = mem_disp;
+//   //     ALU_OPA_IS_NPC:      opa_mux_out_alu_store = id_ex_NPC;
+//   //     ALU_OPA_IS_NOT3:     opa_mux_out_alu_store = ~64'h3;
+//   //   endcase
+//   // end
   
-//MULT opA
-always_comb begin
+// //MULT opA
+// always_comb begin
     
-    case (issue_reg[3].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out[3] = T1_value[3];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[3] = mem_disp[3];
-      ALU_OPA_IS_NPC:      opa_mux_out[3] = issue_reg[3].npc;
-      ALU_OPA_IS_NOT3:     opa_mux_out[3] = ~64'h3;
-    endcase
-  end
+//     case (issue_reg[3].inst.opa_select)
+//       ALU_OPA_IS_REGA:     opa_mux_out[3] = T1_value[3];
+//       ALU_OPA_IS_MEM_DISP: opa_mux_out[3] = mem_disp[3];
+//       ALU_OPA_IS_NPC:      opa_mux_out[3] = issue_reg[3].npc;
+//       ALU_OPA_IS_NOT3:     opa_mux_out[3] = ~64'h3;
+//     endcase
+//   end
 
-//Branch opA
-always_comb begin
+// //Branch opA
+// always_comb begin
     
-    case (issue_reg[4].inst.opa_select)
-      ALU_OPA_IS_REGA:     opa_mux_out[4] = T1_value[4];
-      ALU_OPA_IS_MEM_DISP: opa_mux_out[4] = mem_disp[4];
-      ALU_OPA_IS_NPC:      opa_mux_out[4] = issue_reg[4].npc;
-      ALU_OPA_IS_NOT3:     opa_mux_out[4] = ~64'h3;
-    endcase
-  end
+//     case (issue_reg[4].inst.opa_select)
+//       ALU_OPA_IS_REGA:     opa_mux_out[4] = T1_value[4];
+//       ALU_OPA_IS_MEM_DISP: opa_mux_out[4] = mem_disp[4];
+//       ALU_OPA_IS_NPC:      opa_mux_out[4] = issue_reg[4].npc;
+//       ALU_OPA_IS_NOT3:     opa_mux_out[4] = ~64'h3;
+//     endcase
+//   end
 
    // 
    // ALU0 opB mux
@@ -229,78 +230,81 @@ always_comb begin
     // Default value, Set only because the case isnt full.  If you see this
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
-    case (issue_reg[0].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out[0]= T2_value[0];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[0] = alu_imm[0];
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[0] = br_disp[0];
-    endcase 
+    for (integer i=0; i<5; i=i+1) begin
+      case (issue_reg[i].inst.opb_select)
+      ALU_OPB_IS_REGB:    opb_mux_out[i]= T2_value[i];//id_ex_regb;
+      ALU_OPB_IS_ALU_IMM:  opb_mux_out[i] = alu_imm[i];
+      ALU_OPB_IS_BR_DISP:  opb_mux_out[i] = br_disp[i];
+      endcase 
+    end
+    
   end
 
-  // ALU1 opB mux
-   //
-  always_comb begin
-    // Default value, Set only because the case isnt full.  If you see this
-    // value on the output of the mux you have an invalid opb_select
-    opb_mux_out = 64'hbaadbeefdeadbeef;
-    case (issue_reg[1].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out[1] = T2_value[1];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM: opb_mux_out[1] = alu_imm[1];
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[1]= br_disp[1];
-    endcase 
-  end
+//   // ALU1 opB mux
+//    //
+//   always_comb begin
+//     // Default value, Set only because the case isnt full.  If you see this
+//     // value on the output of the mux you have an invalid opb_select
+//     opb_mux_out = 64'hbaadbeefdeadbeef;
+//     case (issue_reg[1].inst.opb_select)
+//       ALU_OPB_IS_REGB:    opb_mux_out[1] = T2_value[1];//id_ex_regb;
+//       ALU_OPB_IS_ALU_IMM: opb_mux_out[1] = alu_imm[1];
+//       ALU_OPB_IS_BR_DISP:  opb_mux_out[1]= br_disp[1];
+//     endcase 
+//   end
   
-  // ALU_load_store opB mux
-   //
-  always_comb begin
-    // Default value, Set only because the case isnt full.  If you see this
-    // value on the output of the mux you have an invalid opb_select
-    opb_mux_out = 64'hbaadbeefdeadbeef;
-    case (issue_reg[2].inst.opb_select)
-      ALU_OPB_IS_REGB:     opb_mux_out[2] = T2_value[2];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[2] = alu_imm[2];
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[2] = br_disp[2];
-    endcase 
-  end
+//   // ALU_load_store opB mux
+//    //
+//   always_comb begin
+//     // Default value, Set only because the case isnt full.  If you see this
+//     // value on the output of the mux you have an invalid opb_select
+//     opb_mux_out = 64'hbaadbeefdeadbeef;
+//     case (issue_reg[2].inst.opb_select)
+//       ALU_OPB_IS_REGB:     opb_mux_out[2] = T2_value[2];//id_ex_regb;
+//       ALU_OPB_IS_ALU_IMM:  opb_mux_out[2] = alu_imm[2];
+//       ALU_OPB_IS_BR_DISP:  opb_mux_out[2] = br_disp[2];
+//     endcase 
+//   end
   
-  // // ALU_store opB mux
-  //  //
-  // always_comb begin
-  //   // Default value, Set only because the case isnt full.  If you see this
-  //   // value on the output of the mux you have an invalid opb_select
-  //   opb_mux_out = 64'hbaadbeefdeadbeef;
-  //   case (issue_reg[3].inst.opb_select)
-  //     ALU_OPB_IS_REGB:    opb_mux_out_alu1 = T2_value[3]//id_ex_regb;
-  //     ALU_OPB_IS_ALU_IMM: opb_mux_out_alu1 = alu_imm;
-  //     ALU_OPB_IS_BR_DISP: opb_mux_out_alu1 = br_disp;
-  //   endcase 
-  // end
+//   // // ALU_store opB mux
+//   //  //
+//   // always_comb begin
+//   //   // Default value, Set only because the case isnt full.  If you see this
+//   //   // value on the output of the mux you have an invalid opb_select
+//   //   opb_mux_out = 64'hbaadbeefdeadbeef;
+//   //   case (issue_reg[3].inst.opb_select)
+//   //     ALU_OPB_IS_REGB:    opb_mux_out_alu1 = T2_value[3]//id_ex_regb;
+//   //     ALU_OPB_IS_ALU_IMM: opb_mux_out_alu1 = alu_imm;
+//   //     ALU_OPB_IS_BR_DISP: opb_mux_out_alu1 = br_disp;
+//   //   endcase 
+//   // end
   
-  // MULT opB mux
-   //
-  always_comb begin
-    // Default value, Set only because the case isnt full.  If you see this
-    // value on the output of the mux you have an invalid opb_select
-    opb_mux_out = 64'hbaadbeefdeadbeef;
-    case (issue_reg[3].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out[3] = T2_value[3];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[3] = alu_imm[3];
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[3] = br_disp[3];
-    endcase 
-  end
+//   // MULT opB mux
+//    //
+//   always_comb begin
+//     // Default value, Set only because the case isnt full.  If you see this
+//     // value on the output of the mux you have an invalid opb_select
+//     opb_mux_out = 64'hbaadbeefdeadbeef;
+//     case (issue_reg[3].inst.opb_select)
+//       ALU_OPB_IS_REGB:    opb_mux_out[3] = T2_value[3];//id_ex_regb;
+//       ALU_OPB_IS_ALU_IMM:  opb_mux_out[3] = alu_imm[3];
+//       ALU_OPB_IS_BR_DISP:  opb_mux_out[3] = br_disp[3];
+//     endcase 
+//   end
   
 
-// Branch opB mux
-   //
-  always_comb begin
-    // Default value, Set only because the case isnt full.  If you see this
-    // value on the output of the mux you have an invalid opb_select
-    opb_mux_out = 64'hbaadbeefdeadbeef;
-    case (issue_reg[4].inst.opb_select)
-      ALU_OPB_IS_REGB:    opb_mux_out[4] = T2_value[4];//id_ex_regb;
-      ALU_OPB_IS_ALU_IMM:  opb_mux_out[4] = alu_imm[4];
-      ALU_OPB_IS_BR_DISP:  opb_mux_out[4] = br_disp[4];
-    endcase 
-  end
+// // Branch opB mux
+//    //
+//   always_comb begin
+//     // Default value, Set only because the case isnt full.  If you see this
+//     // value on the output of the mux you have an invalid opb_select
+//     opb_mux_out = 64'hbaadbeefdeadbeef;
+//     case (issue_reg[4].inst.opb_select)
+//       ALU_OPB_IS_REGB:    opb_mux_out[4] = T2_value[4];//id_ex_regb;
+//       ALU_OPB_IS_ALU_IMM:  opb_mux_out[4] = alu_imm[4];
+//       ALU_OPB_IS_BR_DISP:  opb_mux_out[4] = br_disp[4];
+//     endcase 
+//   end
 
   //
   // instantiate the ALU
@@ -376,7 +380,7 @@ always_comb begin
 
    // ultimate "take branch" signal:
    //    unconditional, or conditional and the condition is true
-  assign ex_take_branch_out = issue_reg[4].inst.id_uncond_branch_out
-                              | (issue_reg[4].inst.id_cond_branch_out & brcond_result);
+  assign ex_take_branch_out = issue_reg[4].inst.uncond_branch
+                              | (issue_reg[4].inst.cond_branch & brcond_result);
 
 endmodule // module ex_stage
