@@ -38,7 +38,7 @@ module if_stage(
   logic           PC_enable;
   logic           next_ready_for_valid;
 
-	assign PC_enable = 1'b1;
+	assign PC_enable = dispatch_en & Imem_valid ;
 
  
 assign proc2Imem_addr = {PC_reg[63:3], 3'b0};

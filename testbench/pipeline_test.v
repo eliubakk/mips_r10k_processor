@@ -272,6 +272,86 @@ module testbench;
 		end
 	endtask
 
+	task display_memory;
+		begin
+			$display("main memory---------------------------------------------------------------");
+			$display("mem input : proc2mem_command:%h, proc2mem_addr:%h, proc2mem_data:%h", proc2mem_command, proc2mem_addr, proc2mem_data);
+			$display("mem_output : mem2proc_response:%h, mem2proc_data:%h, mem2proc_tag:%h", mem2proc_response, mem2proc_data, mem2proc_tag);
+			$display("Memory array for first 20 rows");
+			for(int p=0;p<20;p++) begin
+				$display(" row %d : %h",p, memory.unified_memory[p][63:0]);
+			end
+		end
+	endtask
+
+	task display_cache;
+		begin
+			$display("Cache memory---------------------------------------------------------------------");
+			$display("inputs");
+			$display("wr1_en: %b wr1_idx: %h wr1_tag: %h wr1_data %h rd1_idx: %h rd1_tag: %h", pipeline_0.Icache_wr_en, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.mem2proc_data, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag);
+			$display("outputs");
+			$display("rd1_data: %d rd1_valid: %b", pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
+			$display("----------------------------------Cache Memory------------------------------------");
+			for (int p = 0; p < 32; ++p) begin
+				$display("data[%d] = %h tags[%d] = %h valids[%d] = %b", p, pipeline_0.cachememory.data[p], p, pipeline_0.cachememory.tags[p], p, pipeline_0.cachememory.valids[p]);
+			end
+			$display("----------------------------------------------------------------------------------");
+		end
+	endtask
+
+	task display_icache;
+		begin
+			$display("icache--------------------------------------------------------------------------");
+			$display("inputs:");
+			$display("Imem2proc_response: %h, Imem2_proc_data: %h, Imem2proc_tag: %h, proc2Icache_addr: %h, cachemem_data: %h, cachemem_valid: %b", pipeline_0.Imem2proc_response, pipeline_0.mem2proc_data, pipeline_0.mem2proc_tag, pipeline_0.proc2Icache_addr, pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
+			$display("outputs:");
+			$display("proc2Imem_command: %d proc2Imem_addr: %h Icache_data_out: %h Icache_valid_out: %d current_index: %d current_tag: %d last_index: %d last_tag: %d data_write_enable: %b", pipeline_0.proc2Imem_command, pipeline_0.proc2Imem_addr, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.Icache_wr_en);
+		end
+	endtask
+
+	task display_if_stage;
+		begin
+			$display("if_stage---------------------------------------------------------------------");
+			$display("inputs");
+			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_alu_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
+			$display("outputs");
+			$display("if_NPC_out: %d, if_IR_out: %h proc2Imem_addr: %h if_valid_inst_out: %d", pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.proc2Icache_addr, pipeline_0.if_valid_inst_out);
+		end
+	endtask
+
+	task display_if_id;
+		begin
+			$display("if_id pipeline registers---------------------------------------------------");
+			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
+		end
+	endtask
+
+	task display_id_stage;
+		begin
+		end
+	endtask
+
+	task display_stages;
+		begin
+			if (clock_count == 100) begin
+				$finish;
+			end
+			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			$display("Cycle: %d", clock_count);
+			$display("Pipeline Assigns");
+			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
+			display_memory;
+			display_cache;
+			display_icache;
+			display_if_stage;
+			display_if_id;
+			// display_id_stage;
+			// display_id_di;
+			// display_RS;
+			$display("\n");
+		end
+	endtask
+
   initial begin
   
     clock = 1'b0;
@@ -284,7 +364,7 @@ module testbench;
     @(posedge clock);
     @(posedge clock);
 	$display("@@@@@@memory1");
-    $readmemh("program.mem", memory.unified_memory);
+    $readmemh("../../program.mem", memory.unified_memory);
 
 	$display("@@@@@@memory2");
     @(posedge clock);
@@ -295,8 +375,17 @@ module testbench;
     reset = 1'b0;
     $display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime);
 
-    wb_fileno = $fopen("writeback.out");
-    
+    wb_fileno = $fopen("../../writeback.out");
+
+
+//----Check issue_reg
+
+	for(int p=0; p<5; p++) begin
+
+	$display("issue_reg.inst.halt[p] = %b", pipeline_0.issue_reg[p].inst.halt);
+ 
+	end
+
     //Open header AFTER throwing the reset otherwise the reset state is displayed
     print_header("                                                                                                        D-MEM Bus &\n");
     print_header("Cycle:      IF      |     ID      |     DI      |     IS      |     EX      |     CMP     |     RE      Reg Result");
@@ -313,10 +402,21 @@ module testbench;
       clock_count <= `SD (clock_count + 1);
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
+	`SD;
+	display_stages;
   end  
 
 
   always @(negedge clock) begin
+
+
+	$display("co_ret_enable: %b co_halt_selected: %b", pipeline_0.co_ret_enable, pipeline_0.co_halt_selected);
+	for(int p=0; p<5; p++) begin
+
+	$display("issue_reg.inst.halt[p] = %b", pipeline_0.issue_reg[p].inst.halt);
+ 
+	end
+	$display("pc_reg = %d", pipeline_0.if_stage_0.PC_reg);
     if(reset)
       $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
                $realtime);

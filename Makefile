@@ -100,6 +100,10 @@ simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
 
 .PHONY: sim
 
+dve_pipe: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+	cd $(SYN_DIR) && \
+	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
+	$(VCS) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
 # updated interactive debugger "DVE", using the latest version of VCS
 # awdeorio fall 2011
 dve:	$(SIMFILES) $(TESTBENCH)

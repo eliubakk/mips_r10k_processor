@@ -67,6 +67,7 @@ module decoder(
         6'h0:
           case (inst[31:26])
             `PAL_INST: begin
+		fu_name = FU_ALU;
               if (inst[25:0] == `PAL_HALT)
                 halt = `TRUE;
               else if (inst[25:0] == `PAL_WHAMI) begin

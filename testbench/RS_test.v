@@ -841,6 +841,43 @@ module testbench;
 			end
 		end
 
+		$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+		@(negedge clock);
+		reset = 1;
+		enable = 0;
+		CAM_en = 0;
+		dispatch_valid = 0;
+		issue_stall = 0;
+
+		@(posedge clock);
+		`DELAY;
+		table_out;
+
+		@(negedge clock);
+		// dispatch halt inst
+		reset = 0;
+		enable = 1;
+		dispatch_valid = 1;
+		inst_in[0].inst.halt = 1;
+		inst_in[0].inst.valid_inst = 1;
+		inst_in[0].inst.cpuid = 0;
+		inst_in[0].inst.illegal = 0; 
+		inst_in[0].busy = 1;
+		inst_in[0].inst_opcode = `PAL_HALT;
+		inst_in[0].npc = 4;
+
+		@(posedge clock);
+		`DELAY;
+		table_out;
+		// check that halt inst exists
+		for (int p = 0; p < `NUM_FU_TOTAL; ++p) begin
+			// check if current issue_out index is halt
+			if (issue_next[p].inst.halt == 1'b1 & issue_next[p].inst_opcode == `PAL_HALT) begin
+				$display("we are good");
+			end
+		end
+
 		if (`SS_SIZE == 1) begin
 			$display("@@@Passed");
 			$finish;
