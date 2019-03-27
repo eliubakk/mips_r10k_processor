@@ -16,7 +16,11 @@ module CAM(enable, tag, tags_in, hits);
 	for(i = 0; i < LENGTH; i = i + 1) begin
 		for(j = 0; j < WIDTH; j = j + 1) begin
 			for(k = 0; k < NUM_TAG; k = k + 1) begin
-				assign hits[i][j] = enable[k] & (tags_in[i][j] == tag[k]);
+				if(WIDTH > 1) begin
+					assign hits[i][j] = enable[k] & (tags_in[i][j] == tag[k]);
+				end else begin
+					assign hits[i] = enable[k] & (tags_in[i] == tag[k]);
+				end
 			end
 		end
 	end		
