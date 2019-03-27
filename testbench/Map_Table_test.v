@@ -1,7 +1,7 @@
 `include "../../sys_defs.vh"
 
 `define DELAY #2
-`define CLOCK_PERIOD #10
+`define CLOCK_PERIOD #3.5
 `define DEBUG
 
 module testbench;
@@ -32,7 +32,7 @@ module testbench;
 	// input wires
 	logic clock;
 	logic reset;
-	logic enable;
+	logic [`SS_SIZE-1:0] enable;
 	GEN_REG  [`SS_SIZE-1:0] reg_a;
 	GEN_REG  [`SS_SIZE-1:0] reg_b;
 	GEN_REG  [`SS_SIZE-1:0] reg_dest;
@@ -107,6 +107,15 @@ module testbench;
 		end
 	endtask
 
+	task tags_out;
+
+		begin
+			for(int i = 0; i < `SS_SIZE; i += 1) begin
+				$display("index: %d\nenable: %b \nCDB_tag_in: %d CDB_en: %d\nreg_a: %d | T1: %d T1_ready: %d \nreg_b: %d | T2: %d T2_ready: %d \nreg_dest: %d free_reg: %d | T_old: %d T_old_ready: %d\n",
+					i, enable[i], CDB_tag_in[i][$clog2(`NUM_PHYS_REG)-1:0], CDB_en[i], reg_a[i], T1[i][$clog2(`NUM_PHYS_REG)-1:0], T1[i][$clog2(`NUM_PHYS_REG)], reg_b[i], T2[i][$clog2(`NUM_PHYS_REG)-1:0], T2[i][$clog2(`NUM_PHYS_REG)], reg_dest[i], free_reg[i], T_old[i][$clog2(`NUM_PHYS_REG)-1:0], T_old[i][$clog2(`NUM_PHYS_REG)]);
+			end
+		end
+	endtask
 
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
@@ -114,13 +123,11 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b enable: %b \nCDB_tag_in: %d CDB_en: %d\nreg_a: %d | T1: %d T1_ready: %d \nreg_b: %d | T2: %d T2_ready: %d \nreg_dest: %d free_reg: %d | T_old: %d T_old_ready: %d\n",
-					clock, reset, enable, CDB_tag_in[0][$clog2(`NUM_PHYS_REG)-1:0], CDB_en[0], reg_a[0], T1[0][$clog2(`NUM_PHYS_REG)-1:0], T1[0][$clog2(`NUM_PHYS_REG)], reg_b[0], T2[0][$clog2(`NUM_PHYS_REG)-1:0], T2[0][$clog2(`NUM_PHYS_REG)], reg_dest[0], free_reg[0], T_old[0][$clog2(`NUM_PHYS_REG)-1:0], T_old[0][$clog2(`NUM_PHYS_REG)]);
-
+		$monitor("clock: %b reset: %b", clock, reset);
+		
 		// intial values
 		clock = ZERO;
 		reset = ZERO;
-		enable = ZERO;
 		for(int i = 0; i < `SS_SIZE; i += 1) begin
 			reg_a[i] = 0;
 			reg_b[i] = 0;
@@ -129,6 +136,7 @@ module testbench;
 			free_reg[i][$clog2(`NUM_PHYS_REG)] = ONE;
 			CDB_tag_in[i] = 0;
 			CDB_en[i] = ZERO;
+			enable[i] = ZERO;
 		end
 
 		table_out();
@@ -138,6 +146,10 @@ module testbench;
 		reset = ONE;
 
 		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+
+		@(negedge clock);
 		`DELAY;
 		table_out();
 		// check that at reset, all mappings of gen purp reg are
@@ -162,7 +174,7 @@ module testbench;
 
 				table_out();
 				@(posedge clock);
-				enable = ONE;
+				enable[0] = ONE;
 				reg_a[0] = i;
 				reg_b[0] = j;
 
@@ -179,7 +191,7 @@ module testbench;
 		// reset
 		@(negedge clock);
 		reset = ONE;
-		enable = ZERO;
+		enable[0] = ZERO;
 
 		$display("Get Mapped Registers Passed");
 
@@ -190,32 +202,34 @@ module testbench;
 		// reset
 		@(negedge clock);
 		reset = ZERO;
-		enable = ZERO;
+		enable[0] = ZERO;
 
 		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
 
 			// reset
 			@(negedge clock);
 			reset = ZERO;
-			enable = ZERO;
+			enable[0] = ZERO;
 
 			// map new registers in map_table
 			// the newly mapped registers are marked as not ready
 			@(negedge clock);
-			enable = ONE;
+			enable[0] = ONE;
 			free_reg[0] = i;
 			reg_dest[0] = counter;
 
 			@(posedge clock);
 			`DELAY;
-			enable = ZERO;
+			enable[0] = ZERO;
+
+			@(negedge clock);
 			assert(map_table_out[reg_dest[0]].phys_tag == free_reg[0]) else #1 exit_on_error;
 			++counter;
 
 			// reset
 			@(negedge clock);
 			reset = ZERO;
-			enable = ZERO;
+			enable[0] = ZERO;
 
 		end
 
@@ -227,20 +241,20 @@ module testbench;
 		// reset
 		@(negedge clock);
 		reset = ZERO;
-		enable = ZERO;
+		enable[0] = ZERO;
 
 		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
 
 			// map new registers in map_table
 			// the newly mapped registers are marked as not ready
 			@(negedge clock);
-			enable = ONE;
+			enable[0] = ONE;
 			free_reg[0] = i;
 			reg_dest[0] = counter;
 
 			@(posedge clock);
 			`DELAY;
-			enable = ZERO;
+			enable[0] = ZERO;
 			assert(map_table_out[reg_dest[0]].phys_tag == free_reg[0]) else #1 exit_on_error;
 			++counter;
 
@@ -264,6 +278,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		CDB_en[0] = ZERO;
+		@(negedge clock);
 		table_out();
 		assert(map_table_out[0].phys_tag == CDB_tag_in[0]) else #1 exit_on_error;
 
@@ -277,26 +292,29 @@ module testbench;
 		// reset
 		@(negedge clock);
 		reset = ZERO;
-		enable = ZERO;
+		enable[0] = ZERO;
 
 		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
 
 			// map new registers in map_table
 			// the newly mapped registers are marked as not ready
 			@(negedge clock);
-			enable = ONE;
+			enable[0] = ONE;
 			free_reg[0] = i;
 			reg_dest[0] = counter;
 
 			@(posedge clock);
 			`DELAY;
+			enable[0] = ZERO;
+
+			@(negedge clock);
 			assert(map_table_out[reg_dest[0]].phys_tag == free_reg[0]) else #1 exit_on_error;
 			++counter;
 
 		end
 
 		// at this point, all regs in map_table are not ready
-		enable = ZERO;
+		enable[0] = ZERO;
 
 		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
 
@@ -308,6 +326,8 @@ module testbench;
 			@(posedge clock);
 			`DELAY;
 			CDB_en = ZERO;
+
+			@(negedge clock);
 			assert(map_table_out[i - `NUM_GEN_REG].phys_tag == CDB_tag_in[0]) else #1 exit_on_error;
 		end
 		table_out();
@@ -318,34 +338,36 @@ module testbench;
 		// reset
 		@(negedge clock);
 		reset = ONE;
-		enable = ZERO;
+		enable[0] = ZERO;
 		CDB_en[0] = ZERO;
 
 		counter = 0;
 		// reset
 		@(negedge clock);
 		reset = ZERO;
-		enable = ZERO;
+		enable[0] = ZERO;
 
 		for (int i = `NUM_GEN_REG; i < `NUM_PHYS_REG; ++i) begin
 
 			// map new registers in map_table
 			// the newly mapped registers are marked as not ready
 			@(negedge clock);
-			enable = ONE;
+			enable[0] = ONE;
 			free_reg[0] = i;
 			reg_dest[0] = counter;
 
 			@(posedge clock);
 			`DELAY;
+			enable[0] = ZERO;
+
+			@(negedge clock);
 			assert(map_table_out[reg_dest[0]].phys_tag == free_reg[0]) else #1 exit_on_error;
 			++counter;
 
 		end
 		table_out();
 		@(posedge clock);
-		`DELAY;
-		enable = ONE;
+		enable[0] = ONE;
 		reg_a[0] = 6;
 		reg_b[0] = 9;
 		reg_dest[0] = 4;
@@ -356,6 +378,7 @@ module testbench;
 		CDB_en[0] = ONE;
 		free_reg[0] = 0;
 		
+		@(negedge clock);
 		`DELAY;
 		cam_out();
 		assert(T1[0] == `NUM_GEN_REG + reg_a[0]) else #1 exit_on_error;
@@ -365,14 +388,16 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		table_out();
-		enable = ZERO;
+		enable[0] = ZERO;
 		CDB_en[0] = ZERO;
+
+		@(negedge clock);
 		assert(map_table_out[reg_dest[0]].phys_tag == free_reg[0]) else #1 exit_on_error;
 		$display("Simultaneous Commit and Dispatch Passed");
 
 		$display("Testing Multiple Simultaneous Commit and Dispatch...");
 
-
+		@(posedge clock);
 		for (int i = 0; i < 50; ++i) begin
 			test_a = $urandom_range(31, 0);
 			test_b = $urandom_range(31, 0);
@@ -395,9 +420,8 @@ module testbench;
 				map_table_test[test_reg_dest].phys_tag = test_free_reg;
 			end
 
-			@(negedge clock);
 			reset = ZERO;
-			enable = test_enable;
+			enable[0] = test_enable;
 			reg_a[0] = test_a;
 			reg_b[0] = test_b;
 			reg_dest[0] = test_reg_dest;
@@ -405,6 +429,7 @@ module testbench;
 			CDB_tag_in[0] = test_CDB_tag;
 			CDB_en[0] = test_CDB_en;
 			
+			@(negedge clock);
 			`DELAY;
 			if (test_enable) begin
 				assert(T1[0] == map_table_test[test_a].phys_tag) else #1 exit_on_error;
@@ -425,7 +450,7 @@ module testbench;
 		$display("Testing Basic Branch Incorrect...");
 
 		@(negedge clock);
-		enable = ZERO;
+		enable[0] = ZERO;
 		CDB_en[0] = ZERO;
 		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
 			map_check_point[i].phys_tag = i + 4;
@@ -436,6 +461,8 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
+
+		@(negedge clock);
 		assert(map_table_out == map_check_point) else #1 exit_on_error;
 
 		$display("Basic Branch Incorrect Passed");
@@ -443,9 +470,8 @@ module testbench;
 		$display("Testing Multiple Branch Incorrect...");
 
 		branch_incorrect = ZERO;
-
+		@(negedge clock);
 		for (int i = 0; i < 10; ++i) begin
-			@(negedge clock);
 			for (int j = 0; j < `NUM_GEN_REG; ++j) begin
 				map_check_point[j] = $urandom_range(`NUM_PHYS_REG - 1, 0);
 			end
@@ -454,11 +480,158 @@ module testbench;
 			@(posedge clock);
 			`DELAY;
 			branch_incorrect = ZERO;
+
+			@(negedge clock);
 			assert(map_table_out == map_check_point) else #1 exit_on_error;
 		end
 
 		$display("Multiple Branch Incorrect Passed");
 
+		if(`SS_SIZE == 1) begin
+			$display("@@@Passed");
+			$finish;
+		end
+		@(negedge clock);
+		reset = ONE;
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+
+		@(negedge clock);
+		table_out();
+		$display("Testing superscalar Dispatch...");
+
+		@(posedge clock);
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			reg_a[i] = i;
+			reg_b[i] = i + `SS_SIZE;
+			reg_dest[i] = i + 2*`SS_SIZE;
+			free_reg[i] = `NUM_GEN_REG + i;
+			free_reg[i][$clog2(`NUM_PHYS_REG)] = ZERO;
+			CDB_tag_in[i] = 0;
+			CDB_en[i] = ZERO;
+			enable[i] = ONE;
+		end
+		@(negedge clock);
+		`DELAY;
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			assert(T1[i][$clog2(`NUM_PHYS_REG)-1:0] == i) else #1 exit_on_error;
+			assert(T1[i][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+			assert(T2[i][$clog2(`NUM_PHYS_REG)-1:0] == (i + `SS_SIZE)) else #1 exit_on_error;
+			assert(T2[i][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+			assert(T_old[i][$clog2(`NUM_PHYS_REG)-1:0] == (i + 2*`SS_SIZE)) else #1 exit_on_error;
+			assert(T_old[i][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+		end
+		@(posedge clock);
+		`DELAY;
+
+		@(negedge clock);
+		table_out();
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			assert(map_table_out[reg_dest[i]].phys_tag == free_reg[i]) else #1 exit_on_error;
+		end
+
+		$display("Superscalar Dispatch Passed");
+
+		$display("Testing Superscalar Dispatch with Dependencies...");
+		reset = ONE;
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+		for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+			reg_a[i] = i + 1;
+			reg_b[i] = i + 1 + `SS_SIZE;
+			reg_dest[i] = i;
+			free_reg[i] = `NUM_GEN_REG + i;
+			free_reg[i][$clog2(`NUM_PHYS_REG)] = ZERO;
+			CDB_tag_in[i] = 0;
+			CDB_en[i] = ZERO;
+			enable[i] = ONE;
+		end
+		@(negedge clock);
+		`DELAY;
+		tags_out();
+		assert(T1[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)-1:0] == `SS_SIZE) else #1 exit_on_error;
+		assert(T1[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+		assert(T2[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)-1:0] == (2*`SS_SIZE)) else #1 exit_on_error;
+		assert(T2[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+		assert(T_old[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)-1:0] == (`SS_SIZE-1)) else #1 exit_on_error;
+		assert(T_old[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+		for(int i = `SS_SIZE-2; i >= 0; i -= 1) begin
+			assert(T1[i][$clog2(`NUM_PHYS_REG)-1:0] == (`NUM_GEN_REG + (i+1))) else #1 exit_on_error;
+			assert(T1[i][$clog2(`NUM_PHYS_REG)] == ZERO) else #1 exit_on_error;
+			assert(T2[i][$clog2(`NUM_PHYS_REG)-1:0] == (i + 1 + `SS_SIZE)) else #1 exit_on_error;
+			assert(T2[i][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+			assert(T_old[i][$clog2(`NUM_PHYS_REG)-1:0] == i) else #1 exit_on_error;
+			assert(T_old[i][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+		end
+		@(posedge clock);
+		`DELAY;
+		table_out();
+		@(negedge clock);
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			assert(map_table_out[reg_dest[i]].phys_tag == free_reg[i]) else #1 exit_on_error;
+		end
+
+		$display("Superscalar Dispatch with Dependencies Passed");
+
+		$display("Testing Superscalar Dispatch and Commit...");
+		reset = ONE;
+		@(posedge clock);
+		`DELAY;
+		reset = ZERO;
+		//update map table to have no registers ready
+		for(int i = 0; i < `NUM_GEN_REG+`SS_SIZE; i += `SS_SIZE) begin
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if((i + j) >= `NUM_GEN_REG) begin
+					break;
+				end
+				reg_a[j] = (i + j);
+				reg_b[j] = (i + j);
+				reg_dest[j] = (i + j);
+				free_reg[j] = `NUM_GEN_REG + (i+j);
+				free_reg[j][$clog2(`NUM_PHYS_REG)] = ZERO;
+				CDB_tag_in[j] = 0;
+				CDB_en[j] = ZERO;
+				enable[j] = ONE;
+			end
+			@(posedge clock);
+		end
+		//table_out();
+		`DELAY;
+		//commit all reg_a
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			reg_a[i] = i;
+			reg_b[i] = i + `SS_SIZE;
+			reg_dest[i] = i + 2*`SS_SIZE;
+			free_reg[i] = 2*`NUM_GEN_REG + i;
+			free_reg[i][$clog2(`NUM_PHYS_REG)] = ZERO;
+			CDB_tag_in[i] = `NUM_GEN_REG + i;
+			CDB_en[i] = ONE;
+			enable[i] = ONE;
+		end
+		tags_out();
+		@(negedge clock);
+		`DELAY;
+		table_out();
+		tags_out();
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			assert(T1[i][$clog2(`NUM_PHYS_REG)-1:0] == (`NUM_GEN_REG + i)) else #1 exit_on_error;
+			assert(T1[i][$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
+			assert(T2[i][$clog2(`NUM_PHYS_REG)-1:0] == (`NUM_GEN_REG + i + `SS_SIZE)) else #1 exit_on_error;
+			assert(T2[i][$clog2(`NUM_PHYS_REG)] == ZERO) else #1 exit_on_error;
+			assert(T_old[i][$clog2(`NUM_PHYS_REG)-1:0] == (`NUM_GEN_REG + i + 2*`SS_SIZE)) else #1 exit_on_error;
+			assert(T_old[i][$clog2(`NUM_PHYS_REG)] == ZERO) else #1 exit_on_error;
+		end
+		@(posedge clock);
+		`DELAY;
+		table_out();
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			assert(map_table_out[reg_dest[i]].phys_tag == free_reg[i]) else #1 exit_on_error;
+		end
+
+		$display("Superscalar Dispatch and Commit Passed");
 
 		$display("@@@Passed");
 		$finish;

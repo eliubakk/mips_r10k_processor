@@ -4,7 +4,7 @@
 module Map_Table(
 	input	clock,
 	input 	reset,
-	input	enable,
+	input	[`SS_SIZE-1:0] enable,
 	input GEN_REG	[`SS_SIZE-1:0]	reg_a, 		// Comes from Decode during Dispatch
 	input GEN_REG	[`SS_SIZE-1:0]  reg_b, 		// Comes from Decode during Dispatch 
 	input GEN_REG 	[`SS_SIZE-1:0]  reg_dest, 	// Comes from Decode during Dispatch
@@ -22,7 +22,7 @@ module Map_Table(
 
 	output PHYS_REG [`SS_SIZE-1:0]	T1, 		// Output for Dispatch and goes to RS
 	output PHYS_REG [`SS_SIZE-1:0]	T2, 		// Output for Dispatch and goes to RS
-	output PHYS_REG [`SS_SIZE-1:0]	T_old 		// Output for Dispatch and goes to ROB
+	output PHYS_REG [`SS_SIZE-1:0]	T_old 		// Output for ROB
 );
 
 	// internal data
@@ -42,15 +42,6 @@ module Map_Table(
 	`endif
 
 	genvar ig;
-	for(ig = 0; ig < `SS_SIZE; ig += 1) begin
-		assign T1[ig][($clog2(`NUM_PHYS_REG)-1):0] = map_table[reg_a[ig]].phys_tag[($clog2(`NUM_PHYS_REG)-1):0];
-		assign T1[ig][$clog2(`NUM_PHYS_REG)] = map_table[reg_a[ig]].phys_tag[$clog2(`NUM_PHYS_REG)] | cam_hits[reg_a[ig]];
-		assign T2[ig][($clog2(`NUM_PHYS_REG)-1):0] = map_table[reg_b[ig]].phys_tag[($clog2(`NUM_PHYS_REG)-1):0];
-		assign T2[ig][$clog2(`NUM_PHYS_REG)] = map_table[reg_b[ig]].phys_tag[$clog2(`NUM_PHYS_REG)] | cam_hits[reg_b[ig]];
-		assign T_old[ig][($clog2(`NUM_PHYS_REG)-1):0] = map_table[reg_dest[ig]].phys_tag[($clog2(`NUM_PHYS_REG)-1):0];
-		assign T_old[ig][$clog2(`NUM_PHYS_REG)] = map_table[reg_dest[ig]].phys_tag[$clog2(`NUM_PHYS_REG)] | cam_hits[reg_dest[ig]];
-	end
-
 	for(ig = 0; ig < `NUM_GEN_REG; ig += 1) begin
 		assign cam_tags_in[ig] = map_table[ig].phys_tag[($clog2(`NUM_PHYS_REG)-1):0];
 	end
@@ -76,10 +67,15 @@ module Map_Table(
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
 				next_map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] |= cam_hits[i];
 			end
-		end
-		if (enable && ~branch_incorrect) begin
-			// Dispatch Stage second
-			next_map_table[reg_dest] = free_reg;
+			for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+				// Dispatch Stage second
+				if(enable[i]) begin
+					T1[i] = next_map_table[reg_a[i]].phys_tag;
+					T2[i] = next_map_table[reg_b[i]].phys_tag;
+					T_old[i] = next_map_table[reg_dest[i]].phys_tag;
+					next_map_table[reg_dest[i]].phys_tag = free_reg[i];
+				end
+			end
 		end
 	end
 
