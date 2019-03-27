@@ -5,9 +5,9 @@
 module RAS(
 	input clock,
 	input reset,
-	input write_en,
-	input clear_en,
-	input [31:0] current_pc,
+	input write_en,  				// Write, retirement
+	input clear_en,					// Read, during fetch
+	input [31:0] current_pc,			// During fetch
 
 	`ifdef DEBUG
 	output logic [`RAS_SIZE - 1:0] [31:0] stack_out,
@@ -15,8 +15,8 @@ module RAS(
 	output logic [$clog2(`RAS_SIZE) - 1:0] tail_out,
 	`endif
 
-	output logic [31:0] next_pc,
-	output logic valid_out
+	output logic [31:0] next_pc,			// During fetch
+	output logic valid_out				// During fetc
 );
 
 	// internal data

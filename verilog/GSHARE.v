@@ -3,7 +3,7 @@
 //
 `include "../../sys_defs.vh"
 `timescale 1ns/100ps
-`define DEBUG_OUT
+`define DEBUG
 
 
 module GSHARE(
@@ -17,7 +17,7 @@ module GSHARE(
 		input							clear_en,	   // When branch prediction is wrong, flip the PHT bit of obq_gh_in
 		input	[31:0]						rt_pc,
 		
-		`ifdef DEBUG_OUT
+		`ifdef DEBUG
 		output	[2**(`BH_SIZE)-1:0]				pht_out,
 		`endif
 		output	[`BH_SIZE-1:0]					ght_out,
@@ -38,7 +38,7 @@ module GSHARE(
 		//logic								prediction;
 		logic								next_prediction;
 
-	`ifdef DEBUG_OUT
+	`ifdef DEBUG
 	assign pht_out 	= pht;
 	assign ght_out	= ght;
 	`endif	

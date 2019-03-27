@@ -126,6 +126,7 @@ module pipeline (
   logic          id_illegal_out;
   logic          id_valid_inst_out;
   logic [4:0]    ra_idx, rb_idx, rc_idx ; 
+  FU_NAME id_fu_name_out;
 
   //outputs from the maptable
   MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out;
@@ -231,7 +232,7 @@ module pipeline (
   logic [4:0]        co_selected;        // alu which is granted the request from priority selector
   logic [31:0]       co_IR_selected;
   logic [63:0]       co_alu_result_selected;
-  wor         psel_enable;
+  logic          psel_enable;
   logic  [4:0] gnt_bus;
 
 
@@ -396,7 +397,7 @@ module pipeline (
     // Outputs
     .if_NPC_out(if_NPC_out), 
     .if_IR_out(if_IR_out),
-    .proc2Imem_addr(proc2Imem_addr),
+    .proc2Imem_addr(proc2Icache_addr),
     .if_valid_inst_out(if_valid_inst_out)
   );
 
@@ -444,7 +445,7 @@ module pipeline (
     .id_opb_select_out(id_opb_select_out),
     .id_dest_reg_idx_out(id_dest_reg_idx_out),
     .id_alu_func_out(id_alu_func_out),
-    .id_fu_name(id_fu_name_out),
+    .id_fu_name_out(id_fu_name_out),
     .id_rd_mem_out(id_rd_mem_out),
     .id_wr_mem_out(id_wr_mem_out),
     .id_ldl_mem_out(id_ldl_mem_out),
@@ -458,6 +459,7 @@ module pipeline (
     .ra_idx(id_ra_idx),
     .rb_idx(id_rb_idx),
     .rc_idx(id_rc_idx)
+    
 
   );
 
@@ -556,7 +558,9 @@ module pipeline (
       .inst_in({id_di_opa_select_out, id_di_opb_select_out, id_di_dest_reg_idx_out, id_di_alu_func_out, id_di_fu_name_out, id_di_rd_mem_out, id_di_wr_mem_out,
        id_di_ldl_mem_out, id_di_stc_mem_out, id_di_cond_branch_out, id_di_uncond_branch_out, id_di_halt_out, id_di_cpuid_out, id_di_illegal_out, id_di_valid_inst_out, fr_free_reg_T 
        , T1, T2, 0, if_id_IR, if_id_NPC}), 
-      .branch_not_taken(branch_not_taken),   //check for this
+      .branch_not_taken(branch_not_taken), 
+      .issue_stall(is_ex_enable),
+        //check for this
       
       // outputs
       .rs_table_out(rs_table_out), 
@@ -565,10 +569,14 @@ module pipeline (
       .rs_full(rs_full)
     );
 
-
-  assign rs_table_out_npc = rs_table_out.npc;
-  assign rs_table_out_inst_opcode = rs_table_out.inst.opcode;
-  assign rs_table_out_inst_valid_inst = rs_table_out.inst.valid_inst;
+always_comb begin
+  for(integer i=0; i< `RS_SIZE; i=i+1) begin
+    rs_table_out_npc[i] = rs_table_out[i].npc;
+    rs_table_out_inst_opcode[i] = rs_table_out[i].inst_opcode;
+    rs_table_out_inst_valid_inst[i] = rs_table_out[i].inst.valid_inst;
+  end
+end
+  
   //////////////////////////////////////////////////
   //                                              //
   //                  ISSUE/EX-Stage                    //
@@ -621,7 +629,7 @@ phys_regfile regf_0 (
   //////////////////////////////////////////////////
   always_comb begin
     for (integer i=0; i<5; i=i+1) begin
-      assign is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
+      is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
     end
   end
   // synopsys sync_set_reset "reset"
@@ -740,17 +748,17 @@ phys_regfile regf_0 (
         end else begin
         if (ex_co_enable[i]) begin
             // these are forwarded directly from ID/EX latches
-            ex_co_NPC[i]          <= `SD issue_reg.npc;
-            ex_co_IR[i]           <= `SD issue_reg.inst_opcode;
-            ex_co_dest_reg_idx[i] <= `SD issue_reg.T;
+            ex_co_NPC[i]          <= `SD issue_reg[i].npc;
+            ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
+            ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T;
            // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
-            ex_co_wr_mem[i]       <= `SD issue_reg.inst.wr_mem;
-            ex_co_halt[i]         <= `SD issue_reg.inst.halt;
-            ex_co_illegal[i]      <= `SD issue_reg.inst.illegal;
-            ex_co_valid_inst[i]   <= `SD issue_reg.inst.valid_inst;
+            ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
+            ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
+            ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
+            ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
             //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
             // these are results of EX stage
-            ex_co_alu_result[i]   <= `SD ex_alu_result_out;      
+            ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];      
             
         end // if
         end // else: !if(reset)
@@ -851,7 +859,7 @@ phys_regfile regf_0 (
   
   
   
-  assign psel_enable = ex_co_valid_inst[2 -: 0] & done & ex_co_valid_inst[4]; // ask the use of wor
+  assign psel_enable = ex_co_valid_inst[0] & ex_co_valid_inst[1] & ex_co_valid_inst[2] & done & ex_co_valid_inst[4]; // ask the use of wor
 //priority encoder to select the results of the execution stage to put in cdb
   psel_generic #(5, 1) psel(
 				.req({ex_co_valid_inst[2:0], ex_co_done, ex_co_valid_inst[4]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
@@ -863,27 +871,27 @@ phys_regfile regf_0 (
     always_comb begin
       for (integer i = 0; i < 5; i=i+1) begin
         if (co_selected[i]== 1) begin
-            assign co_NPC_selected               =    ex_co_NPC[i] ;
-            assign co_IR_selected                =    ex_co_IR[i];
-            assign co_halt_selected              =    ex_co_halt[i];
-            assign co_illegal_selected           =    ex_co_illegal[i];
-            assign co_valid_inst_selected           =    ex_co_valid_inst[i];
-            assign co_reg_wr_idx_out                    =    ex_co_dest_reg_idx[i];
-            assign co_take_branch_selected              =    ex_co_take_branch[i];
-            assign co_alu_result_selected               =    ex_co_alu_result[i];
-            if(ex_co_IR[i] == 6'h18 )  assign co_branch_valid =    1;            // To check whether the inst is branch or not
-            else                 assign co_branch_valid =    0;       
+            co_NPC_selected               =    ex_co_NPC[i] ;
+            co_IR_selected                =    ex_co_IR[i];
+            co_halt_selected              =    ex_co_halt[i];
+            co_illegal_selected           =    ex_co_illegal[i];
+            co_valid_inst_selected           =    ex_co_valid_inst[i];
+            co_reg_wr_idx_out                    =    ex_co_dest_reg_idx[i];
+            co_take_branch_selected              =    ex_co_take_branch[i];
+            co_alu_result_selected               =    ex_co_alu_result[i];
+            if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
+            else                  co_branch_valid =    0;       
         end
         else begin
-          assign co_NPC_selected               =    0 ;
-            assign co_IR_selected              =   `NOOP_INST;
-            assign co_halt_selected            =    0;
-            assign co_illegal_selected         =    0;
-            assign co_valid_inst_selected         =    0;
-            assign co_reg_wr_idx_out                  =   `DUMMY_REG;
-            assign co_take_branch_selected            =    0;
-            assign co_alu_result_selected             =    0;
-            assign co_branch_valid                    =    0;
+          co_NPC_selected               =    0 ;
+             co_IR_selected              =   `NOOP_INST;
+             co_halt_selected            =    0;
+             co_illegal_selected         =    0;
+             co_valid_inst_selected         =    0;
+             co_reg_wr_idx_out                  =   `DUMMY_REG;
+             co_take_branch_selected            =    0;
+             co_alu_result_selected             =    0;
+             co_branch_valid                    =    0;
         end
       end
     end
@@ -930,10 +938,8 @@ phys_regfile regf_0 (
 
 
 //  Things to do
-// update the rs for the issue check
+
 // add condition for the branch opcode in the psel
-// update the FETCH STAGE and check the icache
-// add output signals for the testing
 // how to handle the target pc for the branch
 
 

@@ -38,7 +38,7 @@ module decoder(
                             // 0 for HALT and illegal instructions (die on halt)
 
   );
-
+  
   assign valid_inst = valid_inst_in && !illegal;
 
   always_comb begin

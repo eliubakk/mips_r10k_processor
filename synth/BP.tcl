@@ -13,8 +13,9 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
+set misc_files [glob "../../verilog/misc/*"]
 
-analyze -f sverilog "../verilog/BP.v ../verilog/BTB.v ../verilog/GSHARE.v ../verilog/OBQ.v sys_defs.vh"
+analyze -f sverilog [concat "../../verilog/BP.v" "../../verilog/BTB.v" "../../verilog/GSHARE.v" "../../verilog/OBQ.v" "../../verilog/RAS.v"$misc_files]
 elaborate BP
 set design_name BP
 ##############################################

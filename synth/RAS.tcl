@@ -12,7 +12,8 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 
-analyze -f sverilog "../sys_defs.vh ../verilog/RAS.v"
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/RAS.v" $misc_files]
 elaborate RAS
 set design_name RAS
 ##############################################
