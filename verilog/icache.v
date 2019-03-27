@@ -43,8 +43,9 @@ module icache(
   assign proc2Imem_command = (miss_outstanding && !changed_addr) ?  BUS_LOAD :
                                                                     BUS_NONE;
 
-  assign data_write_enable =  (current_mem_tag == Imem2proc_tag) &&
-                              (current_mem_tag != 0);
+ // assign data_write_enable =  (current_mem_tag == Imem2proc_tag) &&
+                           //   (current_mem_tag != 0);
+ assign data_write_enable = (Imem2proc_response == Imem2proc_tag) && (Imem2proc_response != 0);
 
   wire update_mem_tag = changed_addr || miss_outstanding || data_write_enable;
 

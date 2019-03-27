@@ -319,6 +319,10 @@ module pipeline (
   // assign pipeline_commit_wr_en = wb_reg_wr_en_out;
   // assign pipeline_commit_NPC = mem_wb_NPC;
 
+	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
+	// FOR MEMORY INSTRUCTIONS
+	assign proc2Dmem_command = BUS_NONE;
+
   assign proc2mem_command =
       (proc2Dmem_command == BUS_NONE) ? proc2Imem_command:proc2Dmem_command;
   assign proc2mem_addr =
