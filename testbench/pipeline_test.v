@@ -296,8 +296,8 @@ module testbench;
     wb_fileno = $fopen("writeback.out");
     
     //Open header AFTER throwing the reset otherwise the reset state is displayed
-    print_header("                                                                            D-MEM Bus &\n");
-    print_header("Cycle:    IF    |    ID    |    DI    |    IS    |    EX    |    CMP    |    RE    Reg Result");
+    print_header("                                                                                                        D-MEM Bus &\n");
+    print_header("Cycle:      IF      |     ID      |     DI      |     IS      |     EX      |     CMP     |     RE      Reg Result");
   end
 
 
@@ -329,7 +329,7 @@ module testbench;
       //// show_input_output_port();
        
        // print the piepline stuff via c code to the pipeline.out
-      print_cycles();
+       print_cycles();
        print_stage(" ", if_IR_out, if_NPC_out[31:0], {31'b0,if_valid_inst_out});
        print_stage("|", if_id_IR, if_id_NPC[31:0], {31'b0,if_id_valid_inst});
        print_stage("|", id_di_IR, id_di_NPC[31:0], {31'b0,id_di_valid_inst});
