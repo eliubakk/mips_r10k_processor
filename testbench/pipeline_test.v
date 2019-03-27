@@ -279,12 +279,14 @@ module testbench;
 
     // Pulse the reset signal
     $display("@@\n@@\n@@  %t  Asserting System reset......", $realtime);
-    reset = 1'b1;
+    @(negedge clock);		// HW added
+	reset = 1'b1;
     @(posedge clock);
     @(posedge clock);
-
+	$display("@@@@@@memory1");
     $readmemh("program.mem", memory.unified_memory);
 
+	$display("@@@@@@memory2");
     @(posedge clock);
     @(posedge clock);
     `SD;
