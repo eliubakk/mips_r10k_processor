@@ -37,20 +37,20 @@ SYN_SIMV += $(patsubst %,syn_simv_%,$(MISC_MODULES))
 SIMV = $(patsubst $(VERILOG_DIR)/%.v,simv_%,$(VERILOG_SRC))
 MISC_SIMV = $(patsubst $(VERILOG_DIR)/misc/%.v,simv_%,$(MISC_SRC))
 
-$(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v
+$(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 
-$(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v
+$(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 
-$(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v
+$(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	make $*.vg
 
-$(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v
+$(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
 	make $*.vg
 
 .PHONY: $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg)
