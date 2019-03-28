@@ -333,13 +333,9 @@ module testbench;
 			if (write_en) begin
 				insert_into_test(bh_row);
 			end
-			if (clear_success & write_en) begin
-				row_tag_test = index;
-			end
+			row_tag_test = row_tag;
 
 			@(posedge clock);
-			print_obq(obq_out, head_out, tail_out);
-			print_obq(obq_test, head_test, tail_test);
 			if (write_en) begin
 				assert(row_tag == row_tag_test) else #1 exit_on_error;
 			end
