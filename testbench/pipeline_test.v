@@ -77,7 +77,16 @@ module testbench;
   logic [63:0] co_ret_NPC;
   logic [31:0] co_ret_IR;
   logic        co_ret_valid_inst;
-
+  logic if_id_enable;
+  logic RS_enable;
+  logic is_pr_enable;
+  logic CDB_enable; 
+  logic ROB_enable;
+  logic co_ret_enable; 
+  logic dispatch_en;
+  logic [4:0] is_ex_enable;
+  logic [4:0]   ex_co_enable;
+  logic branch_not_taken;
   RS_ROW_T	[(`RS_SIZE-1):0]		rs_table_out;
   PHYS_REG		[`NUM_GEN_REG-1:0]	arch_table;
   ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out;
@@ -140,7 +149,17 @@ module testbench;
     .arch_table(arch_table),
     .ROB_table_out(ROB_table_out),
     .free_list_out(free_list_out),
-    .co_ret_valid_inst(co_ret_valid_inst)
+    .co_ret_valid_inst(co_ret_valid_inst),
+    .if_id_enable(if_id_enable),
+    .RS_enable(RS_enable),
+    .is_pr_enable(is_pr_enable),
+    .CDB_enable(CDB_enable), 
+    .ROB_enable(ROB_enable), 
+    .co_ret_enable(co_ret_enable), 
+    .dispatch_en(dispatch_en),
+    .is_ex_enable(is_ex_enable),
+    .ex_co_enable(ex_co_enable), 
+    .branch_not_taken(branch_not_taken)
   );
 
 
@@ -342,8 +361,8 @@ module testbench;
 			$display("Cycle: %d", clock_count);
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
-			//display_memory;
-			//display_cache;
+			display_memory;
+			display_cache;
 			//display_icache;
 			display_if_stage;
 			display_if_id;

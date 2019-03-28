@@ -98,15 +98,28 @@ module pipeline (
   output  ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out,
   output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
   output PHYS_REG [`FL_SIZE-1:0] free_list_out,
-	output logic [$clog2(`FL_SIZE):0] tail_out
+	output logic [$clog2(`FL_SIZE):0] tail_out,
+
+  output logic if_id_enable,
+  output logic RS_enable,
+  output logic is_pr_enable,
+  output logic CDB_enable, 
+  output logic ROB_enable, 
+  
+  output logic co_ret_enable, 
+  output logic dispatch_en, 
+  output logic branch_not_taken,
+  output  logic [4:0]   is_ex_enable,
+  output  logic [4:0]   ex_co_enable
 );
   parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
   parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 
   // Pipeline register enables
-  logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
-  logic [4:0]   is_ex_enable, ex_co_enable;
+  // logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
+  // logic [4:0]   is_ex_enable, ex_co_enable;
+  logic fr_read_en;
   logic [4:0]   issue_stall;
   // Output from the branch predictor
   logic   bp_output;
@@ -391,8 +404,8 @@ module pipeline (
     // .wb_reg_wr_data_out(wb_reg_wr_data_out),
 
     // Outputs
-    .id_ra_value_out(id_rega_out),
-    .id_rb_value_out(id_regb_out),
+    //.id_ra_value_out(id_rega_out),
+    //.id_rb_value_out(id_regb_out),
     .id_opa_select_out(id_inst_out.inst.opa_select),
     .id_opb_select_out(id_inst_out.inst.opb_select),
     .id_dest_reg_idx_out(id_inst_out.inst.dest_reg),
@@ -433,14 +446,16 @@ module pipeline (
   	.T_old(T_old) 		// Output for Dispatch and goes to RS and ROB
   );
 
-  //Instantiating the free list
+  //Instantiating the freelist
+  
+  assign fr_read_en= dispatch_en & if_valid_inst_out ;
   Free_List f0(
     // INPUTS
     .clock(clock),
     .reset(reset),
     .enable(id_inst_out.inst.valid_inst),
     .T_old(rob_fl_arch_Told), // Comes from ROB during Retire Stage
-    .dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+    .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
 
     // inputs for branch misprediction
     .branch_incorrect(branch_not_taken),
@@ -457,7 +472,7 @@ module pipeline (
     .free_reg(fr_free_reg_T) // Output for Dispatch for other modules
   );
 
-
+//Instantiating the freelist check_point
   Free_List_Check flc(
     .clock(clock),
     .enable(enable),
@@ -480,17 +495,24 @@ module pipeline (
   //                                              //
   //////////////////////////////////////////////////
 
-  assign id_di_enable = dispatch_en; // always enabled
+  assign id_di_enable = (dispatch_en && if_valid_inst_out); // always enabled
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
       if (reset) begin
         id_di_rega    <= `SD 0;
         id_di_regb    <= `SD 0;
         id_di_inst_in <= `SD EMPTY_ROW;
+        id_di_NPC     <= `SD 0;
+        id_di_IR      <= `SD `NOOP_INST;
+        id_di_valid_inst  <=`SD `FALSE;
+        
       end else if(id_di_enable) begin
         id_di_rega    <= `SD id_rega_out;
         id_di_regb    <= `SD id_regb_out;
         id_di_inst_in <= `SD id_inst_out;
+        id_di_NPC     <= `SD if_id_NPC;
+        id_di_IR      <= `SD if_id_IR;
+        id_di_valid_inst  <= `SD if_id_valid_inst;
       end
   end
 
@@ -503,7 +525,7 @@ module pipeline (
   assign issue_stall= ~is_ex_enable;
   assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full);
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
-  assign RS_enable=1;
+  assign RS_enable= (dispatch_en && if_valid_inst_out);
   RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
@@ -839,6 +861,8 @@ module pipeline (
 
   assign co_branch_prediction = (co_take_branch_selected  == bp_output) ? 1:0 ;// Branch prediction or misprediction
   assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
+  
+  //Instantiated the CDB
   CDB CDB_0(
     // Inputs
     .clock(clock),    // Clock

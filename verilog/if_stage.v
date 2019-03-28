@@ -60,10 +60,12 @@ module if_stage(
   // Pass PC+4 down pipeline w/instruction
   assign if_NPC_out = PC_plus_4;
 
-  assign if_valid_inst_out = ready_for_valid && Imem_valid;
+  //assign if_valid_inst_out = ready_for_valid && Imem_valid;
 
-  assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
-                                !if_valid_inst_out;
+
+assign if_valid_inst_out = Imem_valid;
+  // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
+  //                               !if_valid_inst_out;
 
   // This register holds the PC value
   // synopsys sync_set_reset "reset"
@@ -77,11 +79,11 @@ module if_stage(
   // This FF controls the stall signal that artificially forces
   // fetch to stall until the previous instruction has completed
   // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if (reset)
-      ready_for_valid <= `SD 1;  // must start with something
-    else
-      ready_for_valid <= `SD next_ready_for_valid;
-  end
+  // always_ff @(posedge clock) begin
+  //   if (reset)
+  //     ready_for_valid <= `SD 1;  // must start with something
+  //   else
+  //     ready_for_valid <= `SD next_ready_for_valid;
+  // end
   
 endmodule  // module if_stage

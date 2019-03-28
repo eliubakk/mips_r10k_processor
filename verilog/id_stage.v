@@ -31,12 +31,13 @@ module decoder(
     output logic halt,      // non-zero on a halt
     output logic cpuid,     // get CPUID instruction
     output logic illegal,   // non-zero on an illegal instruction
-    output logic valid_inst // for counting valid instructions executed
+    output logic valid_inst, // for counting valid instructions executed
                             // and for making the fetch stage die on halts/
                             // keeping track of when to allow the next
                             // instruction out of fetch
                             // 0 for HALT and illegal instructions (die on halt)
-
+    output logic [4:0] ra_idx,
+    output logic [4:0] rb_idx
   );
   
   assign valid_inst = valid_inst_in && !illegal;
@@ -62,11 +63,15 @@ module decoder(
     halt = `FALSE;
     cpuid = `FALSE;
     illegal = `FALSE;
+    ra_idx = inst[25:21];   // inst operand A register index
+    rb_idx = inst[20:16]; 
     if(valid_inst_in) begin
       case ({inst[31:29], 3'b0})
         6'h0:
           case (inst[31:26])
             `PAL_INST: begin
+              ra_idx = `ZERO_REG;
+              rb_idx = `ZERO_REG;
 		          fu_name = FU_ALU;
               if (inst[25:0] == `PAL_HALT)
                 halt = `TRUE;
@@ -83,6 +88,7 @@ module decoder(
         begin
           opa_select = ALU_OPA_IS_REGA;
           opb_select = inst[12] ? ALU_OPB_IS_ALU_IMM : ALU_OPB_IS_REGB;
+          rb_idx = inst[12] ? `ZERO_REG : inst[20:16];
           dest_reg = DEST_IS_REGC;
           case (inst[31:26])
             `INTA_GRP:
@@ -145,6 +151,7 @@ module decoder(
               fu_name = FU_BR;
               opa_select = ALU_OPA_IS_NOT3;
               opb_select = ALU_OPB_IS_REGB;
+              ra_idx = `ZERO_REG;
               alu_func = ALU_AND; // clear low 2 bits (word-align)
               dest_reg = DEST_IS_REGA;
               uncond_branch = `TRUE;
@@ -158,6 +165,7 @@ module decoder(
           opb_select = ALU_OPB_IS_REGB;
           alu_func = ALU_ADDQ;
           dest_reg = DEST_IS_REGA;
+          ra_idx = `ZERO_REG;
           case (inst[31:26])
             `LDA_INST:  /* defaults are OK */
             begin
@@ -197,6 +205,8 @@ module decoder(
         begin
           opa_select = ALU_OPA_IS_NPC;
           opb_select = ALU_OPB_IS_BR_DISP;
+          ra_idx = `ZERO_REG;
+          rb_idx = `ZERO_REG;
           alu_func = ALU_ADDQ;
           case (inst[31:26])
             `FBEQ_INST, `FBLT_INST, `FBLE_INST,
@@ -233,9 +243,8 @@ module id_stage(
         //input   [4:0] wb_reg_wr_idx_out,    // Reg write index from WB Stage
        // input  [63:0] wb_reg_wr_data_out,   // Reg write data from WB Stage
         input         if_id_valid_inst,
-
-        output logic [63:0] id_ra_value_out,      // reg A value
-        output logic [63:0] id_rb_value_out,      // reg B value
+       // output logic [63:0] id_ra_value_out,      // reg A value
+        //output logic [63:0] id_rb_value_out,      // reg B value
 
         output ALU_OPA_SELECT id_opa_select_out,    // ALU opa mux select (ALU_OPA_xxx *)
         output ALU_OPB_SELECT id_opb_select_out,    // ALU opb mux select (ALU_OPB_xxx *)
@@ -261,9 +270,9 @@ module id_stage(
   DEST_REG_SEL dest_reg_select;
 
   // instruction fields read from IF/ID pipeline register
-  assign ra_idx = if_id_IR[25:21];   // inst operand A register index
-  assign rb_idx = if_id_IR[20:16];   // inst operand B register index
-  assign rc_idx = if_id_IR[4:0];     // inst operand C register index
+  // assign id_ra_idx = rda_idx;   // inst operand A register index
+  // assign id_rb_idx = rb_idx;   // inst operand B register index
+  assign id_rc_idx = if_id_IR[4:0];     // inst operand C register index
 
   // Instantiate the register file used by this pipeline
   // regfile regf_0 (
@@ -293,6 +302,8 @@ module id_stage(
     .opa_select(id_opa_select_out),
     .opb_select(id_opb_select_out),
     .alu_func(id_alu_func_out),
+    .ra_idx(ra_idx),
+    .rb_idx(rb_idx),
     .fu_name(id_fu_name_out),
     .dest_reg(dest_reg_select),
     .rd_mem(id_rd_mem_out),
