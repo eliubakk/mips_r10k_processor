@@ -261,9 +261,9 @@ module id_stage(
   DEST_REG_SEL dest_reg_select;
 
   // instruction fields read from IF/ID pipeline register
-  GEN_REG ra_idx = if_id_IR[25:21];   // inst operand A register index
-  GEN_REG rb_idx = if_id_IR[20:16];   // inst operand B register index
-  GEN_REG rc_idx = if_id_IR[4:0];     // inst operand C register index
+  assign ra_idx = if_id_IR[25:21];   // inst operand A register index
+  assign rb_idx = if_id_IR[20:16];   // inst operand B register index
+  assign rc_idx = if_id_IR[4:0];     // inst operand C register index
 
   // Instantiate the register file used by this pipeline
   // regfile regf_0 (

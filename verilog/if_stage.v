@@ -41,7 +41,7 @@ module if_stage(
 	assign PC_enable = dispatch_en & Imem_valid ;
 
  
-assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
+  assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
 
   // this mux is because the Imem gives us 64 bits not 32 bits
   assign if_IR_out = PC_reg[2] ? Imem2proc_data[63:32] : Imem2proc_data[31:0];
