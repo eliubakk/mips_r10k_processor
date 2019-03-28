@@ -2,7 +2,7 @@
 `timescale 1ns/100ps
 `define DEBUG
 
-`define index_t ($clog2(`OBQ_SIZE))
+`define index_t ($clog2(`OBQ_SIZE) - 1)
 
 // in this module, we assume the oldest branch history table
 // is at the lowest index (i.e. index 0)
@@ -21,6 +21,7 @@ module OBQ(
 	// outputs
 	`ifdef DEBUG
 	output OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out,
+	output [`index_t:0] head_out,
 	output [`index_t:0] tail_out,
 	`endif
 
@@ -29,6 +30,95 @@ module OBQ(
 	output OBQ_ROW_T bh_pred	// predicted branch history path
 );
 
+	// internal data
+	OBQ_ROW_T [`OBQ_SIZE - 1:0] obq;
+	OBQ_ROW_T [`OBQ_SIZE - 1:0] obq_next;
+
+	logic [`index_t:0] tail;
+	logic [`index_t:0] tail_next;
+
+	logic [`index_t:0] head;
+	logic [`index_t:0] head_next;
+
+	// assign statements
+	assign obq_out = obq;
+	assign tail_out = tail;
+	assign head_out = head;
+
+	assign row_tag = tail;
+	assign bh_pred_valid = (head != tail);
+	assign bh_pred = obq[tail - 1'b1];
+
+	// combinational logic
+	always_comb begin
+
+		// default case
+		obq_next = obq;
+		tail_next = tail;
+		head_next = head;
+
+		if (shift_en) begin
+			if (head <= tail) begin
+				if ((shift_index >= head) & (shift_index < tail)) begin
+					head_next = shift_index + 1;
+				end
+			end else begin
+				if (shift_index >= head) begin
+					head_next = shift_index + 1;
+				end
+			end
+		end
+
+		if (clear_en) begin
+			if (head_next <= tail_next) begin
+				if ((index >= head) & (index < tail)) begin
+					tail_next = index;
+					obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq_next[index - 1].branch_history[`BH_SIZE - 1];
+				end
+			end else begin
+				if (index >= head_next & index < `OBQ_SIZE) begin
+					tail_next = index;
+					obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq_next[index - 1].branch_history[`BH_SIZE - 1];
+
+				end else if (index < tail_next) begin
+					tail_next = index;
+					obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq_next[index - 1].branch_history[`BH_SIZE - 1];
+
+				end
+			end
+		end
+
+		if (write_en) begin
+			obq_next[tail_next] = bh_row;
+			++tail_next;
+			if (tail_next == head_next) begin
+				++head_next;
+			end
+			/*
+			if (tail_next + 1 == head_next) begin
+				++head_next;
+			end
+			obq_next[tail_next] = bh_row;
+			tail_next = tail_next + 1;
+			*/
+		end
+	end
+
+	// sequential logic
+	always_ff @(posedge clock) begin
+		if (reset) begin
+			for (int i = 0; i < `OBQ_SIZE; ++i) begin
+				obq[i].branch_history <= 0;
+			end
+			tail <= 0;
+			head <= 0;
+		end else begin
+			obq <= obq_next;
+			tail <= tail_next;
+			head <= head_next;
+		end
+	end
+/*
 	// internal data
 	OBQ_ROW_T [`OBQ_SIZE-1:0] obq;
 	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_next;
@@ -225,5 +315,5 @@ module OBQ(
 			// row_tag_index 	<= row_tag_next;
 		end
 	end
-
+*/
 endmodule // OBQ
