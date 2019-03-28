@@ -6,7 +6,7 @@
 	
 module testbench;
 	logic clock, reset, enable;
-	
+// Inputs	
 	logic							if_en_branch;
 	logic							if_cond_branch;
 	logic							if_direct_branch;
@@ -21,7 +21,7 @@ module testbench;
 	logic	[31:0]						rt_calculated_pc;
 	logic	[$clog2(`OBQ_SIZE):0]				rt_branch_index;
 
-
+// Outputs
 	logic							next_pc_valid;
 	logic	[$clog2(`OBQ_SIZE):0]				next_pc_index;
 	logic	[31:0]						next_pc;
@@ -38,6 +38,26 @@ module testbench;
 	logic 		[`RAS_SIZE - 1:0] [31:0] 		ras_stack_out;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_head_out;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_out;
+	`endif
+
+// Testing varilables
+
+	logic							test_next_pc_valid;
+	logic	[$clog2(`OBQ_SIZE):0]				test_next_pc_index;
+	logic	[31:0]						test_next_pc;
+	logic							test_next_pc_prediction;
+
+	`ifdef DEBUG
+	logic		[`BH_SIZE-1:0]				test_gshare_ght_out;
+	logic		[2**(`BH_SIZE)-1:0]			test_gshare_pht_out;
+	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				test_obq_out;
+	logic 		[$clog2(`OBQ_SIZE):0] 			test_obq_tail_out;
+	logic 		[`BTB_ROW-1:0]				test_btb_valid_out;
+	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		test_btb_tag_out;
+	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	test_btb_target_address_out;
+	logic 		[`RAS_SIZE - 1:0] [31:0] 		test_ras_stack_out;
+	logic 		[$clog2(`RAS_SIZE) - 1:0] 		test_ras_head_out;
+	logic 		[$clog2(`RAS_SIZE) - 1:0] 		test_ras_tail_out;
 	`endif
 
 
@@ -96,6 +116,9 @@ module testbench;
 		end
 	endtask
 
+
+
+	// Print tables
 	task print_gshare;
 		begin
 			$display("GSHARE");
@@ -205,16 +228,51 @@ module testbench;
 		end
 	endtask
 
-	task _check_for_correct_btb;
+	task _check_for_correct_btb_write;
 		begin
-		//Check the btb is updated correctly except unconditional and
-		//indirect branch
-			if(rt_en_branch & rt_branch_taken & (rt_cond_branch | rt_direct_branch)) begin
-				assert((btb_valid_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== 1) & (btb_tag_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== rt_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] ) & (btb_target_address_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== rt_calculated_pc[`TARGET_SIZE+1:2])) else #1 exit_on_error;
+		//Check the btb is updated correctly when branch is taken
+			if(rt_en_branch & rt_branch_taken) begin
+				assert ((btb_valid_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== 1) & (btb_tag_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== rt_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] ) & (btb_target_address_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== rt_calculated_pc[`TARGET_SIZE+1:2])) else #1 exit_on_error;
 			end
 		end
 	endtask
 
+
+	
+	// Check the functionality of each module for random testing
+	
+	task _check_for_correct_btb;
+		begin
+		//Check the btb is updated correctly when branch is taken
+			if(rt_en_branch & rt_branch_taken) begin
+				test_btb_valid_out[rt_pc[($clog2(`BTB_ROW)+1):2]] = 1;
+				test_btb_tag_out[rt_pc[($clog2(`BTB_ROW)+1):2]]= rt_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)];
+				test_btb_target_address_out[rt_pc[($clog2(`BTB_ROW)+1):2]]= rt_calculated_pc[`TARGET_SIZE+1:2]; 
+			end
+			assert((test_btb_valid_out == btb_valid_out) & (test_btb_tag_out == btb_tag_out) & (test_btb_target_address_out == btb_target_address_out))else #1 exit_on_error; 
+		end
+	endtask
+
+	task _check_for_correct_ras;
+
+	endtask
+
+	task _check_for_correct_gshare;
+
+	endtask
+
+	task _check_for_correct_obq;
+
+	endtask
+
+	task _check_for_correct_bp;
+		_check_for_correct_btb;
+		_check_for_correct_ras;
+		_check_for_correct_gshare;
+		_check_for_correct_obq;
+		// Check the correct output logic
+		
+	endtask
 /*	task display_table;
 		begin
 			$display("*******************************************************************************");
@@ -378,7 +436,7 @@ module testbench;
 		// correct obq
 		assert(obq_tail_out == 1) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;
@@ -416,7 +474,7 @@ module testbench;
 		assert(obq_tail_out == 2) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;	
@@ -453,7 +511,7 @@ module testbench;
 		assert(obq_tail_out == 2) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;	
@@ -492,10 +550,12 @@ module testbench;
 		assert(obq_tail_out == 2) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
-		_check_for_correct_ras_reset;	
+		//_check_for_correct_ras_reset;	
+		//RAS check
+		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
 
 		$display("Single Unconditional Indirect Passed");
 
@@ -530,10 +590,10 @@ module testbench;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
 		// correct btb 
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		//_check_for_correct_btb_reset;
-		_check_for_correct_ras_reset;	
+		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
 
 		$display("Testing Retire Branch - Update BTB only passed");
 
@@ -569,13 +629,12 @@ module testbench;
 		//assert(obq_tail_out == 1) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		// correct btb
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		// correct gshare
 		assert((gshare_ght_out==0) & (gshare_pht_out[gshare_ght_out^rt_pc[`BH_SIZE+1:2]])) else #1 exit_on_error;
 		//_check_for_correct_gshare_reset;
 		//_check_for_correct_btb_reset;
-		_check_for_correct_ras_reset;	
-
+		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
 		$display("Testing Retire Branch - Update BTB only passed");
 
 
@@ -600,30 +659,84 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		assert(next_pc_valid == 0) else #1 exit_on_error;
+		assert((next_pc_valid == 1)) else #1 exit_on_error;
 		//assert(next_pc_index == ) else #1 exit_on_error;
-		//assert(next_pc == 32'bx) else #1 exit_on_error;
-		//assert(next_pc_prediction == 0) else #1 exit_on_error;
+		assert(next_pc == if_pc_in + 4) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq - need to modify obq tomorrow (head advance)
 		$display("@@@@@skip OBQ error now@@@@");
 		//assert(obq_tail_out == 1) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		// correct btb
-		_check_for_correct_btb;
+		_check_for_correct_btb_write;
 		// correct gshare
 		assert((gshare_ght_out==0)) else #1 exit_on_error;
 		//_check_for_correct_gshare_reset;
 		//_check_for_correct_btb_reset;
 		//_check_for_correct_ras_reset;	
 		// correct RAS
-		assert((ras_head_out == 0) & (ras_tail_out == 1) & (ras_stack_out[0] == rt_calculated_pc));	
 		print_bp;
+		
+		assert((ras_head_out == 0) & (ras_tail_out == 0) & (ras_stack_out[0] == 260)) else #1 exit_on_error;	
 
-		$display("Testing Retire Branch - Update RAS only passed");
 
+		// Reset
+		@(negedge clock);
+		$display("\n--------------------------------RESET----------------------------------\n"); 
+		reset = 1'b1;
+		enable = 1'b0;
+		// Initialize the test value
+
+		test_next_pc_valid = 1'b0;
+		test_next_pc_index = {($clog2(`OBQ_SIZE)+1){0}};
+		test_next_pc = 32'h0;
+		test_next_pc_prediction = 1'b0;
+		`ifdef DEBUG
+		test_gshare_ght_out ={`BH_SIZE{0}};
+		test_gshare_pht_out = {(2**(`BH_SIZE)){0}};
+		test_obq_out = {`OBQ_SIZE{0}};
+		test_obq_tail_out = {($clog2(`OBQ_SIZE)+1){0}};
+		test_btb_valid_out = {`BTB_ROW{0}};
+		test_btb_tag_out= {(`BTB_ROW*`TAG_SIZE){0}};
+		test_btb_target_address_out = {(`BTB_ROW*`TARGET_SIZE){0}};
+		test_ras_stack_out ={(`RAS_SIZE*32){0}};
+		test_ras_head_out ={($clog2(`RAS_SIZE)){0}};
+		test_ras_tail_out ={($clog2(`RAS_SIZE)){0}};
+		`endif
+		@(negedge clock);
+		reset = 1'b0;
+		enable = 1'b1;
+		@(posedge clock);
+		`DELAY;
+		check_for_correct_reset;
+		$display("Reset Passed");
 		
 
+	
+		$display("Testing Retire Branch - Update RAS only passed");
+
 		$display("Random testing");
+		@(negedge clock);
+
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b1;
+		if_direct_branch	= 1'b1;
+		if_pc_in 		= 32'b11101110;
+		//Input from retire
+		rt_en_branch		= 1'b1;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b1;
+		rt_branch_taken		= 1'b1;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'b111010101101;
+		rt_calculated_pc	= 32'b111111111111;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}}; 
+		@(posedge clock);
+		`DELAY
+		_check_for_correct_bp;
+		print_bp;
+
+
 
 
 		$display("Random testing passed");
