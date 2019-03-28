@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : ISR.tcl                          */
+#/*   FILE        : Arch_Map_Tabl.tcl                          */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,7 +11,9 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "verilog/arch_map.v"]
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/Arch_Map_Table.v" $misc_files]
+elaborate Arch_Map_Table
 set design_name Arch_Map_Table
 set clock_name clock
 set reset_name reset
