@@ -40,27 +40,6 @@ module testbench;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_out;
 	`endif
 
-	// test wires
-
-	logic							next_pc_valid_test;
-	logic	[$clog2(`OBQ_SIZE):0]				next_pc_index_test;
-	logic	[31:0]						next_pc_test;
-	logic							next_pc_prediction_test;
-
-	logic		[`BH_SIZE-1:0]				gshare_ght_test;
-	logic		[2**(`BH_SIZE)-1:0]			gshare_pht_test;
-	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				obq_test;
-	logic 		[$clog2(`OBQ_SIZE):0] 			obq_tail_test;
-	logic 		[`BTB_ROW-1:0]				btb_valid_test;
-	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		btb_tag_test;
-	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	btb_target_address_test;
-	logic 		[`RAS_SIZE - 1:0] [31:0] 		ras_stack_test;
-	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_head_test;
-	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_test;
-
-	// parameters
-	parameter ONE = 1'b1;
-	parameter ZERO = 1'b0;
 
 
 	BP bp(
@@ -360,22 +339,6 @@ module testbench;
 		check_for_correct_reset;
 		$display("Reset Passed");
 		$display("--------START FROM HERE-----");
-
-		$display("Testing Single Conditional Direct Branch Fetch...");
-
-		@(negedge clock);
-		reset = ZERO;
-		enable = ONE;
-		if_en_branch = ONE;
-		if_cond_branch = ONE;
-		if_direct_branch = ONE;
-		if_pc_in = 80;
-
-		@(posedge clock);
-		`DELAY;
-		print_bp;
-
-		$display("Single Conditional Direct Branch Fetch Passed");
 
 		// Need to do : How do we know whether the instruction is
 		// branch or not before decode?
