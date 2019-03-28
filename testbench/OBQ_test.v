@@ -37,6 +37,7 @@ module testbench;
 	logic [$clog2(`OBQ_SIZE) - 1:0] tail_test;
 	logic [$clog2(`OBQ_SIZE) - 1:0] row_tag_test;
 	int counter = 0;	
+	logic clear_success = ZERO;
 
 	// initialize module
 	`DUT(OBQ) obq0(
@@ -99,11 +100,6 @@ module testbench;
 	task insert_into_test;
 		input OBQ_ROW_T row;
 		begin
-			/*
-			if (tail_test + 1 == head_test) begin
-				++head_test;
-			end
-			*/
 			obq_test[tail_test] = row;
 			row_tag_test = tail_test;
 			++tail_test;
@@ -113,21 +109,31 @@ module testbench;
 		end
 	endtask
 
+	task _clear_idx;
+		input int idx;
+		begin
+			clear_success = ONE;
+			tail_test = idx;
+			obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+		end
+	endtask
+
 	task clear_from_test;
 		input int idx;
 		begin
-			if (head_test < tail_test) begin
-				if ((head_test <= idx) & (idx < tail_test)) begin
-					tail_test = idx;
-					obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];				
+			if (head_test <= tail_test) begin
+				if ((idx >= head_test) & (idx < tail_test)) begin
+					_clear_idx(idx);
+				end else begin
+					clear_success = ZERO;
 				end
-			end else if (head_test != tail_test) begin
-				if (head_test <= idx) begin
-					tail_test = idx;
-					obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+			end else begin
+				if (idx >= head_test & idx < `OBQ_SIZE) begin
+					_clear_idx(idx);
 				end else if (idx < tail_test) begin
-					tail_test = idx;
-					obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+					_clear_idx(idx);
+				end else begin
+					clear_success = ZERO;
 				end
 			end
 		end
@@ -299,7 +305,6 @@ module testbench;
 
 		$display("Clear All Passed");
 
-/*
 		$display("Testing Multiple Write and Multiple Clear...");
 
 		// reset
@@ -311,6 +316,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		obq_test = obq_out;
+		head_test = head_out;
 		tail_test = tail_out;
 
 		// random iterations
@@ -319,7 +325,7 @@ module testbench;
 			reset = ZERO;
 			write_en = $urandom_range(1, 0);
 			clear_en = $urandom_range(1, 0);
-			bh_row.branch_history = $urandom_range(2**10 - 1, 0);
+			bh_row.branch_history = $urandom_range(2**`BH_SIZE - 1, 0);
 			index = $urandom_range(2**4 - 1, 0);
 			if (clear_en) begin
 				clear_from_test(index);
@@ -327,18 +333,24 @@ module testbench;
 			if (write_en) begin
 				insert_into_test(bh_row);
 			end
+			if (clear_success & write_en) begin
+				row_tag_test = index;
+			end
 
 			@(posedge clock);
-			`DELAY;
-			assert(bh_pred_valid == (tail_test > 0)) else #1 exit_on_error;
-			obq_equal(obq_out, obq_test, tail_out, tail_test);
+			print_obq(obq_out, head_out, tail_out);
+			print_obq(obq_test, head_test, tail_test);
 			if (write_en) begin
 				assert(row_tag == row_tag_test) else #1 exit_on_error;
 			end
+			`DELAY;
+			assert(bh_pred_valid == (tail_test > 0)) else #1 exit_on_error;
+			obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		end
 
 		$display("Multiple Write and Multiple Clear Passed");
 
+/*
 		$display("Testing Single Shift...");
 
 		@(negedge clock);
