@@ -130,10 +130,10 @@ module testbench;
 	task print_gshare;
 		begin
 			$display("GSHARE");
-			$display("GHT");
-			for (int i = 0; i < `BH_SIZE; ++i) begin
+			$display("GHT: %b", gshare_ght_out);
+			/*for (int i = 0; i < `BH_SIZE; ++i) begin
 				$display("ght[%d] = %b", i, gshare_ght_out[i]);
-			end
+			end*/
 			$display("PHT");
 			for (int i = 0; i < (2**(`BH_SIZE)); ++i) begin
 				$display("pht[%d] = %b", i, gshare_pht_out[i]);
@@ -425,7 +425,7 @@ module testbench;
 		$display("Reset Passed");
 		$display("--------START FROM HERE-----");
 
-		$display("Testing Single Condition Direct...");
+		$display("\n 1. Testing Fetch Single Condition Direct...");
 
 		@(negedge clock);
 		reset 			= 1'b0;
@@ -454,16 +454,15 @@ module testbench;
 		assert(next_pc == 32'h44) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 1) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 1)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;
 
-		$display("Single Condition Direct Passed");
+		$display("Fetch Single Condition Direct Passed");
 
-		$display("Testing Single Condition Indirect...");
+		$display("\n 2. Testing Fetch Single Condition Indirect...");
 
 		// insert
 		@(negedge clock);
@@ -493,17 +492,16 @@ module testbench;
 		assert(next_pc == 32'h48) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;	
 
-		$display("Single Condition Indirect Passed");
+		$display("Fetch Single Condition Indirect Passed");
 
-		$display("Testing Single Unconditional Direct...");
+		$display("\n 3. Testing Fetch Single Unconditional Direct, Not return...");
 
 		@(negedge clock);
 		reset 			= 1'b0;
@@ -532,19 +530,16 @@ module testbench;
 		assert(next_pc == 32'h64) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;	
 
+		$display("Fetch Single Unconditional Direct, not return Passed");
 
-
-		$display("Single Unconditional Direct Passed");
-
-		$display("Testing Single Unconditional Indirect...");
+		$display("\n 4. Testing Fetch Single Unconditional Direct,return...");
 
 		@(negedge clock);
 		reset 			= 1'b0;
@@ -552,9 +547,9 @@ module testbench;
 		//Input from fetch
 		if_en_branch		= 1'b1;
 		if_cond_branch		= 1'b0;
-		if_direct_branch	= 1'b0;
-		if_return_branch	= 1'b0;
-		if_pc_in 		= 32'h100;
+		if_direct_branch	= 1'b1;
+		if_return_branch	= 1'b1;
+		if_pc_in 		= 32'h60;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
@@ -570,23 +565,66 @@ module testbench;
 		`DELAY;
 		assert(next_pc_valid == 1) else #1 exit_on_error;
 		assert(next_pc_index == 0) else #1 exit_on_error;
-		assert(next_pc == 32'h104) else #1 exit_on_error;
+		assert(next_pc == 32'h64) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
+		_check_for_correct_gshare_reset;
+		_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+
+		$display("Fetch Single Unconditional Direct  return Passed");
+
+
+
+		$display("\n 5. Testing Fetch Single Unconditional Indirect...");
+
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
+		if_pc_in 		= 32'h120;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
+		rt_branch_taken		= 1'b0;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'h0;
+		rt_calculated_pc	= 32'h0;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}};
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 1) else #1 exit_on_error;
+		assert(next_pc_index == 0) else #1 exit_on_error;
+		assert(next_pc == 32'h124) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert(( obq_head_out == 0) && (obq_tail_out == 2)) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		assert(obq_out[1] == 0) else #1 exit_on_error;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		//_check_for_correct_ras_reset;	
 		//RAS check
-		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
+		assert((ras_stack_out[0] == 292) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
 
-		$display("Single Unconditional Indirect Passed");
+		$display("Fetch Single Unconditional Indirect Passed");
+
+		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@			Simple Fetch Test Passed 		@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
 		
-		$display("Testing Retire Branch - Update BTB only - Branch is taken but prediction is correct");
+		$display("\n 6. Testing Retire Branch - Update BTB only - Branch is taken but prediction is correct for unconditional and indirect");
 		@(negedge clock);
 		reset 			= 1'b0;
 		enable 			= 1'b1;
@@ -614,20 +652,18 @@ module testbench;
 		//assert(next_pc == 32'bx) else #1 exit_on_error;
 		//assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
 		// correct btb 
 		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
-		//_check_for_correct_btb_reset;
-		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
-
+		assert((ras_stack_out[0] == 292) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
 		$display("Testing Retire Branch - Update BTB only passed");
 
 
 
-		$display("Testing Retire Branch - Update Gshare and OBQ + BTB - Branch is taken but prediction is incorrect");
+		$display("\n 7. Testing Retire Branch - Update Gshare and OBQ + BTB - Branch is taken but prediction is incorrect for conditional direct");
 		@(negedge clock);
 		reset 			= 1'b0;
 		enable 			= 1'b1;
@@ -654,21 +690,20 @@ module testbench;
 		//assert(next_pc_index == ) else #1 exit_on_error;
 		//assert(next_pc == 32'bx) else #1 exit_on_error;
 		//assert(next_pc_prediction == 0) else #1 exit_on_error;
-		// correct obq - need to modify obq tomorrow (head advance)
-		$display("@@@@@@skip OBQ error now@@@");
-		//assert(obq_tail_out == 1) else #1 exit_on_error;
-		assert(obq_out[0] == 0) else #1 exit_on_error;
+		// correct obq
+		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ OBQ test should be done later@@@@@@@@@@@@@@@@@@@@@@@");;
+		//assert((obq_head_out == 1) & (obq_tail_out == 2)) else #1 exit_on_error;
+		//assert(obq_out[1] == 0) else #1 exit_on_error;
 		// correct btb
 		_check_for_correct_btb_write;
 		// correct gshare
-		assert((gshare_ght_out==0) & (gshare_pht_out[gshare_ght_out^rt_pc[`BH_SIZE+1:2]])) else #1 exit_on_error;
-		//_check_for_correct_gshare_reset;
-		//_check_for_correct_btb_reset;
-		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
-		$display("Testing Retire Branch - Update BTB only passed");
+		assert((gshare_ght_out==0) & ( gshare_pht_out[gshare_ght_out^rt_pc[`BH_SIZE+1:2]]==1)) else #1 exit_on_error;
+		// correct ras
+		assert((ras_stack_out[0] == 292) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
+		$display("Testing Retire Branch - Update Gshare and OBQ + BTB passed");
 
 
-		$display("Testing Retire Branch - RAS - Branch is taken");
+		$display("\n 8. Testing Retire Branch - return branch - do nothing");
 		@(negedge clock);
 		reset 			= 1'b0;
 		enable 			= 1'b1;
@@ -680,9 +715,9 @@ module testbench;
 		if_pc_in 		= 32'h100;
 		//Input from retire
 		rt_en_branch		= 1'b1;
-		rt_cond_branch		= 1'b0;
+		rt_cond_branch		= 1'b1;
 		rt_direct_branch	= 1'b0;
-		rt_return_branch	= 1'b0;
+		rt_return_branch	= 1'b1;
 		rt_branch_taken		= 1'b1;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'b10101000;
@@ -691,25 +726,75 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		assert((next_pc_valid == 1)) else #1 exit_on_error;
+		assert((next_pc_valid == 0)) else #1 exit_on_error;
 		//assert(next_pc_index == ) else #1 exit_on_error;
-		assert(next_pc == if_pc_in + 4) else #1 exit_on_error;
-		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		//assert(next_pc == 292) else #1 exit_on_error;
+		//assert(next_pc_prediction == 1) else #1 exit_on_error;
 		// correct obq - need to modify obq tomorrow (head advance)
-		$display("@@@@@skip OBQ error now@@@@");
-		//assert(obq_tail_out == 1) else #1 exit_on_error;
-		assert(obq_out[0] == 0) else #1 exit_on_error;
+		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@   OBQ test should be done later @@@@@@@@@@@@@@@@@@");
+		//assert((obq_head_out == 1)&(obq_tail_out == 2)) else #1 exit_on_error;
+		//assert(obq_out[1] == 0) else #1 exit_on_error;
 		// correct btb
 		_check_for_correct_btb_write;
 		// correct gshare
 		assert((gshare_ght_out==0)) else #1 exit_on_error;
-		//_check_for_correct_gshare_reset;
-		//_check_for_correct_btb_reset;
-		//_check_for_correct_ras_reset;	
 		// correct RAS
-		print_bp;
 		
-		assert((ras_head_out == 0) & (ras_tail_out == 0) & (ras_stack_out[0] == 260)) else #1 exit_on_error;	
+		assert((ras_stack_out[0] == 292)&(ras_head_out == 0) & (ras_tail_out == 1) ) else #1 exit_on_error;	
+
+		$display("Testing retire Branch - Read RAS and clear it passed");
+
+		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@			Simple Retire Test Passed 		@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+		$display("\n 9. Testing Fetch return branch - Read RAS and clear it, mark as branch taken");
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b1;
+		if_return_branch	= 1'b1;
+		if_pc_in 		= 32'h110;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b1;
+		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b1;
+		rt_branch_taken		= 1'b1;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'b10101000;
+		rt_calculated_pc	= 32'b11011000;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+		`DELAY;
+		
+		assert((next_pc_valid == 1)) else #1 exit_on_error;
+		//assert(next_pc_index == ) else #1 exit_on_error;
+		assert(next_pc == 292) else #1 exit_on_error;
+		assert(next_pc_prediction == 1) else #1 exit_on_error;
+		// correct obq - need to modify obq tomorrow (head advance)
+		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@   OBQ test should be done later @@@@@@@@@@@@@@@@@@");
+		//assert((obq_head_out == 1)&(obq_tail_out == 2)) else #1 exit_on_error;
+		//assert(obq_out[1] == 0) else #1 exit_on_error;
+		// correct btb
+		_check_for_correct_btb_write;
+		// correct gshare
+		assert((gshare_ght_out==0)) else #1 exit_on_error;
+		// correct RAS
+		assert((ras_head_out == 0) & (ras_tail_out == 0) ) else #1 exit_on_error;	
+
+		$display("Testing fetch return branch - read RAS and clear it  passed");
+
+		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@			Start random testing			@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+
+
 
 
 		// Reset
