@@ -25,9 +25,9 @@
 //3. Unconditional and direct 	: READ & Update BTB only, mark as branch_taken
 //4. Unconditional and indirect : READ & Update RAS only, mark ad branch_taken
 
-// BTB is updated when branch is not taken
+// BTB is updated when branch is taken
 // Gshare and OBQ are updated when the prediction is wrong
-
+// RAS is updated when the function returns
 //*** May need small decoder at the FETCH outside of BP module
 //----------------------------------------------------------------------
 
@@ -250,7 +250,7 @@ module  BP(
 				end else begin
 					next_pc_valid_calc	 = 1'b1;
 					next_pc_index_calc	 = bh_index;
-					next_pc_calc		 = next_pc + 4;
+					next_pc_calc		 = if_pc_in + 4;
 					next_pc_prediction_calc	 = 1'b0;
 				end			
 					
@@ -263,11 +263,11 @@ module  BP(
 					next_pc_valid_calc	 = 1'b1;
 					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
 					next_pc_calc		 = btb_next_pc;
-					next_pc_prediction_calc	 = 1'b0;
+					next_pc_prediction_calc	 = 1'b1;
 				end else begin
 					next_pc_valid_calc	 = 1'b1;
 					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-					next_pc_calc		 = next_pc + 4;
+					next_pc_calc		 = if_pc_in + 4;
 					next_pc_prediction_calc	 = 1'b0;
 				end
 
@@ -279,11 +279,11 @@ module  BP(
 					next_pc_valid_calc	 = 1'b1;
 					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
 					next_pc_calc		 = ras_next_pc;
-					next_pc_prediction_calc	 = 1'b0;
+					next_pc_prediction_calc	 = 1'b1;
 				end else begin
 					next_pc_valid_calc	 = 1'b1;
 					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-					next_pc_calc		 = next_pc + 4;
+					next_pc_calc		 = if_pc_in + 4;
 					next_pc_prediction_calc	 = 1'b0;
 				end
 

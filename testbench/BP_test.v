@@ -232,8 +232,7 @@ module testbench;
 			
 			// From Ash
 			$display("tail_out: %d", tail_out);
-			for (i = 0; i < `OBQ_SIZE; ++i) begin
-				$display("index: %d branch_history: %b", i, obq_out[i].branch_history);
+			for (i = 0; i < `OBQ_SIZE; ++i) begin$display("index: %d branch_history: %b", i, obq_out[i].branch_history);
 			end	
 			
 			$display("*******************************************************************************");
@@ -340,6 +339,235 @@ module testbench;
 		$display("Reset Passed");
 		$display("--------START FROM HERE-----");
 
+		$display("Testing Single Condition Direct...");
+
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b1;
+		if_direct_branch	= 1'b1;
+		if_pc_in 		= 32'h40;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b0;
+		rt_branch_taken		= 1'b0;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'h0;
+		rt_calculated_pc	= 32'h0;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}}; 
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 1) else #1 exit_on_error;
+		assert(next_pc_index == 0) else #1 exit_on_error;
+		assert(next_pc == 32'h44) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert(obq_tail_out == 1) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;
+
+		$display("Single Condition Direct Passed");
+
+		$display("Testing Single Condition Indirect...");
+
+		// insert
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b1;
+		if_direct_branch	= 1'b0;
+		if_pc_in 		= 32'h44;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b0;
+		rt_branch_taken		= 1'b0;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'h0;
+		rt_calculated_pc	= 32'h0;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}};
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 1) else #1 exit_on_error;
+		assert(next_pc_index == 1) else #1 exit_on_error;
+		assert(next_pc == 32'h48) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		assert(obq_out[1] == 0) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+
+		$display("Single Condition Indirect Passed");
+
+		$display("Testing Single Unconditional Direct...");
+
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b1;
+		if_pc_in 		= 32'h60;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b0;
+		rt_branch_taken		= 1'b0;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'h0;
+		rt_calculated_pc	= 32'h0;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}};
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 1) else #1 exit_on_error;
+		assert(next_pc_index == 0) else #1 exit_on_error;
+		assert(next_pc == 32'h64) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		assert(obq_out[1] == 0) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+
+
+
+		$display("Single Unconditional Direct Passed");
+
+		$display("Testing Single Unconditional Indirect...");
+
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b0;
+		if_pc_in 		= 32'h100;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b0;
+		rt_branch_taken		= 1'b0;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'h0;
+		rt_calculated_pc	= 32'h0;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}};
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 1) else #1 exit_on_error;
+		assert(next_pc_index == 0) else #1 exit_on_error;
+		assert(next_pc == 32'h104) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		assert(obq_out[1] == 0) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+
+		$display("Single Unconditional Indirect Passed");
+
+		
+		$display("Testing Retire Branch - Update BTB only - Branch is taken but prediction is correct");
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b0;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b0;
+		if_pc_in 		= 32'h100;
+		//Input from retire
+		rt_en_branch		= 1'b1;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b1;
+		rt_branch_taken		= 1'b1;
+		rt_prediction_correct	= 1'b1;
+		rt_pc			= 32'h40;
+		rt_calculated_pc	= 32'h60;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 0) else #1 exit_on_error;
+		//assert(next_pc_index == ) else #1 exit_on_error;
+		//assert(next_pc == 32'bx) else #1 exit_on_error;
+		//assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		assert(obq_out[1] == 0) else #1 exit_on_error;
+		// correct btb 
+		assert((btb_valid_out== 1) & (btb_tag_out== 1 ) & (btb_target_address_out== 12'b11000)) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		//_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+		print_bp;
+
+		$display("Testing Retire Branch - Update BTB only passed");
+
+
+
+
+		$display("Testing Retire Branch - Update Gshare and OBQ + OBQ - Branch is taken but prediction is incorrect");
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b0;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b0;
+		if_pc_in 		= 32'h100;
+		//Input from retire
+		rt_en_branch		= 1'b1;
+		rt_cond_branch		= 1'b1;
+		rt_direct_branch	= 1'b1;
+		rt_branch_taken		= 1'b1;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'b11100;
+		rt_calculated_pc	= 32'b11111100;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 0) else #1 exit_on_error;
+		//assert(next_pc_index == ) else #1 exit_on_error;
+		//assert(next_pc == 32'bx) else #1 exit_on_error;
+		//assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq - need to modify obq tomorrow (head advance)
+		assert(obq_tail_out == 1) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		// correct btb
+		assert((btb_valid_out== 1) & (btb_tag_out== 7 ) & (btb_target_address_out== 63)) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		//_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+		print_bp;
+
+		$display("Testing Retire Branch - Update BTB only passed");
+
+
+
+
+	
 		// Need to do : How do we know whether the instruction is
 		// branch or not before decode?
 

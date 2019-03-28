@@ -36,7 +36,7 @@ module OBQ(
 	logic [`index_t:0] tail;
 	logic [`index_t:0] tail_next;
 
-	logic [`index_t:0] row_tag_index;
+	// logic [`index_t:0] row_tag_index;
 	logic [`index_t:0] row_tag_next;
 
 	// assign statements
@@ -51,16 +51,16 @@ module OBQ(
 	// bh_pred is the most recent prediction entry
 	assign bh_pred 		= obq[tail-1];
 	// row_tag is the index at which the last branch history was inserted
-	assign row_tag 		= row_tag_index; // tail - 1;
-
+	// assign row_tag 		= row_tag_index; // tail - 1;
+	assign row_tag		= row_tag_next;
 	// combinational next state logic
 	always_comb begin
 
 		// default values for next state logic
 		obq_next = obq;
 		tail_next = tail;
-		row_tag_next = row_tag;
-
+		// row_tag_next = row_tag;
+		row_tag_next = tail;
 		if (write_en & clear_en & shift_en) begin
 
 			// determine tail_next
@@ -218,11 +218,11 @@ module OBQ(
 				obq[i].branch_history <= 0; // reset to all not taken
 			end
 			tail 		<= 0;
-			row_tag_index 	<= 0;
+			// row_tag_index 	<= 0;
 		end else begin
 			obq 		<= obq_next;
 			tail 		<= tail_next;
-			row_tag_index 	<= row_tag_next;
+			// row_tag_index 	<= row_tag_next;
 		end
 	end
 
