@@ -143,7 +143,7 @@ module  BP(
 		
 	// During fetch 	/ unconditional indirect
 	assign ras_write_en	= if_en_branch & !if_cond_branch & !if_direct_branch;
-	// During retirement	/ unconditional indirect
+	// During fetch		/ unconditional indirect
 	assign ras_read_en	= if_en_branch & if_return_branch;				
 
 	// internal registers
