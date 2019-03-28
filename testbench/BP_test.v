@@ -10,11 +10,13 @@ module testbench;
 	logic							if_en_branch;
 	logic							if_cond_branch;
 	logic							if_direct_branch;
+	logic							if_return_branch;
 	logic	[31:0]						if_pc_in;
 	
 	logic							rt_en_branch;
 	logic							rt_cond_branch;
 	logic							rt_direct_branch;
+	logic							rt_return_branch;
 	logic							rt_branch_taken;
 	logic							rt_prediction_correct;
 	logic	[31:0]						rt_pc;
@@ -31,7 +33,8 @@ module testbench;
 	logic		[`BH_SIZE-1:0]				gshare_ght_out;
 	logic		[2**(`BH_SIZE)-1:0]			gshare_pht_out;
 	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				obq_out;
-	logic 		[$clog2(`OBQ_SIZE):0] 			obq_tail_out;
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_head_out;
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_tail_out;
 	logic 		[`BTB_ROW-1:0]				btb_valid_out;
 	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		btb_tag_out;
 	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	btb_target_address_out;
@@ -51,7 +54,9 @@ module testbench;
 	logic		[`BH_SIZE-1:0]				test_gshare_ght_out;
 	logic		[2**(`BH_SIZE)-1:0]			test_gshare_pht_out;
 	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				test_obq_out;
-	logic 		[$clog2(`OBQ_SIZE):0] 			test_obq_tail_out;
+	
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		test_obq_head_out;
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		test_obq_tail_out;
 	logic 		[`BTB_ROW-1:0]				test_btb_valid_out;
 	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		test_btb_tag_out;
 	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	test_btb_target_address_out;
@@ -70,12 +75,14 @@ module testbench;
 		
 		.if_en_branch(if_en_branch),
 		.if_cond_branch(if_cond_branch),
-		.if_direct_branch(if_direct_branch), 
+		.if_direct_branch(if_direct_branch),
+		.if_return_branch(if_return_branch), 
 		.if_pc_in(if_pc_in),
 		
 		.rt_en_branch(rt_en_branch),
 		.rt_cond_branch(rt_cond_branch),
 		.rt_direct_branch(rt_direct_branch),
+		.rt_return_branch(rt_return_branch),
 		.rt_branch_taken(rt_branch_taken),
 		.rt_prediction_correct(rt_prediction_correct),
 		.rt_pc(rt_pc),
@@ -87,6 +94,7 @@ module testbench;
 		.gshare_ght_out(gshare_ght_out),
 		.gshare_pht_out(gshare_pht_out),		
 		.obq_out(obq_out),
+		.obq_head_out(obq_head_out),
 		.obq_tail_out(obq_tail_out),
 		.btb_valid_out(btb_valid_out),
 		.btb_tag_out(btb_tag_out),
@@ -136,7 +144,7 @@ module testbench;
 	task print_obq;
 		begin
 			$display("OBQ");
-			$display("tail_out: %d", obq_tail_out);
+			$display("head_out: %d, tail_out: %d", obq_head_out, obq_tail_out);
 			for (int i = 0; i < `OBQ_SIZE; ++i) begin
 				$display("obq[%d] = %b", i, obq_out[i].branch_history);
 			end
@@ -191,7 +199,7 @@ module testbench;
 
 	task _check_for_correct_obq_reset;
 		begin
-			assert(obq_tail_out == 0) else #1 exit_on_error;
+			assert((obq_tail_out == 0) & (obq_head_out == 0)  ) else #1 exit_on_error;
 			for (int i = 0; i < `OBQ_SIZE; ++i) begin
 				assert(obq_out[i].branch_history == 0) else #1 exit_on_error;
 			end
@@ -231,7 +239,8 @@ module testbench;
 	task _check_for_correct_btb_write;
 		begin
 		//Check the btb is updated correctly when branch is taken
-			if(rt_en_branch & rt_branch_taken) begin
+		//& not return
+			if(rt_en_branch & rt_branch_taken & !rt_return_branch) begin
 				assert ((btb_valid_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== 1) & (btb_tag_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== rt_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)] ) & (btb_target_address_out[rt_pc[($clog2(`BTB_ROW)+1):2]]== rt_calculated_pc[`TARGET_SIZE+1:2])) else #1 exit_on_error;
 			end
 		end
@@ -244,7 +253,8 @@ module testbench;
 	task _check_for_correct_btb;
 		begin
 		//Check the btb is updated correctly when branch is taken
-			if(rt_en_branch & rt_branch_taken) begin
+		//except return
+			if(rt_en_branch & rt_branch_taken & !rt_return_branch) begin
 				test_btb_valid_out[rt_pc[($clog2(`BTB_ROW)+1):2]] = 1;
 				test_btb_tag_out[rt_pc[($clog2(`BTB_ROW)+1):2]]= rt_pc[(`TAG_SIZE+$clog2(`BTB_ROW)+1):($clog2(`BTB_ROW)+2)];
 				test_btb_target_address_out[rt_pc[($clog2(`BTB_ROW)+1):2]]= rt_calculated_pc[`TARGET_SIZE+1:2]; 
@@ -254,15 +264,21 @@ module testbench;
 	endtask
 
 	task _check_for_correct_ras;
-
+		begin
+		// Check the RAS is updated correctly when unconditional
+		// indirect is fetched or return is fetched
+		end
 	endtask
 
 	task _check_for_correct_gshare;
+		// Check the gshare is updated correctly when conditional is
+		// retired and prediction is wrong
 
 	endtask
 
 	task _check_for_correct_obq;
-
+		// Check the obq is updated correctly when conditional is
+		// retired and prediction is wrong
 	endtask
 
 	task _check_for_correct_bp;
@@ -379,11 +395,13 @@ module testbench;
 		if_en_branch		= 1'b0;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h0;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b0;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'h0;
@@ -416,11 +434,13 @@ module testbench;
 		if_en_branch		= 1'b1;
 		if_cond_branch		= 1'b1;
 		if_direct_branch	= 1'b1;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h40;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b0;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'h0;
@@ -453,11 +473,13 @@ module testbench;
 		if_en_branch		= 1'b1;
 		if_cond_branch		= 1'b1;
 		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h44;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b0;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'h0;
@@ -490,11 +512,13 @@ module testbench;
 		if_en_branch		= 1'b1;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b1;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h60;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b0;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'h0;
@@ -529,11 +553,13 @@ module testbench;
 		if_en_branch		= 1'b1;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h100;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b0;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'h0;
@@ -568,11 +594,13 @@ module testbench;
 		if_en_branch		= 1'b0;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h100;
 		//Input from retire
 		rt_en_branch		= 1'b1;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b1;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b1;
 		rt_prediction_correct	= 1'b1;
 		rt_pc			= 32'h40;
@@ -607,11 +635,13 @@ module testbench;
 		if_en_branch		= 1'b0;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h100;
 		//Input from retire
 		rt_en_branch		= 1'b1;
 		rt_cond_branch		= 1'b1;
 		rt_direct_branch	= 1'b1;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b1;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'b11100;
@@ -646,11 +676,13 @@ module testbench;
 		if_en_branch		= 1'b0;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b0;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'h100;
 		//Input from retire
 		rt_en_branch		= 1'b1;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b1;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'b10101000;
@@ -695,7 +727,8 @@ module testbench;
 		test_gshare_ght_out ={`BH_SIZE{0}};
 		test_gshare_pht_out = {(2**(`BH_SIZE)){0}};
 		test_obq_out = {`OBQ_SIZE{0}};
-		test_obq_tail_out = {($clog2(`OBQ_SIZE)+1){0}};
+		test_obq_head_out = {($clog2(`OBQ_SIZE)){0}};
+		test_obq_tail_out = {($clog2(`OBQ_SIZE)){0}};
 		test_btb_valid_out = {`BTB_ROW{0}};
 		test_btb_tag_out= {(`BTB_ROW*`TAG_SIZE){0}};
 		test_btb_target_address_out = {(`BTB_ROW*`TARGET_SIZE){0}};
@@ -721,11 +754,13 @@ module testbench;
 		if_en_branch		= 1'b1;
 		if_cond_branch		= 1'b1;
 		if_direct_branch	= 1'b1;
+		if_return_branch	= 1'b0;
 		if_pc_in 		= 32'b11101110;
 		//Input from retire
 		rt_en_branch		= 1'b1;
 		rt_cond_branch		= 1'b0;
 		rt_direct_branch	= 1'b1;
+		rt_return_branch	= 1'b0;
 		rt_branch_taken		= 1'b1;
 		rt_prediction_correct	= 1'b0;
 		rt_pc			= 32'b111010101101;

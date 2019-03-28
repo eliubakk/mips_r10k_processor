@@ -20,17 +20,23 @@
 //Target address : 	pc[TARGET_SIZE+1:2]
 
 //-------------------------------Module behavior---------------------------
-//1. Conditional and direct 	: READ & Update BTB, GSHARE/OBQ
-//2. Conditional and indirect 	: READ & Update BTB, GSHARE/OBQ
-//3. Unconditional and direct 	: X return : READ & Update BTB only, mark as branch_taken
-//				  return : READ & clear RAS only,markas taken
-//				  	   if no entry in RAS, then mark as
-//				  	   not taken, and pc+4
-//4. Unconditional and indirect : Fetch : Bring next_pc from BTB, store pc+4
-//					to RAS, (if BTB match, them mark as
-//					branch taken)  
-//				  Retire : Write next_pc to BTB
-// BTB is updated when branch is taken (retire)
+//1. Conditional and direct 	: Fetch : READ BTB, GSHARE/OBQ
+//				  Retire : Update BTB, GSHARE/OBQ
+//2. Conditional and indirect 	: Fetch : READ BTB, GSHARE/OBQ
+//				  Retire : Update BTB, GSHARE/OBQ
+//
+//3. Unconditional and direct 	: 
+//Fetch : X return - Read BTB, mark as branch_taken
+//	    return - Read RAS and clear it, mark as branch_taken
+//Retire : X return - Update BTB only
+//	    return - Do nothing
+
+//4. Unconditional and indirect : 
+//Fetch : Bring next_pc from BTB, store pc+4 to RAS, (if BTB match, them mark as
+//	branch taken)  
+//Retire : Write next_pc to BTB
+//
+//BTB is updated when branch is taken (retire)
 // Gshare and OBQ are updated when the prediction is wrong (retire)
 // RAS is updated when the new instruction comes in (fetch)
 //*** May need small decoder at the FETCH outside of BP module
@@ -50,6 +56,7 @@ module  BP(
 	input					rt_en_branch,		// enabled when the instruction is branch  
 	input					rt_cond_branch,		// enabled when it is conditional branch
 	input					rt_direct_branch,       // enbaled when it is direct
+	input					rt_return_branch,
 	input					rt_branch_taken,	// enabled when the branch is actullly taken
 	input					rt_prediction_correct,  // enabled when the branch prediction is correct 
 	input		[31:0]			rt_pc,			// PC of the executed branch instruction
@@ -127,8 +134,8 @@ module  BP(
 
 	//----------For BTB and RAS
 	// During retirement	/ update when branch is taken (except
-	// unconditional indirect)
-	assign btb_write_en	= rt_en_branch & rt_branch_taken & (rt_cond_branch | rt_direct_branch) ; 				
+	//retiremnet)
+	assign btb_write_en	= rt_en_branch & rt_branch_taken &  !rt_return_branch ; 				
 	// During fetch		/ Everytime when branch comes in except return
 	// branch
 	assign btb_read_en	= if_en_branch & !(if_return_branch); 				
