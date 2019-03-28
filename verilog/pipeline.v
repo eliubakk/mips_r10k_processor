@@ -108,6 +108,7 @@ module pipeline (
   // Pipeline register enables
   logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
   logic [4:0]   is_ex_enable, ex_co_enable;
+  logic [4:0]   issue_stall;
   // Output from the branch predictor
   logic   bp_output;
   
@@ -125,7 +126,7 @@ module pipeline (
   logic          id_halt_out;
   logic          id_illegal_out;
   logic          id_valid_inst_out;
-  logic [4:0]    ra_idx, rb_idx, rc_idx ; 
+  GEN_REG    id_ra_idx, id_rb_idx, id_rc_idx ; 
   FU_NAME id_fu_name_out;
 
   //outputs from the maptable
@@ -137,21 +138,23 @@ module pipeline (
   // outputs of ID/DI stage
   // logic id_di_NPC;
   // logic id_di_IR;
-  logic id_di_rega;
-  logic id_di_regb;
-  logic id_di_opa_select;
-  logic id_di_opb_select;
-  logic id_di_dest_reg_idx;
-  logic id_di_alu_func;
-  logic id_di_rd_mem;
-  logic id_di_wr_mem;
-  logic id_di_ldl_mem_out;
-  logic id_di_stc_mem_out;
-  logic id_di_cond_branch;
-  logic id_di_uncond_branch;
-  logic id_di_halt;
-  logic id_di_cpuid_out;
-  logic id_di_illegal;
+  RS_ROW_T id_inst_out;
+  RS_ROW_T id_di_inst_in;
+  GEN_REG id_di_rega;
+  GEN_REG id_di_regb;
+  //logic id_di_opa_select;
+  //logic id_di_opb_select;
+  //logic id_di_dest_reg_idx;
+  //logic id_di_alu_func;
+  //logic id_di_rd_mem;
+  //logic id_di_wr_mem;
+  //logic id_di_ldl_mem_out;
+  //logic id_di_stc_mem_out;
+  //logic id_di_cond_branch;
+  //logic id_di_uncond_branch;
+  //logic id_di_halt;
+  //logic id_di_cpuid_out;
+  //logic id_di_illegal;
   //logic id_di_valid_inst;
 
   // outputs from dispatch stage
@@ -445,21 +448,21 @@ module pipeline (
     // Outputs
     .id_ra_value_out(id_rega_out),
     .id_rb_value_out(id_regb_out),
-    .id_opa_select_out(id_opa_select_out),
-    .id_opb_select_out(id_opb_select_out),
-    .id_dest_reg_idx_out(id_dest_reg_idx_out),
-    .id_alu_func_out(id_alu_func_out),
-    .id_fu_name_out(id_fu_name_out),
-    .id_rd_mem_out(id_rd_mem_out),
-    .id_wr_mem_out(id_wr_mem_out),
-    .id_ldl_mem_out(id_ldl_mem_out),
-    .id_stc_mem_out(id_stc_mem_out),
-    .id_cond_branch_out(id_cond_branch_out),
-    .id_uncond_branch_out(id_uncond_branch_out),
-    .id_halt_out(id_halt_out),
-    .id_cpuid_out(id_cpuid_out),
-    .id_illegal_out(id_illegal_out),
-    .id_valid_inst_out(id_valid_inst_out),
+    .id_opa_select_out(id_inst_out.inst.opa_select),
+    .id_opb_select_out(id_inst_out.inst.opb_select),
+    .id_dest_reg_idx_out(id_inst_out.inst.dest_reg),
+    .id_alu_func_out(id_inst_out.inst.alu_func),
+    .id_fu_name_out(id_inst_out.inst.fu_name),
+    .id_rd_mem_out(id_inst_out.inst.rd_mem),
+    .id_wr_mem_out(id_inst_out.inst.wr_mem),
+    .id_ldl_mem_out(id_inst_out.inst.ldl_mem),
+    .id_stc_mem_out(id_inst_out.inst.stc_mem),
+    .id_cond_branch_out(id_inst_out.inst.cond_branch),
+    .id_uncond_branch_out(id_inst_out.inst.uncond_branch),
+    .id_halt_out(id_inst_out.inst.halt),
+    .id_cpuid_out(id_inst_out.inst.cpuid),
+    .id_illegal_out(id_inst_out.inst.illegal),
+    .id_valid_inst_out(id_inst_out.inst.valid_inst),
     .ra_idx(id_ra_idx),
     .rb_idx(id_rb_idx),
     .rc_idx(id_rc_idx)
@@ -482,12 +485,16 @@ module pipeline (
 	.branch_incorrect(branch_incorrect),
 	
   .map_table_out(map_table_out),
-	.T1(T1), 		// Output for Dispatch and goes to RS
-	.T2(T2), 		// Output for Dispatch and goes to RS
-	.T(T) 		// Output for Dispatch and goes to RS and ROB
+	.T1(id_inst_out.T1), 		// Output for Dispatch and goes to RS
+	.T2(id_inst_out.T2), 		// Output for Dispatch and goes to RS
+	.T_old(T) 		// Output for Dispatch and goes to RS and ROB
 
   );
 
+assign id_inst_out.T = fr_free_reg_T;
+assign id_inst_out.busy = 1'b0;
+assign id_inst_out.inst_opcode = if_id_IR;
+assign id_inst_out.npc = if_id_NPC; 
  //////////////////////////////////////////////////
   //                                              //
   //                  ID/DI-Stage                    //
@@ -498,44 +505,14 @@ module pipeline (
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset) begin
-      id_di_NPC           <= `SD 0;
-      id_di_IR            <= `SD `NOOP_INST;
       id_di_rega          <= `SD 0;
       id_di_regb          <= `SD 0;
-      id_di_opa_select    <= `SD ALU_OPA_IS_REGA;
-      id_di_opb_select    <= `SD ALU_OPB_IS_REGB;
-      id_di_dest_reg_idx  <= `SD `ZERO_REG;
-      id_di_alu_func      <= `SD ALU_ADDQ;
-      id_di_rd_mem        <= `SD 0;
-      id_di_wr_mem        <= `SD 0;
-      id_di_ldl_mem_out   <= `SD 0;
-      id_di_stc_mem_out   <= `SD 0;
-      id_di_cond_branch   <= `SD 0;
-      id_di_uncond_branch <= `SD 0;
-      id_di_halt          <= `SD 0;
-      id_di_cpuid_out     <= `SD 0;
-      id_di_illegal       <= `SD 0;
-      id_di_valid_inst    <= `SD 0;
+      id_di_inst_in <= `SD EMPTY_ROW;
       end
       else begin
-        id_di_NPC           <= `SD if_id_NPC;
-        id_di_IR            <= `SD if_id_IR;
         id_di_rega          <= `SD id_rega_out;
         id_di_regb          <= `SD id_regb_out;
-        id_di_opa_select    <= `SD id_opa_select_out;
-        id_di_opb_select    <= `SD id_opb_select_out;
-        id_di_dest_reg_idx  <= `SD id_dest_reg_idx_out;
-        id_di_alu_func      <= `SD id_alu_func_out;
-        id_di_rd_mem        <= `SD id_rd_mem_out;
-        id_di_wr_mem        <= `SD id_wr_mem_out;
-        id_di_ldl_mem_out   <= `SD id_ldl_mem_out;
-        id_di_stc_mem_out   <= `SD id_stc_mem_out;
-        id_di_cond_branch   <= `SD id_cond_branch_out;
-        id_di_uncond_branch <= `SD id_uncond_branch_out;
-        id_di_halt          <= `SD id_halt_out;
-        id_di_cpuid_out     <= `SD id_cpuid_out;
-        id_di_illegal       <= `SD id_illegal_out;
-        id_di_valid_inst    <= `SD id_valid_inst_out;
+        id_di_inst_in <= `SD id_inst_out;
       end
   end
   
@@ -545,9 +522,10 @@ module pipeline (
   //                  DI/ISSUE-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
-  
+
+  assign  issue_stall= ~is_ex_enable;
   assign dispatch_en= ~(rs_full & fr_empty & rob_full) ;
-  assign branch_not_taken = !co_ret_take_branch;    // for flushing
+  assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   assign RS_enable=1;
   RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
@@ -559,11 +537,9 @@ module pipeline (
       .CAM_en(CDB_enable), 
       .CDB_in(CDB_in), 
       .dispatch_valid(dispatch_en),
-      .inst_in({id_di_opa_select_out, id_di_opb_select_out, id_di_dest_reg_idx_out, id_di_alu_func_out, id_di_fu_name_out, id_di_rd_mem_out, id_di_wr_mem_out,
-       id_di_ldl_mem_out, id_di_stc_mem_out, id_di_cond_branch_out, id_di_uncond_branch_out, id_di_halt_out, id_di_cpuid_out, id_di_illegal_out, id_di_valid_inst_out, fr_free_reg_T 
-       , T1, T2, 0, if_id_IR, if_id_NPC}), 
+      .inst_in(id_di_inst_in), 
       .branch_not_taken(branch_not_taken), 
-      .issue_stall(is_ex_enable),
+      .issue_stall(issue_stall),
         //check for this
       
       // outputs

@@ -67,7 +67,7 @@ module decoder(
         6'h0:
           case (inst[31:26])
             `PAL_INST: begin
-		fu_name = FU_ALU;
+		          fu_name = FU_ALU;
               if (inst[25:0] == `PAL_HALT)
                 halt = `TRUE;
               else if (inst[25:0] == `PAL_WHAMI) begin
@@ -159,10 +159,10 @@ module decoder(
           alu_func = ALU_ADDQ;
           dest_reg = DEST_IS_REGA;
           case (inst[31:26])
-            //`LDA_INST:  /* defaults are OK */;
-            //begin
-            //  fu_name = FU_LD;
-            //end
+            `LDA_INST:  /* defaults are OK */
+            begin
+             fu_name = FU_LD;
+            end
             `LDQ_INST:
             begin
               rd_mem = `TRUE;
@@ -255,15 +255,15 @@ module id_stage(
         output logic        id_cpuid_out,         // get CPUID inst?
         output logic        id_illegal_out,
         output logic        id_valid_inst_out,     // is inst a valid instruction to be 
-        output logic [4:0] ra_idx, rb_idx, rc_idx       //for giving input for the maptable                                // counted for CPI calculations?
+        output GEN_REG ra_idx, rb_idx, rc_idx       //for giving input for the maptable                                // counted for CPI calculations?
             );
    
   DEST_REG_SEL dest_reg_select;
 
   // instruction fields read from IF/ID pipeline register
-  wire    [4:0] ra_idx = if_id_IR[25:21];   // inst operand A register index
-  wire    [4:0] rb_idx = if_id_IR[20:16];   // inst operand B register index
-  wire    [4:0] rc_idx = if_id_IR[4:0];     // inst operand C register index
+  GEN_REG ra_idx = if_id_IR[25:21];   // inst operand A register index
+  GEN_REG rb_idx = if_id_IR[20:16];   // inst operand B register index
+  GEN_REG rc_idx = if_id_IR[4:0];     // inst operand C register index
 
   // Instantiate the register file used by this pipeline
   // regfile regf_0 (

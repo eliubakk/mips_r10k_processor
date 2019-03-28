@@ -328,7 +328,9 @@ module testbench;
 
 	task display_id_stage;
 		begin
-		end
+  $display("id pipeline registers---------------------------------------------------");
+			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
+    end
 	endtask
 
 	task display_stages;
@@ -340,9 +342,9 @@ module testbench;
 			$display("Cycle: %d", clock_count);
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
-			display_memory;
-			display_cache;
-			display_icache;
+			//display_memory;
+			//display_cache;
+			//display_icache;
 			display_if_stage;
 			display_if_id;
 			// display_id_stage;
@@ -424,11 +426,11 @@ module testbench;
       `SD;
       `SD;
        //print tables
-      //// display_RS_table();
-      //// display_arch_table();
-      //// display_ROB_table();
-      //// display_free_list_table(free_list_out);
-      //// show_input_output_port();
+     //display_RS_table();
+     //display_arch_table();
+     //display_ROB_table();
+     //display_free_list_table(free_list_out);
+     //show_input_output_port();
        
        // print the piepline stuff via c code to the pipeline.out
        print_cycles();
