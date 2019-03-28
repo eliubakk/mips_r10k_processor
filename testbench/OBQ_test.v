@@ -142,8 +142,14 @@ module testbench;
 	task shift_test;
 		input int idx;
 		begin
-			if ((idx >= head_test) & (idx < tail_test)) begin
-				head_test = idx;
+			if (head_test <= tail_test) begin
+				if ((idx >= head_test) & (idx < tail_test)) begin
+					head_test = idx + 1;
+				end
+			end else begin
+				if (!((tail_test <= idx) & (idx < head_test))) begin
+					head_test = idx + 1;
+				end
 			end
 		end
 	endtask
@@ -333,7 +339,6 @@ module testbench;
 			if (write_en) begin
 				insert_into_test(bh_row);
 			end
-			row_tag_test = row_tag;
 
 			@(posedge clock);
 			if (write_en) begin
@@ -346,7 +351,6 @@ module testbench;
 
 		$display("Multiple Write and Multiple Clear Passed");
 
-/*
 		$display("Testing Single Shift...");
 
 		@(negedge clock);
@@ -368,10 +372,10 @@ module testbench;
 			insert_into_test(bh_row);
 
 			@(posedge clock);
+			assert(row_tag == row_tag_test) else #1 exit_on_error;
 			`DELAY;
 			assert(bh_pred_valid == (tail_test > 0)) else #1 exit_on_error;
-			obq_equal(obq_out, obq_test, tail_out, tail_test);
-			assert(row_tag == row_tag_test) else #1 exit_on_error;
+			obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		end
 
 		@(negedge clock);
@@ -383,7 +387,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		assert(bh_pred_valid == ONE) else #1 exit_on_error;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 
 		$display("Single Shift Passed");
 
@@ -397,8 +401,8 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		assert(bh_pred_valid == ZERO) else #1 exit_on_error;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
+		assert(bh_pred_valid == ONE) else #1 exit_on_error;
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 
 		$display("Multiple Shift Passed");
 
@@ -411,6 +415,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		obq_test = obq_out;
+		head_test = head_out;
 		tail_test = tail_out;
 
 		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
@@ -418,7 +423,7 @@ module testbench;
 			reset = ZERO;
 			write_en = $urandom_range(1, 0);
 			shift_en = $urandom_range(1, 0);
-			bh_row.branch_history = $urandom_range(2**10 - 1, 0);
+			bh_row.branch_history = $urandom_range(2**`BH_SIZE - 1, 0);
 			shift_index = $urandom_range(2**4 - 1, 0);
 			if (shift_en) begin
 				shift_test(shift_index);
@@ -428,12 +433,12 @@ module testbench;
 			end
 
 			@(posedge clock);
-			`DELAY;
-			assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
-			obq_equal(obq_out, obq_test, tail_out, tail_test);
 			if (write_en) begin
 				assert(row_tag == row_tag_test) else #1 exit_on_error;
 			end
+			`DELAY;
+			assert(bh_pred_valid == (tail_out != head_out)) else #1 exit_on_error;
+			obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		end
 
 		$display("Multiple Write and Multiple Shift Passed");
@@ -448,6 +453,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		obq_test = obq_out;
+		head_test = head_out;
 		tail_test = tail_out;
 
 		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
@@ -463,10 +469,10 @@ module testbench;
 					insert_into_test(bh_row);
 
 					@(posedge clock);
-					`DELAY;
-					assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
-					obq_equal(obq_out, obq_test, tail_out, tail_test);
 					assert(row_tag == row_tag_test) else #1 exit_on_error;
+					`DELAY;
+					assert(bh_pred_valid == (tail_out != head_out)) else #1 exit_on_error;
+					obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 				end
 			end else begin
 				reset = ZERO;
@@ -491,13 +497,14 @@ module testbench;
 	
 				@(posedge clock);
 				`DELAY;
-				assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
-				obq_equal(obq_out, obq_test, tail_out, tail_test);
+				assert(bh_pred_valid == (tail_out != head_out)) else #1 exit_on_error;
+				obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 			end
 
 		end		
 
 		$display("Multiple Clear and Multiple Shift Passed");
+
 		$display("Testing Multiple Write, Clear, and Shift...");
 		
 		@(negedge clock);
@@ -509,6 +516,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		obq_test = obq_out;
+		head_test = head_out;
 		tail_test = tail_out;
 
 		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
@@ -525,15 +533,12 @@ module testbench;
 				shift_index = $urandom_range(2**4 - 1, 0);
 			end
 
-			if (clear_en & shift_en & (shift_index == index) & (index < tail_test)) begin
-				clear_from_test(0);
-			end else begin
-				if (clear_en) begin
-					clear_from_test(index);
-				end
-				if (shift_en) begin
-					shift_test(shift_index);
-				end
+			if (clear_en) begin
+				clear_from_test(index);
+			end
+
+			if (shift_en) begin
+				shift_test(shift_index);
 			end
 
 			if (write_en) begin
@@ -541,17 +546,17 @@ module testbench;
 			end
 
 			@(posedge clock);
-			`DELAY;
-			assert(bh_pred_valid == (tail_out > 0)) else #1 exit_on_error;
-			obq_equal(obq_out, obq_test, tail_out, tail_test);
 			if (write_en) begin
 				assert(row_tag == row_tag_test) else #1 exit_on_error;
 			end
+			`DELAY;
+			assert(bh_pred_valid == (tail_out != head_out)) else #1 exit_on_error;
+			obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
+
 			counter += 1;
 		end
 
 		$display("Multiple Write, Clear, and Shift Passed");
-*/
 		$display("ALL TESTS Passed");
 		$finish;
 	end

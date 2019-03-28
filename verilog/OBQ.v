@@ -40,12 +40,15 @@ module OBQ(
 	logic [`index_t:0] head;
 	logic [`index_t:0] head_next;
 
+	logic [`index_t:0] _row_tag;
+
 	// assign statements
 	assign obq_out = obq;
 	assign tail_out = tail;
 	assign head_out = head;
 
-	assign row_tag = tail;
+	// assign row_tag = tail;
+	assign row_tag = _row_tag;
 	assign bh_pred_valid = (head != tail);
 	assign bh_pred = obq[tail - 1'b1];
 
@@ -56,18 +59,7 @@ module OBQ(
 		obq_next = obq;
 		tail_next = tail;
 		head_next = head;
-
-		if (shift_en) begin
-			if (head <= tail) begin
-				if ((shift_index >= head) & (shift_index < tail)) begin
-					head_next = shift_index + 1;
-				end
-			end else begin
-				if (shift_index >= head) begin
-					head_next = shift_index + 1;
-				end
-			end
-		end
+		_row_tag = tail;
 
 		if (clear_en) begin
 			if (head_next <= tail_next) begin
@@ -88,8 +80,23 @@ module OBQ(
 			end
 		end
 
+		if (shift_en) begin
+			if (head_next <= tail_next) begin
+				if ((shift_index >= head_next) & (shift_index < tail_next)) begin
+					head_next = shift_index + 1;
+				end
+			end else begin
+				if (~((shift_index < head_next) & (shift_index >= tail_next))) begin
+					head_next = shift_index + 1;
+				end
+			end
+		end
+
+
+
 		if (write_en) begin
 			obq_next[tail_next] = bh_row;
+			_row_tag = tail_next;
 			++tail_next;
 			if (tail_next == head_next) begin
 				++head_next;
