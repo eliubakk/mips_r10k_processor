@@ -25,15 +25,17 @@ module testbench;
 
 	// output wires
 	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_out;
-	logic [$clog2(`OBQ_SIZE):0] tail_out;
-	logic [$clog2(`OBQ_SIZE):0] row_tag;
+	logic [$clog2(`OBQ_SIZE) - 1:0] head_out;
+	logic [$clog2(`OBQ_SIZE) - 1:0] tail_out;
+	logic [$clog2(`OBQ_SIZE) - 1:0] row_tag;
 	logic bh_pred_valid;
 	OBQ_ROW_T bh_pred;
 
 	// test wires
 	OBQ_ROW_T [`OBQ_SIZE-1:0] obq_test;
-	logic [$clog2(`OBQ_SIZE):0] tail_test;
-	logic [$clog2(`OBQ_SIZE):0] row_tag_test;
+	logic [$clog2(`OBQ_SIZE) - 1:0] head_test;
+	logic [$clog2(`OBQ_SIZE) - 1:0] tail_test;
+	logic [$clog2(`OBQ_SIZE) - 1:0] row_tag_test;
 	int counter = 0;	
 
 	// initialize module
@@ -50,6 +52,7 @@ module testbench;
 
 		// outputs
 		.obq_out(obq_out),
+		.head_out(head_out),
 		.tail_out(tail_out),
 		.row_tag(row_tag),
 		.bh_pred_valid(bh_pred_valid),
@@ -68,11 +71,14 @@ module testbench;
 	task obq_equal;
 		input OBQ_ROW_T [`OBQ_SIZE-1:0] obq;
 		input OBQ_ROW_T [`OBQ_SIZE-1:0] test;
+		input [$clog2(`OBQ_SIZE):0] head;
+		input [$clog2(`OBQ_SIZE):0] head_test;
 		input [$clog2(`OBQ_SIZE):0] tail;
 		input [$clog2(`OBQ_SIZE):0] tail_test;
 		begin
+			assert(head == head_test) else #1 exit_on_error;
 			assert(tail == tail_test) else #1 exit_on_error;
-			for (int i = 0; i < tail; ++i) begin
+			for (int i = head; i < tail; ++i) begin
 				assert(obq[i] == test[i]) else #1 exit_on_error;
 			end
 		end
@@ -80,7 +86,10 @@ module testbench;
 
 	task print_obq;
 		input OBQ_ROW_T [`OBQ_SIZE-1:0] obq;
+		input [$clog2(`OBQ_SIZE):0] head;
+		input [$clog2(`OBQ_SIZE):0] tail;
 		begin
+			$display("head: %d tail: %d", head, tail);
 			for (int i = 0; i < `OBQ_SIZE; ++i) begin
 				$display("i = %d bht: %b", i, obq[i].branch_history);
 			end
@@ -90,10 +99,16 @@ module testbench;
 	task insert_into_test;
 		input OBQ_ROW_T row;
 		begin
-			if (tail_test < `OBQ_SIZE) begin
-				obq_test[tail_test] = row;
-				row_tag_test = tail_test;
-				++tail_test;
+			/*
+			if (tail_test + 1 == head_test) begin
+				++head_test;
+			end
+			*/
+			obq_test[tail_test] = row;
+			row_tag_test = tail_test;
+			++tail_test;
+			if (tail_test == head_test) begin
+				++head_test;
 			end
 		end
 	endtask
@@ -101,9 +116,19 @@ module testbench;
 	task clear_from_test;
 		input int idx;
 		begin
-			if (idx < tail_test) begin
-				tail_test = idx;
-				obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+			if (head_test < tail_test) begin
+				if ((head_test <= idx) & (idx < tail_test)) begin
+					tail_test = idx;
+					obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];				
+				end
+			end else if (head_test != tail_test) begin
+				if (head_test <= idx) begin
+					tail_test = idx;
+					obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+				end else if (idx < tail_test) begin
+					tail_test = idx;
+					obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+				end
 			end
 		end
 	endtask
@@ -111,14 +136,8 @@ module testbench;
 	task shift_test;
 		input int idx;
 		begin
-			if (idx < tail_test) begin
-				int count;
-				count = 0;
-				for (int i = idx + 1; i < `OBQ_SIZE; ++i) begin
-					obq_test[count] = obq_test[i];
-					++count;
-				end
-				tail_test -= idx + 1;
+			if ((idx >= head_test) & (idx < tail_test)) begin
+				head_test = idx;
 			end
 		end
 	endtask
@@ -129,8 +148,8 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b write_en: %b bh_row: %b clear_en: %b index: %d shift_en: %b shift_index: %d bh_pred_valid: %b bh_pred: %b",
-				clock, reset, write_en, bh_row, clear_en, index, shift_en, shift_index, bh_pred_valid, bh_pred);
+		$monitor("clock: %b reset: %b write_en: %b bh_row: %b clear_en: %b index: %d shift_en: %b shift_index: %d bh_pred_valid: %b bh_pred: %b row_tag: %d",
+				clock, reset, write_en, bh_row, clear_en, index, shift_en, shift_index, bh_pred_valid, bh_pred.branch_history, row_tag);
 
 		// initialize
 		clock = ZERO;
@@ -149,28 +168,33 @@ module testbench;
 			obq_test[i].branch_history = 0; 
 		end
 		tail_test = 0;
+		head_test = 0;
 
 		@(posedge clock);
 		`DELAY;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
-
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
+		assert(row_tag == 0) else #1 exit_on_error;
+		assert(bh_pred_valid == 0) else #1 exit_on_error;
+		assert(bh_pred.branch_history == 0) else #1 exit_on_error;
 		$display("Reset Test Passed");
 
 		$display("Testing Single Write...");
 
 		@(negedge clock);
 		reset = ZERO;
-		bh_row.branch_history = `BH_SIZE'b1010101011;
+		bh_row.branch_history = `BH_SIZE'b1011;
 		write_en = ONE;
 		insert_into_test(bh_row);
+		row_tag_test = 0;
 
 		@(posedge clock);
+		// test combinational
+		assert(row_tag == row_tag_test) else #1 exit_on_error;
 		`DELAY;
+		// test sequential
 		assert(bh_pred_valid == ONE) else #1 exit_on_error;
 		assert(bh_pred == bh_row) else #1 exit_on_error;
-		assert(row_tag == row_tag_test) else #1 exit_on_error;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
-
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		$display("Single Write Passed");
 
 		$display("Testing Multiple Write...");
@@ -178,16 +202,16 @@ module testbench;
 		for (int i = 1; i < 5; ++i) begin
 			@(negedge clock);
 			reset = ZERO;
-			bh_row.branch_history = $urandom_range(2**10,0);
+			bh_row.branch_history = $urandom_range(2**`BH_SIZE,0);
 			write_en = ONE;
 			insert_into_test(bh_row);
 
 			@(posedge clock);
+			assert(row_tag == row_tag_test) else #1 exit_on_error;
 			`DELAY;
 			assert(bh_pred_valid == ONE) else #1 exit_on_error;
 			assert(bh_pred == bh_row) else #1 exit_on_error;
-			assert(row_tag == row_tag_test) else #1 exit_on_error;
-			obq_equal(obq_out, obq_test, tail_out, tail_test);
+			obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		end
 
 		$display("Multiple Write Passed");
@@ -203,7 +227,7 @@ module testbench;
 		`DELAY;
 		assert(bh_pred_valid == ONE) else #1 exit_on_error;
 		assert(bh_pred == obq_test[3]) else #1 exit_on_error;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 
 		$display("Single Clear Passed");
 
@@ -218,7 +242,7 @@ module testbench;
 		`DELAY;
 		assert(bh_pred_valid == ONE) else #1 exit_on_error;
 		assert(bh_pred == obq_test[0]) else #1 exit_on_error;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 
 		$display("Multiple Clear Passed");
 
@@ -235,16 +259,16 @@ module testbench;
 		for (int i = 0; i < `OBQ_SIZE; ++i) begin
 			@(negedge clock);
 			reset = ZERO;
-			bh_row.branch_history = $urandom_range(2**10, 0);
+			bh_row.branch_history = $urandom_range(2**`BH_SIZE, 0);
 			write_en = ONE;
 			insert_into_test(bh_row);
 
 			@(posedge clock);
+			assert(row_tag == row_tag_test) else #1 exit_on_error;
 			`DELAY;
 			assert(bh_pred_valid == ONE) else #1 exit_on_error;
 			assert(bh_pred == bh_row) else #1 exit_on_error;
-			assert(row_tag == row_tag_test) else #1 exit_on_error;
-			obq_equal(obq_out, obq_test, tail_out, tail_test);
+			obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		end
 
 		// clear
@@ -256,12 +280,26 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		assert(bh_pred_valid == ZERO) else #1 exit_on_error;
-		obq_equal(obq_out, obq_test, tail_out, tail_test);
+		assert(bh_pred_valid == ONE) else #1 exit_on_error;
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
 		assert(tail_out == 0) else #1 exit_on_error;
+
+		// clear all
+		@(negedge clock);
+		write_en = ZERO;
+		clear_en = ONE;
+		index = head_out;
+		clear_from_test(index);
+
+		@(posedge clock);
+		`DELAY;
+		assert(bh_pred_valid == ZERO) else #1 exit_on_error;
+		obq_equal(obq_out, obq_test, head_out, head_test, tail_out, tail_test);
+		assert(tail_out == index) else #1 exit_on_error;
 
 		$display("Clear All Passed");
 
+/*
 		$display("Testing Multiple Write and Multiple Clear...");
 
 		// reset
@@ -505,7 +543,7 @@ module testbench;
 		end
 
 		$display("Multiple Write, Clear, and Shift Passed");
-
+*/
 		$display("ALL TESTS Passed");
 		$finish;
 	end
