@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : CAM.tcl                                 */
+#/*   FILE        : RS.tcl                                  */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,14 +11,13 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-
-analyze -f sverilog "sys_defs.vh ../verilog/OBQ.v"
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/OBQ.v" $misc_files]
 elaborate OBQ
 set design_name OBQ
-##############################################
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 10
+set CLK_PERIOD 6
 
 
 
