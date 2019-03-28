@@ -425,7 +425,7 @@ module testbench;
 		$display("Reset Passed");
 		$display("--------START FROM HERE-----");
 
-		$display("Testing Single Condition Direct...");
+		$display("\n 1. Testing Fetch Single Condition Direct...");
 
 		@(negedge clock);
 		reset 			= 1'b0;
@@ -454,16 +454,15 @@ module testbench;
 		assert(next_pc == 32'h44) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 1) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 1)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;
 
-		$display("Single Condition Direct Passed");
+		$display("Fetch Single Condition Direct Passed");
 
-		$display("Testing Single Condition Indirect...");
+		$display("\n 2. Testing Fetch Single Condition Indirect...");
 
 		// insert
 		@(negedge clock);
@@ -493,17 +492,16 @@ module testbench;
 		assert(next_pc == 32'h48) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;	
 
-		$display("Single Condition Indirect Passed");
+		$display("Fetch Single Condition Indirect Passed");
 
-		$display("Testing Single Unconditional Direct...");
+		$display("\n 3. Testing Fetch Single Unconditional Direct, Not return...");
 
 		@(negedge clock);
 		reset 			= 1'b0;
@@ -532,19 +530,56 @@ module testbench;
 		assert(next_pc == 32'h64) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		_check_for_correct_ras_reset;	
 
+		$display("Fetch Single Unconditional Direct, not return Passed");
+
+		$display("\n 4. Testing Fetch Single Unconditional Direct,return...");
+
+		@(negedge clock);
+		reset 			= 1'b0;
+		enable 			= 1'b1;
+		//Input from fetch
+		if_en_branch		= 1'b1;
+		if_cond_branch		= 1'b0;
+		if_direct_branch	= 1'b1;
+		if_return_branch	= 1'b1;
+		if_pc_in 		= 32'h60;
+		//Input from retire
+		rt_en_branch		= 1'b0;
+		rt_cond_branch		= 1'b0;
+		rt_direct_branch	= 1'b0;
+		rt_return_branch	= 1'b0;
+		rt_branch_taken		= 1'b0;
+		rt_prediction_correct	= 1'b0;
+		rt_pc			= 32'h0;
+		rt_calculated_pc	= 32'h0;
+		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}};
+
+		@(posedge clock);
+		`DELAY;
+		assert(next_pc_valid == 1) else #1 exit_on_error;
+		assert(next_pc_index == 0) else #1 exit_on_error;
+		assert(next_pc == 32'h64) else #1 exit_on_error;
+		assert(next_pc_prediction == 0) else #1 exit_on_error;
+		// correct obq
+		assert((obq_head_out == 0) & (obq_tail_out == 2)) else #1 exit_on_error;
+		assert(obq_out[0] == 0) else #1 exit_on_error;
+		assert(obq_out[1] == 0) else #1 exit_on_error;
+		_check_for_correct_gshare_reset;
+		_check_for_correct_btb_reset;
+		_check_for_correct_ras_reset;	
+
+		$display("Fetch Single Unconditional Direct  return Passed");
 
 
-		$display("Single Unconditional Direct Passed");
 
-		$display("Testing Single Unconditional Indirect...");
+		$display("\n 5. Testing Fetch Single Unconditional Indirect...");
 
 		@(negedge clock);
 		reset 			= 1'b0;
@@ -554,7 +589,7 @@ module testbench;
 		if_cond_branch		= 1'b0;
 		if_direct_branch	= 1'b0;
 		if_return_branch	= 1'b0;
-		if_pc_in 		= 32'h100;
+		if_pc_in 		= 32'h120;
 		//Input from retire
 		rt_en_branch		= 1'b0;
 		rt_cond_branch		= 1'b0;
@@ -573,17 +608,21 @@ module testbench;
 		assert(next_pc == 32'h104) else #1 exit_on_error;
 		assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
-		assert(obq_tail_out == 2) else #1 exit_on_error;
+		assert(( obq_head_out == 0) && (obq_tail_out == 2)) else #1 exit_on_error;
 		assert(obq_out[0] == 0) else #1 exit_on_error;
 		assert(obq_out[1] == 0) else #1 exit_on_error;
-		_check_for_correct_btb_write;
 		_check_for_correct_gshare_reset;
 		_check_for_correct_btb_reset;
 		//_check_for_correct_ras_reset;	
 		//RAS check
-		assert((ras_stack_out[0] == 260) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
+		assert((ras_stack_out[0] == 292) & (ras_head_out == 0) & (ras_tail_out == 1)) else #1 exit_on_error;
 
-		$display("Single Unconditional Indirect Passed");
+		$display("Fetch Single Unconditional Indirect Passed");
+
+		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		$display("@@@@@@@@@@@			Simple Fetch Test Passed 		@@@@@@@@@@@@@@@@@");
+		$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
 
 		
 		$display("Testing Retire Branch - Update BTB only - Branch is taken but prediction is correct");
