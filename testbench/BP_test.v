@@ -2,8 +2,12 @@
 `define DELAY #2
 
 `include "../../sys_defs.vh"
-
-	
+/*`include "../../verilog/BTB.v"
+`include "../../verilog/OBQ.v"
+`include "../../verilog/GSHARE.v"
+`include "../../verilog/RAS.v"
+`timescale 1ns/100ps
+*/	
 module testbench;
 	logic clock, reset, enable;
 // Inputs	
@@ -423,28 +427,28 @@ module testbench;
 					end else if (if_en_branch & !if_cond_branch & !if_direct_branch) begin					
 					// Unconditional indirect	
 						if(if_return_branch) begin
-							if(ras_next_pc_valid) begin
-								test_pc_valid_calc	 = 1'b1;
-								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-								test_pc_calc		 = ras_next_pc;
-								test_pc_prediction_calc	 = 1'b1;
+							if(ras_valid_out) begin
+								test_next_pc_valid	 = 1'b1;
+								test_next_pc_index	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_next_pc		 = ras_next_pc;
+								test_next_pc_prediction	 = 1'b1;
 							end else begin
-								test_pc_valid_calc	 = 1'b1;
-								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-								test_pc_calc		 = if_pc_in + 4;
-								test_pc_prediction_calc	 = 1'b0;
+								test_next_pc_valid	 = 1'b1;
+								test_next_pc_index	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_next_pc		 = if_pc_in + 4;
+								test_next_pc_prediction	 = 1'b0;
 							end 
 						end else begin
 							if(btb_next_pc_valid) begin
-								test_pc_valid_calc	 = 1'b1;
-								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-								test_pc_calc		 = btb_next_pc;
-								test_pc_prediction_calc	 = 1'b1;
+								test_next_pc_valid	 = 1'b1;
+								test_next_pc_index	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_next_pc		 = btb_next_pc;
+								test_next_pc_prediction	 = 1'b1;
 							end else begin
-								test_pc_valid_calc	 = 1'b1;
-								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-								test_pc_calc		 = if_pc_in + 4;
-								test_pc_prediction_calc	 = 1'b0;
+								test_next_pc_valid	 = 1'b1;
+								test_next_pc_index	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_next_pc		 = if_pc_in + 4;
+								test_next_pc_prediction	 = 1'b0;
 							end
 						end
 
@@ -459,7 +463,7 @@ module testbench;
 
 			
 			assert( test_next_pc_valid == next_pc_valid ) else #1 exit_on_error;
-			assert( test_next_pc_ndex == next_pc_index ) else #1 exit_on_error;
+			assert( test_next_pc_index == next_pc_index ) else #1 exit_on_error;
 			assert( test_next_pc == next_pc ) else #1 exit_on_error;
 			assert( test_next_pc_prediction == next_pc_prediction ) else #1 exit_on_error;
 		end
@@ -672,7 +676,6 @@ module testbench;
 		
 
 
->>>>>>> 5735f8bac678ab1cde8f793075f2c02795b1d9be
 	
 	initial begin
 		
@@ -1095,25 +1098,7 @@ module testbench;
 		$display("\n--------------------------------RESET----------------------------------\n"); 
 		reset = 1'b1;
 		enable = 1'b0;
-		// Initialize the test value
 
-		test_next_pc_valid = 1'b0;
-		test_next_pc_index = {($clog2(`OBQ_SIZE)+1){0}};
-		test_next_pc = 32'h0;
-		test_next_pc_prediction = 1'b0;
-		`ifdef DEBUG
-		test_gshare_ght_out ={`BH_SIZE{0}};
-		test_gshare_pht_out = {(2**(`BH_SIZE)){0}};
-		test_obq_out = {`OBQ_SIZE{0}};
-		test_obq_head_out = {($clog2(`OBQ_SIZE)){0}};
-		test_obq_tail_out = {($clog2(`OBQ_SIZE)){0}};
-		test_btb_valid_out = {`BTB_ROW{0}};
-		test_btb_tag_out= {(`BTB_ROW*`TAG_SIZE){0}};
-		test_btb_target_address_out = {(`BTB_ROW*`TARGET_SIZE){0}};
-		test_ras_stack_out ={(`RAS_SIZE*32){0}};
-		test_ras_head_out ={($clog2(`RAS_SIZE)){0}};
-		test_ras_tail_out ={($clog2(`RAS_SIZE)){0}};
-		`endif
 		@(negedge clock);
 		reset = 1'b0;
 		enable = 1'b1;
@@ -1124,7 +1109,7 @@ module testbench;
 		
 
 	
-		for(int counter=0; counter<10; counter++) begin
+		for(int counter=0; counter<1000; counter++) begin
 			$display("\n--------------------------------------");
 			$display("%dth Random testing", counter+1);
 			@(negedge clock);

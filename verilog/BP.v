@@ -261,7 +261,7 @@ module  BP(
 
 		if(enable) begin
 			// Instruction should not fetch during roll back!
-			if(!roll_back) begin
+			if(roll_back) begin
 				next_pc_valid_calc = 1'b0;
 
 			end else begin
