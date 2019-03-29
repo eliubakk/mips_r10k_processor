@@ -17,7 +17,7 @@ elaborate OBQ
 set design_name OBQ
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 6
+set CLK_PERIOD 5
 
 
 
