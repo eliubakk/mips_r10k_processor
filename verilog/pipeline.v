@@ -157,6 +157,8 @@ module pipeline (
   logic [4:0][63:0] is_ex_T2_value;
   logic [4:0][63:0] pr_T1_value; 
   logic [4:0][63:0] pr_T2_value;    
+  PHYS_REG [4:0] issue_reg_T1;
+   PHYS_REG [4:0] issue_reg_T2;
 
   // Outputs from EX-Stage
   logic [4:0][63:0] ex_alu_result_out;
@@ -547,6 +549,8 @@ module pipeline (
     .rs_full(rs_full)
   );
 
+  genvar j;
+  
   always_comb begin
     for(integer i=0; i< `RS_SIZE; i=i+1) begin
       rs_table_out_npc[i] = rs_table_out[i].npc;
@@ -573,20 +577,25 @@ module pipeline (
     end
   end
 
-
+  genvar i;
+  for(i=0; i< `NUM_FU_TOTAL; i=i+1) begin
+    assign issue_reg_T1[i]= issue_reg[i].T1;
+    assign issue_reg_T2[i]= issue_reg[i].T2;
+    assign issue_reg_inst_opcode[i] = issue_reg[i].inst_opcode;
+  end
   //Instantiating the physical register
   assign is_pr_enable = 1'b1;
   phys_regfile regf_0 (
-    .rda_idx(T1),
+    .rda_idx(issue_reg_T1),
     .rda_out(pr_T1_value), 
 
-    .rdb_idx(T2),
+    .rdb_idx(issue_reg_T2),
     .rdb_out(pr_T2_value),
 
     .wr_clk(clock),
-    .wr_en(co_reg_wr_en_out),
-    .wr_idx(co_reg_wr_idx_out),
-    .wr_data(co_reg_wr_en_out)
+    .wr_en(ex_co_wr_mem),
+    .wr_idx(ex_co_dest_reg_idx),
+    .wr_data(ex_co_alu_result)
   );
 
   // Note: Decode signals for load-lock/store-conditional and "get CPU ID"
