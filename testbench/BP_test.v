@@ -43,28 +43,12 @@ module testbench;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_out;
 	`endif
 
-// Testing varilables
+	// Testing varilables for BP
 
 	logic							test_next_pc_valid;
 	logic	[$clog2(`OBQ_SIZE):0]				test_next_pc_index;
 	logic	[31:0]						test_next_pc;
 	logic							test_next_pc_prediction;
-
-	`ifdef DEBUG
-	logic		[`BH_SIZE-1:0]				test_gshare_ght_out;
-	logic		[2**(`BH_SIZE)-1:0]			test_gshare_pht_out;
-	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				test_obq_out;
-	
-	logic 		[$clog2(`OBQ_SIZE)-1:0] 		test_obq_head_out;
-	logic 		[$clog2(`OBQ_SIZE)-1:0] 		test_obq_tail_out;
-	logic 		[`BTB_ROW-1:0]				test_btb_valid_out;
-	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		test_btb_tag_out;
-	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	test_btb_target_address_out;
-	logic 		[`RAS_SIZE - 1:0] [31:0] 		test_ras_stack_out;
-	logic 		[$clog2(`RAS_SIZE) - 1:0] 		test_ras_head_out;
-	logic 		[$clog2(`RAS_SIZE) - 1:0] 		test_ras_tail_out;
-	`endif
-
 
 	// RAS WIRES
 	// inputs
@@ -76,7 +60,7 @@ module testbench;
 	logic ras_next_pc;
 	logic ras_valid_out;	
 
-	// test modules
+	// RAS test modules
 	RAS test_ras(
 		// inputs
 		.clock(clock),
@@ -104,7 +88,7 @@ module testbench;
 	logic obq_bh_pred_valid;
 	OBQ_ROW_T obq_bh_pred;
 
-	// test modules
+	// OBQ test modules
 	OBQ test_obq(
 		// inputs
 		.clock(clock),
@@ -121,6 +105,73 @@ module testbench;
 		.bh_pred(obq_bh_pred)
 	);
 
+	// BTB WIRES
+	// inputs
+	logic 		[31:0]	btb_if_pc_in;
+	logic 			btb_read_en;
+	logic 		[31:0]	btb_rt_pc;
+	logic 		[31:0]	btb_rt_calculated_pc;
+	logic 			btb_rt_branch_taken;
+	logic 			btb_write_en;
+	
+	// outputs
+	logic [31:0]		btb_next_pc;
+	logic 			btb_next_pc_valid;
+	// BTB test modules
+	
+
+	BTB test_btb(
+		// inputs
+		.clock(clock), 
+		.reset(reset), 
+		.enable(enable), 
+		.pc_in(btb_if_pc_in),
+		.if_branch(btb_read_en),	
+		.ex_pc(btb_rt_pc),
+		.calculated_pc(btb_rt_calculated_pc),
+		.ex_branch_taken(btb_rt_branch_taken),
+		.ex_en_branch(btb_write_en),
+		
+		// outputs 
+		.target_pc(btb_next_pc),
+		.valid_target(btb_next_pc_valid)
+	);
+
+
+	
+
+	// GSHARE WIRES
+	// inputs
+	logic			gshare_read_en;
+	logic		[31:0]	gshare_if_pc_in;
+	logic			gshare_clear_en;
+	logic		[31:0]	gshare_rt_pc;
+	logic			gshare_bh_pred_valid;
+	OBQ_ROW_T		gshare_bh_pred;
+	// outputs
+	logic	[`BH_SIZE-1:0]	gshare_ght;
+	logic			ghsare_prediction_valid;
+	logic			gshare_prediction;
+	// GSHARE test modules
+	GSHARE test_gshare(
+		// inputs
+		.clock(clock), 
+		.reset(reset), 
+		.enable(enable),
+		.if_branch(gshare_read_en), 
+		.pc_in(gshare_if_pc_in),
+		.obq_bh_pred_valid(gshare_bh_pred_valid),
+		.obq_gh_in(gshare_bh_pred.branch_history),
+		.clear_en(gshare_clear_en),
+		.rt_pc(gshare_rt_pc),
+		
+		// outputs
+		.ght_out(gshare_ght), 
+		.prediction_valid(gshare_prediction_valid),
+		.prediction_out(gshare_prediction)
+	);
+
+	// Branch predictor module
 
 	BP bp(
 		// inputs
@@ -190,19 +241,31 @@ module testbench;
 			// 	a. unconditional indirect
 			// 	b. next pc should be the top of RAS
 			// 	c. remove top of RAS
+			//
+			ras_reset = 1'b0;;
+			ras_write_en = 1'b0;
+			ras_clear_en = 1'b0;
+			ras_current_pc = 32'h0;
+
 			if (reset) begin
 				// enable bits don't matter
 				ras_reset = 1;
-			end else if (if_en_branch) begin // check if jump
-				ras_reset = 0;
-				write_en = 1;
-				clear_en = 0;
-				current_pc = ; // this should be the pc of the inst
-			end else if () begin // check if return
-				ras_reset = 0;
-				write_en = 0;
-				clear_en = 1;
+			end
+			// Do not fetch during roll back
+			if( !(rt_en_branch & rt_cond_branch & !rt_prediction_correct )) begin		
+
+			
+				if (if_en_branch & !if_cond_branch & !if_direct_branch & !if_return_branch) begin // check if jump
+					ras_reset = 0;
+					ras_write_en = 1;
+					ras_clear_en = 0;
+					ras_current_pc = if_pc_in; // this should be the pc of the inst
+				end else if (if_en_branch & if_return_branch) begin // check if return
+					ras_reset = 0;
+					ras_write_en = 0;
+					ras_clear_en = 1;
 				// current_pc doesnt matter?
+				end
 			end
 		end
 	endtask
@@ -213,34 +276,93 @@ module testbench;
 			// situations (fetch):
 			// 1. Conditional and Direct Instruction
 			// 2. Conditional and Indirect Instruction
+			obq_reset = 1'b0;
+			obq_write_en = 1'b0;;
+			obq_bh_row = {(`BH_SIZE-1){0}};
+			obq_clear_en = 1'b0;;
+			obq_index = {($clog2(`OBQ_SIZE)-1) {0}};
+			obq_shift_en = 1'b0;
+			obq_shift_index = {($clog2(`OBQ_SIZE)-1) {0}};
+	
 			if (reset) begin
 				obq_reset = 1;
 			end else begin
 				obq_reset = 0;
 				if (rt_en_branch) begin
 					obq_write_en = 0;
-					if () begin // preditction incorrect
+					if (rt_cond_branch & !rt_prediction_correct) begin // preditction incorrect
 						obq_shift_en = 0;
 						if (!obq_bh_pred_valid) begin // if obq not empty
 							obq_clear_en = 1;
-							obq_index = ; // some index tag
+							obq_index = rt_branch_index; // some index tag
 						end else begin
 							obq_clear_en = 0;
 						end
 					end else begin // prediction correct
 						obq_shift_en = 1;
-						obq_shift_index = ; // some index tag
+						obq_shift_index = rt_branch_index; // some index tag
 					end
 				end
-				if () begin // if stage ONLY IF RETIRE CORRECT
+				if ( !(rt_en_branch  & rt_cond_branch & !rt_prediction_correct) ) begin // if stage ONLY IF RETIRE CORRECT
 					if (if_en_branch) begin
 						obq_write_en = 1;
-						obq_bh_row.branch_history = ; // comes from gshare
+						obq_bh_row.branch_history = gshare_ght; // comes from gshare
 						obq_clear_en = 0;
 						obq_shift_en = 0;
 					end
 				end
 			end
+		end
+	endtask
+
+	task update_BTB;
+		begin
+			btb_if_pc_in = 32'h0;
+			btb_read_en = 1'b0;
+			btb_rt_pc = 32'h0;
+			btb_rt_calculated_pc = 32'h0;
+			btb_rt_branch_taken = 1'b0;
+			btb_write_en = 1'b0;
+			
+			// BTB is updated during retirement when branch is
+			// taken (except return)
+			if(rt_en_branch & rt_branch_taken & !rt_return_branch) begin
+				btb_write_en = 1'b1;
+				btb_rt_pc = rt_pc;
+				btb_rt_calculated_pc = rt_calculated_pc;
+			end else begin
+			// BTB reads value during fetch except return
+				if(if_en_branch & !if_return_branch) begin
+					btb_read_en = 1'b1;
+					btb_if_pc_in = if_pc_in;
+				end 
+			end
+
+		end
+	endtask
+
+	task update_GSHARE;
+		begin
+			gshare_read_en = 1'b0;
+			gshare_if_pc_in = 32'h0;
+			gshare_clear_en = 1'b0;
+			gshare_rt_pc = 32'h0;
+			gshare_bh_pred_valid = 1'b0;
+			gshare_bh_pred ={(`BH_SIZE) {0}};
+			
+			if(rt_en_branch & rt_branch_taken & !rt_return_branch) begin
+				gshare_clear_en = 1'b1;
+				gshare_rt_pc = rt_pc;
+				gshare_bh_pred_valid = obq_bh_pred_valid;
+				gshare_bh_pred	     = obq_bh_pred_valid;
+			end else begin
+				if(if_en_branch & if_cond_branch) begin
+					gshare_read_en = 1'b1;
+					gshare_if_pc_in = if_pc_in;
+				end
+			end
+
+
 		end
 	endtask
 
@@ -250,8 +372,99 @@ module testbench;
 			update_RAS;
 			//update OBQ
 			update_OBQ;
+			//update BTB
+			update_BTB;
+			//update GSHARE
+			update_GSHARE;
 		end
 	endtask
+
+	task _check_for_correct_bp;
+		begin
+			update_modules;
+			test_next_pc_valid = 1'b0;
+			test_next_pc_index = {($clog2(`OBQ_SIZE+1){0}};
+			test_next_pc = 32'h0;
+			test_next_pc_prediction = 1'b0;
+				// During the roll back, do nothing on fetch
+			if (!reset & enable) begin
+				if( !(rt_en_branch & rt_cond_branch & !rt_prediction_correct)) begin
+					// Conditional direct/indirect
+					if(if_en_branch & if_cond_branch) begin
+						if(gshare_prediction_valid & gshare_prediction & btb_next_pc_valid) begin
+							test_next_pc_valid = 1'b1;
+							test_next_pc_index = obq_row_tag;
+							test_next_pc = btb_next_pc;
+							test_next_pc_prediction = 1'b1;
+							
+						end else begin
+							test_next_pc_valid = 1'b1;
+							test_next_pc_index = obq_row_tag;
+							test_next_pc = if_pc_in + 4;
+							test_next_pc_prediction = 1'b0;
+							
+						end
+
+					end else if (if_en_branch & !if_cond_branch & if_direct_branch) begin	
+					// Unconditional direct
+						if(btb_next_pc_valid) begin
+							test_next_pc_valid = 1'b1;
+							test_next_pc_index = {($clog2(`OBQ_SIZE+1){0}};
+							test_next_pc = btb_next_pc;
+							test_next_pc_prediction = 1'b1;
+						end else begin
+							test_next_pc_valid = 1'b1;
+							test_next_pc_index = {($clog2(`OBQ_SIZE+1){0}};
+							test_next_pc = if_pc_in + 4;
+							test_next_pc_prediction = 1'b0;
+		
+						end
+					
+					end else if (if_en_branch & !if_cond_branch & !if_direct_branch) begin					
+					// Unconditional indirect	
+						if(if_return_branch) begin
+							if(ras_next_pc_valid) begin
+								test_pc_valid_calc	 = 1'b1;
+								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_pc_calc		 = ras_next_pc;
+								test_pc_prediction_calc	 = 1'b1;
+							end else begin
+								test_pc_valid_calc	 = 1'b1;
+								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_pc_calc		 = if_pc_in + 4;
+								test_pc_prediction_calc	 = 1'b0;
+							end 
+						end else begin
+							if(btb_next_pc_valid) begin
+								test_pc_valid_calc	 = 1'b1;
+								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_pc_calc		 = btb_next_pc;
+								test_pc_prediction_calc	 = 1'b1;
+							end else begin
+								test_pc_valid_calc	 = 1'b1;
+								test_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+								test_pc_calc		 = if_pc_in + 4;
+								test_pc_prediction_calc	 = 1'b0;
+							end
+						end
+
+
+					end else begin
+
+					end
+				end
+
+
+			end		
+
+			
+			assert( test_next_pc_valid == next_pc_valid ) else #1 exit_on_error;
+			assert( test_next_pc_ndex == next_pc_index ) else #1 exit_on_error;
+			assert( test_next_pc == next_pc ) else #1 exit_on_error;
+			assert( test_next_pc_prediction == next_pc_prediction ) else #1 exit_on_error;
+		end
+	endtask
+
 
 	// Print tables
 	task print_gshare;
@@ -452,16 +665,6 @@ module testbench;
 		// retired and prediction is wrong
 	endtask
 */
-	task _check_for_correct_bp;
-		_check_for_correct_btb;
-		//_check_for_correct_ras;
-		//_check_for_correct_obq;
-		//_check_for_correct_gshare;
-		// Check the correct output logic
-		
-	endtask
-
-
 	
 	initial begin
 		
