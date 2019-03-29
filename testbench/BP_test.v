@@ -75,7 +75,7 @@ module testbench;
 	// outputs
 	logic ras_next_pc;
 	logic ras_valid_out;	
-
+/*
 	// test modules
 	RAS test_ras(
 		// inputs
@@ -120,7 +120,7 @@ module testbench;
 		.bh_pred_valid(obq_bh_pred_valid),
 		.bh_pred(obq_bh_pred)
 	);
-
+*/
 
 	BP bp(
 		// inputs
@@ -178,7 +178,7 @@ module testbench;
 			$finish;
 		end
 	endtask
-
+/*
 	task update_RAS;
 		begin
 			// RAS needs to be updated in the following
@@ -195,13 +195,13 @@ module testbench;
 				ras_reset = 1;
 			end else if (if_en_branch) begin // check if jump
 				ras_reset = 0;
-				write_en = 1;
-				clear_en = 0;
-				current_pc = ; // this should be the pc of the inst
+				ras_write_en = 1;
+				ras_clear_en = 0;
+				ras_current_pc = ; // this should be the pc of the inst
 			end else if () begin // check if return
 				ras_reset = 0;
-				write_en = 0;
-				clear_en = 1;
+				ras_write_en = 0;
+				ras_clear_en = 1;
 				// current_pc doesnt matter?
 			end
 		end
@@ -252,7 +252,7 @@ module testbench;
 			update_OBQ;
 		end
 	endtask
-
+*/
 	// Print tables
 	task print_gshare;
 		begin
@@ -453,7 +453,7 @@ module testbench;
 	endtask
 */
 	task _check_for_correct_bp;
-		_check_for_correct_btb;
+		// _check_for_correct_btb;
 		//_check_for_correct_ras;
 		//_check_for_correct_obq;
 		//_check_for_correct_gshare;
@@ -934,7 +934,7 @@ module testbench;
 			rt_calculated_pc	= $urandom;
 			rt_branch_index		= $urandom_range(`OBQ_SIZE,0);
 
-			update_modules;
+			// update_modules;
 			@(posedge clock);
 			`DELAY
 			_check_for_correct_bp;

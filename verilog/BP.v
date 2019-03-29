@@ -61,7 +61,7 @@ module  BP(
 	input					rt_prediction_correct,  // enabled when the branch prediction is correct 
 	input		[31:0]			rt_pc,			// PC of the executed branch instruction
 	input		[31:0]			rt_calculated_pc,  	// Calculated target PC
-	input	[$clog2(`OBQ_SIZE):0]		rt_branch_index,	// Executed branch's OBQ index 
+	input	[$clog2(`OBQ_SIZE) - 1:0]		rt_branch_index,	// Executed branch's OBQ index 
 		
 	
 	`ifdef DEBUG
@@ -79,7 +79,7 @@ module  BP(
 	`endif
 
 	output		logic						next_pc_valid,		// Enabled when next_pc value is valid pc
-	output 		logic 	[$clog2(`OBQ_SIZE):0]			next_pc_index, 		// ************Index from OBQ	
+	output 		logic 	[$clog2(`OBQ_SIZE) - 1:0]			next_pc_index, 		// ************Index from OBQ	
 	output		logic	[31:0]					next_pc,
 	output		logic						next_pc_prediction	// enabled when next pc is predicted to be taken
 	
@@ -103,7 +103,7 @@ module  BP(
 		// OBQ signals
 		logic 				bh_pred_valid;		// Same as Gshare obq_bh_pred_valid
 		OBQ_ROW_T 			bh_pred;		// Same as [`BH_SIZE-1:0] obq_gh_in
-		logic	[$clog2(`OBQ_SIZE):0]	bh_index;		// *******Index from OBQ
+		logic	[$clog2(`OBQ_SIZE) - 1:0]	bh_index;		// *******Index from OBQ
 									// *******Was the branch predicted taken or not taken?
 		// BTB signals
 		logic	[31:0]			btb_next_pc; 	
@@ -115,7 +115,7 @@ module  BP(
 
 	// Outputs for BP module
 		logic				next_pc_valid_calc;
-		logic 	[$clog2(`OBQ_SIZE):0]	next_pc_index_calc; 		
+		logic 	[$clog2(`OBQ_SIZE) - 1:0]	next_pc_index_calc; 		
 		logic	[31:0]			next_pc_calc;
 		logic				next_pc_prediction_calc;	
 	
@@ -278,12 +278,12 @@ module  BP(
 			// PC + 4 when BTB not match
 				if(btb_next_pc_valid) begin
 					next_pc_valid_calc	 = 1'b1;
-					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 					next_pc_calc		 = btb_next_pc;
 					next_pc_prediction_calc	 = 1'b1;
 				end else begin
 					next_pc_valid_calc	 = 1'b1;
-					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 					next_pc_calc		 = if_pc_in + 4;
 					next_pc_prediction_calc	 = 1'b0;
 				end
@@ -296,24 +296,24 @@ module  BP(
 				if(if_return_branch) begin
 					if(ras_next_pc_valid) begin
 						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+						next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 						next_pc_calc		 = ras_next_pc;
 						next_pc_prediction_calc	 = 1'b1;
 					end else begin
 						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+						next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 						next_pc_calc		 = if_pc_in + 4;
 						next_pc_prediction_calc	 = 1'b0;
 					end 
 				end else begin
 					if(btb_next_pc_valid) begin
 						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+						next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 						next_pc_calc		 = btb_next_pc;
 						next_pc_prediction_calc	 = 1'b1;
 					end else begin
 						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+						next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 						next_pc_calc		 = if_pc_in + 4;
 						next_pc_prediction_calc	 = 1'b0;
 					end
@@ -333,7 +333,7 @@ module  BP(
 
 		if(reset) begin
 			next_pc_valid		<= 1'b0;
-			next_pc_index		<= {($clog2(`OBQ_SIZE)+1){0}};
+			next_pc_index		<= {($clog2(`OBQ_SIZE) - 1){0}};
 			next_pc			<= 32'h0;
 			next_pc_prediction	<= 1'b0;
 		end else begin
