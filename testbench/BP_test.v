@@ -89,7 +89,7 @@ module testbench;
 		.next_pc(ras_next_pc),
 		.valid_out(ras_valid_out)
 	);
-/*
+
 	// OBQ WIRES
 	// inputs
 	logic obq_reset;
@@ -104,6 +104,7 @@ module testbench;
 	logic obq_bh_pred_valid;
 	OBQ_ROW_T obq_bh_pred;
 
+	// test modules
 	OBQ test_obq(
 		// inputs
 		.clock(clock),
@@ -119,7 +120,7 @@ module testbench;
 		.bh_pred_valid(obq_bh_pred_valid),
 		.bh_pred(obq_bh_pred)
 	);
-*/
+
 
 	BP bp(
 		// inputs
@@ -177,7 +178,7 @@ module testbench;
 			$finish;
 		end
 	endtask
-/*
+
 	task update_RAS;
 		begin
 			// RAS needs to be updated in the following
@@ -245,13 +246,13 @@ module testbench;
 
 	task update_modules;
 		begin
-			// update RAS
+			//update RAS
 			update_RAS;
-			// update OBQ
+			//update OBQ
 			update_OBQ;
 		end
 	endtask
-*/
+
 	// Print tables
 	task print_gshare;
 		begin
@@ -373,7 +374,7 @@ module testbench;
 	endtask
 
 
-	
+/*	
 	// Check the functionality of each module for random testing
 	
 	task _check_for_correct_btb;
@@ -428,7 +429,7 @@ module testbench;
 	task _check_for_correct_gshare;
 		// Check the gshare is updated correctly when conditional is
 		// retired and prediction is wrong
-/*
+
 		begin
 		// During retire
 			if(rt_en_branch & rt_cond_branch & !rt_prediction_correct) begin
@@ -443,14 +444,14 @@ module testbench;
 				end
 			end
 		end
-*/			
+			
 	endtask
 
 	task _check_for_correct_obq;
 		// Check the obq is updated correctly when conditional is
 		// retired and prediction is wrong
 	endtask
-
+*/
 	task _check_for_correct_bp;
 		_check_for_correct_btb;
 		//_check_for_correct_ras;
@@ -459,98 +460,7 @@ module testbench;
 		// Check the correct output logic
 		
 	endtask
-/*	task display_table;
-		begin
-			$display("*******************************************************************************");
-			$display("*******************************************************************************");
-		
-			$display("FETCH_IN  @@@ if_branch : %d, if_pc_in : %h", if_branch, if_pc_in);
-			$display("RETIRE_IN @@@ rt_en_branch : %b, rt_branch_taken : %b, rt_prediction_correct : %b", rt_en_branch, rt_branch_taken, rt_prediction_correct);
-			$display("	    @@@ rt_pc : %h, rt_calculated_pc : %h, rt_branch_index : %5.0b", rt_pc, rt_calculated_pc, rt_branch_index);
-			$display("FETCH_OUT @@@ next_pc_valid : %b, next_pc_index : %5.0b, next_pc : %h", next_pc_valid, next_pc_index, next_pc);
-			$display("--------------------------BTB-----------------------------------");
-			$display("index(pc[%2.0d:2]		valid		tag(pc[%2.0d,%2.0d])	target_address(pc[%2.0d,2])",$clog2(`BTB_ROW)+1, `TAG_SIZE+$clog2(`BTB_ROW)+2, $clog2(`BTB_ROW)+2, `TARGET_SIZE+1 );
-			for(i=0;i<`BTB_ROW;i=i+1) begin
-			$display("%d		 %1.0b		%h		%h",i,valid_out[i], tag_out[i], target_address_out[i] );
-			end
-			$display("*******************************************************************************");
-			$display("--------------------------GSHARE PHT-----------------------------------");
-			$display("GHT : %b",ght_out[`BH_SIZE-1:0]);
-			$display("GHT idx           PHT");
-			for(i=0;i<(2**`BH_SIZE);i=i+1) begin
-				$display("Idx %b : Prediction %b", i[`BH_SIZE-1:0], pht_out[i]);
-			end
-			
-			$display("*******************************************************************************");
-			$display("---------------------------OBQ-----------------------------------------");
-			
-			// From Ash
-			$display("tail_out: %d", tail_out);
-			for (i = 0; i < `OBQ_SIZE; ++i) begin$display("index: %d branch_history: %b", i, obq_out[i].branch_history);
-			end	
-			
-			$display("*******************************************************************************");
-			$display("*******************************************************************************");
 
-
-		end
-	endtask
-
-	task insert_through_fetch;
-		input int pc;
-
-		begin
-			@(negedge clock);
-			if_branch = 1'b1;
-			if_pc_in = pc;
-			rt_en_branch = 1'b0;
-
-			@(posedge clock);
-			`DELAY;
-			rt_branch_index = next_pc_index;
-			
-			$display("AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			display_table;
-			// assert statements for correctness
-		end
-	endtask
-
-	task fix_through_retire;
-		input int pc;
-		input int calc_pc;
-
-		begin
-			@(negedge clock);
-			if_branch = 1'b0;
-			rt_en_branch = 1'b1;
-			rt_branch_taken = 1'b1;
-			rt_prediction_correct = 1'b0;
-			rt_pc = pc;
-			rt_calculated_pc = calc_pc;
-
-			@(posedge clock);
-			`DELAY;
-			// at this point should be inserted`
-		end
-	endtask
-
-	task insert_branch_into_bp;
-		input int pc;
-		input int calc_pc;
-
-		begin
-			//$display("BEFORE FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			//display_table;
-			insert_through_fetch(pc);
-			
-
-			fix_through_retire(pc, calc_pc);
-			$display("AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			display_table;
-			
-		end
-	endtask
-*/
 
 	
 	initial begin
@@ -853,26 +763,19 @@ module testbench;
 		rt_calculated_pc	= 32'b11111100;
 		rt_branch_index		= 1;
 		
-		print_obq;
 		`DELAY;
-		$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		$display("ghsare_prediction_valid (write_en): %b clear_en: %b clear_index: %d shift_en: %b shift_index: %d", bp.gshare_prediction_valid, bp.clear_en, bp.rt_branch_index, bp.shift_en, bp.rt_branch_index); 
 
 		@(posedge clock);
 		`DELAY;
-		$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		$display("ghsare_prediction_valid (write_en): %b clear_en: %b clear_index: %d shift_en: %b shift_index: %d", bp.gshare_prediction_valid, bp.clear_en, bp.rt_branch_index, bp.shift_en, bp.rt_branch_index); 
-
-	
 		assert(next_pc_valid == 0) else #1 exit_on_error;
 		//assert(next_pc_index == ) else #1 exit_on_error;
 		//assert(next_pc == 32'bx) else #1 exit_on_error;
 		//assert(next_pc_prediction == 0) else #1 exit_on_error;
 		// correct obq
 		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ OBQ test should be done later@@@@@@@@@@@@@@@@@@@@@@@");
-		print_obq;
-		assert((obq_head_out == 0) & (obq_tail_out == 1)) else #1 exit_on_error;
-		assert(obq_out[0] == 0) else #1 exit_on_error;
+		//print_obq;
+		//assert((obq_head_out == 0) & (obq_tail_out == 1)) else #1 exit_on_error;
+		//assert(obq_out[0] == 0) else #1 exit_on_error;
 		// correct btb
 		_check_for_correct_btb_write;
 		// correct gshare
@@ -911,8 +814,8 @@ module testbench;
 		//assert(next_pc_prediction == 1) else #1 exit_on_error;
 		// correct obq - need to modify obq tomorrow (head advance)
 		$display("@@@@@@@@@@@@@@@@@@@@@@@@@@@   OBQ test should be done later @@@@@@@@@@@@@@@@@@");
-		assert((obq_head_out == 1)&(obq_tail_out == 2)) else #1 exit_on_error;
-		assert(obq_out[1] == 0) else #1 exit_on_error;
+		//assert((obq_head_out == 1)&(obq_tail_out == 2)) else #1 exit_on_error;
+		//assert(obq_out[1] == 0) else #1 exit_on_error;
 		// correct btb
 		_check_for_correct_btb_write;
 		// correct gshare
@@ -1031,7 +934,7 @@ module testbench;
 			rt_calculated_pc	= $urandom;
 			rt_branch_index		= $urandom_range(`OBQ_SIZE,0);
 
-			//update_modules;
+			update_modules;
 			@(posedge clock);
 			`DELAY
 			_check_for_correct_bp;
