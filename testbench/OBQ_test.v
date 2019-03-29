@@ -114,7 +114,7 @@ module testbench;
 		begin
 			clear_success = ONE;
 			tail_test = idx;
-			obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
+			// obq_test[idx - 1].branch_history[`BH_SIZE - 1] = ~obq_test[idx - 1].branch_history[`BH_SIZE - 1];
 		end
 	endtask
 

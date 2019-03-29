@@ -59,8 +59,13 @@ module testbench;
 	// outputs
 	logic ras_next_pc;
 	logic ras_valid_out;	
+<<<<<<< HEAD
 
 	// RAS test modules
+=======
+/*
+	// test modules
+>>>>>>> 5735f8bac678ab1cde8f793075f2c02795b1d9be
 	RAS test_ras(
 		// inputs
 		.clock(clock),
@@ -104,6 +109,7 @@ module testbench;
 		.bh_pred_valid(obq_bh_pred_valid),
 		.bh_pred(obq_bh_pred)
 	);
+<<<<<<< HEAD
 
 	// BTB WIRES
 	// inputs
@@ -172,6 +178,9 @@ module testbench;
 	);
 
 	// Branch predictor module
+=======
+*/
+>>>>>>> 5735f8bac678ab1cde8f793075f2c02795b1d9be
 
 	BP bp(
 		// inputs
@@ -229,7 +238,7 @@ module testbench;
 			$finish;
 		end
 	endtask
-
+/*
 	task update_RAS;
 		begin
 			// RAS needs to be updated in the following
@@ -250,6 +259,7 @@ module testbench;
 			if (reset) begin
 				// enable bits don't matter
 				ras_reset = 1;
+<<<<<<< HEAD
 			end
 			// Do not fetch during roll back
 			if( !(rt_en_branch & rt_cond_branch & !rt_prediction_correct )) begin		
@@ -264,6 +274,17 @@ module testbench;
 					ras_reset = 0;
 					ras_write_en = 0;
 					ras_clear_en = 1;
+=======
+			end else if (if_en_branch) begin // check if jump
+				ras_reset = 0;
+				ras_write_en = 1;
+				ras_clear_en = 0;
+				ras_current_pc = ; // this should be the pc of the inst
+			end else if () begin // check if return
+				ras_reset = 0;
+				ras_write_en = 0;
+				ras_clear_en = 1;
+>>>>>>> 5735f8bac678ab1cde8f793075f2c02795b1d9be
 				// current_pc doesnt matter?
 				end
 			end
@@ -464,8 +485,12 @@ module testbench;
 			assert( test_next_pc_prediction == next_pc_prediction ) else #1 exit_on_error;
 		end
 	endtask
+<<<<<<< HEAD
 
 
+=======
+*/
+>>>>>>> 5735f8bac678ab1cde8f793075f2c02795b1d9be
 	// Print tables
 	task print_gshare;
 		begin
@@ -665,6 +690,19 @@ module testbench;
 		// retired and prediction is wrong
 	endtask
 */
+<<<<<<< HEAD
+=======
+	task _check_for_correct_bp;
+		// _check_for_correct_btb;
+		//_check_for_correct_ras;
+		//_check_for_correct_obq;
+		//_check_for_correct_gshare;
+		// Check the correct output logic
+		
+	endtask
+
+
+>>>>>>> 5735f8bac678ab1cde8f793075f2c02795b1d9be
 	
 	initial begin
 		
@@ -1137,7 +1175,7 @@ module testbench;
 			rt_calculated_pc	= $urandom;
 			rt_branch_index		= $urandom_range(`OBQ_SIZE,0);
 
-			update_modules;
+			// update_modules;
 			@(posedge clock);
 			`DELAY
 			_check_for_correct_bp;
