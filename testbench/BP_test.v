@@ -383,7 +383,7 @@ module testbench;
 		begin
 			update_modules;
 			test_next_pc_valid = 1'b0;
-			test_next_pc_index = {($clog2(`OBQ_SIZE+1){0}};
+			test_next_pc_index = {($clog2(`OBQ_SIZE+1)){0}};
 			test_next_pc = 32'h0;
 			test_next_pc_prediction = 1'b0;
 				// During the roll back, do nothing on fetch
@@ -409,12 +409,12 @@ module testbench;
 					// Unconditional direct
 						if(btb_next_pc_valid) begin
 							test_next_pc_valid = 1'b1;
-							test_next_pc_index = {($clog2(`OBQ_SIZE+1){0}};
+							test_next_pc_index = {($clog2(`OBQ_SIZE+1)){0}};
 							test_next_pc = btb_next_pc;
 							test_next_pc_prediction = 1'b1;
 						end else begin
 							test_next_pc_valid = 1'b1;
-							test_next_pc_index = {($clog2(`OBQ_SIZE+1){0}};
+							test_next_pc_index = {($clog2(`OBQ_SIZE+1)){0}};
 							test_next_pc = if_pc_in + 4;
 							test_next_pc_prediction = 1'b0;
 		
