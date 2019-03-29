@@ -699,15 +699,15 @@ module pipeline (
   //////////////////////////////////////////////////
   // not sure whether it can be directly assigned
   always_comb begin
-    for (integer i=0; i<2; i=i+1) begin
-      ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i]| & co_selected[i]);
+    for (integer i=0; i<3; i=i+1) begin
+      ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
  
   //enable signal for the multipler  register
   assign ex_co_enable[3]=  (~done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
 
-  assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4]| & co_selected[4]));
+  assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
   
 
   // synopsys sync_set_reset "reset"
