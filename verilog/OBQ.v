@@ -65,12 +65,10 @@ module OBQ(
 			if (head_next <= tail_next) begin
 				if ((head <= index) & (index < tail)) begin
 					tail_next = index;
-					obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq_next[index - 1].branch_history[`BH_SIZE - 1];
 				end
 			end else begin
 				if (~((index < head_next) & (index >= tail_next))) begin
 					tail_next = index;
-					obq_next[index - 1].branch_history[`BH_SIZE - 1] = ~obq_next[index - 1].branch_history[`BH_SIZE - 1];
 				end
 			end
 		end
