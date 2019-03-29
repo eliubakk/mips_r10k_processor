@@ -154,10 +154,12 @@ module testbench;
 		table_out();
 		// check that at reset, all mappings of gen purp reg are
 		// to their equivalent phys reg
-		for (int i = 0; i < `NUM_GEN_REG; ++i) begin
+		for (int i = 0; i < `NUM_GEN_REG - 1; ++i) begin
 			assert(map_table_out[i].phys_tag[$clog2(`NUM_PHYS_REG)-1:0] == i) else #1 exit_on_error;
 			assert(map_table_out[i].phys_tag[$clog2(`NUM_PHYS_REG)] == ONE) else #1 exit_on_error;
 		end
+		// check that R31 maps to the DUMMY_REG
+		assert(map_table_out[`NUM_GEN_REG - 1].phys_tag == `DUMMY_REG) else #1 exit_on_error;
 
 		$display("Reset Test Passed");
 

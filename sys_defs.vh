@@ -161,6 +161,8 @@ const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001,
 `define SS_SIZE 1 // superscalar size
 `define ROB_SIZE 16
 
+typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
+
 // the number of functional units of each specific type we instantiate.
 const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 

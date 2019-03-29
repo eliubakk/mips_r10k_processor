@@ -41,7 +41,7 @@ module if_stage(
 	assign PC_enable = dispatch_en & Imem_valid ;
 
  
-assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
+  assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
 
   // this mux is because the Imem gives us 64 bits not 32 bits
   assign if_IR_out = PC_reg[2] ? Imem2proc_data[63:32] : Imem2proc_data[31:0];
@@ -60,10 +60,12 @@ assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
   // Pass PC+4 down pipeline w/instruction
   assign if_NPC_out = PC_plus_4;
 
-  assign if_valid_inst_out = ready_for_valid && Imem_valid;
+  //assign if_valid_inst_out = ready_for_valid && Imem_valid;
 
-  assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
-                                !if_valid_inst_out;
+
+assign if_valid_inst_out = Imem_valid;
+  // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
+  //                               !if_valid_inst_out;
 
   // This register holds the PC value
   // synopsys sync_set_reset "reset"
@@ -77,11 +79,11 @@ assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
   // This FF controls the stall signal that artificially forces
   // fetch to stall until the previous instruction has completed
   // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if (reset)
-      ready_for_valid <= `SD 1;  // must start with something
-    else
-      ready_for_valid <= `SD next_ready_for_valid;
-  end
+  // always_ff @(posedge clock) begin
+  //   if (reset)
+  //     ready_for_valid <= `SD 1;  // must start with something
+  //   else
+  //     ready_for_valid <= `SD next_ready_for_valid;
+  // end
   
 endmodule  // module if_stage

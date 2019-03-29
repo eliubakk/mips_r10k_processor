@@ -82,10 +82,11 @@ module Map_Table(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			// if reset, set reg_i = pr_i (i.e. reg0 = pr0, ...)
-			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
+			for (int i = 0; i < `NUM_GEN_REG - 1; i += 1) begin
 				map_table[i].phys_tag 		<= i;
 				map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] <= 1'b1;
 			end
+			map_table[`NUM_GEN_REG - 1].phys_tag <= `DUMMY_REG;
 		end else begin
 			// update the map_table's next state
 			map_table <= next_map_table;
