@@ -37,10 +37,17 @@ module decoder(
                             // instruction out of fetch
                             // 0 for HALT and illegal instructions (die on halt)
     output logic [4:0] ra_idx,
-    output logic [4:0] rb_idx
+    output logic [4:0] rb_idx,
+    output logic [4:0] rdest_idx
   );
   
   assign valid_inst = valid_inst_in && !illegal;
+
+  assign ra_idx= (opa_select == ALU_OPA_IS_REGA) ? inst[25:21] : `ZERO_REG;
+  assign rb_idx= (opb_select == ALU_OPB_IS_REGB) ? inst[20:16] : `ZERO_REG;
+  assign rdest_idx= (dest_reg == DEST_IS_REGC) ? inst[4:0] :
+                    (dest_reg == DEST_IS_REGA) ? inst[25:21]  : `ZERO_REG;
+                  
 
   always_comb begin
     // default control values:
@@ -63,15 +70,13 @@ module decoder(
     halt = `FALSE;
     cpuid = `FALSE;
     illegal = `FALSE;
-    ra_idx = inst[25:21];   // inst operand A register index
-    rb_idx = inst[20:16]; 
+    
     if(valid_inst_in) begin
       case ({inst[31:29], 3'b0})
         6'h0:
           case (inst[31:26])
             `PAL_INST: begin
-              ra_idx = `ZERO_REG;
-              rb_idx = `ZERO_REG;
+             
 		          fu_name = FU_ALU;
               if (inst[25:0] == `PAL_HALT)
                 halt = `TRUE;
@@ -88,7 +93,7 @@ module decoder(
         begin
           opa_select = ALU_OPA_IS_REGA;
           opb_select = inst[12] ? ALU_OPB_IS_ALU_IMM : ALU_OPB_IS_REGB;
-          rb_idx = inst[12] ? `ZERO_REG : inst[20:16];
+         
           dest_reg = DEST_IS_REGC;
           case (inst[31:26])
             `INTA_GRP:
@@ -151,7 +156,7 @@ module decoder(
               fu_name = FU_BR;
               opa_select = ALU_OPA_IS_NOT3;
               opb_select = ALU_OPB_IS_REGB;
-              ra_idx = `ZERO_REG;
+             
               alu_func = ALU_AND; // clear low 2 bits (word-align)
               dest_reg = DEST_IS_REGA;
               uncond_branch = `TRUE;
@@ -165,7 +170,7 @@ module decoder(
           opb_select = ALU_OPB_IS_REGB;
           alu_func = ALU_ADDQ;
           dest_reg = DEST_IS_REGA;
-          ra_idx = `ZERO_REG;
+         
           case (inst[31:26])
             `LDA_INST:  /* defaults are OK */
             begin
@@ -205,8 +210,7 @@ module decoder(
         begin
           opa_select = ALU_OPA_IS_NPC;
           opb_select = ALU_OPB_IS_BR_DISP;
-          ra_idx = `ZERO_REG;
-          rb_idx = `ZERO_REG;
+         
           alu_func = ALU_ADDQ;
           case (inst[31:26])
             `FBEQ_INST, `FBLT_INST, `FBLE_INST,
@@ -249,7 +253,7 @@ module id_stage(
         output ALU_OPA_SELECT id_opa_select_out,    // ALU opa mux select (ALU_OPA_xxx *)
         output ALU_OPB_SELECT id_opb_select_out,    // ALU opb mux select (ALU_OPB_xxx *)
 
-        output logic  [4:0] id_dest_reg_idx_out,  // destination (writeback) register index
+        //output logic  [4:0] id_dest_reg_idx_out,  // destination (writeback) register index
         // (ZERO_REG if no writeback)
         output ALU_FUNC     id_alu_func_out,      // ALU function select (ALU_xxx *)
         output FU_NAME      id_fu_name_out,           // Function unit name
@@ -264,7 +268,7 @@ module id_stage(
         output logic        id_cpuid_out,         // get CPUID inst?
         output logic        id_illegal_out,
         output logic        id_valid_inst_out,     // is inst a valid instruction to be 
-        output GEN_REG ra_idx, rb_idx, rc_idx       //for giving input for the maptable                                // counted for CPI calculations?
+        output GEN_REG ra_idx, rb_idx, rdest_idx       //for giving input for the maptable                                // counted for CPI calculations?
             );
    
   DEST_REG_SEL dest_reg_select;
@@ -272,7 +276,7 @@ module id_stage(
   // instruction fields read from IF/ID pipeline register
   // assign id_ra_idx = rda_idx;   // inst operand A register index
   // assign id_rb_idx = rb_idx;   // inst operand B register index
-  assign id_rc_idx = if_id_IR[4:0];     // inst operand C register index
+  //assign id_rc_idx = if_id_IR[4:0];     // inst operand C register index
 
   // Instantiate the register file used by this pipeline
   // regfile regf_0 (
@@ -304,6 +308,7 @@ module id_stage(
     .alu_func(id_alu_func_out),
     .ra_idx(ra_idx),
     .rb_idx(rb_idx),
+    .rdest_idx(rdest_idx),
     .fu_name(id_fu_name_out),
     .dest_reg(dest_reg_select),
     .rd_mem(id_rd_mem_out),
@@ -320,13 +325,13 @@ module id_stage(
 
   // mux to generate dest_reg_idx based on
   // the dest_reg_select output from decoder
-  always_comb begin
-    case (dest_reg_select)
-      DEST_IS_REGC: id_dest_reg_idx_out = rc_idx;
-      DEST_IS_REGA: id_dest_reg_idx_out = ra_idx;
-      DEST_NONE:    id_dest_reg_idx_out = `ZERO_REG;
-      default:      id_dest_reg_idx_out = `ZERO_REG; 
-    endcase
-  end
-   
-endmodule // module id_stage
+  // always_comb begin
+  //   case (dest_reg_select)
+  //     DEST_IS_REGC: id_dest_reg_idx_out = rc_idx;
+  //     DEST_IS_REGA: id_dest_reg_idx_out = ra_idx;
+  //     DEST_NONE:    id_dest_reg_idx_out = `ZERO_REG;
+  //     default:      id_dest_reg_idx_out = `ZERO_REG; 
+  //   endcase
+  // end
+
+endmodule

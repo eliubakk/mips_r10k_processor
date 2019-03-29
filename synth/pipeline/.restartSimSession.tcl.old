@@ -1,15 +1,15 @@
 # Begin_DVE_Session_Save_Info
 # DVE restart session
-# Saved on Fri Mar 29 12:47:20 2019
+# Saved on Fri Mar 29 17:18:20 2019
 # Designs open: 1
 #   Sim: /afs/umich.edu/user/s/u/surajrs/470/group10w19/synth/pipeline/dve
 # Toplevel windows open: 2
 # 	TopLevel.1
 # 	TopLevel.2
 #   Source.1: _vcs_unit__487125699
-#   Wave.1: 15 signals
-#   Group count = 1
-#   Group regf_0 signal count = 15
+#   Wave.1: 26 signals
+#   Group count = 2
+#   Group Group1 signal count = 2
 # End_DVE_Session_Save_Info
 
 # DVE version: N-2017.12-SP2-1_Full64
@@ -86,14 +86,22 @@ gui_set_time_units 100ps
 # Global: Signal Compare
 
 # Global: Signal Groups
-gui_load_child_values {testbench.pipeline_0.regf_0}
+gui_load_child_values {testbench.pipeline_0}
+gui_load_child_values {testbench.pipeline_0.id_stage_0}
 
 
-set _session_group_2 regf_0
-gui_sg_create "$_session_group_2"
-set regf_0 "$_session_group_2"
+set _session_group_3 Group1
+gui_sg_create "$_session_group_3"
+set Group1 "$_session_group_3"
 
-gui_sg_addsignal -group "$_session_group_2" { testbench.pipeline_0.regf_0.phys_registers testbench.pipeline_0.regf_0.rdb_reg testbench.pipeline_0.regf_0.rda_reg testbench.pipeline_0.regf_0.rdb_out testbench.pipeline_0.regf_0.wr_idx testbench.pipeline_0.regf_0.rda_out testbench.pipeline_0.regf_0.wr_data testbench.pipeline_0.regf_0.wr_en testbench.pipeline_0.regf_0.rdb_idx testbench.pipeline_0.regf_0.rda_idx {testbench.pipeline_0.regf_0.$unit} testbench.pipeline_0.regf_0.wr_clk testbench.pipeline_0.ex_co_enable testbench.pipeline_0.ex_co_valid_inst testbench.pipeline_0.co_selected }
+gui_sg_addsignal -group "$_session_group_3" { testbench.pipeline_0.id_inst_out }
+
+set _session_group_4 $_session_group_3|
+append _session_group_4 id_stage_0
+gui_sg_create "$_session_group_4"
+set Group1|id_stage_0 "$_session_group_4"
+
+gui_sg_addsignal -group "$_session_group_4" { testbench.pipeline_0.id_stage_0.rc_idx testbench.pipeline_0.id_stage_0.id_uncond_branch_out testbench.pipeline_0.id_stage_0.clock testbench.pipeline_0.id_stage_0.id_alu_func_out testbench.pipeline_0.id_stage_0.rb_idx testbench.pipeline_0.id_stage_0.id_fu_name_out testbench.pipeline_0.id_stage_0.reset testbench.pipeline_0.id_stage_0.id_stc_mem_out testbench.pipeline_0.id_stage_0.id_rd_mem_out testbench.pipeline_0.id_stage_0.id_wr_mem_out testbench.pipeline_0.id_stage_0.ra_idx testbench.pipeline_0.id_stage_0.id_rc_idx testbench.pipeline_0.id_stage_0.id_opa_select_out testbench.pipeline_0.id_stage_0.id_halt_out testbench.pipeline_0.id_stage_0.if_id_valid_inst testbench.pipeline_0.id_stage_0.id_illegal_out testbench.pipeline_0.id_stage_0.id_ldl_mem_out testbench.pipeline_0.id_stage_0.id_dest_reg_idx_out testbench.pipeline_0.id_stage_0.id_valid_inst_out testbench.pipeline_0.id_stage_0.id_cond_branch_out testbench.pipeline_0.id_stage_0.id_cpuid_out testbench.pipeline_0.id_stage_0.id_opb_select_out {testbench.pipeline_0.id_stage_0.$unit} testbench.pipeline_0.id_stage_0.if_id_IR testbench.pipeline_0.id_stage_0.dest_reg_select }
 
 # Global: Highlighting
 
@@ -123,16 +131,15 @@ gui_list_set_filter -id ${Hier.1} -list { {Package 1} {All 0} {Process 1} {VirtP
 gui_list_set_filter -id ${Hier.1} -text {*}
 gui_change_design -id ${Hier.1} -design Sim
 catch {gui_list_expand -id ${Hier.1} testbench}
-catch {gui_list_select -id ${Hier.1} {testbench.pipeline_0}}
+catch {gui_list_expand -id ${Hier.1} testbench.pipeline_0}
+catch {gui_list_select -id ${Hier.1} {testbench.pipeline_0.id_stage_0}}
 gui_view_scroll -id ${Hier.1} -vertical -set 0
 gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Data 'Data.1'
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
-gui_list_set_filter -id ${Data.1} -text {co_selected}
-gui_list_show_data -id ${Data.1} {testbench.pipeline_0}
-gui_show_window -window ${Data.1}
-catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.co_selected }}
+gui_list_set_filter -id ${Data.1} -text {id_inst_out}
+gui_list_show_data -id ${Data.1} {testbench.pipeline_0.id_stage_0}
 gui_view_scroll -id ${Data.1} -vertical -set 0
 gui_view_scroll -id ${Data.1} -horizontal -set 0
 gui_view_scroll -id ${Hier.1} -vertical -set 0
@@ -155,9 +162,12 @@ set origWaveHeight [gui_get_pref_value -category Wave -key waveRowHeight]
 gui_list_set_height -id Wave -height 25
 set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
-gui_wv_zoom_timerange -id ${Wave.1} 0 10560
-gui_list_add_group -id ${Wave.1} -after {New Group} {regf_0}
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.regf_0.wr_data
+gui_wv_zoom_timerange -id ${Wave.1} 576 2545
+gui_list_add_group -id ${Wave.1} -after {New Group} {Group1}
+gui_list_add_group -id ${Wave.1}  -after Group1 {Group1|id_stage_0}
+gui_list_expand -id ${Wave.1} testbench.pipeline_0.id_inst_out
+gui_list_expand -id ${Wave.1} testbench.pipeline_0.id_inst_out.inst
+gui_list_select -id ${Wave.1} {testbench.pipeline_0.id_inst_out }
 gui_seek_criteria -id ${Wave.1} {Any Edge}
 
 
@@ -173,7 +183,7 @@ if { $groupExD } {
 }
 gui_list_set_filter -id ${Wave.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
 gui_list_set_filter -id ${Wave.1} -text {*}
-gui_list_set_insertion_bar  -id ${Wave.1} -group regf_0  -position in
+gui_list_set_insertion_bar  -id ${Wave.1} -group Group1  -position in
 
 gui_view_scroll -id ${Wave.1} -vertical -set 0
 gui_show_grid -id ${Wave.1} -enable false
@@ -182,7 +192,7 @@ gui_show_grid -id ${Wave.1} -enable false
 if {[gui_exist_window -window ${TopLevel.1}]} {
 	gui_set_active_window -window ${TopLevel.1}
 	gui_set_active_window -window ${Source.1}
-	gui_set_active_window -window ${DLPane.1}
+	gui_set_active_window -window ${HSPane.1}
 }
 if {[gui_exist_window -window ${TopLevel.2}]} {
 	gui_set_active_window -window ${TopLevel.2}
