@@ -32,3 +32,9 @@ synth/BP/*
 synth/BP
 synth/pipeline
 synth/pipeline/*
+synth/RAS
+synth/RAS/*
+synth/OBQ
+synth/OBQ/*
+synth/BTB
+synth/BTB/*
