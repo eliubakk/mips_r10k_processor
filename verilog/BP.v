@@ -26,15 +26,15 @@
 //				  Retire : Update BTB, GSHARE/OBQ
 //
 //3. Unconditional and direct 	: 
-//Fetch : X return - Read BTB, mark as branch_taken
-//	    return - Read RAS and clear it, mark as branch_taken
-//Retire : X return - Update BTB only
-//	    return - Do nothing
+//Fetch : Read BTB, mark as branch_taken
+//Retire : Update BTB only
 
 //4. Unconditional and indirect : 
-//Fetch : Bring next_pc from BTB, store pc+4 to RAS, (if BTB match, them mark as
-//	branch taken)  
-//Retire : Write next_pc to BTB
+//Fetch : X return - Bring next_pc from BTB, store pc+4 to RAS, (if BTB match, them mark as
+//	branch taken)
+//	    return - Read RAS and clear it, mark as branch_taken  
+//Retire : X return - Write next_pc to BTB
+//	    return - Do nothing
 //
 //BTB is updated when branch is taken (retire)
 // Gshare and OBQ are updated when the prediction is wrong (retire)
@@ -141,9 +141,9 @@ module  BP(
 	assign btb_read_en	= if_en_branch & !(if_return_branch); 				
 
 		
-	// During fetch 	/ unconditional indirect
-	assign ras_write_en	= if_en_branch & !if_cond_branch & !if_direct_branch;
-	// During fetch		/ unconditional indirect
+	// During fetch 	/ unconditional indirect but not return branch
+	assign ras_write_en	= if_en_branch & !if_cond_branch & !if_direct_branch & !if_return_branch;
+	// During fetch		/ return branch
 	assign ras_read_en	= if_en_branch & if_return_branch;				
 
 	// internal registers
@@ -274,8 +274,23 @@ module  BP(
 
 			end else if(if_en_branch & !if_cond_branch & if_direct_branch) begin
 			// ----------Unconditional direct
-			//For not return : bring value from BTB when it is in BTB,
+			//Bring value from BTB when it is in BTB,
 			// PC + 4 when BTB not match
+				if(btb_next_pc_valid) begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_calc		 = btb_next_pc;
+					next_pc_prediction_calc	 = 1'b1;
+				end else begin
+					next_pc_valid_calc	 = 1'b1;
+					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+					next_pc_calc		 = if_pc_in + 4;
+					next_pc_prediction_calc	 = 1'b0;
+				end
+			
+			end else if (if_en_branch & !if_cond_branch & !if_direct_branch) begin
+			// ----------Unconditional indirect
+			// Find the next PC at the BTB, if not, then PC+4
 			// For return : bring value from RAS when it is in
 			// RAS, PC +4 when RAS not match
 				if(if_return_branch) begin
@@ -289,8 +304,7 @@ module  BP(
 						next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
 						next_pc_calc		 = if_pc_in + 4;
 						next_pc_prediction_calc	 = 1'b0;
-					end
-
+					end 
 				end else begin
 					if(btb_next_pc_valid) begin
 						next_pc_valid_calc	 = 1'b1;
@@ -304,22 +318,6 @@ module  BP(
 						next_pc_prediction_calc	 = 1'b0;
 					end
 				end
-
-			end else if (if_en_branch & !if_cond_branch & !if_direct_branch) begin
-			// ----------Unconditional indirect
-			// Find the next PC at the BTB, if not, then PC+4
-				if(btb_next_pc_valid) begin
-					next_pc_valid_calc	 = 1'b1;
-					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-					next_pc_calc		 = btb_next_pc;
-					next_pc_prediction_calc	 = 1'b1;
-				end else begin
-					next_pc_valid_calc	 = 1'b1;
-					next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
-					next_pc_calc		 = if_pc_in + 4;
-					next_pc_prediction_calc	 = 1'b0;
-				end
-
 
 			end else begin
 				next_pc_valid_calc	= 1'b0;
