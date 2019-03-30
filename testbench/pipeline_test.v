@@ -291,7 +291,7 @@ module testbench;
 		end
 	endtask
 
-	task display_inst
+	task display_inst;
 		input DECODED_INST _inst_in;
 		begin
 			$display("\t\topa_select: %d opb_select: %d dest_reg_sel: %d alu_func: %d fu_name: %d", _inst_in.opa_select, _inst_in.opb_select, _inst_in.dest_reg, _inst_in.alu_func, _inst_in.fu_name);
@@ -391,7 +391,63 @@ module testbench;
 		end
 	endtask
 
+	task display_issue_ex;
+		begin
+			$display("\n issue execute pipeline registers-----------------------------------------");
+			$display("issue_reg:");
+			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+				$display("\t\tissue_reg[%d] T = %d T1 = %d T2 = %d busy: %b inst_opcode: %d npc: %d", i, pipeline_0.issue_reg[i].T, pipeline_0.issue_reg[i].T1, pipeline_0.issue_reg[i].T2, pipeline_0.issue_reg[i].busy, pipeline_0.issue_reg[i].inst_opcode, pipeline_0.issue_reg[i].npc);
+			end
+			$display("issue_reg WIRES (those that are assigned");
+			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+				$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %d", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
+			end
+		end
+	endtask
 
+	task display_is_ex_registers;
+		begin
+			$display("\n issue execute pipeline registers-----------------------------------------");
+			for (int i = 0; i < 5; ++i) begin
+				$display("is_ex_enable[%d]: %b is_ex_T1_value[%d]: %d is_ex_T2_value[%d]: %d", i, pipeline_0.is_ex_enable[i], i, pipeline_0.is_ex_T1_value[i], i, pipeline_0.is_ex_T2_value[i]);
+			end
+		end
+	endtask
+
+	task display_ex;
+		begin
+			$display("\n execute state -------------------------------------------------------");
+			for(int i = 0; i<5 ; ++i) begin
+				$display(" %dth ALU output", i);
+				$display("ex_alu_result_out : %d", pipeline_0.ex_alu_result_out[i]);
+				$display("ex_take_branch_out :%b", pipeline_0.ex_take_branch_out[i]);
+			end
+		end
+	endtask
+
+	task display_ex_co_registers;
+		begin
+			$display("\n execute/complete state registers--------------------------------------");
+			for (int i=0; i<5; ++i) begin
+				$display("%dth registers", i);
+				$display("ex_co_NPC: %d, ex_co_IR: %h, ex_co_dest_reg_idx: %d", pipeline_0.ex_co_NPC[i], pipeline_0.ex_co_IR[i], pipeline_0.ex_co_dest_reg_idx[i]);
+				$display("ex_co_wr_mem: %d, ex_co_halt: %b, ex_co_illegal: %b, ex_co_valid_inst: %b", pipeline_0.ex_co_wr_mem[i], pipeline_0.ex_co_halt[i], pipeline_0.ex_co_illegal[i], pipeline_0.ex_co_valid_inst[i]);
+				$display("ex_co_alu_result: %d", pipeline_0.ex_co_alu_result[i]); 
+
+			end
+			
+			$display("Done and branch signals, ex_co_done: %d, ex_co_taken_branch: %b", pipeline_0.ex_co_done, pipeline_0.ex_co_take_branch);	
+		end
+	endtask
+
+	task display_complete;
+		begin
+			$display("\n complete state--------------------------------------------------");
+			$display("psel_enable: %b, co_branch_prediction: %b, CDB_enable: %b", pipeline_0.psel_enable, pipeline_0.co_branch_prediction, pipeline_0.CDB_enable);
+			$display("CDB output: CDB_tag_out: %d, CDB_en_out: %b, CDB_busy: %b", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
+
+		end
+	endtask
 
 	task display_stages;
 		begin
@@ -410,7 +466,11 @@ module testbench;
 			display_id_stage;
 			display_id_di;
 			display_di_issue;
-	
+			display_issue_ex;
+			display_is_ex_registers;
+			display_ex;
+			display_ex_co_registers;
+			display_complete;
 			// display_id_di;
 			// display_RS;
 			$display("\n");
