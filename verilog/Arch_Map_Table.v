@@ -1,5 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 module Arch_Map_Table(
 	input	clock,
 	input 	reset,
