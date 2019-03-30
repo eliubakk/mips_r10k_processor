@@ -23,7 +23,6 @@ module CDB (
 		end else if (enable & ex_valid) begin
 			CDB_tag_out	<= tag_in;
 		end	
-
 	end
 
 endmodule
