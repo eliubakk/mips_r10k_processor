@@ -90,6 +90,13 @@ module testbench;
 		end
 	endtask
 
+	task check_not_ready;
+		input PHYS_REG r;
+		begin
+			assert(r[$clog2(`NUM_PHYS_REG)] == 1'b0) else #1 exit_on_error;
+		end
+	endtask
+
 
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
@@ -361,6 +368,53 @@ module testbench;
 		end
 
 		$display("Multiple Branch Incorrect Passed");
+
+		$display("Testing Dispatch Not Ready...");
+
+		@(negedge clock);
+		reset = 1;
+
+		@(posedge clock);
+		`DELAY;
+		reset = 0;
+		// free list should be reset
+
+		while (!empty) begin
+			@(negedge clock);
+			dispatch_en = 1;
+
+			@(posedge clock);
+			check_not_ready(free_reg);
+			`DELAY;
+			
+		end
+
+		// now that free reg is empty, lets start retiring ready regs
+		for (int i = 0; i < `NUM_PHYS_REG; ++i) begin
+			@(negedge clock);
+			dispatch_en = 0;
+			enable = 1;
+			T_old = i;
+			T_old[$clog2(`NUM_PHYS_REG)] = 1'b1;
+
+			@(posedge clock);
+			`DELAY;
+			assert(num_free_entries == (i + 1)) else #1 exit_on_error;
+			assert(empty == 0) else #1 exit_on_error;
+		end
+
+		// now similar while loop to check for not ready
+		while (!empty) begin
+			@(negedge clock);
+			enable = 0;
+			dispatch_en = 1;
+
+			@(posedge clock);
+			check_not_ready(free_reg);
+			`DELAY;
+		end
+
+		$display("Dispatch Not Ready Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;

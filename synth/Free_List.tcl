@@ -11,11 +11,11 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "../verilog/Free_List.v" "../sys_defs.vh"]
+read_file -f sverilog [list "../../verilog/Free_List.v" "../../sys_defs.vh"]
 set design_name Free_List
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 10
+set CLK_PERIOD 2.5
 
 
 

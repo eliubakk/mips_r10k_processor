@@ -55,7 +55,8 @@ module Free_List(
 			for (int i = 0; i < `FL_SIZE; ++i) begin
 				next_free_list[i] = free_list[i+1];
 			end
-			next_free_list[tail - 1] = T_old;
+			next_free_list[tail - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+			// next_free_list[tail - 1] = T_old;
 			next_tail = tail;
 		end else if (enable) begin
 			// Register is getting retired
@@ -64,7 +65,8 @@ module Free_List(
 				next_tail = tail;
 			end else begin
 				next_free_list = free_list;
-				next_free_list[tail] = T_old;
+				next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+				// next_free_list[tail] = T_old;
 				next_tail = tail + 1;
 			end
 		end else if (dispatch_en) begin
