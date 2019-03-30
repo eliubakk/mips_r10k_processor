@@ -19,11 +19,10 @@ module CDB (
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			CDB_tag_out	<= 7'b0; 
+			CDB_tag_out	<= `SD 7'b0; 
 		end else if (enable & ex_valid) begin
-			CDB_tag_out	<= tag_in;
+			CDB_tag_out	<= `SD tag_in;
 		end	
-
 	end
 
 endmodule

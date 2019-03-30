@@ -89,10 +89,10 @@ module Arch_Map_Table(
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			for(int i = 0; i < `NUM_GEN_REG; i += 1) begin
-				arch_map_table[i] <=  ((1'b1 << $clog2(`NUM_PHYS_REG)) | $unsigned(i)); //GEN_REG[i] = PHYS_REG[i]			
+				arch_map_table[i] <=  `SD ((1'b1 << $clog2(`NUM_PHYS_REG)) | $unsigned(i)); //GEN_REG[i] = PHYS_REG[i]			
 			end
 		end else begin
-			arch_map_table <= arch_map_table_next;
+			arch_map_table <= `SD arch_map_table_next;
 		end
 	end
 

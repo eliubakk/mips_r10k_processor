@@ -291,9 +291,17 @@ module testbench;
 		end
 	endtask
 
+	task display_inst
+		input DECODED_INST _inst_in;
+		begin
+			$display("\t\topa_select: %d opb_select: %d dest_reg_sel: %d alu_func: %d fu_name: %d", _inst_in.opa_select, _inst_in.opb_select, _inst_in.dest_reg, _inst_in.alu_func, _inst_in.fu_name);
+			$display("\t\trd_mem: %b wr_mem: %b ldl_mem: %b stc_mem: %b cond_branch: %b uncond_branch: %b halt: %b cpuid: %d illegal: %b valid_inst: %b", _inst_in.rd_mem, _inst_in.wr_mem, _inst_in.ldl_mem, _inst_in.stc_mem, _inst_in.cond_branch, _inst_in.uncond_branch, _inst_in.halt, _inst_in.cpuid, _inst_in.illegal, _inst_in.valid_inst);
+		end 
+	endtask
+
 	task display_memory;
 		begin
-			$display("main memory---------------------------------------------------------------");
+			$display("\nmain memory---------------------------------------------------------------");
 			$display("mem input : proc2mem_command:%h, proc2mem_addr:%h, proc2mem_data:%h", proc2mem_command, proc2mem_addr, proc2mem_data);
 			$display("mem_output : mem2proc_response:%h, mem2proc_data:%h, mem2proc_tag:%h", mem2proc_response, mem2proc_data, mem2proc_tag);
 			$display("Memory array for first 20 rows");
@@ -305,7 +313,7 @@ module testbench;
 
 	task display_cache;
 		begin
-			$display("Cache memory---------------------------------------------------------------------");
+			$display("\nCache memory---------------------------------------------------------------------");
 			$display("inputs");
 			$display("wr1_en: %b wr1_idx: %h wr1_tag: %h wr1_data %h rd1_idx: %h rd1_tag: %h", pipeline_0.Icache_wr_en, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.mem2proc_data, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag);
 			$display("outputs");
@@ -320,7 +328,7 @@ module testbench;
 
 	task display_icache;
 		begin
-			$display("icache--------------------------------------------------------------------------");
+			$display("\nicache--------------------------------------------------------------------------");
 			$display("inputs:");
 			$display("Imem2proc_response: %h, Imem2_proc_data: %h, Imem2proc_tag: %h, proc2Icache_addr: %h, cachemem_data: %h, cachemem_valid: %b", pipeline_0.Imem2proc_response, pipeline_0.mem2proc_data, pipeline_0.mem2proc_tag, pipeline_0.proc2Icache_addr, pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
 			$display("outputs:");
@@ -330,7 +338,7 @@ module testbench;
 
 	task display_if_stage;
 		begin
-			$display("if_stage---------------------------------------------------------------------");
+			$display("\nif_stage---------------------------------------------------------------------");
 			$display("inputs");
 			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_alu_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
 			$display("outputs");
@@ -340,42 +348,69 @@ module testbench;
 
 	task display_if_id;
 		begin
-			$display("if_id pipeline registers---------------------------------------------------");
+			$display("\nif_id pipeline registers---------------------------------------------------");
 			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
 		end
 	endtask
 
 	task display_id_stage;
 		begin
-  $display("id pipeline registers---------------------------------------------------");
-      /*
+  	$display("\n id pipeline registers---------------------------------------------------");
+      
 			// $display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
-      $display("if_id_IR: %d if_id_valid_inst: %b", pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
-      $display("id_opa_select_out: %d id_opb_select_out: %d id_dest_reg_idx_out: %d", pipeline_0.id_opa_select_out, pipeline_0.id_opb_select_out, pipeline_0.id_dest_reg_idx_out);
-      $display("id_alu_func_out: %d id_fu_name_out: %d", pipeline_0.id_alu_func_out, pipeline_0.id_fu_name_out);
-      $display("id_rd_mem_out: %d id_wr_mem_out: %d id_ldl_mem_out: %d id_stc_mem_out: %d", pipeline_0.id_rd_mem_out, pipeline_0.id_wr_mem_out, pipeline_0.id_ldl_mem_out, pipeline_0.id_stc_mem_out);
-      $display("id_cond_branch_out: %b id_uncond_branch_out: %b id_halt_out: %b id_cpuid_out: %d id_illegal_out: %b", pipeline_0.id_cond_branch_out, pipeline_0.id_uncond_branch_out, pipeline_0.id_halt_out, pipeline_0.id_cpuid_out, pipeline_0.id_illegal_out);
-      $display("id_valid_inst_out: %b", pipeline_0.id_valid_inst_out);
-      $display("ra_idx: %d rb_idx: %d rc_idx: %d", pipeline_0.ra_idx, pipeline_0.rb_idx, pipeline_0.rc_idx);
-      */
-    end
+      $display("if_id_IR: %h if_id_valid_inst: %b", pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
+      $display("id_opa_select_out: %d id_opb_select_out: %d", pipeline_0.id_inst_out.inst.opa_select, pipeline_0.id_inst_out.inst.opb_select);
+      $display("id_alu_func_out: %d id_fu_name_out: %d", pipeline_0.id_inst_out.inst.alu_func, pipeline_0.id_inst_out.inst.fu_name);
+      $display("id_rd_mem_out: %d id_wr_mem_out: %d id_ldl_mem_out: %d id_stc_mem_out: %d", pipeline_0.id_inst_out.inst.rd_mem, pipeline_0.id_inst_out.inst.wr_mem, pipeline_0.id_inst_out.inst.ldl_mem, pipeline_0.id_inst_out.inst.stc_mem);
+      $display("id_cond_branch_out: %b id_uncond_branch_out: %b id_halt_out: %b id_cpuid_out: %d id_illegal_out: %b", pipeline_0.id_inst_out.inst.cond_branch, pipeline_0.id_inst_out.inst.uncond_branch, pipeline_0.id_inst_out.inst.halt, pipeline_0.id_inst_out.inst.cpuid, pipeline_0.id_inst_out.inst.illegal);
+      $display("id_valid_inst_out: %b", pipeline_0.id_inst_out.inst.valid_inst);
+      $display("ra_idx: %d rb_idx: %d rdest_idx: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
+      
+   		end
 	endtask
+
+	task display_id_di;
+		begin
+			$display("\n id_di pipeline registers---------------------------------------------");
+			$display("id_di_enable: %b, dispatch_en: %b, if_valid_inst_out: %b", pipeline_0.id_di_enable, pipeline_0.dispatch_en, pipeline_0.if_valid_inst_out);
+			$display("id_di_rega: %d, id_di_regb: %d, id_di_inst_in: %h", pipeline_0.id_di_rega, pipeline_0.id_di_regb, pipeline_0.id_di_inst_in); 			
+			$display("id_di_NPC: %d, id_di_IR: %h, id_di_valid_inst: %b",pipeline_0.id_di_NPC, pipeline_0.id_di_IR, pipeline_0.id_di_valid_inst );
+
+		end
+	endtask
+
+
+	task display_di_issue;
+		begin
+			$display("\n di_issue stage---------------------------------------------------------");
+			$display("issue_stall: %b dispatch_en: %b branch_not_taken: %b RS_enable: %b", pipeline_0.issue_stall, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.RS_enable);
+			$display("\n RESERVATION STATION INPUT WIRES---------------------------------------");
+			$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
+			$display("\n INST GOING INTO RS");
+			display_inst(pipeline_0.id_di_inst_in);
+		end
+	endtask
+
+
 
 	task display_stages;
 		begin
-			if (clock_count == 100) begin
+			if (clock_count == 20) begin
 				$finish;
 			end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("Cycle: %d", clock_count);
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
-			display_memory;
-			display_cache;
+			//display_memory;
+			//display_cache;
 			//display_icache;
 			display_if_stage;
 			display_if_id;
 			display_id_stage;
+			display_id_di;
+			display_di_issue;
+	
 			// display_id_di;
 			// display_RS;
 			$display("\n");
