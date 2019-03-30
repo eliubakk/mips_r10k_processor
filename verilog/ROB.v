@@ -122,7 +122,7 @@ rob_free_entries = `ROB_SIZE - (ROB_table[16].busy + ROB_table[1].busy + ROB_tab
 check_loop = 1'b0;
 	
 
-		
+	if (dispatch_en) begin	
 	for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
 		if (i > head) begin
 			if (!ROB_table[i].busy) begin
@@ -162,6 +162,7 @@ check_loop = 1'b0;
 			
 			end
 		end
+	end
 
 		if (dispatch_en) begin
 		if(head==0) begin
