@@ -17,7 +17,7 @@ module Map_Table(
 
 	`ifdef DEBUG
 	output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
-	output logic [(`NUM_GEN_REG-1):0] cam_hits_out,
+	output logic [(`NUM_GEN_REG-1):0][(`SS_SIZE-1):0] cam_hits_out,
 	`endif
 
 	output PHYS_REG [`SS_SIZE-1:0]	T1, 		// Output for Dispatch and goes to RS
@@ -32,9 +32,9 @@ module Map_Table(
 	MAP_ROW_T [`NUM_GEN_REG-1:0]	next_map_table;
 
 	//CAM VARIABLES FOR CDB
-	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tag_in;
-	logic [(`NUM_GEN_REG-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
-	logic [(`NUM_GEN_REG-1):0] cam_hits;
+	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
+	logic [(`NUM_GEN_REG-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_table_in;
+	logic [(`NUM_GEN_REG-1):0][(`SS_SIZE-1):0] cam_hits;
 
 	`ifdef DEBUG
 	assign map_table_out = map_table;
@@ -43,20 +43,20 @@ module Map_Table(
 
 	genvar ig;
 	for(ig = 0; ig < `NUM_GEN_REG; ig += 1) begin
-		assign cam_tags_in[ig] = map_table[ig].phys_tag[($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_table_in[ig] = map_table[ig].phys_tag[($clog2(`NUM_PHYS_REG)-1):0];
 	end
 	for(ig = 0; ig < `SS_SIZE; ig += 1) begin
-		assign cam_tag_in[ig] = CDB_tag_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_tags_in[ig] = CDB_tag_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
 	end
 	
 	//Instantiate CAM module for reg
 	CAM #(.LENGTH(`NUM_GEN_REG),
 		  .WIDTH(1),
-		  .NUM_TAG (`SS_SIZE),
+		  .NUM_TAGS(`SS_SIZE),
 		  .TAG_SIZE($clog2(`NUM_PHYS_REG))) map_cam ( 
 		.enable(CDB_en),
-		.tag(cam_tag_in),
-		.tags_in(cam_tags_in),
+		.tags(cam_tags_in),
+		.table_in(cam_table_in),
 		.hits(cam_hits)
 	);
 
@@ -65,7 +65,7 @@ module Map_Table(
 		if(~branch_incorrect) begin
 			// Commit Stage first
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
-				next_map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] |= cam_hits[i];
+				next_map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] |=  (|cam_hits[i]);
 			end
 			for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
 				// Dispatch Stage second
@@ -83,13 +83,13 @@ module Map_Table(
 		if (reset) begin
 			// if reset, set reg_i = pr_i (i.e. reg0 = pr0, ...)
 			for (int i = 0; i < `NUM_GEN_REG - 1; i += 1) begin
-				map_table[i].phys_tag 		<= i;
-				map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] <= 1'b1;
+				map_table[i].phys_tag 		<= `SD i;
+				map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] <= `SD 1'b1;
 			end
-			map_table[`NUM_GEN_REG - 1].phys_tag <= `DUMMY_REG;
+			map_table[`NUM_GEN_REG - 1].phys_tag <= `SD `DUMMY_REG;
 		end else begin
 			// update the map_table's next state
-			map_table <= next_map_table;
+			map_table <= `SD next_map_table;
 		end
 	end
 

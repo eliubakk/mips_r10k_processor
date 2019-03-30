@@ -39,9 +39,9 @@ module RS
 	RS_ROW_T [(`RS_SIZE-1):0]		rs_table, rs_table_next;
 
 	//CAM VARIABLES
-	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tag_in;
-	logic [(`RS_SIZE-1):0][1:0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
-	logic [(`RS_SIZE-1):0][1:0] cam_hits;	
+	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
+	logic [(`RS_SIZE-1):0][1:0][($clog2(`NUM_PHYS_REG)-1):0] cam_table_in;
+	logic [(`RS_SIZE-1):0][1:0][(`SS_SIZE-1):0] cam_hits;	
 
 	// DISPATCH LOGIC VARIABLES
 	logic [(`RS_SIZE-1):0] dispatch_reqs, dispatch_gnt;
@@ -92,8 +92,8 @@ module RS
 	for(ig = 0; ig < `NUM_TYPE_FU; ig = ig + 1) begin
 		for(jg = 0; jg < `RS_SIZE; jg = jg + 1) begin 
 			assign issue_reqs[ig][jg] = (rs_table[jg].inst.fu_name == FU_NAME_VAL[ig] &
-										(rs_table[jg].T1[$clog2(`NUM_PHYS_REG)] | cam_hits[jg][0]) &
-										(rs_table[jg].T2[$clog2(`NUM_PHYS_REG)] | cam_hits[jg][1]) & 
+										(rs_table[jg].T1[$clog2(`NUM_PHYS_REG)] | (|cam_hits[jg][0])) &
+										(rs_table[jg].T2[$clog2(`NUM_PHYS_REG)] | (|cam_hits[jg][1])) & 
 										rs_table[jg].busy);
 		end
 	end
@@ -158,21 +158,21 @@ module RS
 
 	//CAM LOGIC
 	for(ig = 0; ig < `RS_SIZE; ig = ig + 1) begin
-		assign cam_tags_in[ig][0] = rs_table[ig].T1[($clog2(`NUM_PHYS_REG)-1):0];
-		assign cam_tags_in[ig][1] = rs_table[ig].T2[($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_table_in[ig][0] = rs_table[ig].T1[($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_table_in[ig][1] = rs_table[ig].T2[($clog2(`NUM_PHYS_REG)-1):0];
 	end
 	for(ig = 0; ig < `SS_SIZE; ig = ig + 1) begin
-		assign cam_tag_in[ig] = CDB_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_tags_in[ig] = CDB_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
 	end
 
 	//Instantiate CAM module for CBD
 	CAM #(.LENGTH(`RS_SIZE),
 		  .WIDTH(2),
-		  .NUM_TAG (`SS_SIZE),
+		  .NUM_TAGS(`SS_SIZE),
 		  .TAG_SIZE($clog2(`NUM_PHYS_REG))) rscam ( 
 		.enable({`SS_SIZE{enable}} & CAM_en),
-		.tag(cam_tag_in),
-		.tags_in(cam_tags_in),
+		.tags(cam_tags_in),
+		.table_in(cam_table_in),
 		.hits(cam_hits)
 	);
 	
@@ -187,8 +187,8 @@ module RS
 		
 		//COMMIT STAGE
 		for(i = 0; i < `RS_SIZE; i = i + 1) begin
-			rs_table_next[i].T1[$clog2(`NUM_PHYS_REG)] = cam_hits[i][0] | rs_table[i].T1[$clog2(`NUM_PHYS_REG)];
-			rs_table_next[i].T2[$clog2(`NUM_PHYS_REG)] = cam_hits[i][1] | rs_table[i].T2[$clog2(`NUM_PHYS_REG)];
+			rs_table_next[i].T1[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][0]) | rs_table[i].T1[$clog2(`NUM_PHYS_REG)];
+			rs_table_next[i].T2[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][1]) | rs_table[i].T2[$clog2(`NUM_PHYS_REG)];
 		end 		
 
 		//ISSUE STAGE
@@ -226,11 +226,11 @@ module RS
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
 			for(j=0; j<`RS_SIZE; j=j+1) begin // Other way to do this?
-				rs_table[j] <= EMPTY_ROW;
+				rs_table[j] <= `SD EMPTY_ROW;
 			end
 		end
 		else begin
-			rs_table  <= rs_table_next;
+			rs_table  <= `SD rs_table_next;
 		end
 	end
 
