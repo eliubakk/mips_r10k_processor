@@ -1,10 +1,12 @@
 // Entire branch predictor module
 // Should include BTB, GSHARE, OBQ 
 `include "../../sys_defs.vh"
+`ifndef PIPELINE
 `include "../../verilog/BTB.v"
 `include "../../verilog/OBQ.v"
 `include "../../verilog/GSHARE.v"
 `include "../../verilog/RAS.v"
+`endif
 `timescale 1ns/100ps
 //`include "BTB.v"
 //`include "GSHARE.v"

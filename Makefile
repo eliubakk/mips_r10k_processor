@@ -8,8 +8,9 @@
 # added "-sverilog" and "SW_VCS=2012.09" option,
 #	and removed deprecated Virsim references -- jbbeau fall 2013
 # updated library path name -- jbbeau fall 2013
-
-VCS = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64
+VCS_BASE = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 
+VCS = $(VCS_BASE)
+VCS_PIPE = $(VCS_BASE) +define+PIPELINE=1
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
 # testing commit
@@ -82,7 +83,7 @@ $(MISC_SIMV): simv_%: $(MISC_SRC) $(TEST_DIR)/%_test.v
 simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS) $(patsubst %,../../%,$^) -o $@ &&\
+	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
 $(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
@@ -109,7 +110,7 @@ simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
 dve_pipe: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
+	$(VCS_PIPE) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
 # updated interactive debugger "DVE", using the latest version of VCS
 # awdeorio fall 2011
 dve:	$(SIMFILES) $(TESTBENCH)

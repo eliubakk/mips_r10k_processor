@@ -16,7 +16,7 @@ set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/BP.v" $misc_files]
+analyze -f sverilog [concat "../../verilog/OBQ.v" "../../verilog/RAS.v" "../../verilog/GSHARE.v" "../../verilog/BTB.v" "../../verilog/BP.v" $misc_files]
 elaborate BP
 set design_name BP
 set clock_name clock
