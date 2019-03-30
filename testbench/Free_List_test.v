@@ -120,6 +120,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
+		$display("tail: %d", tail_out);
 		assert(num_free_entries == (`NUM_PHYS_REG - `NUM_GEN_REG)) else #1 exit_on_error;
 		assert(!empty) else #1 exit_on_error;
 

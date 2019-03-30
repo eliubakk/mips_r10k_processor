@@ -451,7 +451,7 @@ module pipeline (
 
   //Instantiating the freelist
   
-  assign fr_read_en= dispatch_en & if_valid_inst_out ;
+  assign fr_read_en= dispatch_en & if_id_enable & id_inst_out.inst.valid_inst ;
   Free_List f0(
     // INPUTS
     .clock(clock),

@@ -213,7 +213,7 @@ typedef struct packed{
 //
 // actually, you might have to change this if you change VERILOG_CLOCK_PERIOD
 //
-`define SD #5
+`define SD #1
 
 
 // the Alpha register file zero register, any read of this register always

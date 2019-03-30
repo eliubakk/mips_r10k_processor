@@ -97,12 +97,12 @@ module Free_List(
 			// all the gen purpose regs to be pr0 to 
 			// pr(num_gen- 1)
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
-				free_list[i] 		<= {0, `NUM_GEN_REG + i};
+				free_list[i] 		<= `SD {0, `NUM_GEN_REG + i};
 			end
-			tail 		<= `NUM_GEN_REG;
+			tail 		<= `SD `NUM_GEN_REG;
 		end else begin
-			free_list <= next_free_list;
-			tail <= next_tail;
+			free_list <= `SD next_free_list;
+			tail <= `SD next_tail;
 		end
 	end
 

@@ -30,3 +30,5 @@ synth/csrc
 synth/*.res
 synth/BP/*
 synth/BP
+synth/pipeline/*
+synth/pipeline/
