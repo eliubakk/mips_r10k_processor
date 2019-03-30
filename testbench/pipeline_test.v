@@ -348,7 +348,16 @@ module testbench;
 	task display_id_stage;
 		begin
   $display("id pipeline registers---------------------------------------------------");
-			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
+      /*
+			// $display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
+      $display("if_id_IR: %d if_id_valid_inst: %b", pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
+      $display("id_opa_select_out: %d id_opb_select_out: %d id_dest_reg_idx_out: %d", pipeline_0.id_opa_select_out, pipeline_0.id_opb_select_out, pipeline_0.id_dest_reg_idx_out);
+      $display("id_alu_func_out: %d id_fu_name_out: %d", pipeline_0.id_alu_func_out, pipeline_0.id_fu_name_out);
+      $display("id_rd_mem_out: %d id_wr_mem_out: %d id_ldl_mem_out: %d id_stc_mem_out: %d", pipeline_0.id_rd_mem_out, pipeline_0.id_wr_mem_out, pipeline_0.id_ldl_mem_out, pipeline_0.id_stc_mem_out);
+      $display("id_cond_branch_out: %b id_uncond_branch_out: %b id_halt_out: %b id_cpuid_out: %d id_illegal_out: %b", pipeline_0.id_cond_branch_out, pipeline_0.id_uncond_branch_out, pipeline_0.id_halt_out, pipeline_0.id_cpuid_out, pipeline_0.id_illegal_out);
+      $display("id_valid_inst_out: %b", pipeline_0.id_valid_inst_out);
+      $display("ra_idx: %d rb_idx: %d rc_idx: %d", pipeline_0.ra_idx, pipeline_0.rb_idx, pipeline_0.rc_idx);
+      */
     end
 	endtask
 
@@ -366,7 +375,7 @@ module testbench;
 			//display_icache;
 			display_if_stage;
 			display_if_id;
-			// display_id_stage;
+			display_id_stage;
 			// display_id_di;
 			// display_RS;
 			$display("\n");
