@@ -18,12 +18,12 @@ module if_stage(
                                           // makes pipeline behave as single-cycle
     input         co_ret_take_branch,      // taken-branch signal
     input  [63:0] co_ret_target_pc,        // target pc: use if take_branch is TRUE
-    input  [63:0] Imem2proc_data,          // Data coming back from instruction-memory
-    input         Imem_valid,
-    input dispatch_en,                   /// dispatch enable signal
-    input co_ret_branch_valid,                  // whether the inst is branch or not
+    input  [63:0] Imem2proc_data,//comes from  Icache_data_out from Icache         // Data coming back from instruction-memory
+    input         Imem_valid,//comes from  Icache_valid_out from Icache 
+    input dispatch_en;                    /// dispatch enable signal
+    input co_ret_branch_valid;                   // whether the inst is branch or not
 
-    output logic [63:0] proc2Imem_addr,    // Address sent to Instruction memory
+    output logic [63:0] proc2Icache_addr,//proc2Imem_addr,    // Address sent to Instruction memory
     output logic [63:0] if_NPC_out,        // PC of instruction after fetched (PC+4).
     output logic [31:0] if_IR_out,        // fetched instruction out
     output logic        if_valid_inst_out  // when low, instruction is garbage
@@ -38,13 +38,10 @@ module if_stage(
   logic           PC_enable;
   logic           next_ready_for_valid;
 
-	assign PC_enable = dispatch_en & Imem_valid ;
-
- 
-  assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
+  assign proc2Icache_addr = {PC_reg[63:3], 3'b0};
 
   // this mux is because the Imem gives us 64 bits not 32 bits
-  assign if_IR_out = PC_reg[2] ? Imem2proc_data[63:32] : Imem2proc_data[31:0];
+  assign if_IR_out = PC_reg[2] ? Icache_data_out[63:32] : Icache_data_out[31:0];
 
   // default next PC value
   assign PC_plus_4 = PC_reg + 4;
@@ -60,12 +57,10 @@ module if_stage(
   // Pass PC+4 down pipeline w/instruction
   assign if_NPC_out = PC_plus_4;
 
-  //assign if_valid_inst_out = ready_for_valid && Imem_valid;
+  assign if_valid_inst_out = ready_for_valid & Icache_valid_out;
 
-
-assign if_valid_inst_out = Imem_valid;
-  // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
-  //                               !if_valid_inst_out;
+  assign next_ready_for_valid = (ready_for_valid || mem_wb_valid_inst) && 
+                                !if_valid_inst_out;
 
   // This register holds the PC value
   // synopsys sync_set_reset "reset"
