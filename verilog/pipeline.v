@@ -128,7 +128,7 @@ module pipeline (
   logic [63:0]  id_rega_out;
   logic [63:0]  id_regb_out;
   RS_ROW_T      id_inst_out;
-  GEN_REG       id_ra_idx, id_rb_idx, id_rc_idx;
+  GEN_REG       id_ra_idx, id_rb_idx, id_rdest_idx;
 
   //outputs from the maptable
   MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out;
@@ -188,6 +188,7 @@ module pipeline (
   logic               ex_co_take_branch;
   logic               ex_co_done;
   FU_REG              ex_co_wr_mem;  
+
 
   //Outputs from the complete stage
   logic         co_halt_selected;
@@ -410,7 +411,7 @@ module pipeline (
     //.id_rb_value_out(id_regb_out),
     .id_opa_select_out(id_inst_out.inst.opa_select),
     .id_opb_select_out(id_inst_out.inst.opb_select),
-    .id_dest_reg_idx_out(id_inst_out.inst.dest_reg),
+    //.id_dest_reg_idx_out(id_inst_out.inst.dest_reg),
     .id_alu_func_out(id_inst_out.inst.alu_func),
     .id_fu_name_out(id_inst_out.inst.fu_name),
     .id_rd_mem_out(id_inst_out.inst.rd_mem),
@@ -425,7 +426,7 @@ module pipeline (
     .id_valid_inst_out(id_inst_out.inst.valid_inst),
     .ra_idx(id_ra_idx),
     .rb_idx(id_rb_idx),
-    .rc_idx(id_rc_idx)
+    .rdest_idx(id_rdest_idx)
   );
 
   // Instantiating the map table
@@ -435,7 +436,7 @@ module pipeline (
   	.enable(id_inst_out.inst.valid_inst),
   	.reg_a(id_ra_idx), 		// Comes from Decode duringmem2proc_data
   	.reg_b(id_rb_idx), 		// Comes from Decode duringmem2proc_data
-  	.reg_dest(id_dest_reg_idx_out), 	// Comes from Dmem2proc_data
+  	.reg_dest(id_rdest_idx), 	// Comes from Dmem2proc_data
   	.free_reg(fr_free_reg_T), 	// Comes from Free List durmem2proc_data
   	.CDB_tag_in(CDB_tag_out), 	// Comes from CDB durinmem2proc_data
   	.CDB_en(CDB_enable),     	// Comes from CDB during Commitmem2proc_data
@@ -584,7 +585,7 @@ module pipeline (
     assign issue_reg_inst_opcode[i] = issue_reg[i].inst_opcode;
   end
   //Instantiating the physical register
-  assign is_pr_enable = 1'b1;
+  assign is_pr_enable = 1;
   phys_regfile regf_0 (
     .rda_idx(issue_reg_T1),
     .rda_out(pr_T1_value), 
@@ -593,8 +594,8 @@ module pipeline (
     .rdb_out(pr_T2_value),
 
     .wr_clk(clock),
-    .wr_en(ex_co_wr_mem),
-    .wr_idx(ex_co_dest_reg_idx),
+    .wr_en(ex_co_valid_inst),
+    .wr_idx(ex_co_dest_reg_idx[`phys_index_t:0]),
     .wr_data(ex_co_alu_result)
   );
 
@@ -699,15 +700,15 @@ module pipeline (
   //////////////////////////////////////////////////
   // not sure whether it can be directly assigned
   always_comb begin
-    for (integer i=0; i<2; i=i+1) begin
-      ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i]| & co_selected[i]);
+    for (integer i=0; i<3; i=i+1) begin
+      ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
  
   //enable signal for the multipler  register
   assign ex_co_enable[3]=  (~done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
 
-  assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4]| & co_selected[4]));
+  assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
   
 
   // synopsys sync_set_reset "reset"
@@ -986,7 +987,7 @@ module pipeline (
   	.T_new_in(rob_arch_retire_reg), // Comes from ROB during Retire
     .T_old_in(rob_fl_arch_Told), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
-  	.arch_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
+  	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
   );
 
 
