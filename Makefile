@@ -36,6 +36,7 @@ SYN_SIMV = $(patsubst %,syn_simv_%,$(MODULES))
 SYN_SIMV += $(patsubst %,syn_simv_%,$(MISC_MODULES))
 SIMV = $(patsubst $(VERILOG_DIR)/%.v,simv_%,$(VERILOG_SRC))
 MISC_SIMV = $(patsubst $(VERILOG_DIR)/misc/%.v,simv_%,$(MISC_SRC))
+DVE = $(patsubst $(VERILOG_DIR)/%.v,dve_%,$(VERILOG_SRC))
 
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
@@ -88,6 +89,11 @@ $(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	./syn_simv_$@ | tee $@_syn_program.out
+
+$(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
+	cd $(SYN_DIR) && \
+	mkdir -p $* && cd $* && \
+	$(VCS) +memcbk $(patsubst %.v,../../%.v,$^) -o dve -R -gui 
 
 #####
 # Should be no need to modify after here

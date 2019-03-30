@@ -30,5 +30,13 @@ synth/csrc
 synth/*.res
 synth/BP/*
 synth/BP
+synth/pipeline
 synth/pipeline/*
-synth/pipeline/
+synth/RAS
+synth/RAS/*
+synth/OBQ
+synth/OBQ/*
+synth/BTB
+synth/BTB/*
+synth/RS
+synth/RS/*
