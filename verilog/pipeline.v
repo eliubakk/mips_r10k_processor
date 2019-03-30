@@ -987,7 +987,7 @@ module pipeline (
   	.T_new_in(rob_arch_retire_reg), // Comes from ROB during Retire
     .T_old_in(rob_fl_arch_Told), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
-  	.arch_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
+  	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
   );
 
 
