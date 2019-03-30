@@ -267,8 +267,8 @@ module testbench;
 
   task display_ROB_table;
 		begin
-			@(posedge clock);
-			#2;
+		//	@(posedge clock);
+		//	#2;
 				$display("**********************************************************\n");
 				$display("------------------------ROB TABLE----------------------------\n");
 
@@ -276,7 +276,7 @@ module testbench;
 			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b branch_not_taken: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.branch_not_taken);
 			$display("OUTPUTS");
 			$display("T_free: %d T_arch: %d T_out_valid: %b rob_free_entries: %d rob_full: %b tail_reg: %d head_reg: %d", pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg, pipeline_0.arch_fr_enable, pipeline_0.rob_free_entries, pipeline_0.rob_full, pipeline_0.tail_reg, pipeline_0.head_reg);
-			for(integer i=1;i<=`ROB_SIZE;i=i+1) begin
+			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
 				$display("ROB_Row = %d,  busy = %d, T_new_out = %7.0b T_old_out = %7.0b ", i, ROB_table_out[i].busy, ROB_table_out[i].T_new_out, ROB_table_out[i].T_old_out);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
@@ -467,9 +467,11 @@ module testbench;
 			//display_memory;
 			//display_cache;
 			//display_icache;
-			display_if_stage;
+			// display_if_stage;
 			display_if_id;
 			display_id_stage;
+			$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
+			$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
 			display_id_di;
 			/*
 			display_di_issue;
@@ -480,7 +482,7 @@ module testbench;
 			display_complete;*/
 			
 			display_ROB_table;
-			$display("dispatch_en : %b, dispatch_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_hazard);
+			$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;
@@ -538,7 +540,7 @@ module testbench;
       clock_count <= `SD (clock_count + 1);
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
-	`SD;
+	//`SD;
 	display_stages;
   end  
 

@@ -362,7 +362,7 @@ logic dispatch_no_hazard;
     .co_ret_target_pc(co_ret_alu_result),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(dispatch_no_hazard),
+    .dispatch_en(dispatch_en),
     .co_ret_branch_valid(co_ret_branch_valid),
 
     // Outputs
@@ -532,11 +532,11 @@ logic dispatch_no_hazard;
 
   assign issue_stall= ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full); 
-  assign dispatch_en= dispatch_no_hazard & id_di_valid_inst; 
+  assign dispatch_en= dispatch_no_hazard && id_di_valid_inst; 
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
  
-  assign RS_enable= (dispatch_en && id_di_valid_inst);
+  assign RS_enable= dispatch_en ;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
