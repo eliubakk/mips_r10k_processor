@@ -28,6 +28,7 @@ module testbench;
   // variables used in the testbench
   logic        clock;
   logic        reset;
+  logic	       enable;
   logic [31:0] clock_count;
   logic [31:0] instr_count;
   int          wb_fileno;
@@ -99,6 +100,7 @@ module testbench;
     // Inputs
     .clock             (clock),
     .reset             (reset),
+    .enable		(1'b1),
     .mem2proc_response (mem2proc_response),
     .mem2proc_data     (mem2proc_data),
     .mem2proc_tag      (mem2proc_tag),
@@ -270,6 +272,10 @@ module testbench;
 				$display("**********************************************************\n");
 				$display("------------------------ROB TABLE----------------------------\n");
 
+			$display("INPUTS");
+			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b branch_not_taken: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.branch_not_taken);
+			$display("OUTPUTS");
+			$display("T_free: %d T_arch: %d T_out_valid: %b rob_free_entries: %d rob_full: %b tail_reg: %d head_reg: %d", pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg, pipeline_0.arch_fr_enable, pipeline_0.rob_free_entries, pipeline_0.rob_full, pipeline_0.tail_reg, pipeline_0.head_reg);
 			for(integer i=1;i<=`ROB_SIZE;i=i+1) begin
 				$display("ROB_Row = %d,  busy = %d, T_new_out = %7.0b T_old_out = %7.0b ", i, ROB_table_out[i].busy, ROB_table_out[i].T_new_out, ROB_table_out[i].T_old_out);
 			end
@@ -372,7 +378,7 @@ module testbench;
 	task display_id_di;
 		begin
 			$display("\n id_di pipeline registers---------------------------------------------");
-			$display("id_di_enable: %b, dispatch_en: %b, if_valid_inst_out: %b", pipeline_0.id_di_enable, pipeline_0.dispatch_en, pipeline_0.if_valid_inst_out);
+			$display("id_di_enable: %b, dispatch_en: %b", pipeline_0.id_di_enable, pipeline_0.dispatch_en);
 			$display("id_di_rega: %d, id_di_regb: %d, id_di_inst_in: %h", pipeline_0.id_di_rega, pipeline_0.id_di_regb, pipeline_0.id_di_inst_in); 			
 			$display("id_di_NPC: %d, id_di_IR: %h, id_di_valid_inst: %b",pipeline_0.id_di_NPC, pipeline_0.id_di_IR, pipeline_0.id_di_valid_inst );
 
@@ -465,12 +471,17 @@ module testbench;
 			display_if_id;
 			display_id_stage;
 			display_id_di;
+			/*
 			display_di_issue;
 			display_issue_ex;
 			display_is_ex_registers;
 			display_ex;
 			display_ex_co_registers;
-			display_complete;
+			display_complete;*/
+			
+			display_ROB_table;
+			$display("dispatch_en : %b, dispatch_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_hazard);
+			$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;
 			$display("\n");

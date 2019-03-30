@@ -18,6 +18,7 @@ module pipeline (
     //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
     input         clock,                    // System clock
     input         reset,                    // System reset
+    input	  enable,
     input [3:0]   mem2proc_response,        // Tag from memory about current request
     input [63:0]  mem2proc_data,            // Data coming back from memory
     input [3:0]   mem2proc_tag,              // Tag from memory about current reply
@@ -140,6 +141,8 @@ module pipeline (
   RS_ROW_T id_di_inst_in;
   GEN_REG id_di_rega;
   GEN_REG id_di_regb;
+
+logic dispatch_no_hazard;
 
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
@@ -359,7 +362,7 @@ module pipeline (
     .co_ret_target_pc(co_ret_alu_result),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(dispatch_en),
+    .dispatch_en(dispatch_no_hazard),
     .co_ret_branch_valid(co_ret_branch_valid),
 
     // Outputs
@@ -374,7 +377,7 @@ module pipeline (
   //            IF/ID Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  assign if_id_enable = (dispatch_en && if_valid_inst_out); 
+  assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out); 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
@@ -498,8 +501,10 @@ module pipeline (
   //                                              //
   //////////////////////////////////////////////////
 
-  assign id_di_enable = (dispatch_en && if_valid_inst_out); // always enabled
-  // synopsys sync_set_reset "reset"
+  assign dispatch_no_hazard =  ~((free_rows_next == 0) | fr_empty | rob_full); 
+  assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out); // always enabled
+  //assign id_di_enable = if_valid_inst_out;
+	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
       if (reset) begin
         id_di_rega    <= `SD 0;
@@ -526,10 +531,13 @@ module pipeline (
   //////////////////////////////////////////////////
 
   assign issue_stall= ~is_ex_enable;
-  assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full);
+  //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full); 
+  assign dispatch_en= dispatch_no_hazard & id_di_valid_inst; 
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
-  assign RS_enable= (dispatch_en && if_valid_inst_out);
-  RS #(.FU_NAME_VAL(FU_NAME_VAL),
+  //assign RS_enable= (dispatch_en && if_id_valid_inst);
+ 
+  assign RS_enable= (dispatch_en && id_di_valid_inst);
+	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
     // inputs
