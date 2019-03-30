@@ -67,6 +67,7 @@ module pipeline (
   output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
   output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
   output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
+  output RS_ROW_T[`NUM_FU_TOTAL-1 :0] issue_next,
 
 
     // // Outputs from ID/EX Pipeline Register
@@ -451,7 +452,7 @@ module pipeline (
 
   //Instantiating the freelist
   
-  assign fr_read_en= dispatch_en & if_id_enable & id_inst_out.inst.valid_inst ;
+  assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
   Free_List f0(
     // INPUTS
     .clock(clock),
@@ -487,8 +488,17 @@ module pipeline (
     .tail_check(tail_check)
   );
 
-  assign id_inst_out.T = fr_free_reg_T;
-  assign id_inst_out.busy = 1'b0;
+  always_comb begin
+    if (id_inst_out.inst.valid_inst) begin
+    assign  id_inst_out.T = fr_free_reg_T;
+    end else begin
+    assign  id_inst_out.T = `DUMMY_REG;
+    end
+  end
+  // if (fr_read_en) assign id_inst_out.T = fr_free_reg_T;
+  // else            assign id_inst_out.T = `DUMMY_REG;
+  
+  
   assign id_inst_out.inst_opcode = if_id_IR;
   assign id_inst_out.npc = if_id_NPC; 
 
@@ -833,30 +843,33 @@ module pipeline (
   
   
   
-  assign psel_enable = ex_co_valid_inst[0] & ex_co_valid_inst[1] & ex_co_valid_inst[2] & done & ex_co_valid_inst[4]; // ask the use of wor
+  assign psel_enable = ex_co_valid_inst[0] | ex_co_valid_inst[1] | ex_co_valid_inst[2] | done | ex_co_valid_inst[4]; // ask the use of wor
   //priority encoder to select the results of the execution stage to put in cdb
   psel_generic #(`NUM_FU_TOTAL, 1) psel(
-		.req({ex_co_valid_inst[2:0], ex_co_done, ex_co_valid_inst[4]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+		.req({ ex_co_valid_inst[4], ex_co_done, ex_co_valid_inst[2:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
 		.gnt(co_selected),
     .gnt_bus(gnt_bus)
 	);
   
-  always_comb begin
-    for (integer i = 0; i < 5; i=i+1) begin
-      if (co_selected[i] == 1) begin
-        co_NPC_selected               =    ex_co_NPC[i];
-        co_IR_selected                =    ex_co_IR[i];
-        co_halt_selected              =    ex_co_halt[i];
-        co_illegal_selected           =    ex_co_illegal[i];
-        co_valid_inst_selected        =    ex_co_valid_inst[i];
-        co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
-        co_take_branch_selected       =    ex_co_take_branch[i];
-        co_alu_result_selected        =    ex_co_alu_result[i];
-        if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
-        else                  co_branch_valid =    0;       
+    always_comb begin
+      if (|co_selected == 1) begin
+        for (integer i=0; i< 5; i=i+1) begin
+          if(co_selected[i]==1) begin
+            co_NPC_selected               =    ex_co_NPC[i];
+            co_IR_selected                =    ex_co_IR[i];
+            co_halt_selected              =    ex_co_halt[i];
+            co_illegal_selected           =    ex_co_illegal[i];
+            co_valid_inst_selected        =    ex_co_valid_inst[i];
+            co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
+            co_take_branch_selected       =    ex_co_take_branch[i];
+            co_alu_result_selected        =    ex_co_alu_result[i];
+             if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
+             else                  co_branch_valid =    0;    
+          end
+        end         
       end else begin
-        co_NPC_selected             =    0 ;
+         co_NPC_selected             =    0 ;
         co_IR_selected              =   `NOOP_INST;
         co_halt_selected            =    0;
         co_illegal_selected         =    0;
@@ -864,10 +877,13 @@ module pipeline (
         co_reg_wr_idx_out           =   `DUMMY_REG;
         co_take_branch_selected     =    0;
         co_alu_result_selected      =    0;
-        co_branch_valid             =    0;
+        co_branch_valid             =    0; 
       end
     end
-  end
+   
+      
+    
+   
 
   assign co_branch_prediction = (co_take_branch_selected  == bp_output) ? 1:0 ;// Branch prediction or misprediction
   assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
