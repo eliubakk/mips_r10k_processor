@@ -169,7 +169,7 @@ module RS
 		  .WIDTH(2),
 		  .NUM_TAGS(`SS_SIZE),
 		  .TAG_SIZE($clog2(`NUM_PHYS_REG))) rscam ( 
-		.enable({`SS_SIZE{enable}} & CAM_en),
+		.enable(CAM_en),
 		.tags(cam_tags_in),
 		.table_in(cam_table_in),
 		.hits(cam_hits)

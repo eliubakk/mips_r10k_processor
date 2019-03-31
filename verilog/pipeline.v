@@ -559,7 +559,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .reset(reset), 
     .enable(RS_enable), 
     .CAM_en(CDB_enable), 
-    .CDB_in(CDB_in), 
+    .CDB_in(CDB_tag_out), 
     .dispatch_valid(dispatch_en),
     .inst_in(id_di_inst_in), 
     .branch_not_taken(branch_not_taken), 

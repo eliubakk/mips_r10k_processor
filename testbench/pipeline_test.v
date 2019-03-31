@@ -424,7 +424,7 @@ module testbench;
 			$display("\n di_issue stage---------------------------------------------------------");
 			$display("issue_stall: %b dispatch_en: %b branch_not_taken: %b RS_enable: %b", pipeline_0.issue_stall, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.RS_enable);
 			$display("\n RESERVATION STATION INPUT WIRES---------------------------------------");
-			$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
+			//$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
 			$display("\n INST GOING INTO RS");
 			display_inst(pipeline_0.id_di_inst_in);
 		end
@@ -497,40 +497,42 @@ module testbench;
 
 	task display_stages;
 		begin
-			if (clock_count == 20) begin
+			 if (clock_count == 20) begin
 				$finish;
-			end
+			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
-			//display_cache;
+			display_cache;
 			//display_icache;
 			//display_if_stage;
-			display_if_id;
+			 display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-			display_id_di;
+		display_id_di;
 			
 			display_di_issue;
 			display_RS_table;
 			display_ROB_table;
 			//display_issue_ex;
-			display_is_ex_registers;
+/*			display_is_ex_registers;
 			//display_ex;
 			display_ex_co_registers;
 			display_complete;
-			display_co_re_registers;
+			display_co_re_registers;*/
 				
 			//display_ROB_table;
 			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
-			$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
+			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;
+			
 			$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
+
 		end
 	endtask
 
@@ -584,22 +586,22 @@ module testbench;
       clock_count <= `SD (clock_count + 1);
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
-	//`SD;
-	display_stages;
+	`SD;
+	 display_stages;
   end  
 
   
   always @(negedge clock) begin
 
 
-	$display("co_ret_enable: %b co_halt_selected: %b", pipeline_0.co_ret_enable, pipeline_0.co_halt_selected);
+/*	$display("co_ret_enable: %b co_halt_selected: %b", pipeline_0.co_ret_enable, pipeline_0.co_halt_selected);
 	for(int p=0; p<5; p++) begin
 
 	$display("issue_reg.inst.halt[p] = %b", pipeline_0.issue_reg[p].inst.halt);
  
 	end
 	$display("pc_reg = %d", pipeline_0.if_stage_0.PC_reg);
-
+*/
 
     if(reset)
       $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
