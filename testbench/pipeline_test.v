@@ -156,7 +156,7 @@ module testbench;
     .arch_table(arch_table),
     .ROB_table_out(ROB_table_out),
     .free_list_out(free_list_out),
-    .issue_next(issue_next),
+    // .issue_next(issue_next),
     .co_ret_valid_inst(co_ret_valid_inst),
     .if_id_enable(if_id_enable),
     .RS_enable(RS_enable),
@@ -478,7 +478,7 @@ module testbench;
 				$finish;
 			end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			$display("Cycle: %d", clock_count);
+			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
@@ -531,7 +531,7 @@ module testbench;
     $display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime);
 
     wb_fileno = $fopen("../../writeback.out");
-
+	$display("@@@Start");
 
 //----Check issue_reg
 
