@@ -264,6 +264,22 @@ module testbench;
 				$display("**********************************************************\n");
 				$display("------------------------RS TABLE----------------------------\n");
 
+			$display("issue_reg");
+			for (int i = 0; i < 5; ++i) begin
+				$display("issue_reg[%d].inst.valid_inst: %b", i, pipeline_0.issue_reg[i].inst.valid_inst);
+				$display("ex_co_enable[%d]: %b", i, pipeline_0.ex_co_enable[i]);
+			end
+
+
+			$display("issue_idx_valid_shift");
+			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+				$display("issue_idx_valid_shifted[%d] = %b", i, pipeline_0.RS0.issue_idx_valid_shifted[i]);
+			end 
+			$display("issue_idx_valid");
+			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+				$display("issue_idx_valid[%d]: %b", i, pipeline_0.RS0.issue_idx_valid[i]);
+			end
+
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
 			end
@@ -372,7 +388,7 @@ module testbench;
 	task display_if_id;
 		begin
 			$display("\nif_id pipeline registers---------------------------------------------------");
-			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
+			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_id_NPC, pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
 		end
 	endtask
 
@@ -395,7 +411,7 @@ module testbench;
 	task display_id_di;
 		begin
 			$display("\n id_di pipeline registers---------------------------------------------");
-			$display("id_di_enable: %b, dispatch_en: %b", pipeline_0.id_di_enable, pipeline_0.dispatch_en);
+			$display("id_di_enable: %b, dispatch_no_hazard: %b, if_valid_inst_out : %b", pipeline_0.id_di_enable, pipeline_0.dispatch_no_hazard, pipeline_0.if_valid_inst_out);
 			$display("id_di_rega: %d, id_di_regb: %d, id_di_inst_in: %h", pipeline_0.id_di_rega, pipeline_0.id_di_regb, pipeline_0.id_di_inst_in); 			
 			$display("id_di_NPC: %d, id_di_IR: %h, id_di_valid_inst: %b",pipeline_0.id_di_NPC, pipeline_0.id_di_IR, pipeline_0.id_di_valid_inst );
 
@@ -472,6 +488,13 @@ module testbench;
 		end
 	endtask
 
+	task display_co_re_registers;
+		begin
+			$display("\n Complete/Retire pipeline registers----------------------------------------");
+			$display("co_ret_NPC: %h, co_ret_IR: %h, co_ret_halt: %b, co_ret_valid_inst: %b", pipeline_0.co_ret_NPC, pipeline_0.co_ret_IR, pipeline_0.co_ret_halt, pipeline_0.co_ret_valid_inst);
+		end
+	endtask
+
 	task display_stages;
 		begin
 			if (clock_count == 20) begin
@@ -484,22 +507,24 @@ module testbench;
 			//display_memory;
 			//display_cache;
 			//display_icache;
-			// display_if_stage;
+			display_if_stage;
 			display_if_id;
 			display_id_stage;
-			$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
-			$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
+			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
+			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
 			display_id_di;
-			/*
-			display_di_issue;
-			display_issue_ex;
-			display_is_ex_registers;
-			display_ex;
-			display_ex_co_registers;
-			display_complete;*/
 			
-			display_ROB_table;
-			$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
+			display_di_issue;
+			display_RS_table;
+			//display_issue_ex;
+			display_is_ex_registers;
+			//display_ex;
+			display_ex_co_registers;
+			display_complete;
+			display_co_re_registers;
+				
+			//display_ROB_table;
+			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;

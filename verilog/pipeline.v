@@ -377,7 +377,9 @@ logic dispatch_no_hazard;
   //            IF/ID Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out); 
+  
+assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out); 
+//assign if_id_enable = (dispatch_no_hazard && Icache_valid_out); 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
@@ -404,7 +406,8 @@ logic dispatch_no_hazard;
     .clock(clock),
     .reset(reset),
     .if_id_IR(if_id_IR),
-    .if_id_valid_inst(if_id_valid_inst),
+	.if_id_valid_inst(if_id_valid_inst),
+    // .if_id_valid_inst(if_valid_inst_out),
     // .wb_reg_wr_en_out(wb_reg_wr_en_out),
     // .wb_reg_wr_idx_out(wb_reg_wr_idx_out),
     // .wb_reg_wr_data_out(wb_reg_wr_data_out),
@@ -506,12 +509,13 @@ logic dispatch_no_hazard;
 
   //////////////////////////////////////////////////
   //                                              //
-  //                  ID/DI-Stage                 //
+  //                  ID/DI-registers             //
   //                                              //
   //////////////////////////////////////////////////
 
   assign dispatch_no_hazard =  ~((free_rows_next == 0) | fr_empty | rob_full); 
-  assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out); // always enabled
+	assign id_di_enable = (dispatch_no_hazard && if_id_valid_inst); 
+  //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
   //assign id_di_enable = if_valid_inst_out;
 	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
@@ -535,7 +539,7 @@ logic dispatch_no_hazard;
 
   //////////////////////////////////////////////////
   //                                              //
-  //                  DI/ISSUE-Stage              //
+  //                  DI/ISSUE-stages             //
   //                                              //
   //////////////////////////////////////////////////
 
@@ -630,7 +634,9 @@ logic dispatch_no_hazard;
   //////////////////////////////////////////////////
   always_comb begin
     for (integer i=0; i<5; i=i+1) begin
-      is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
+	//is_ex_enable[i] = (issue_reg[i].inst.valid_inst & ex_co_enable[i]);
+	//is_ex_enable[i] = ex_co_enable[i];
+      is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled - Original stuff
     end
   end
   // synopsys sync_set_reset "reset"
