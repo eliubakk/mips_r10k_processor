@@ -96,7 +96,7 @@ module pipeline (
     //Module outputs
   output RS_ROW_T [(`RS_SIZE-1):0]		rs_table_out,
   output PHYS_REG [`NUM_GEN_REG-1:0] arch_table, 
-  output  ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out,
+  output  ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table_out,
   output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
   output PHYS_REG [`FL_SIZE-1:0] free_list_out,
 	output logic [$clog2(`FL_SIZE):0] tail_out,
@@ -262,6 +262,7 @@ logic dispatch_no_hazard;
   logic [63:0] wb_reg_wr_data_out;
   logic  [4:0] wb_reg_wr_idx_out;
   logic        wb_reg_wr_en_out;
+	logic head_halt;
 
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
@@ -281,7 +282,7 @@ logic dispatch_no_hazard;
 
   assign pipeline_completed_insts = {3'b0, co_ret_valid_inst};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
-                                  co_ret_halt     ? HALTED_ON_HALT :
+                                  head_halt       ? HALTED_ON_HALT :
                                   NO_ERROR;
 
   // assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
@@ -994,6 +995,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
   	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
+	.id_halt(id_di_inst_in.inst.halt),
 
   	// OUTPUTS
   	.T_free(rob_fl_arch_Told), // Output for Retire Stage goes to Free List
@@ -1002,11 +1004,12 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.T_out_valid(arch_fr_enable),
   	.rob_free_entries(rob_free_entries),
   	.rob_full(rob_full), // Used for Dispatch Hazard
-  	
+  	.head_halt(head_halt),
   	.ROB_table_out(ROB_table_out),
   	.tail_reg(tail_reg), 
     .head_reg(head_reg)
   );
+
 
   //Intsantiating the arch map
   Arch_Map_Table a0(

@@ -310,7 +310,7 @@ module testbench;
 			$display("OUTPUTS");
 			$display("T_free: %d T_arch: %d T_out_valid: %b rob_free_entries: %d rob_full: %b tail_reg: %d head_reg: %d", pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg, pipeline_0.arch_fr_enable, pipeline_0.rob_free_entries, pipeline_0.rob_full, pipeline_0.tail_reg, pipeline_0.head_reg);
 			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_new_out = %7.0b T_old_out = %7.0b ", i, ROB_table_out[i].busy, ROB_table_out[i].T_new_out, ROB_table_out[i].T_old_out);
+				$display("ROB_Row = %d,  busy = %d, halt = %b, T_new_out = %7.0b T_old_out = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt, pipeline_0.ROB_table_out[i].T_new_out, pipeline_0.ROB_table_out[i].T_old_out);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
 			$display("*******************************************************************\n");
@@ -529,6 +529,7 @@ module testbench;
 			$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;
+			$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
 		end
 	endtask
@@ -717,7 +718,7 @@ module testbench;
         show_clk_count;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
-        #100 $finish;
+        #1 $finish;
       end
 
     end  // if(reset)   

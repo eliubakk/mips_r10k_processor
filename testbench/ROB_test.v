@@ -7,18 +7,23 @@ module testbench;
 	logic clock, reset, enable;
 	PHYS_REG 		                T_old_in; // Comes from Map Table During Dispatch
 	PHYS_REG		                T_new_in; // Comes from Free List During Dispatch
-	PHYS_REG 		                CDB_tag_in; // Comes from CDB during Commit
-	logic			                CDB_en; // Comes from CDB during Commit
+	PHYS_REG 		                CDB_tag_in; // Comes from CDB during complete
+	logic			                CAM_en; // Comes from CDB during complete
 	logic			                dispatch_en; // Structural Hazard detection during Dispatch
 	logic			                branch_not_taken;
     //Outputs
-	PHYS_REG 	                    T_old_out; // Output for Retire Stage goes to Free List
-	PHYS_REG                        T_new_out; // Output for Retire Stage goes to Arch Map
-	logic 				            T_old_valid, T_new_valid;
-	logic [$clog2(`ROB_SIZE) - 1:0] rob_free_entries;
+	PHYS_REG 	                    T_free; // Output for Retire Stage goes to Free List
+	PHYS_REG                        T_arch; // Output for Retire Stage goes to Arch Map
+	logic 				            T_out_valid;
+	logic [$clog2(`ROB_SIZE):0] rob_free_entries;
     logic                           rob_full;
+    ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out;
+	logic [$clog2(`ROB_SIZE):0] tail_reg, head_reg;
+	logic 	id_halt;
+	logic 	head_halt;
 
-    `DUT(ROB) ROB0(
+
+    ROB g1(
         //inputs
         .clock(clock),
         .reset(reset),
@@ -26,222 +31,219 @@ module testbench;
         .T_old_in(T_old_in),
         .T_new_in(T_new_in),
         .CDB_tag_in(CDB_tag_in),
-        .CDB_en(CDB_en),
+        .CAM_en(CAM_en),
         .dispatch_en(dispatch_en),
         .branch_not_taken(branch_not_taken),
+	.id_halt(id_halt),
 
         //outputs
-        .T_old_out(T_old_out),
-        .T_new_out(T_new_out),
-        .T_old_valid(T_old_valid),
-        .T_new_valid(T_new_valid),
+        .T_free(T_free),
+        .T_arch(T_arch),
+        .T_out_valid(T_out_valid),
         .rob_free_entries(rob_free_entries),
-        .rob_full(rob_full)
+        .rob_full(rob_full),
+	.head_halt(head_halt),
+        .ROB_table_out(ROB_table_out),
+		.tail_reg(tail_reg),
+		.head_reg(head_reg)
+		
     );
 
     always #10 clock = ~clock;
 
-    typedef ROB_ROW_T [`ROB_SIZE] table_t;
+    // need to update this
 
-    function table_t clear_rob_table_test;
+	// TASKS
+	task exit_on_error;
 		begin
-			for (integer i = 0; i < `RS_SIZE; i += 1) begin
-				// rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
-				clear_rob_table_test[i].T_new_out = `DUMMY_REG;
-				clear_rob_table_test[i].T_old_out = `DUMMY_REG;
-				clear_rob_table_test[i].busy = 1'b0;
-			end
-		end
-	endfunction
-
-    task exit_on_error;
-		begin
-			#1;
+			@(posedge clock);
+			#2;
 			$display("@@@Failed at time %f", $time);
 			$finish;
 		end
 	endtask
 
-    task print_rob_entry;
-		input ROB_ROW_T rob_entry;
+	task table_out;
 		begin
-			$display("\tT_old_out = %7.0b", rob_entry.T_old_out);
-			$display("\tT_new_out = %7.0b", rob_entry.T_new_out);
-            $display("\tBusy = %b", rob_entry.busy);
-		end
-	endtask
-
-    task print_rob_table;
-		input ROB_ROW_T  [(`ROB_SIZE - 1):0]	rob_table;
-		begin
-			$display("**********************************************************\n");
-			$display("------------------------ROB TABLE----------------------------\n");
-
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("Entry: %d", i);
-				print_rob_entry(rob_table[i]);
-			end
-			$display("*******************************************************************\n");
-		end
-	endtask
-
-    task table_out;
-		begin
+			@(posedge clock);
+			#2;
 				$display("**********************************************************\n");
 				$display("------------------------ROB TABLE----------------------------\n");
 
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_old_out = %7.0b, T_new_out = %7.0b ", i, rob_table_out[i].busy, rob_table_out[i].T_old_out, rob_table_out[i].T_new_out);
+			for(integer i=1;i<=`ROB_SIZE;i=i+1) begin
+				$display("ROB_Row = %d,  busy = %d, halt=%b,  T_new_out = %7.0b T_old_out = %7.0b ", i, ROB_table_out[i].busy, ROB_table_out[i].halt, ROB_table_out[i].T_new_out, ROB_table_out[i].T_old_out);
 			end
-				$display("ROB full = %b, rob_free_entries = %d",rob_full, rob_free_entries);
-            $display("*******************************************************************\n");
-        end
-    endtask
-
-    task table_test_out;
-		begin
-				$display("**********************************************************\n");
-				$display("------------------------ROB TABLE----------------------------\n");
-
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_old_out = %7.0b, T_new_out = %7.0b ", i, rob_table_test[i].busy, rob_table_test[i].T_old_out, rob_table_test[i].T_new_out);
-			end
-				$display("ROB full = %b, rob_free_entries = %d",rob_full_test, rob_free_entries_test);			
+				$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
+				$display("id_halt: %b, head_halt: %b",id_halt, head_halt);
+			
 			$display("*******************************************************************\n");
+
 		end
 	endtask
-
-    //task entry_exists_in_table;
-		////input ROB_ROW_T inst_in;
-		//input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
-		//begin
-		//	integer i;
-		//	for (i = 0; i < `ROB_SIZE; i += 1) begin
-		//		if (rob_table_out[i].busy) begin
-		//			//if (rs_table_out[i] == inst_in) begin
-		//			return;
-		//			//end
-		//		end
-		//	end
-		//	$display("failed in entry_exists_in_table");
-		//	#1 exit_on_error;
-		//end
-	//endtask
-
-	//task entry_not_in_table;
-	//	//input RS_ROW_T inst_in;
-	//	input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
-	//	begin
-	//		integer i;
-	//		for (i = 0; i < `ROB_SIZE; i += 1) begin
-	//			if (rob_table_out[i].busy) begin
-	////				if (rs_table_out[i] == inst_in) begin
-		//				$display("failed in entry_not_in_table");
-		//				#1 exit_on_error;
-		////			end
-			//	end
-		//	end
-		//	return;
-		//end
-	//endtask
-
-	task table_has_N_entries;
-		input integer count;
-		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
-		begin
-			integer _count = 0;
-			integer i;
-			_count = 0;
-			for (i = 0; i < `ROB_SIZE; i += 1) begin
-				if (rob_table_out[i].busy) begin
-					_count += 1;
-				end
-			end
-			assert(count == _count) else #1 exit_on_error;
-		end
-	endtask
-
-	task tags_now_ready;
-		input integer tag;
-		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
-		begin
-			integer i;
-			for (i = 0; i < `ROB_SIZE; i += 1) begin
-				if (rob_table_out[i].busy) begin
-					if (rob_table_out[i].T_old_out[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rob_table_out[i].T_old_out[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-					if (rob_table_out[i].T_new_out[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rob_table_out[i].T_new_out[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-				end
-			end
-			return;
-		end
-	endtask
-
-	task rob_table_equal;
-		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table;
-		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_test;
-		begin
-			for (int i = 0; i < `ROB_SIZE; i += 1) begin
-				assert(rob_table_test[i] === rob_table[i]) else #1 exit_on_error;
-			end
-		end
-	endtask
-
-	// helper variables
-	logic first = 1'b0;
-	logic second = 1'b0;
-	ROB_ROW_T inst_1;
-	ROB_ROW_T inst_2;
+initial begin
 	
-	initial begin
-		
-	/*	$monitor("Clock: %4.0f, reset: $b, enable:%b, CAM_en:%b, CDB_in:%h, .dispatch_valid:%b, inst_in:%h, LSQ_busy : %b, \n rs_table_out:%h", clock, reset, enable, CAM_en, CDB_in,dispatch_valid, inst_in, LSQ_busy, rs_table_out);	
- 	*/
-		$monitor("Clock: %4.0f, reset: %b, enable:%b, ", clock, reset, enable);	
-		
-		// Initial value
-		clock = 1'b0;
-		reset = 1'b0;
-		enable = 1'b0;
-		T_old_in = 7'b1111111;
-		T_new_in = 7'b1111111;
-		CDB_tag_in = 7'b1111111;
-		CDB_en = 1'b0;
-		dispatch_en = 1'b0;
-		branch_not_taken = 1'b0; 
 
-		@(negedge clock);
+$monitor("Clock: %4.0f, reset: %b, enable:%b, ", clock, reset, enable);	
+
+		// Initial value
+        clock = 0;
+		reset = 0;
+		enable = 0;
+		CAM_en = 0;
+		CDB_tag_in = 0;
+		dispatch_en = 0;
+		branch_not_taken= 0;
+        T_old_in= 7'b1111111;
+        T_new_in= 7'b1111111;
+		id_halt = 1'b0;
+        @(negedge clock);
 //Check reset
 		reset = 1;
-	@(negedge  clock);
-//Check enable
 		enable = 1;
-	@(negedge clock);
+	@(negedge  clock);
+		table_out();
+//Check enable
+		
+	
 //Dispatch
 		reset = 0;
 		enable = 1;
-		T_old_in = 7'b1111111;
-		T_new_in = 7'b1111111;
-		CDB_tag_in = 7'b1111111;
-		CDB_en = 1'b0;
-		dispatch_en = 1'b1;
-		branch_not_taken = 1'b0;	
+		dispatch_en = 1;
+		
 		$display("****************************************DISPATCH MULT R1 R2 R3************************************************");
+        T_old_in= 7'b1000011;
+        T_new_in= 7'b0100011;
+	id_halt = 1'b1;
+        
 
-		// At this cycle, rob_table should be empty
-		// because currently dispatched instruction is seen
-		// in rob_table on the next cycle
-		@(posedge clock);
-		`DELAY;
+		@(negedge clock);
+		table_out();
 
-		table_has_N_entries(1, rob_table_out);
-		@(negedge clock);	
+		
+			
+$display("****************************************DISPATCH R1 R2 R4  ISSUE MULT R1 R2 R3************************************************");
 
-		$display("@@@Passed");
+        T_old_in= 7'b1000100;
+        T_new_in= 7'b0100100;
+
+        
+
+		@(negedge clock);
+		table_out();
+
+		
+
+
+
+		
+
+$display("****************************************DISPATCH R1 R2 R5 ISSUE R1 R2 R4  EXECUTE MULT R1 R2 R3************************************************");
+
+        T_old_in= 7'b1000101;
+        T_new_in= 7'b0100101;
+
+        
+
+		@(negedge clock);
+		table_out();
+
+		
+
+
+$display("**************************************** DISPATCH R1 R2 R6 ISSUE R1 R2 R5 EXECUTE R1 R2 R4  complete MULT R1 R2 R3************************************************");
+
+        T_old_in= 7'b1000110;
+        T_new_in= 7'b0100110;
+		CAM_en = 1;
+		CDB_tag_in = 7'b0100011; 
+
+        
+
+		@(negedge clock);
+		table_out();
+
+		
+$display("**************************************** DISPATCH R1 R2 R7 ISSUE R1 R2 R6 EXECUTE R1 R2 R5 EXECUTE R1 R2 R4  RETIRE MULT R1 R2 R3************************************************");
+
+        T_old_in= 7'b1000111;
+        T_new_in= 7'b0100111;
+		CAM_en = 0;
+		CDB_tag_in = 7'b0100011; 
+
+        
+
+		@(negedge clock);
+		table_out();
+
+// older inst gets completeed before .
+$display("**************************************** DISPATCH R1 R2 R8 ISSUE R1 R2 R7 EXECUTE R1 R2 R6 complete R1 R2 R5 EXECUTE R1 R2 R4  ************************************************");
+
+        T_old_in= 7'b1001000;
+        T_new_in= 7'b0101000;
+		CAM_en = 1;
+		CDB_tag_in = 7'b0100101; 
+
+        
+
+		@(negedge clock);
+		table_out();
+
+		
+$display("**************************************** DISPATCH R1 R2 R8 ISSUE R1 R2 R7 EXECUTE R1 R2 R6 complete R1 R2 R5 complete R1 R2 R4  ************************************************");
+
+        T_old_in= 7'b1001000;
+        T_new_in= 7'b0101000;
+		CAM_en = 1;
+		CDB_tag_in = 7'b0100100; 
+
+        
+
+		@(negedge clock);
+		table_out();
+
+@(negedge clock);
+		table_out();
+		@(negedge clock);
+		table_out();
+
+// ROB FULL		
+$display("****************************************  ROB FULL  ************************************************");
+		for (integer i=0; i< 13; i=i+1) begin
+			dispatch_en= 1;
+			CAM_en = 0;
+			CDB_tag_in = 7'b0100100; 
+		    @(negedge clock);
+		end
+		table_out();
+
+
+// //DISPATCH COMMAND WITH ROB BEING FULL
+
+$display("****************************************  complete ROB HEAD  ************************************************");
+		
+		dispatch_en= 0;
+		CAM_en = 1;
+		CDB_tag_in = 7'b0100110; 
+
+		    @(negedge clock);
+	
+		table_out();
+
+$display("**************************************** DISPATCH AND EMPTY AT THE SAME LAST SPOT IN ROB  ************************************************");
+		
+		dispatch_en= 1;
+		CAM_en = 0;
+		T_old_in= 7'b1001111;
+        T_new_in= 7'b0101111;
+		
+
+		    @(negedge clock);
+	
+		table_out();
+		
 		$finish;
+
+		
 	end
 	
 endmodule
