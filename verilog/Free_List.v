@@ -1,6 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
-// `define FL_SIZE `NUM_PHYS_REG
 `define DEBUG
 // would be good idea to create a queue module and create an instance of that
 // here...

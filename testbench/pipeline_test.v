@@ -11,7 +11,7 @@
 `include "../../sys_defs.vh"
 
 extern void print_header(string str);
-extern void print_cycles();
+extern void print_cycles(int valid);
 extern void print_stage(string div, int inst, int npc, int valid_inst);
 //extern void print_stage_array_RS_size(string div, int inst[`RS_SIZE], int npc[`RS_SIZE], int valid_inst[`RS_SIZE]);
 //extern void print_stage_array_RS_size(string div, int inst[`RS_SIZE], int npc[`RS_SIZE], int valid_inst[`RS_SIZE]);
@@ -92,7 +92,12 @@ module testbench;
   PHYS_REG		[`NUM_GEN_REG-1:0]	arch_table;
   ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out;
   PHYS_REG [`NUM_PHYS_REG-1:0] free_list_out;
-
+  RS_ROW_T[`NUM_FU_TOTAL-1 :0] issue_next;
+  logic [`NUM_FU_TOTAL-1:0][63:0] issue_next_npc;
+  logic [`NUM_FU_TOTAL-1:0][31:0] issue_next_inst_opcode;
+  logic [`NUM_FU_TOTAL-1:0]       issue_next_valid_inst;
+  int pipe_counter; 
+  int copy_pipe_counter;
   // Instantiate the Pipeline
   pipeline #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_MULT, FU_BR}),
   .FU_BASE_IDX({FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX}),
@@ -151,6 +156,7 @@ module testbench;
     .arch_table(arch_table),
     .ROB_table_out(ROB_table_out),
     .free_list_out(free_list_out),
+    .issue_next(issue_next),
     .co_ret_valid_inst(co_ret_valid_inst),
     .if_id_enable(if_id_enable),
     .RS_enable(RS_enable),
@@ -164,7 +170,11 @@ module testbench;
     .branch_not_taken(branch_not_taken)
   );
 
-
+  // assign pipeline_commit_NPC = 64'h10;
+  // assign pipeline_commit_wr_idx = 5'h10;
+  // assign pipeline_commit_wr_data = 64'h8;
+  // assign pipeline_completed_insts = 4'h2;
+  // assign pipeline_commit_wr_en = 1'b1;
   // Instantiate the Data Memory
   mem memory (
     // Inputs
@@ -179,6 +189,13 @@ module testbench;
     .mem2proc_data     (mem2proc_data),
     .mem2proc_tag      (mem2proc_tag)
   );
+  always_comb begin
+    for(integer i=0; i< `NUM_FU_TOTAL; i=i+1) begin
+      issue_next_npc[i] = issue_next[i].npc;
+      issue_next_inst_opcode[i] = issue_next[i].inst_opcode;
+      issue_next_valid_inst[i] = issue_next[i].inst.valid_inst;
+    end
+  end
 
   // Generate System Clock
   always begin
@@ -544,7 +561,7 @@ module testbench;
 	display_stages;
   end  
 
-
+  
   always @(negedge clock) begin
 
 
@@ -555,6 +572,8 @@ module testbench;
  
 	end
 	$display("pc_reg = %d", pipeline_0.if_stage_0.PC_reg);
+
+
     if(reset)
       $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
                $realtime);
@@ -567,27 +586,77 @@ module testbench;
      //display_ROB_table();
      //display_free_list_table(free_list_out);
      //show_input_output_port();
-       
+       pipe_counter= 0;
        // print the piepline stuff via c code to the pipeline.out
-       print_cycles();
-       print_stage(" ", if_IR_out, if_NPC_out[31:0], {31'b0,if_valid_inst_out});
-       print_stage("|", if_id_IR, if_id_NPC[31:0], {31'b0,if_id_valid_inst});
-       print_stage("|", id_di_IR, id_di_NPC[31:0], {31'b0,id_di_valid_inst});
-       for (integer i = 0; i < `RS_SIZE; i=i+1) begin
-        print_stage("|", rs_table_out_inst_opcode[i], rs_table_out_npc[i][31:0], {31'b0,rs_table_out_inst_valid_inst[i]});
-       end
        for (integer i = 0; i < `NUM_FU_TOTAL; i=i+1) begin
-          print_stage("|", issue_reg_inst_opcode[i], issue_reg_npc[i][31:0], {31'b0,issue_reg_inst_valid_inst[i]});
-       end
-      print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
-      print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
-      print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
-                 {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});
-      print_membus({30'b0,proc2mem_command}, {28'b0,mem2proc_response},
-                    proc2mem_addr[63:32], proc2mem_addr[31:0],
-                    proc2mem_data[63:32], proc2mem_data[31:0]);
-
-
+        if (issue_next[i].busy) begin
+          if (pipe_counter==0) begin
+            print_cycles(1);
+            print_stage(" ", if_IR_out, if_NPC_out[31:0], {31'b0,if_valid_inst_out});
+            print_stage("|", if_id_IR, if_id_NPC[31:0], {31'b0,if_id_valid_inst});
+            print_stage("|", id_di_IR, id_di_NPC[31:0], {31'b0,id_di_valid_inst});
+          end else begin
+            print_cycles(0);
+            print_stage(" ", if_IR_out, if_NPC_out[31:0], 0);
+            print_stage("|", if_id_IR, if_id_NPC[31:0], 0);
+            print_stage("|", id_di_IR, id_di_NPC[31:0], 0);
+          end
+          //for (integer i = 0; i < `RS_SIZE; i=i+1) begin
+          print_stage("|", issue_next_inst_opcode[i], issue_next_npc[i][31:0], {31'b0,issue_next_valid_inst[i]});
+          //end
+          //for (integer i = 0; i < `NUM_FU_TOTAL; i=i+1) begin
+          if (`NUM_FU_TOTAL>pipe_counter)
+            print_stage("|", issue_reg_inst_opcode[pipe_counter], issue_reg_npc[pipe_counter][31:0], {31'b0,issue_reg_inst_valid_inst[pipe_counter]});
+          //end
+          else
+            print_stage("|", issue_reg_inst_opcode[0], issue_reg_npc[0][31:0], {0});
+          if (pipe_counter==0) begin
+            print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
+            print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
+          end else begin
+            print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
+            print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
+          end
+          print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
+                    {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});
+          print_membus({30'b0,proc2mem_command}, {28'b0,mem2proc_response},
+                        proc2mem_addr[63:32], proc2mem_addr[31:0],
+                        proc2mem_data[63:32], proc2mem_data[31:0]);
+          pipe_counter = pipe_counter+1;
+        end
+      end
+      copy_pipe_counter = pipe_counter;
+      $display("@@@@@@@@@@@@@@@@@@  pipe_counter=%t",pipe_counter);
+      if (`NUM_FU_TOTAL>copy_pipe_counter)begin
+        for (integer i = copy_pipe_counter; i < `NUM_FU_TOTAL; i=i+1) begin        
+          if (pipe_counter==0) begin
+              print_cycles(1);
+              print_stage(" ", if_IR_out, if_NPC_out[31:0], {31'b0,if_valid_inst_out});
+              print_stage("|", if_id_IR, if_id_NPC[31:0], {31'b0,if_id_valid_inst});
+              print_stage("|", id_di_IR, id_di_NPC[31:0], {31'b0,id_di_valid_inst});
+          end else begin
+              print_cycles(0);
+              print_stage(" ", if_IR_out, if_NPC_out[31:0], 0);
+              print_stage("|", if_id_IR, if_id_NPC[31:0], 0);
+              print_stage("|", id_di_IR, id_di_NPC[31:0], 0);
+            end
+            print_stage("|", issue_next_inst_opcode[0], issue_next_npc[0][31:0], {0});
+            print_stage("|", issue_reg_inst_opcode[i], issue_reg_npc[i][31:0], {31'b0,issue_reg_inst_valid_inst[i]});
+            if (pipe_counter==0) begin
+              print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
+              print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
+            end else begin
+              print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
+              print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
+            end
+            print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
+                      {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});
+            print_membus({30'b0,proc2mem_command}, {28'b0,mem2proc_response},
+                          proc2mem_addr[63:32], proc2mem_addr[31:0],
+                          proc2mem_data[63:32], proc2mem_data[31:0]);
+          pipe_counter = pipe_counter+1;
+          end
+        end
        // print the writeback information to writeback.out
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)

@@ -22,11 +22,14 @@ void print_header(char* str)
   fprintf(ppfile, "%s", str);
 }
 
-void print_cycles()
+void print_cycles(int valid)
 {
   /* we'll enforce the printing of a header */
-  if (ppfile != NULL)
-    fprintf(ppfile, "\n%5d:", cycle_count++);
+  if (ppfile != NULL){
+    if (!valid)
+      fprintf(ppfile, "\n%5d:", cycle_count);
+    else
+      fprintf(ppfile, "\n%5d:", cycle_count++);}
 }
 
 
