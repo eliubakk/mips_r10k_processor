@@ -363,7 +363,7 @@ logic dispatch_no_hazard;
     .co_ret_target_pc(co_ret_alu_result),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(dispatch_en),
+    .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
 
     // Outputs
@@ -391,10 +391,14 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
       if_id_NPC        <= `SD if_NPC_out;
       if_id_IR         <= `SD if_IR_out;
       if_id_valid_inst <= `SD if_valid_inst_out;
-    end else begin
+    end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
       if_id_NPC        <= `SD if_id_NPC;
       if_id_IR         <= `SD if_id_IR;
       if_id_valid_inst <= `SD if_id_valid_inst;
+    end else begin
+	 if_id_NPC        <= `SD 0;
+      if_id_IR         <= `SD `NOOP_INST;
+      if_id_valid_inst <= `SD `FALSE;
     end
   end
   
@@ -550,7 +554,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
  
-  assign RS_enable= dispatch_en ;
+  assign RS_enable= dispatch_en & if_valid_inst_out ;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(

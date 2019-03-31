@@ -505,7 +505,7 @@ module testbench;
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
-			display_cache;
+			//display_cache;
 			//display_icache;
 			//display_if_stage;
 			 display_if_id;
