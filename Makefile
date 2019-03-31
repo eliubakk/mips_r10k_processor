@@ -131,7 +131,8 @@ clean:
           dve *.vpd *.vcd *.dump ucli.key
 
 nuke:	clean
-	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf DVEfiles/
+	cd $(SYN_DIR) && \
+	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf *.sv DVEfiles/
 	
 .PHONY: dve clean nuke	
 
