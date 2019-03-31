@@ -67,7 +67,7 @@ module pipeline (
   output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
   output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
   output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
-  output RS_ROW_T[`NUM_FU_TOTAL-1 :0] issue_next,
+//  output RS_ROW_T[`NUM_FU_TOTAL-1 :0] issue_next,
 
 
     // // Outputs from ID/EX Pipeline Register
@@ -536,7 +536,7 @@ module pipeline (
   //////////////////////////////////////////////////
 
   assign issue_stall= ~is_ex_enable;
-  assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full);
+  assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full) ;
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   assign RS_enable= (dispatch_en && if_valid_inst_out);
   RS #(.FU_NAME_VAL(FU_NAME_VAL),
@@ -895,7 +895,7 @@ module pipeline (
     .reset(reset),  // Asynchronous reset active low
     .enable(CDB_enable), // Clock Enable
     .tag_in(co_reg_wr_idx_out),	// Comes from FU, during commit
-    .ex_valid(ex_co_valid_inst_selected),
+    .ex_valid(co_valid_inst_selected),
 
     // Outputs
     .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules

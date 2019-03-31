@@ -122,44 +122,45 @@ rob_free_entries = `ROB_SIZE - (ROB_table[16].busy + ROB_table[1].busy + ROB_tab
 check_loop = 1'b0;
 	
 
-		
-	for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
-		if (i > head) begin
-			if (!ROB_table[i].busy) begin
-				ROB_table[i].T_new_out= T_new_in;
-				ROB_table[i].T_old_out= T_old_in;
-				ROB_table[i].busy= 1;
-				check_loop = 1'b1;
-				if (tail_reg == 5'd16) begin
-					tail= 5'd1;
-				end
-				else begin
-					tail= tail_reg + 1;
-				end			
-				break;
-			end
-		end
-	end
-
-	
-		if(!check_loop) begin
-			for(integer i=1;i< `ROB_SIZE; i=i+1) begin
-				if(i<head) begin
-					if (!ROB_table[i].busy) begin
-						ROB_table[i].T_new_out= T_new_in;
-						ROB_table[i].T_old_out= T_old_in;
-						ROB_table[i].busy= 1;
-						if (tail_reg == 5'd16) begin
-							tail= 5'd1;
-						end
-						else begin
-							tail= tail_reg + 1;
-						end		
-						break;
+	if (dispatch_en) begin
+		for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
+			if (i > head) begin
+				if (!ROB_table[i].busy) begin
+					ROB_table[i].T_new_out= T_new_in;
+					ROB_table[i].T_old_out= T_old_in;
+					ROB_table[i].busy= 1;
+					check_loop = 1'b1;
+					if (tail_reg == 5'd16) begin
+						tail= 5'd1;
 					end
+					else begin
+						tail= tail_reg + 1;
+					end			
+					break;
 				end
+			end 
+		end
+
+		
+			if(!check_loop) begin
+				for(integer i=1;i< `ROB_SIZE; i=i+1) begin
+					if(i<head) begin
+						if (!ROB_table[i].busy) begin
+							ROB_table[i].T_new_out= T_new_in;
+							ROB_table[i].T_old_out= T_old_in;
+							ROB_table[i].busy= 1;
+							if (tail_reg == 5'd16) begin
+								tail= 5'd1;
+							end
+							else begin
+								tail= tail_reg + 1;
+							end		
+							break;
+						end
+					end
+					
 				
-			
+				end
 			end
 		end
 
