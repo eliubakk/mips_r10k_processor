@@ -507,15 +507,16 @@ module testbench;
 			//display_memory;
 			//display_cache;
 			//display_icache;
-			display_if_stage;
+			//display_if_stage;
 			display_if_id;
-			display_id_stage;
+			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
 			display_id_di;
 			
 			display_di_issue;
 			display_RS_table;
+			display_ROB_table;
 			//display_issue_ex;
 			display_is_ex_registers;
 			//display_ex;

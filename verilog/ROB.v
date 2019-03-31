@@ -41,26 +41,26 @@ module ROB(
 	output PHYS_REG     T_arch, // Output for Retire Stage goes to Arch Map
 
 	output logic		T_out_valid,
-	output logic [$clog2(`ROB_SIZE):0] rob_free_entries,
+	output logic [$clog2(`ROB_SIZE) - 1:0] rob_free_entries,
 	output logic							 rob_full, // Used for Dispatch Hazard
 	`ifdef DEBUG 
-	output  ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out,
-	output logic [$clog2(`ROB_SIZE):0] tail_reg, head_reg
+	output  ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table_out,
+	output logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg
 	`endif
 );
 
 
 
-	logic [$clog2(`ROB_SIZE):0] tail, head;
+	logic [$clog2(`ROB_SIZE) - 1:0] tail, head;
 	//logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg;
 	//logic [$clog2(`ROB_SIZE) - 1:0] ROB_idx;
 
 							
-	ROB_ROW_T [`ROB_SIZE:1]		ROB_table;
-	ROB_ROW_T [`ROB_SIZE:1]		ROB_table_reg;
+	ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table;
+	ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table_reg;
 	logic check_loop;		// To keep a tab on the loop checking during dispatch stage
 	//logic T_new_valid_reg, T_old_valid_reg;
-	logic [(`ROB_SIZE):1] MSB_T1;
+	logic [(`ROB_SIZE) - 1:0] MSB_T1;
 
 
 	`ifdef DEBUG 
@@ -81,13 +81,27 @@ module ROB(
 
 	always_comb begin
 	
-		ROB_table= ROB_table_reg;
+		ROB_table = ROB_table_reg;
 		T_out_valid= 1'b0;	// Intializing the valid bits after each cycle
 		head= head_reg;
 		tail= tail_reg;
 		T_free= 7'b1111111;
 		T_arch= 7'b1111111;
 
+		// RETIRE STAGE
+		// if head is busy and dest tag is ready
+		if (ROB_table_reg[head].busy & ROB_table_reg[head].T_new_out[6]) begin
+			// above case is true, so retire the head inst
+			T_out_valid = 1;
+			T_free = ROB_table[head].T_old_out;
+			T_arch = ROB_table[head].T_new_out;
+
+			// clear head entry
+			ROB_table[head].busy = 0;
+			++head;
+		end
+
+/*
 		if((ROB_table_reg[head].busy)&(ROB_table_reg[head].T_new_out[6])) begin			// check for the head pointer and the ready bit of dest reg to know it has commited or not
 			T_out_valid= 1;
 			T_free= ROB_table[head].T_old_out;
@@ -99,26 +113,41 @@ module ROB(
 				head= head_reg + 1;
 			end 
 		end 	
-
+*/
 		// COMMIT STAGE
 
 	
+		// check if rob is full
+		rob_full = (tail + 1) == head;
 
-		for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
-			ROB_table[i].T_new_out[6]= MSB_T1[i] | ROB_table_reg[i].T_new_out[6];
+		// update T_new tags with CAM
+		for (int i = 0; i < `ROB_SIZE; ++i) begin
+			ROB_table[i].T_new_out[6] = MSB_T1[i] | ROB_table_reg[i].T_new_out[6];
 		end
 
-		rob_full = ROB_table_reg[16].busy & ROB_table_reg[1].busy & ROB_table_reg[2].busy & ROB_table_reg[3].busy & ROB_table_reg[4].busy 
-			& ROB_table_reg[5].busy & ROB_table_reg[6].busy & ROB_table_reg[7].busy & ROB_table_reg[8].busy & ROB_table_reg[9].busy 
-			& ROB_table_reg[10].busy & ROB_table_reg[11].busy &  ROB_table_reg[12].busy & ROB_table_reg[13].busy & ROB_table_reg[14].busy & ROB_table_reg[15].busy; 
+// 		rob_full = ROB_table_reg[16].busy & ROB_table_reg[1].busy & ROB_table_reg[2].busy & ROB_table_reg[3].busy & ROB_table_reg[4].busy 
+// 			& ROB_table_reg[5].busy & ROB_table_reg[6].busy & ROB_table_reg[7].busy & ROB_table_reg[8].busy & ROB_table_reg[9].busy 
+// 			& ROB_table_reg[10].busy & ROB_table_reg[11].busy &  ROB_table_reg[12].busy & ROB_table_reg[13].busy & ROB_table_reg[14].busy & ROB_table_reg[15].busy; 
 
-		rob_free_entries = `ROB_SIZE - (ROB_table[16].busy + ROB_table[1].busy + ROB_table[2].busy + ROB_table[3].busy +  ROB_table[4].busy + ROB_table[5].busy + ROB_table[6].busy + ROB_table[7].busy + ROB_table[8].busy + ROB_table[9].busy + ROB_table[10].busy + ROB_table[11].busy +  ROB_table[12].busy + ROB_table[13].busy + ROB_table[14].busy + ROB_table[15].busy); 
+		if (head <= tail) begin
+			rob_free_entries = `ROB_SIZE - (tail - head) - 1;
+		end else begin
+			rob_free_entries = head - tail - 1;
+		end
+// 		rob_free_entries = `ROB_SIZE - (ROB_table[16].busy + ROB_table[1].busy + ROB_table[2].busy + ROB_table[3].busy +  ROB_table[4].busy + ROB_table[5].busy + ROB_table[6].busy + ROB_table[7].busy + ROB_table[8].busy + ROB_table[9].busy + ROB_table[10].busy + ROB_table[11].busy +  ROB_table[12].busy + ROB_table[13].busy + ROB_table[14].busy + ROB_table[15].busy); 
+
 
 		// Dispatch
-		check_loop = 1'b0;
-	
+// 		check_loop = 1'b0;	
 
-		if (dispatch_en) begin
+		if (dispatch_en & ~rob_full) begin
+
+			ROB_table[tail].T_new_out = T_new_in;
+			ROB_table[tail].T_old_out = T_old_in;
+			ROB_table[tail].busy = 1; 
+			++tail;
+
+			/*
 			for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
 				if (i > head) begin
 					if (!ROB_table[i].busy) begin
@@ -162,23 +191,24 @@ module ROB(
 				head= head_reg+1;
 			end
 		end
+		*/
 	end
 	
-		//UPDATE_FLIP_FLOPS
+	//UPDATE_FLIP_FLOPS
 	
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
-			for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
-				ROB_table_reg[i].T_new_out <= `SD 7'b1111111;
-				ROB_table_reg[i].T_old_out <=  `SD 7'b1111111;
+			for (int i = 0; i< `ROB_SIZE; ++i) begin
+				ROB_table_reg[i].T_new_out <= `SD `DUMMY_REG;
+				ROB_table_reg[i].T_old_out <=  `SD `DUMMY_REG;
 				ROB_table_reg[i].busy <= `SD 1'b0;		
 			end
 			tail_reg<= `SD 0;
 			head_reg<= `SD 0;
 		end else begin
-		ROB_table_reg<= `SD ROB_table;
-		tail_reg<=  `SD tail;
-		head_reg<=  `SD head;	
+		ROB_table_reg <= `SD ROB_table;
+		tail_reg <=  `SD tail;
+		head_reg <=  `SD head;	
 		end
 	end
 
