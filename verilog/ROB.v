@@ -98,7 +98,6 @@ module ROB(
 			end else begin
 				head= head_reg + 1;
 			end 
-
 		end 	
 
 		// COMMIT STAGE
@@ -119,71 +118,68 @@ module ROB(
 		check_loop = 1'b0;
 	
 
-			if (dispatch_en) begin
-				for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
-					if (i > head) begin
+		if (dispatch_en) begin
+			for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
+				if (i > head) begin
+					if (!ROB_table[i].busy) begin
+						ROB_table[i].T_new_out= T_new_in;
+						ROB_table[i].T_old_out= T_old_in;
+						ROB_table[i].busy= 1;
+						check_loop = 1'b1;
+						if (tail_reg == 5'd16) begin
+							tail= 5'd1;
+						end
+						else begin
+							tail= tail_reg + 1;
+						end			
+						break;
+					end
+				end 
+			end
+	
+		
+			if(!check_loop) begin
+				for(integer i=1;i< `ROB_SIZE; i=i+1) begin
+					if(i<head) begin
 						if (!ROB_table[i].busy) begin
 							ROB_table[i].T_new_out= T_new_in;
 							ROB_table[i].T_old_out= T_old_in;
 							ROB_table[i].busy= 1;
-							check_loop = 1'b1;
 							if (tail_reg == 5'd16) begin
 								tail= 5'd1;
-							end
-							else begin
+							end else begin
 								tail= tail_reg + 1;
-							end			
+							end		
 							break;
 						end
-					end 
-				end
-		
-			
-				if(!check_loop) begin
-					for(integer i=1;i< `ROB_SIZE; i=i+1) begin
-						if(i<head) begin
-							if (!ROB_table[i].busy) begin
-								ROB_table[i].T_new_out= T_new_in;
-								ROB_table[i].T_old_out= T_old_in;
-								ROB_table[i].busy= 1;
-								if (tail_reg == 5'd16) begin
-									tail= 5'd1;
-								end
-								else begin
-									tail= tail_reg + 1;
-								end		
-								break;
-							end
-						end
-						
-					
 					end
 				end
 			end
+		end
 	
-			if (dispatch_en) begin
-				if(head==0) begin
-					head= head_reg+1;
-				end
-	
+		if (dispatch_en) begin
+			if(head==0) begin
+				head= head_reg+1;
 			end
 		end
+	end
 	
 		//UPDATE_FLIP_FLOPS
 	
-		always_ff @(posedge clock) begin
-			if (reset | branch_not_taken) begin
-				for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
-					ROB_table_reg[i].T_new_out <= `SD 7'b1111111;
-					ROB_table_reg[i].T_old_out <=  `SD 7'b1111111;
-					ROB_table_reg[i].busy <= `SD 1'b0;		
-				end
-				tail_reg<= `SD 0;
-				head_reg<= `SD 0;
-			end else begin
-			ROB_table_reg<= `SD ROB_table;
-			tail_reg<=  `SD tail;
-			head_reg<=  `SD head;	
+	always_ff @(posedge clock) begin
+		if (reset | branch_not_taken) begin
+			for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
+				ROB_table_reg[i].T_new_out <= `SD 7'b1111111;
+				ROB_table_reg[i].T_old_out <=  `SD 7'b1111111;
+				ROB_table_reg[i].busy <= `SD 1'b0;		
+			end
+			tail_reg<= `SD 0;
+			head_reg<= `SD 0;
+		end else begin
+		ROB_table_reg<= `SD ROB_table;
+		tail_reg<=  `SD tail;
+		head_reg<=  `SD head;	
 		end
+	end
 
 endmodule // ROB
