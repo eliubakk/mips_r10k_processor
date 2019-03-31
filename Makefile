@@ -96,6 +96,9 @@ $(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	mkdir -p $* && cd $* && \
 	$(VCS) +memcbk $(patsubst %.v,../../%.v,$^) -o dve -R -gui 
 
+clean_%:
+	cd $(SYN_DIR) && \
+	rm -rf $(subst clean_,,$@) 
 #####
 # Should be no need to modify after here
 #####
