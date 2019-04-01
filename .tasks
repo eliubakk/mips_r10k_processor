@@ -1,0 +1,22 @@
+Tasks to be Completed/Schedule
+
+LSQ - Ash, Morteza
+Automated Regression Testing - Ash, Morteza
+
+LSQ
+- Confirm Signals/Behavior with each other (Together)
+- Confirm Signals/Behavior with team/pipeline (Team)
+- Implement Store Queue (Ash)
+- Implement Load Queue (Morteza)
+- Store Queue Testbench (Morteza)
+- Load Queue Testbench (Ash)
+- LSQ Integration Test (Ash + Morteza)
+
+Automated Regression Testing
+- Determine Desired Behavior
+	- Correctness Checking
+	- Performance Checking
+	- 
+- Map out What we need to do correctness/performance checking
+- Implement
+- Test
