@@ -507,7 +507,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 20) begin
+			 if (clock_count == 200) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
