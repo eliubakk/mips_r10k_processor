@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : ISR.tcl                          */
+#/*   FILE        : ROB.tcl                                 */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,7 +11,9 @@
 #/***********************************************************/
 
 #set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "ROB.v"]
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/ROB.v" $misc_files]
+elaborate ROB
 set design_name ROB
 set clock_name clock
 set reset_name reset
