@@ -445,11 +445,11 @@ module testbench;
 			$display("\n issue execute pipeline registers-----------------------------------------");
 			$display("issue_reg:");
 			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("\t\tissue_reg[%d] T = %d T1 = %d T2 = %d busy: %b inst_opcode: %d npc: %d", i, pipeline_0.issue_reg[i].T, pipeline_0.issue_reg[i].T1, pipeline_0.issue_reg[i].T2, pipeline_0.issue_reg[i].busy, pipeline_0.issue_reg[i].inst_opcode, pipeline_0.issue_reg[i].npc);
+				$display("\t\tissue_reg[%d] T = %d T1 = %d T2 = %d busy: %b inst_opcode: %h npc: %d", i, pipeline_0.issue_reg[i].T, pipeline_0.issue_reg[i].T1, pipeline_0.issue_reg[i].T2, pipeline_0.issue_reg[i].busy, pipeline_0.issue_reg[i].inst_opcode, pipeline_0.issue_reg[i].npc);
 			end
 			$display("issue_reg WIRES (those that are assigned");
 			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %d", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
+				$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %h", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
 			end
 		end
 	endtask
@@ -531,11 +531,12 @@ module testbench;
 			$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 			$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
 			$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
-			//display_issue_ex;
-/*			display_is_ex_registers;
-			//display_ex;
+		
+			display_issue_ex;
+			display_is_ex_registers;
+			display_ex;
 			display_ex_co_registers;
-			display_complete;
+			/*display_complete;
 			display_co_re_registers;*/
 				
 			//display_ROB_table;
