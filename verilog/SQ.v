@@ -60,21 +60,37 @@ module SQ(
 	logic [`index_t:0] tail;
 	logic [`index_t:0] tail_next;
 
+	
 	logic addr_rd_ready;
-	logic [`SQ_SIZE - 1:0] addr_rd_hits;
 
-	CAM #(	.LENGTH(`SQ_SIZE),
-		.WIDTH(1),
-		.NUM_TAGS(1),
-		.TAG_SIZE(32))
-	cam(
-		.enable(rd_en),
-		.tags(addr_rd),
-		.table_in(addr_next),
-		.hits(addr_rd_hits)
+	logic [`SQ_SIZE - 1:0] load_req;
+	logic [`SQ_SIZE - 1:0] load_gnt;
+	logic [`index_t:0] data_rd_idx;
+
+	psel_generic #(
+		.WIDTH(`SQ_SIZE),
+		.NUM_REQS(1)
+	)
+	psel(
+		.req(load_req),
+		.en(rd_en),
+		// .gnt_bus(),
+		.gnt(load_gnt)
+	);
+
+	encoder #(
+		.WIDTH(`SQ_SIZE)
+	)
+	enc(
+		.in(load_gnt),
+		.out(data_rd_idx)
 	);
 
 	// assigns
+	assign data_rd = data_next[data_rd_idx];
+	assign rd_valid = &load_req;
+	assign tail_out = tail;
+	assign full = (tail + 1 == head);
 
 	always_comb begin
 		// default case
@@ -85,7 +101,7 @@ module SQ(
 
 		// retire signals
 		if (rt_en) begin
-			head_next = rt_index;
+			++head_next;
 		end
 
 		// execute signals
@@ -114,13 +130,18 @@ module SQ(
 
 		// read signals
 		if (rd_en) begin
+
 			if (head_next <= tail_next) begin
-				addr_rd_ready = &addr_rd_hits[head_next:ld_pos];
+				for (int i = 0; i < `SQ_SIZE; ++i) begin
+					load_req[i] = (addr_rd == addr_next[i]) & (addr_ready_next[i]) & (head_next <= i & i < tail_next) & (i <= ld_pos);
+				end
 			end else begin
-				addr_rd_ready = &addr_rd_hits[head_next:`SQ_SIZE - 1] & 
-						&addr_rd_hits[0:tail_next];
+				for (int i = 0; i < `SQ_SIZE; ++i) begin
+					load_req[i] = (addr_rd == addr_next[i]) & (addr_ready_next[i]) & (head_next <= i | i < tail_next) & (i <= ld_pos);
+				end
 			end
-			
+		end else begin
+			load_req = 0;
 		end
 	end
 

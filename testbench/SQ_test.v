@@ -16,41 +16,70 @@ module testbench;
 	// input wires
 	logic clock;
 	logic reset;
-	logic write_en;
-	logic clear_en;
-	logic [31:0] current_pc;
+
+	// read signals
+	logic rd_en; // load queue wants to read data at an address in SQ
+	logic [31:0] addr_rd; // the address the load queue wants to read
+	logic [($clog2(`SQ_SIZE) - 1):0] ld_pos; // the tail of the sq at the time the load was dispatched
+
+	// dispatch signals
+	logic dispatch_en; // 1 when a store is getting dispatched
+	logic  [31:0] dispatch_addr; // addr of the store
+	logic dispatch_addr_ready; // if the store address is ready (direct store vs indirect store)
+	logic [63:0] dispatch_data; // data to store 
+	logic dispatch_data_ready; // if the data of store is ready (direct store vs indirect store)
+	
+	// execute signals
+	logic ex_en; // 1 when a store is being executed
+	logic [($clog2(`SQ_SIZE) - 1):0] ex_index; // the index/tag of the store that is being executed
+	logic [31:0] ex_addr; // the address calculated during execute
+	logic ex_addr_en; // 1 if want to use ex_addr for the address (direct vs indirect store)
+	logic [63:0] ex_data; // the data calculated during execute
+	logic ex_data_en; // 1 if want to use ex_data for the data (direct vs indirect store)
+
+	// retire signals
+	logic rt_en; // 1 when a store is at retire
+	// input [`index_t:0] rt_index, // the index/tag of the store that is being retired
 
 	// output wires
-	logic [`RAS_SIZE - 1:0] [31:0] stack_out;
-	logic [$clog2(`RAS_SIZE) - 1:0] head_out;
-	logic [$clog2(`RAS_SIZE) - 1:0] tail_out;
-	
-	logic [31:0] next_pc;
-	logic valid_out;
+	// read outputs
+	logic [63:0] data_rd; // the data that is being read by the load
+	logic rd_valid; // whether the data that is being read is ready
 
+	// general outputs
+	logic [($clog2(`SQ_SIZE) - 1):0] tail_out; // the index of the store being dispatched
+	logic full;
 
 	// test variables
-	logic [`RAS_SIZE - 1:0] [31:0] stack_test;
-	logic [$clog2(`RAS_SIZE) - 1:0] head_test;
-	logic [$clog2(`RAS_SIZE) - 1:0] tail_test;
-	logic [$clog2(`RAS_SIZE) - 1:0] index_test;
+	logic [($clog2(`SQ_SIZE) - 1):0] tail_test;
 	
 	// initialize module
-	`DUT(RAS) ras0(
+
+	`DUT(SQ) sq0(
 		// inputs
 		.clock(clock),
 		.reset(reset),
-		.write_en(write_en),
-		.clear_en(clear_en),
-		.current_pc(current_pc),
+		.rd_en(rd_en),
+		.addr_rd(addr_rd),
+		.ld_pos(ld_pos),
+		.dispatch_en(dispatch_en),
+		.dispatch_addr(dispatch_addr),
+		.dispatch_addr_ready(dispatch_addr_ready),
+		.dispatch_data(dispatch_data),
+		.dispatch_data_ready(dispatch_data_ready),
+		.ex_en(ex_en),
+		.ex_index(ex_index),
+		.ex_addr(ex_addr),
+		.ex_addr_en(ex_addr_en),
+		.ex_data(ex_data),
+		.ex_data_en(ex_data_en),
+		.rt_en(rt_en),
 
-		// outputs
-		.stack_out(stack_out),
-		.head_out(head_out),
+		// outputs 
+		.data_rd(data_rd),
+		.rd_valid(rd_valid),
 		.tail_out(tail_out),
-
-		.next_pc(next_pc),
-		.valid_out(valid_out)
+		.full(full)
 	);
 
 	// TASKS
@@ -64,60 +93,45 @@ module testbench;
 
 	task check_correct_reset;
 		begin
-			assert(head_out == 0) else #1 exit_on_error;
+			assert(rd_valid == 0) else #1 exit_on_error;
 			assert(tail_out == 0) else #1 exit_on_error;
-			for (int i = 0; i < `RAS_SIZE; ++i) begin
-				assert(stack_out[i] === 0) else #1 exit_on_error;
+			assert(full == 0) else #1 exit_on_error;
+
+			for (int i = 0; i < `SQ_SIZE; ++i) begin
+				assert(sq0.addr[i] == 0) else #1 exit_on_error;
+				assert(sq0.data[i] == 0) else #1 exit_on_error;
+				assert(sq0.addr_ready[i] == 0) else #1 exit_on_error;
+				assert(sq0.data_ready[i] == 0) else #1 exit_on_error;
 			end
-			assert(valid_out === ZERO) else #1 exit_on_error;
+
+			assert(sq0.head == 0) else #1 exit_on_error;
+			assert(sq0.tail == 0) else #1 exit_on_error;
 		end
 	endtask
 
-	task push_into_test;
+	task check_dispatch_in;
 		begin
-			stack_test[tail_test] = current_pc + 4;
-			tail_test++;
-			if (tail_test == head_test) begin
-				head_test++;
+			if (dispatch_addr_ready) begin
+				assert(sq0.addr[tail_test] == dispatch_addr) else #1 exit_on_error;
 			end
+			assert(sq0.addr_ready[tail_test] == dispatch_addr_ready) else #1 exit_on_error;
+			if (dispatch_data_ready) begin
+				assert(sq0.data[tail_test] == dispatch_data) else #1 exit_on_error;
+			end
+			assert(sq0.data_ready[tail_test] == dispatch_data_ready) else #1 exit_on_error;
 		end
 	endtask
 
-	task pop_from_test;
+	task check_ex_in;
 		begin
-			if (head_test != tail_test) begin
-				tail_test--;
+			if (ex_addr_en) begin
+				assert(sq0.addr[ex_index] == ex_addr) else #1 exit_on_error;
 			end
-		end
-	endtask
-
-	task matches_test;
-		begin
-			assert(head_out == head_test) else #1 exit_on_error;
-			assert(tail_out == tail_test) else #1 exit_on_error;
-			for (index_test = head_out; index_test != tail_out; ++index_test) begin
-				assert(stack_out[index_test] == stack_test[index_test]) else #1 exit_on_error;
+			assert(sq0.addr_ready[ex_index] == 1) else #1 exit_on_error;
+			if (ex_data_en) begin
+				assert(sq0.data[ex_index] == ex_data) else #1 exit_on_error;
 			end
-		end
-	endtask
-
-	task print_stack_out;
-		begin
-			$display("STACK OUT");
-			$display("head_out: %d tail_out: %d", head_out, tail_out);
-			for (int i = 0; i < `RAS_SIZE; ++i) begin
-				$display("stack_out[%d] = %d", i, stack_out[i]);
-			end
-		end
-	endtask
-
-	task print_stack_test;
-		begin
-			$display("STACK TEST");
-			$display("head_test: %d tail_test: %d", head_test, tail_test);
-			for (int i = 0; i < `RAS_SIZE; ++i) begin
-				$display("stack_test[%d] = %d", i, stack_test[i]);
-			end
+			assert(sq0.data_ready[ex_index] == 1) else #1 exit_on_error;
 		end
 	endtask
 
@@ -127,15 +141,27 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b write_en: %b clear_en: %b current_pc: %d next_pc: %d valid_out: %b",
-			clock, reset, write_en, clear_en, current_pc, next_pc, valid_out);
+		$monitor("clock: %b reset: %b rd_en: %b addr_rd: %d ld_pos: %d dispatch_en: %b dispatch_addr: %d dispatch_addr_ready: %b dispatch_data: %d dispatch_data_ready: %b ex_en: %b ex_index: %d ex_addr: %d ex_addr_en: %b ex_data: %d ex_data_en: %b rt_en: %b data_rd: %d rd_valid: %b tail_out: %d full: %b", 
+			clock, reset, rd_en, addr_rd, ld_pos, dispatch_en, dispatch_addr, dispatch_addr_ready, dispatch_data, dispatch_data_ready, ex_en, ex_index, ex_addr, ex_addr_en, ex_data, ex_data_en, rt_en, data_rd, rd_valid, tail_out, full);
 
 		// intial values
 		clock = ZERO;
 		reset = ZERO;
-		write_en = ZERO;
-		clear_en = ZERO;
-		current_pc = 0;
+		rd_en = 0;
+		addr_rd = 0;
+		ld_pos = 0;
+		dispatch_en = 0;
+		dispatch_addr = 0;
+		dispatch_addr_ready = 0;
+		dispatch_data = 0;
+		dispatch_data_ready = 0;
+		ex_en = 0;
+		ex_index = 0;
+		ex_addr = 0;
+		ex_addr_en = 0;
+		ex_data = 0;
+		ex_data_en = 0;
+		rt_en = 0;
 		
 		$display("Testing Reset...");
 		@(negedge clock);
@@ -143,247 +169,92 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		print_stack_out;
-		print_stack_test;
 		check_correct_reset;
-		stack_test = stack_out;
-		head_test = head_out;
-		tail_test = tail_out;
 
 		$display("Reset Test Passed");
 
-		$display("Testing Single Push...");
-
+		$display("Testing Read Empty...");
 		@(negedge clock);
 		reset = ZERO;
-		write_en = ONE;
-		current_pc = 100;
-		push_into_test;
+		rd_en = 1;
+		addr_rd = 0;
+		ld_pos = 0;
+		dispatch_en = 0;
+		dispatch_addr = 0;
+		dispatch_addr_ready = 0;
+		dispatch_data = 0;
+		dispatch_data_ready = 0;
+		ex_en = 0;
+		ex_index = 0;
+		ex_addr = 0;
+		ex_addr_en = 0;
+		ex_data = 0;
+		ex_data_en = 0;
+		rt_en = 0;
 
 		@(posedge clock);
 		`DELAY;
-		matches_test;
+		assert(rd_valid == 0) else #1 exit_on_error;
 
-		$display("Single Push Passed");
+		$display("Read Empty Passed");
 
-		$display("Testing Multiple Push (No Wrap Around)...");
-
-		// reset
+		$display("Testing Single Dispatch...");
 		@(negedge clock);
-		reset = ONE;
-		write_en = ZERO;
+		reset = ZERO;
+		rd_en = 0;
+		addr_rd = 0;
+		ld_pos = 0;
+		dispatch_en = 1;
+		dispatch_addr = 10;
+		dispatch_addr_ready = 1;
+		dispatch_data = 0;
+		dispatch_data_ready = 0;
+		ex_en = 0;
+		ex_index = 0;
+		ex_addr = 0;
+		ex_addr_en = 0;
+		ex_data = 0;
+		ex_data_en = 0;
+		rt_en = 0;
 
-		@(posedge clock);
-		`DELAY;
-		check_correct_reset;
-		stack_test = stack_out;
-		head_test = head_out;
 		tail_test = tail_out;
 
-		// push till full
-		for (int i = 0; i < `RAS_SIZE; ++i) begin
-			@(negedge clock);
-			reset = ZERO;
-			write_en = ONE;
-			current_pc = $urandom_range(2**32 - 1, 0);
-			push_into_test;
-
-			@(posedge clock);
-			`DELAY;
-			matches_test;
-		end
-
-		$display("Multiple Push (No Wrap Around) Passed");
-
-		$display("Testing Single Push (Wrap Around)...");
-
-		// currently have full RAS
-		@(negedge clock);
-		write_en = ONE;
-		current_pc = $urandom_range(2**32 - 1, 0);
-		push_into_test;
-
 		@(posedge clock);
 		`DELAY;
-		assert(stack_out[0] == current_pc + 4) else #1 exit_on_error;
-		assert(head_out == 2) else #1 exit_on_error;
+		assert(rd_valid == 0) else #1 exit_on_error;
 		assert(tail_out == 1) else #1 exit_on_error;
-		matches_test;
+		assert(full == 0) else #1 exit_on_error;
+		check_dispatch_in;
 
-		$display("Single Push (Wrap Around) Passed");
+		$display("Single Dispatch Passed");
 
-		$display("Testing Single Pop (No Wrap Around)...");
-
-		// reset
-		@(negedge clock);
-		reset = ONE;
-		write_en = ZERO;
-
-		@(posedge clock);
-		`DELAY;
-		check_correct_reset;
-		stack_test = stack_out;
-		head_test = head_out;
-		tail_test = tail_out;
-
-		// push 1
+		$display("Testing Single Execute...");
 		@(negedge clock);
 		reset = ZERO;
-		clear_en = ZERO;
-		write_en = ONE;
-		current_pc = $urandom_range(2**32 - 1, 0);
-		push_into_test;
+		rd_en = 0;
+		addr_rd = 0;
+		ld_pos = 0;
+		dispatch_en = 0;
+		dispatch_addr = 0;
+		dispatch_addr_ready = 0;
+		dispatch_data = 0;
+		dispatch_data_ready = 0;
+		ex_en = 1;
+		ex_index = 0;
+		ex_addr = 0;
+		ex_addr_en = 0;
+		ex_data = 12;
+		ex_data_en = 1;
+		rt_en = 0;
 
 		@(posedge clock);
 		`DELAY;
-		matches_test;
+		assert(rd_valid == 0) else #1 exit_on_error;
+		assert(tail_out == 1) else #1 exit_on_error;
+		assert(full == 0) else #1 exit_on_error;
+		check_ex_in;
 
-		// pop 1
-		@(negedge clock);
-		write_en = ZERO;
-		clear_en = ONE;
-		pop_from_test;
-
-		@(posedge clock);
-		`DELAY;
-		assert(valid_out == ZERO) else #1 exit_on_error;
-		matches_test;
-
-		$display("Single Pop (No Wrap Around) Passed");
-
-		$display("Testing Multiple Pop (No Wrap Around)...");
-
-		// reset
-		@(negedge clock);
-		reset = ONE;
-		clear_en = ZERO;
-
-		@(posedge clock);
-		`DELAY;
-		check_correct_reset;
-		stack_test = stack_out;
-		head_test = head_out;
-		tail_test = tail_out;
-
-		// push till full
-		for (int i = 0; i < `RAS_SIZE; ++i) begin
-			@(negedge clock);
-			reset = ZERO;
-			write_en = ONE;
-			current_pc = $urandom_range(2**32 - 1, 0);
-			push_into_test;
-
-			@(posedge clock);
-			`DELAY;
-			assert(valid_out == ONE) else #1 exit_on_error;
-			matches_test;
-		end
-
-		// clear till empty
-		for (int i = 0; i < `RAS_SIZE; ++i) begin
-			@(negedge clock);
-			write_en = ZERO;
-			clear_en = ONE;
-			pop_from_test;
-
-			@(posedge clock);
-			`DELAY;
-			matches_test;
-		end
-		assert(valid_out == ZERO) else #1 exit_on_error;
-
-		$display("Multiple Pop (No Wrap Around) Passed");
-
-		$display("Testing Pop If Empty...");
-
-		@(negedge clock);
-		clear_en = ONE;
-		
-		@(posedge clock);
-		`DELAY;
-		assert(valid_out == ZERO) else #1 exit_on_error;
-		matches_test;
-
-		$display("Pop If Empty Passed");
-
-		$display("Testing Multiple Pop (with Wrap Around)...");
-
-		// reset
-		@(negedge clock);
-		clear_en = ZERO;
-		reset = ONE;
-
-		@(posedge clock);
-		`DELAY;
-		check_correct_reset;
-		stack_test = stack_out;
-		head_test = head_out;
-		tail_test = tail_out;
-
-		// push with wrap around
-		for (int i = 0; i < 3*`RAS_SIZE; ++i) begin
-			@(negedge clock);
-			write_en = ONE;
-			reset = ZERO;
-			current_pc = $urandom_range(2**32 - 1, 0);
-			push_into_test;
-
-			@(posedge clock);
-			`DELAY;
-			matches_test;
-		end
-
-		// pop all
-		while (!valid_out) begin
-			@(negedge clock);
-			write_en = ZERO;
-			clear_en = ONE;
-			pop_from_test;
-
-			@(posedge clock);
-			`DELAY;
-			matches_test;
-		end
-
-		$display("Multiple Pop (with Wrap Around) Passed");
-
-		$display("Testing Multiple Simultaneous Push and Pop...");
-
-		// reset
-		@(negedge clock);
-		clear_en = ZERO;
-		reset = ONE;
-
-		@(posedge clock);
-		`DELAY;
-		check_correct_reset;
-		stack_test = stack_out;
-		head_test = head_out;
-		tail_test = tail_out;
-
-		for (int i = 0; i < `NUM_RAND_ITER; ++i) begin
-			@(negedge clock);
-			reset = ZERO;
-			write_en = $urandom_range(1, 0);
-			clear_en = $urandom_range(1, 0);
-			current_pc = $urandom_range(2**32 - 1, 0);
-			if (write_en & clear_en) begin
-				stack_test[tail_test - 1] = current_pc + 4;
-			end else begin	
-				if (write_en) begin
-					push_into_test;
-				end
-				if (clear_en) begin
-					pop_from_test;
-				end
-			end
-
-			@(posedge clock);
-			`DELAY;
-			matches_test;
-		end
-
-		$display("Multiple Simultaneous Push and Pop Passed");
+		$display("Single Execute Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;

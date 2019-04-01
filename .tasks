@@ -4,12 +4,8 @@ LSQ - Ash, Morteza
 Automated Regression Testing - Ash, Morteza
 
 LSQ
-- Confirm Signals/Behavior with each other (Together)
-- Confirm Signals/Behavior with team/pipeline (Team)
-- Implement Store Queue (Ash)
-- Implement Load Queue (Morteza)
-- Store Queue Testbench (Morteza)
-- Load Queue Testbench (Ash)
+- Implement Store Queue (Ash + Morteza)
+- Store Queue Testbench (Ash + Morteza)
 - LSQ Integration Test (Ash + Morteza)
 
 Automated Regression Testing
