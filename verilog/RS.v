@@ -207,6 +207,12 @@ module RS
 				rs_table_next[dispatch_idx[i]].busy = 1'b1;
 			end 
 		end
+	//COMMIT STAGE
+		for(i = 0; i < `RS_SIZE; i = i + 1) begin
+			rs_table_next[i].T1[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][0]) | rs_table[i].T1[$clog2(`NUM_PHYS_REG)];
+			rs_table_next[i].T2[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][1]) | rs_table[i].T2[$clog2(`NUM_PHYS_REG)];
+		end 		
+
 
 		//DISPATCH CONTROL SIGNAL
 		//	number of rows that can be dispatched into next cycle
