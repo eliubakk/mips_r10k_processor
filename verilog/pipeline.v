@@ -775,7 +775,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
           // these are forwarded directly from ID/EX latches
           ex_co_NPC[i]          <= `SD issue_reg[i].npc;
           ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
-          ex_co_dest_reg_idx[i] <= `SD issue_reg[i][5:0];
+          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[5:0];
          // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
           ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
           ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;

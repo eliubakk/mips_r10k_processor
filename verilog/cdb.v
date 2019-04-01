@@ -15,13 +15,13 @@ module CDB (
 
 	assign CDB_en_out	= !reset & enable & ex_valid;
 	assign busy 		= !reset & enable & ex_valid;
-
-	always_ff @(posedge clock) begin
+	assign CDB_tag_out	= reset ? 7'b0 : tag_in;
+	/*always_ff @(posedge clock) begin
 		if(reset) begin
 			CDB_tag_out	<= `SD 7'b0; 
 		end else if (enable & ex_valid) begin
 			CDB_tag_out	<= `SD tag_in;
 		end	
-	end
+	end*/
 
 endmodule

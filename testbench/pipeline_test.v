@@ -536,8 +536,10 @@ module testbench;
 			display_is_ex_registers;
 			display_ex;
 			display_ex_co_registers;
-			/*display_complete;
-			display_co_re_registers;*/
+			display_complete;
+			$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
+			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
+			display_co_re_registers;
 				
 			//display_ROB_table;
 			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
