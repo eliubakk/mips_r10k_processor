@@ -1036,7 +1036,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   Arch_Map_Table a0(
   	.clock(clock),
   	.reset(reset),
-  	.enable(arch_enable),
+  	.enable(arch_fr_enable),
   	.T_new_in(rob_arch_retire_reg), // Comes from ROB during Retire
     .T_old_in(rob_fl_arch_Told), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
