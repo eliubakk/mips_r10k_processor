@@ -297,6 +297,16 @@ module testbench;
 			$display("------------------------------------------\n");	
 		end
 	endtask
+  task display_map_table;
+		begin
+			$display("-----------Map Table-----------");
+			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
+				$display("Reg:%d, pluas: %b, Phys Reg : %d", k, pipeline_0.map_table_out[k][6],pipeline_0.map_table_out[k][5:0]); 
+			end
+			$display("------------------------------------------\n");	
+		end
+	endtask
+
 
   task display_ROB_table;
 		begin
@@ -517,6 +527,10 @@ module testbench;
 			display_di_issue;
 			display_RS_table;
 			display_ROB_table;
+			display_map_table;
+			$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
+			$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
+			$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 			//display_issue_ex;
 /*			display_is_ex_registers;
 			//display_ex;

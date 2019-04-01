@@ -160,8 +160,8 @@ logic dispatch_no_hazard;
   logic [4:0][63:0] is_ex_T2_value;
   logic [4:0][63:0] pr_T1_value; 
   logic [4:0][63:0] pr_T2_value;    
-  PHYS_REG [4:0] issue_reg_T1;
-   PHYS_REG [4:0] issue_reg_T2;
+  logic [4:0][5:0] issue_reg_T1;
+  logic [4:0][5:0] issue_reg_T2;
 
   // Outputs from EX-Stage
   logic [4:0][63:0] ex_alu_result_out;
@@ -186,7 +186,7 @@ logic dispatch_no_hazard;
   // Outputs from EX/COM Pipeline Register
   FU_REG              ex_co_halt;
   FU_REG              ex_co_illegal;
-  PHYS_REG [4:0]      ex_co_dest_reg_idx;
+  logic  [4:0][5:0]      ex_co_dest_reg_idx;
   logic  [4:0][63:0]  ex_co_alu_result;
   logic               ex_co_take_branch;
   logic               ex_co_done;
@@ -462,8 +462,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   //Instantiating the freelist
   
-  assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
-  Free_List f0(
+ // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
+	assign fr_read_en = id_inst_out.inst.valid_inst; 
+ Free_List f0(
     // INPUTS
     .clock(clock),
     .reset(reset),
@@ -622,8 +623,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   genvar i;
   for(i=0; i< `NUM_FU_TOTAL; i=i+1) begin
-    assign issue_reg_T1[i]= issue_reg[i].T1;
-    assign issue_reg_T2[i]= issue_reg[i].T2;
+    assign issue_reg_T1[i]= issue_reg[i].T1[5:0];
+    assign issue_reg_T2[i]= issue_reg[i].T2[5:0];
     assign issue_reg_inst_opcode[i] = issue_reg[i].inst_opcode;
   end
   //Instantiating the physical register
@@ -637,7 +638,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
     .wr_clk(clock),
     .wr_en(ex_co_valid_inst),
-    .wr_idx(ex_co_dest_reg_idx[`phys_index_t:0]),
+    .wr_idx(ex_co_dest_reg_idx),
     .wr_data(ex_co_alu_result)
   );
 
@@ -773,7 +774,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
           // these are forwarded directly from ID/EX latches
           ex_co_NPC[i]          <= `SD issue_reg[i].npc;
           ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
-          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T;
+          ex_co_dest_reg_idx[i] <= `SD issue_reg[i][5:0];
          // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
           ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
           ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
