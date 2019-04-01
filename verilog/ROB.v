@@ -57,7 +57,7 @@ module ROB(
 	//logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg;
 	//logic [$clog2(`ROB_SIZE) - 1:0] ROB_idx;
 	
-
+	//logic head_halt_next;
 							
 	ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table;
 	ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table_reg;
@@ -90,7 +90,7 @@ module ROB(
 		tail= tail_reg;
 		T_free= `DUMMY_REG;
 		T_arch= `DUMMY_REG;
-		head_halt = 1'b0;
+		//head_halt_next = 1'b0;
 
 		// RETIRE STAGE
 		// if head is busy and dest tag is ready
@@ -101,12 +101,11 @@ module ROB(
 			T_arch = ROB_table[head_reg].T_new_out;
 
 			// If retiring halt instruction, then output is halt
-			head_halt = ROB_table[head_reg].halt;
 
+			head_halt = ROB_table[head_reg].halt;
 			// clear head entry
 			ROB_table[head_reg].busy = 0;
 			++head;
-
 		end
 
 /*
@@ -216,10 +215,12 @@ module ROB(
 			end
 			tail_reg<= `SD 0;
 			head_reg<= `SD 0;
+			//head_halt<= `SD 0;
 		end else begin
 		ROB_table_reg <= `SD ROB_table;
 		tail_reg <=  `SD tail;
 		head_reg <=  `SD head;	
+		//head_halt <= `SD head_halt_next;
 		end
 	end
 

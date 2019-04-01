@@ -197,6 +197,7 @@ typedef struct packed{
 //  logic T_new_valid;
 //  logic T_old_valid;
   logic busy;
+  logic halt;
 } ROB_ROW_T;
 
 //Freelist

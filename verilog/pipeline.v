@@ -143,6 +143,7 @@ module pipeline (
   GEN_REG id_di_regb;
 
 logic dispatch_no_hazard;
+logic ROB_enable;
 
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
@@ -160,8 +161,8 @@ logic dispatch_no_hazard;
   logic [4:0][63:0] is_ex_T2_value;
   logic [4:0][63:0] pr_T1_value; 
   logic [4:0][63:0] pr_T2_value;    
-  PHYS_REG [4:0] issue_reg_T1;
-   PHYS_REG [4:0] issue_reg_T2;
+  logic [4:0][5:0] issue_reg_T1;
+  logic [4:0][5:0] issue_reg_T2;
 
   // Outputs from EX-Stage
   logic [4:0][63:0] ex_alu_result_out;
@@ -186,7 +187,7 @@ logic dispatch_no_hazard;
   // Outputs from EX/COM Pipeline Register
   FU_REG              ex_co_halt;
   FU_REG              ex_co_illegal;
-  PHYS_REG [4:0]      ex_co_dest_reg_idx;
+  logic  [4:0][5:0]      ex_co_dest_reg_idx;
   logic  [4:0][63:0]  ex_co_alu_result;
   logic               ex_co_take_branch;
   logic               ex_co_done;
@@ -363,7 +364,7 @@ logic dispatch_no_hazard;
     .co_ret_target_pc(co_ret_alu_result),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(dispatch_en),
+    .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
 
     // Outputs
@@ -391,10 +392,14 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
       if_id_NPC        <= `SD if_NPC_out;
       if_id_IR         <= `SD if_IR_out;
       if_id_valid_inst <= `SD if_valid_inst_out;
-    end else begin
+    end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
       if_id_NPC        <= `SD if_id_NPC;
       if_id_IR         <= `SD if_id_IR;
       if_id_valid_inst <= `SD if_id_valid_inst;
+    end else begin
+	 if_id_NPC        <= `SD 0;
+      if_id_IR         <= `SD `NOOP_INST;
+      if_id_valid_inst <= `SD `FALSE;
     end
   end
   
@@ -458,8 +463,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   //Instantiating the freelist
   
-  assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
-  Free_List f0(
+ // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
+	assign fr_read_en = id_inst_out.inst.valid_inst; 
+ Free_List f0(
     // INPUTS
     .clock(clock),
     .reset(reset),
@@ -528,14 +534,30 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         id_di_IR      <= `SD `NOOP_INST;
         id_di_valid_inst  <=`SD `FALSE;
         
-      end else if(id_di_enable) begin
+      end else if(id_di_enable) begin // Update the value
         id_di_rega    <= `SD id_rega_out;
         id_di_regb    <= `SD id_regb_out;
         id_di_inst_in <= `SD id_inst_out;
         id_di_NPC     <= `SD if_id_NPC;
         id_di_IR      <= `SD if_id_IR;
         id_di_valid_inst  <= `SD if_id_valid_inst;
-      end
+      end else if(!dispatch_no_hazard) begin // Freeze current value
+	 id_di_rega    <= `SD id_di_rega;
+        id_di_regb    <= `SD id_di_regb;
+        id_di_inst_in <= `SD id_di_inst_in;
+        id_di_NPC     <= `SD id_di_NPC;
+        id_di_IR      <= `SD id_di_IR;
+        id_di_valid_inst  <=`SD id_di_valid_inst;
+     end else  begin
+	 id_di_rega    <= `SD 0;
+        id_di_regb    <= `SD 0;
+        id_di_inst_in <= `SD EMPTY_ROW;
+        id_di_NPC     <= `SD 0;
+        id_di_IR      <= `SD `NOOP_INST;
+        id_di_valid_inst  <=`SD `FALSE;
+        
+
+	end
   end
 
   //////////////////////////////////////////////////
@@ -546,21 +568,21 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   assign issue_stall= ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full); 
-  assign dispatch_en= dispatch_no_hazard && id_di_valid_inst; 
+  assign dispatch_en= dispatch_no_hazard & id_di_valid_inst; 
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
- 
-  assign RS_enable= dispatch_en ;
+  assign ROB_enable = dispatch_no_hazard &  id_inst_out.inst.valid_inst;
+  assign RS_enable= dispatch_en & id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
     // inputs
     .clock(clock), 
     .reset(reset), 
-    .enable(RS_enable), 
+    .enable(enable), 
     .CAM_en(CDB_enable), 
-    .CDB_in(CDB_in), 
-    .dispatch_valid(dispatch_en),
+    .CDB_in(CDB_tag_out), 
+    .dispatch_valid(RS_enable),
     .inst_in(id_di_inst_in), 
     .branch_not_taken(branch_not_taken), 
     .issue_stall(issue_stall),
@@ -602,8 +624,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   genvar i;
   for(i=0; i< `NUM_FU_TOTAL; i=i+1) begin
-    assign issue_reg_T1[i]= issue_reg[i].T1;
-    assign issue_reg_T2[i]= issue_reg[i].T2;
+    assign issue_reg_T1[i]= issue_reg[i].T1[5:0];
+    assign issue_reg_T2[i]= issue_reg[i].T2[5:0];
     assign issue_reg_inst_opcode[i] = issue_reg[i].inst_opcode;
   end
   //Instantiating the physical register
@@ -617,7 +639,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
     .wr_clk(clock),
     .wr_en(ex_co_valid_inst),
-    .wr_idx(ex_co_dest_reg_idx[`phys_index_t:0]),
+    .wr_idx(ex_co_dest_reg_idx),
     .wr_data(ex_co_alu_result)
   );
 
@@ -753,7 +775,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
           // these are forwarded directly from ID/EX latches
           ex_co_NPC[i]          <= `SD issue_reg[i].npc;
           ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
-          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T;
+          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[5:0];
          // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
           ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
           ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
@@ -993,10 +1015,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.T_new_in(fr_rs_rob_T), // Comes from Free List During Dispatch
   	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
-  	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+  	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
-	.id_halt(id_di_inst_in.inst.halt),
-
+	.id_halt(id_inst_out.inst.halt),
   	// OUTPUTS
   	.T_free(rob_fl_arch_Told), // Output for Retire Stage goes to Free List
   	.T_arch(rob_arch_retire_reg), // Output for Retire Stage goes to Arch Map
