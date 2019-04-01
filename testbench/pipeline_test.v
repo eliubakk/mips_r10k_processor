@@ -152,7 +152,8 @@ module testbench;
     .ex_co_valid_inst(ex_co_valid_inst),
     .co_ret_NPC(co_ret_NPC),
     .co_ret_IR(co_ret_IR),
-    .rs_table_out(rs_table_out),
+    .co_ret_valid_inst(co_ret_valid_inst),
+	.rs_table_out(rs_table_out),
     .arch_table(arch_table),
     .ROB_table_out(ROB_table_out),
     .free_list_out(free_list_out),
@@ -374,7 +375,10 @@ module testbench;
 	task display_phys_reg;
 		begin
 			$display("\n Physical register files-------------------------------------");
-			
+			for(int p=0;p<32+`ROB_SIZE;p++) begin
+				$display("%dth phys reg value : %d", p, pipeline_0.phys_reg[p]);
+				
+			end	
 		end
 	endtask
 
@@ -559,7 +563,8 @@ module testbench;
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 			display_co_re_registers;
 			display_arch_table;
-			display_free_list_table;	
+			display_free_list_table;
+			display_phys_reg;	
 			$display("ROB output to arch map - T_out_valid : %b, T_free : %b, T_arch : %b", pipeline_0.arch_fr_enable, pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg);				
 			//display_ROB_table;
 			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
@@ -757,7 +762,9 @@ module testbench;
         show_clk_count;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
-        #1 $finish;
+        @(negedge clock);
+	@(posedge clock);
+	#1 $finish;
       end
 
     end  // if(reset)   
