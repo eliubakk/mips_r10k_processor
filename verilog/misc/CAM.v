@@ -1,5 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 module CAM(enable, tags, table_in, hits);
 	parameter LENGTH=16; //number of rows in table_in
 	parameter WIDTH=2; //number of columns in table_in 

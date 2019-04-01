@@ -27,8 +27,7 @@ module testbench;
 	logic [`SS_SIZE-1:0] retire_idx_valid_out;
 	logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx_out;
 
-
-    `DUT(ROB) ROB0(
+    ROB g1(
         //inputs
         .clock(clock),
         .reset(reset),
@@ -59,7 +58,8 @@ module testbench;
 
     typedef ROB_ROW_T [`ROB_SIZE-1:0] table_t;
 
-    function table_t clear_rob_table_test;
+	// TASKS
+	function table_t clear_rob_table_test;
 		begin
 			for (integer i = 0; i < `ROB_SIZE; i += 1) begin
 				clear_rob_table_test[i].T_new = `DUMMY_REG;
@@ -72,6 +72,7 @@ module testbench;
     task exit_on_error;
 		begin
 			#1;
+
 			$display("@@@Failed at time %f", $time);
 			$finish;
 		end
@@ -140,7 +141,7 @@ module testbench;
 			assert(count == _count) else #1 exit_on_error;
 		end
 	endtask
-
+	
 	task tags_now_ready;
 		input integer tag;
 		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
@@ -1021,5 +1022,4 @@ module testbench;
 		$display("@@@Passed");
 		$finish;
 	end
-	
 endmodule

@@ -8,8 +8,9 @@
 # added "-sverilog" and "SW_VCS=2012.09" option,
 #	and removed deprecated Virsim references -- jbbeau fall 2013
 # updated library path name -- jbbeau fall 2013
-
-VCS = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64
+VCS_BASE = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps 
+VCS = $(VCS_BASE)
+VCS_PIPE = $(VCS_BASE) +define+PIPELINE=1
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
 # testing commit
@@ -36,6 +37,7 @@ SYN_SIMV = $(patsubst %,syn_simv_%,$(MODULES))
 SYN_SIMV += $(patsubst %,syn_simv_%,$(MISC_MODULES))
 SIMV = $(patsubst $(VERILOG_DIR)/%.v,simv_%,$(VERILOG_SRC))
 MISC_SIMV = $(patsubst $(VERILOG_DIR)/misc/%.v,simv_%,$(MISC_SRC))
+DVE = $(patsubst $(VERILOG_DIR)/%.v,dve_%,$(VERILOG_SRC))
 
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
@@ -81,7 +83,7 @@ $(MISC_SIMV): simv_%: $(MISC_SRC) $(TEST_DIR)/%_test.v
 simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS) $(patsubst %,../../%,$^) -o $@ &&\
+	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
 $(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
@@ -89,6 +91,14 @@ $(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
 	mkdir -p $* && cd $* && \
 	./syn_simv_$@ | tee $@_syn_program.out
 
+$(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
+	cd $(SYN_DIR) && \
+	mkdir -p $* && cd $* && \
+	$(VCS) +memcbk $(patsubst %.v,../../%.v,$^) -o dve -R -gui 
+
+clean_%:
+	cd $(SYN_DIR) && \
+	rm -rf $(subst clean_,,$@) 
 #####
 # Should be no need to modify after here
 #####
@@ -103,7 +113,7 @@ simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
 dve_pipe: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
+	$(VCS_PIPE) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
 # updated interactive debugger "DVE", using the latest version of VCS
 # awdeorio fall 2011
 dve:	$(SIMFILES) $(TESTBENCH)
@@ -121,7 +131,8 @@ clean:
           dve *.vpd *.vcd *.dump ucli.key
 
 nuke:	clean
-	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf DVEfiles/
+	cd $(SYN_DIR) && \
+	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf *.sv DVEfiles/
 	
 .PHONY: dve clean nuke	
 

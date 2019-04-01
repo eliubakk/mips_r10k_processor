@@ -1,27 +1,37 @@
+#
+# Written by : DC-Transcript, Version X-2005.09-SP2 -- Jan 03, 2006
+# Date       : Tue Aug 29 17:09:34 2006
+#
+
+#
+# Translation of script: tut_synth.scr
+#
+
 #/***********************************************************/
-#/*   FILE        : ROB.tcl                                 */
+#/*   FILE        : tut_synth.scr                           */
 #/*   Description : Default Synopsys Design Compiler Script */
-#/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
+#/*   Usage       : dc_shell -f tut_synth.scr               */
 #/*   You'll need to minimally set design_name & read files */
 #/***********************************************************/
+set SYN_DIR ./
+set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys" ]
+set target_library "lec25dscc25_TT.db"
+set link_library [concat  "*" $target_library]
 
 #/***********************************************************/
-#/* The following five lines must be updated for every      */
+#/* Set some flags to suppress warnings we don't care about */
+set suppress_errors [concat $suppress_errors "UID-401"]
+suppress_message {"VER-130"}
+
+#/***********************************************************/
+#/* The following four lines must be updated for every      */
 #/* new design                                              */
 #/***********************************************************/
-
-set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/ROB.v" $misc_files]
-elaborate ROB
-set design_name ROB
+read_file -f sverilog [list "../../verilog/PHT_TWO_SC.v"]
+set design_name PHT_TWO_SC
+#set reset_name reset
 set clock_name clock
-set reset_name reset
-#set CLK_PERIOD 5
-set CLK_PERIOD 7
-
-
-
+set CLK_PERIOD 10
 
 
 #/***********************************************************/
@@ -29,10 +39,6 @@ set CLK_PERIOD 7
 #/* to moderate sized designs.  You may need to alter it    */
 #/* when synthesizing your final project.                   */
 #/***********************************************************/
-set SYN_DIR ./
-set search_path "/afs/umich.edu/class/eecs470/lib/synopsys/"
-set target_library "lec25dscc25_TT.db"
-set link_library [concat  "*" $target_library]
 
 #/***********************************************************/
 #/* Set some flags for optimisation */
@@ -87,7 +93,7 @@ set LOGICLIB lec25dscc25_TT
 set sys_clk $clock_name
 
 set netlist_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".vg"]
-set ddc_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".ddc"]
+set db_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".db"]
 set rep_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".rep"]
 set dc_shell_status [ set chk_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".chk"] ]
 
@@ -110,23 +116,22 @@ if {  $dc_shell_status != [list] } {
   set_input_delay $AVG_INPUT_DELAY -clock $sys_clk [all_inputs]
   remove_input_delay -clock $sys_clk [find port $sys_clk]
   set_output_delay $AVG_OUTPUT_DELAY -clock $sys_clk [all_outputs]
-  set_dont_touch $reset_name
-  set_resistance 0 $reset_name
-  set_drive 0 $reset_name
+  set_dont_touch reset_name
+  set_resistance 0 reset_name
+  set_drive 0 reset_name
   set_critical_range $CRIT_RANGE [current_design]
   set_max_delay $CLK_PERIOD [all_outputs]
   set MAX_FANOUT $MAX_FANOUT
   set MAX_TRANSITION $MAX_TRANSITION
   uniquify
-  ungroup -all -flatten
   redirect $chk_file { check_design }
-  compile -map_effort high
+  compile -map_effort medium
   write -hier -format verilog -output $netlist_file $design_name
-  write -hier -format ddc -output $ddc_file $design_name
+  write -hier -format db -output $db_file $design_name
   redirect $rep_file { report_design -nosplit }
   redirect -append $rep_file { report_area }
   redirect -append $rep_file { report_timing -max_paths 2 -input_pins -nets -transition_time -nosplit }
-  redirect -append $rep_file { report_constraint -max_delay -verbose -nosplit }
+  redirect -append $rep_file { report_constraint -all_violators -verbose -nosplit }
   remove_design -all
   read_file -format verilog $netlist_file
   current_design $design_name
@@ -135,5 +140,4 @@ if {  $dc_shell_status != [list] } {
 } else {
    quit
 }
-
 

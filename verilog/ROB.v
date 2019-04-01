@@ -1,5 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 `define DEBUG
 
 module ROB(
@@ -28,6 +27,7 @@ module ROB(
 		`endif
 	);
 
+
 	logic [$clog2(`ROB_SIZE):0] tail, tail_next, head, head_next;
 	logic head_next_busy;
 
@@ -40,6 +40,7 @@ module ROB(
 	logic [`SS_SIZE-1:0] dispatched;
 						
 	ROB_ROW_T [`ROB_SIZE-1:0] ROB_table, ROB_table_next;
+
 
 	//CAM VARIABLES
 	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
@@ -125,11 +126,7 @@ module ROB(
 					(retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] == tail)? tail :
 					(retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] == 0)? `ROB_SIZE - 1:
 												retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] - 1;
-		//head_next = (BIT_COUNT_LUT[retired] == 0)? head :
-		// 			(((head >= tail) & (BIT_COUNT_LUT[retired] > (head-tail)))
-		// 			 | ((head < tail) & (BIT_COUNT_LUT[retired] > (`ROB_SIZE-(tail-head)))))? tail :
-		//												(head >= BIT_COUNT_LUT[retired])? head - BIT_COUNT_LUT[retired] :
-		//												  			  					  `ROB_SIZE - (BIT_COUNT_LUT[retired] - head);
+												
 		head_next_busy = ROB_table_next[head_next].busy;
 			
 		for(int i = 0; i < `SS_SIZE; i += 1) begin
@@ -151,11 +148,7 @@ module ROB(
 		end
 
 		tail_next = (BIT_COUNT_LUT[dispatched] == 0)? tail : 
-							dispatch_idx[`SS_SIZE-1-(BIT_COUNT_LUT[dispatched]-1)];
-		//tail_next = (BIT_COUNT_LUT[dispatched] == 0)? tail :
-		//			(tail >= BIT_COUNT_LUT[dispatched])? tail - (BIT_COUNT_LUT[dispatched]-(!head_next_busy)):
-		//				  ? tail - BIT_COUNT_LUT[dispatched] :
-		//												 	   `ROB_SIZE - (BIT_COUNT_LUT[dispatched] - tail);		
+							dispatch_idx[`SS_SIZE-1-(BIT_COUNT_LUT[dispatched]-1)];	
 			
 		free_rows_next = (head_next == tail_next)? `ROB_SIZE - ROB_table_next[tail_next].busy :
 						  (head_next > tail_next)? `ROB_SIZE - (head_next - tail_next + 1) :

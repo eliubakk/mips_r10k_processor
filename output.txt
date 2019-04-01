@@ -1,0 +1,78 @@
+cd synth && \
+mkdir -p BP && cd BP && \
+SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 ../../verilog/BP.v ../../verilog/misc/CAM.v ../../verilog/misc/encoder.v ../../verilog/misc/psel_generic.v ../../verilog/misc/psel_single.v ../../testbench/BP_test.v -o simv_BP &&\
+./simv_BP | tee BP_simv_program.out
+                         Chronologic VCS (TM)
+      Version N-2017.12-SP2-1_Full64 -- Thu Mar 28 22:30:48 2019
+               Copyright (c) 1991-2017 by Synopsys Inc.
+                         ALL RIGHTS RESERVED
+
+This program is proprietary and confidential information of Synopsys Inc.
+and may be used and disclosed only as authorized in a license agreement
+controlling such use and disclosure.
+
+Parsing design file '../../verilog/BP.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/BP.v'.
+Parsing included file '../../verilog/BTB.v'.
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/BTB.v'.
+Back to file '../../verilog/BP.v'.
+Parsing included file '../../verilog/OBQ.v'.
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/OBQ.v'.
+Back to file '../../verilog/BP.v'.
+Parsing included file '../../verilog/GSHARE.v'.
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/GSHARE.v'.
+Back to file '../../verilog/BP.v'.
+Parsing included file '../../verilog/RAS.v'.
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/RAS.v'.
+Back to file '../../verilog/BP.v'.
+Parsing design file '../../verilog/misc/CAM.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/CAM.v'.
+Parsing design file '../../verilog/misc/encoder.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/encoder.v'.
+Parsing design file '../../verilog/misc/psel_generic.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/psel_generic.v'.
+Parsing design file '../../verilog/misc/psel_single.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/psel_single.v'.
+Parsing design file '../../testbench/BP_test.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../testbench/BP_test.v'.
+
+Error-[IND] Identifier not declared
+../../testbench/BP_test.v, 198
+  Identifier 'write_en' has not been declared yet. If this error is not 
+  expected, please check if you have set `default_nettype to none.
+  
+
+
+Error-[IND] Identifier not declared
+../../testbench/BP_test.v, 199
+  Identifier 'clear_en' has not been declared yet. If this error is not 
+  expected, please check if you have set `default_nettype to none.
+  
+
+
+Error-[IND] Identifier not declared
+../../testbench/BP_test.v, 200
+  Identifier 'current_pc' has not been declared yet. If this error is not 
+  expected, please check if you have set `default_nettype to none.
+  
+
+
+Error-[SE] Syntax error
+  Following verilog source has syntax error :
+  "../../testbench/BP_test.v", 200: token is ';'
+  				current_pc = ; // this should be the pc of 
+  the inst
+                                                ^
+
+4 errors
+CPU time: .100 seconds to compile

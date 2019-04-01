@@ -1,6 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
-// `define FL_SIZE `NUM_PHYS_REG
 `define DEBUG
 // would be good idea to create a queue module and create an instance of that
 // here...
@@ -55,7 +53,8 @@ module Free_List(
 			for (int i = 0; i < `FL_SIZE; ++i) begin
 				next_free_list[i] = free_list[i+1];
 			end
-			next_free_list[tail - 1] = T_old;
+			next_free_list[tail - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+			// next_free_list[tail - 1] = T_old;
 			next_tail = tail;
 		end else if (enable) begin
 			// Register is getting retired
@@ -64,7 +63,8 @@ module Free_List(
 				next_tail = tail;
 			end else begin
 				next_free_list = free_list;
-				next_free_list[tail] = T_old;
+				next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+				// next_free_list[tail] = T_old;
 				next_tail = tail + 1;
 			end
 		end else if (dispatch_en) begin
@@ -95,12 +95,12 @@ module Free_List(
 			// all the gen purpose regs to be pr0 to 
 			// pr(num_gen- 1)
 			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
-				free_list[i] 		<= {0, `NUM_GEN_REG + i};
+				free_list[i] 		<= `SD {0, `NUM_GEN_REG + i};
 			end
-			tail 		<= `NUM_GEN_REG;
+			tail 		<= `SD `NUM_GEN_REG;
 		end else begin
-			free_list <= next_free_list;
-			tail <= next_tail;
+			free_list <= `SD next_free_list;
+			tail <= `SD next_tail;
 		end
 	end
 

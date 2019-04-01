@@ -9,7 +9,6 @@
 
 
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 
 module regfile(
         input   [4:0] rda_idx, rdb_idx, wr_idx,    // read/write index
