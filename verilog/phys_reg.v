@@ -16,11 +16,18 @@ module phys_regfile(
         input   [4:0]      wr_en, 
         input               wr_clk,
 
+	`ifdef DEBUG
+	output logic	[31 + `ROB_SIZE:0] [63:0] phys_registers_out,
+	`endif
         output logic [5:0][63:0] rda_out, rdb_out    // read data
           
       );
   
   logic    [31 + `ROB_SIZE :0] [63:0] phys_registers;   // 64, 64-bit Physical Registers
+
+`ifdef DEBUG
+	assign phys_registers_out = phys_registers;
+`endif
 
   wire   [4:0][63:0] rda_reg = phys_registers[rda_idx];
   wire   [4:0][63:0] rdb_reg = phys_registers[rdb_idx];

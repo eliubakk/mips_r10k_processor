@@ -164,6 +164,8 @@ logic ROB_enable;
   logic [4:0][5:0] issue_reg_T1;
   logic [4:0][5:0] issue_reg_T2;
 
+	logic [31 + `ROB_SIZE:0][63:0] phys_reg;
+
   // Outputs from EX-Stage
   logic [4:0][63:0] ex_alu_result_out;
   logic             ex_take_branch_out;
@@ -250,7 +252,7 @@ logic ROB_enable;
   //Outputs form the freelist check
   PHYS_REG [`FL_SIZE - 1:0]   free_list_check;
   logic [$clog2(`FL_SIZE):0]  tail_check;
-
+logic fr_wr_en;
   
   // // Outputs from MEM/WB Pipeline Register
   // logic         mem_wb_halt;
@@ -464,12 +466,13 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //Instantiating the freelist
   
  // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
-	assign fr_read_en = id_inst_out.inst.valid_inst; 
+	assign fr_read_en = id_inst_out.inst.valid_inst;
+	assign fr_wr_en = (rob_fl_arch_Told == `DUMMY_REG) ? 0 : 1; 
  Free_List f0(
     // INPUTS
     .clock(clock),
     .reset(reset),
-    .enable(id_inst_out.inst.valid_inst),
+    .enable(fr_wr_en),// Write enable from ROB during retire
     .T_old(rob_fl_arch_Told), // Comes from ROB during Retire Stage
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
 
@@ -637,6 +640,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .rdb_idx(issue_reg_T2),
     .rdb_out(pr_T2_value),
 
+`ifdef DEBUG
+	.phys_registers_out(phys_reg),
+`endif
     .wr_clk(clock),
     .wr_en(ex_co_valid_inst),
     .wr_idx(ex_co_dest_reg_idx),
