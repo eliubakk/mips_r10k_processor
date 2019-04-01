@@ -162,6 +162,7 @@ module testbench;
 			addr_ready_test = sq0.addr_ready;
 			data_test = sq0.data;
 			data_ready_test = sq0.data_ready;
+			tail_test = tail_out;
 		end
 	endtask
 
@@ -400,6 +401,36 @@ module testbench;
 			assert(full == 1) else #1 exit_on_error;
 		end
 		$display("Multiple Execute Passed");
+
+		$display("Testing Multiple Retire...");
+		copy_test;
+		for (int i = 0; i < (`SQ_SIZE - 1); ++i) begin
+			@(negedge clock);
+			reset = 0;
+			rd_en = 0;
+			addr_rd = 0;
+			ld_pos = 0;
+			dispatch_en = 0;
+			dispatch_addr = 0;
+			dispatch_addr_ready = 0;
+			dispatch_data = 0;
+			dispatch_data_ready = 0;
+			ex_en = 0;
+			ex_index = 0;
+			ex_addr = 0;
+			ex_addr_en = 0;
+			ex_data = 0;
+			ex_data_en = 0;
+			rt_en = 1;
+
+			@(posedge clock);
+			`DELAY;
+			assert(sq0.head == i + 1) else #1 exit_on_error;
+			assert(tail_test == tail_out) else #1 exit_on_error;
+			assert(full == 0) else #1 exit_on_error;			
+		end
+
+		$display("Multiple Retire Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
