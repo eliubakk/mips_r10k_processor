@@ -143,6 +143,7 @@ module pipeline (
   GEN_REG id_di_regb;
 
 logic dispatch_no_hazard;
+logic ROB_enable;
 
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
@@ -567,10 +568,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   assign issue_stall= ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full); 
-  assign dispatch_en= dispatch_no_hazard && id_di_valid_inst; 
+  assign dispatch_en= dispatch_no_hazard & id_di_valid_inst; 
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
- 
+  assign ROB_enable = dispatch_no_hazard &  id_inst_out.inst.valid_inst;
   assign RS_enable= dispatch_en & id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
@@ -1014,10 +1015,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.T_new_in(fr_rs_rob_T), // Comes from Free List During Dispatch
   	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
-  	.dispatch_en(RS_enable), // Structural Hazard detection during Dispatch
+  	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
-	.id_halt(id_di_inst_in.inst.halt),
-
+	.id_halt(id_inst_out.inst.halt),
   	// OUTPUTS
   	.T_free(rob_fl_arch_Told), // Output for Retire Stage goes to Free List
   	.T_arch(rob_arch_retire_reg), // Output for Retire Stage goes to Arch Map
