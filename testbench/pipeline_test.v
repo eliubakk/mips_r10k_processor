@@ -328,7 +328,7 @@ module testbench;
 		end
 	endtask
 
-  task display_free_list_table;
+ /* task display_free_list_table;
 		input	PHYS_REG [`NUM_PHYS_REG-1:0] list;
 		begin
     $display("**********************************************************\n");
@@ -339,7 +339,18 @@ module testbench;
 			end	
 		end
 	endtask
+*/
 
+
+ 	task display_free_list_table;
+		begin
+			$display("\n----------------------------Freelist Table----------------------------\n");
+			$display("Free_list_tail : %b", pipeline_0.fr_tail_out);
+			for (integer i = 0; i<`FL_SIZE; ++i) begin
+				$display("%dth line : %b", i, pipeline_0.fr_rs_rob_T[i]);
+			end
+		end
+	endtask
 	task display_inst;
 		input DECODED_INST _inst_in;
 		begin
@@ -357,6 +368,13 @@ module testbench;
 			for(int p=0;p<20;p++) begin
 				$display(" row %d : %h",p, memory.unified_memory[p][63:0]);
 			end
+		end
+	endtask
+
+	task display_phys_reg;
+		begin
+			$display("\n Physical register files-------------------------------------");
+			
 		end
 	endtask
 
@@ -540,7 +558,9 @@ module testbench;
 			$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 			display_co_re_registers;
-			display_arch_table;				
+			display_arch_table;
+			display_free_list_table;	
+			$display("ROB output to arch map - T_out_valid : %b, T_free : %b, T_arch : %b", pipeline_0.arch_fr_enable, pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg);				
 			//display_ROB_table;
 			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
