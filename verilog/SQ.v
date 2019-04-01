@@ -9,34 +9,34 @@ module SQ(
 
 	// read signals
 	input rd_en, // load queue wants to read data at an address in SQ
-	input addr_rd, // the address the load queue wants to read
-	input ld_pos, // the tail of the sq at the time the load was dispatched
+	input [31:0] addr_rd, // the address the load queue wants to read
+	input [`index_t:0] ld_pos, // the tail of the sq at the time the load was dispatched
 
 	// dispatch signals
 	input dispatch_en, // 1 when a store is getting dispatched
-	input dispatch_addr, // addr of the store
+	input [31:0] dispatch_addr, // addr of the store
 	input dispatch_addr_ready, // if the store address is ready (direct store vs indirect store)
-	input dispatch_data, // data to store 
+	input [63:0] dispatch_data, // data to store 
 	input dispatch_data_ready, // if the data of store is ready (direct store vs indirect store)
 	
 	// execute signals
 	input ex_en, // 1 when a store is being executed
-	input ex_index, // the index/tag of the store that is being executed
-	input ex_addr, // the address calculated during execute
+	input [`index_t:0] ex_index, // the index/tag of the store that is being executed
+	input [31:0] ex_addr, // the address calculated during execute
 	input ex_addr_en, // 1 if want to use ex_addr for the address (direct vs indirect store)
-	input ex_data, // the data calculated during execute
+	input [63:0] ex_data, // the data calculated during execute
 	input ex_data_en, // 1 if want to use ex_data for the data (direct vs indirect store)
 
 	// retire signals
 	input rt_en, // 1 when a store is at retire
-	input rt_index, // the index/tag of the store that is being retired
+	// input [`index_t:0] rt_index, // the index/tag of the store that is being retired
 
 	// read outputs
-	output logic data_rd, // the data that is being read by the load
+	output logic [63:0] data_rd, // the data that is being read by the load
 	output logic rd_valid, // whether the data that is being read is ready
 
 	// general outputs
-	output logic tail_out,
+	output logic [`index_t:0] tail_out, // the index of the store being dispatched
 	output logic full
 );
 
