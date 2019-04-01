@@ -98,9 +98,13 @@ module SQ(
 		data_next = data;
 		head_next = head;
 		tail_next = tail;
+		addr_ready_next = addr_ready;
+		data_ready_next = data_ready;
 
 		// retire signals
 		if (rt_en) begin
+			addr_ready_next[head_next] = 0;
+			data_ready_next[head_next] = 0;
 			++head_next;
 		end
 

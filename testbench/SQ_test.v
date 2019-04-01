@@ -256,6 +256,35 @@ module testbench;
 
 		$display("Single Execute Passed");
 
+		$display("Testing Single Retire...");
+
+		@(negedge clock);
+		reset = ZERO;
+		rd_en = 0;
+		addr_rd = 0;
+		ld_pos = 0;
+		dispatch_en = 0;
+		dispatch_addr = 0;
+		dispatch_addr_ready = 0;
+		dispatch_data = 0;
+		dispatch_data_ready = 0;
+		ex_en = 0;
+		ex_index = 0;
+		ex_addr = 0;
+		ex_addr_en = 0;
+		ex_data = 0;
+		ex_data_en = 0;
+		rt_en = 1;
+
+		@(posedge clock);
+		`DELAY;
+		assert(tail_out == 1) else #1 exit_on_error;
+		assert(sq0.head == 1) else #1 exit_on_error;
+		assert(sq0.addr_ready[0] == 0) else #1 exit_on_error;
+		assert(sq0.data_ready[0] == 0) else #1 exit_on_error;
+
+		$display("Single Retire Passed");
+
 		$display("ALL TESTS Passed");
 		$finish;
 	end
