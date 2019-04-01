@@ -375,6 +375,7 @@ module testbench;
 	task display_phys_reg;
 		begin
 			$display("\n Physical register files-------------------------------------");
+			$display("input : rda_idx %b, rda_out: %d. rdb_idx %b, rdb_out %d, wr_en : %b, wr_idx : %b, wr_data : %d", pipeline_0. issue_reg_T1, pipeline_0.pr_T1_value, pipeline_0.issue_reg_T2, pipeline_0.pr_T2_value, pipeline_0.ex_co_valid_inst, pipeline_0.ex_co_dest_reg_idx, pipeline_0.ex_co_alu_result);
 			for(int p=0;p<32+`ROB_SIZE;p++) begin
 				$display("%dth phys reg value : %d", p, pipeline_0.phys_reg[p]);
 				
