@@ -42,14 +42,14 @@ module SQ(
 
 	// internal data
 
-	logic [31:0] [`SQ_SIZE - 1:0] addr;
-	logic [31:0] [`SQ_SIZE - 1:0] addr_next;
+	logic [`SQ_SIZE - 1:0] [31:0] addr;
+	logic [`SQ_SIZE - 1:0] [31:0] addr_next;
 
 	logic [`SQ_SIZE - 1:0] addr_ready;
 	logic [`SQ_SIZE - 1:0] addr_ready_next;
 
-	logic [63:0] [`SQ_SIZE - 1:0] data;
-	logic [63:0] [`SQ_SIZE - 1:0] data_next;
+	logic [`SQ_SIZE - 1:0] [63:0] data;
+	logic [`SQ_SIZE - 1:0] [63:0] data_next;
 
 	logic [`SQ_SIZE - 1:0] data_ready;
 	logic [`SQ_SIZE - 1:0] data_ready_next;
@@ -90,7 +90,7 @@ module SQ(
 	assign data_rd = data_next[data_rd_idx];
 	assign rd_valid = &load_req;
 	assign tail_out = tail;
-	assign full = (tail + 1 == head);
+	assign full = (tail + 1'b1 == head);
 
 	always_comb begin
 		// default case

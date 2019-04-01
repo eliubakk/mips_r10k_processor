@@ -52,6 +52,12 @@ module testbench;
 
 	// test variables
 	logic [($clog2(`SQ_SIZE) - 1):0] tail_test;
+	logic [($clog2(`SQ_SIZE) - 1):0] head_test;
+
+	logic [`SQ_SIZE - 1:0] [31:0] addr_test;
+	logic [`SQ_SIZE - 1:0] addr_ready_test;
+	logic [`SQ_SIZE - 1:0] [63:0] data_test;
+	logic [`SQ_SIZE - 1:0] data_ready_test;
 	
 	// initialize module
 
@@ -88,6 +94,21 @@ module testbench;
 			#1;
 			$display("@@@Failed at time %f", $time);
 			$finish;
+		end
+	endtask
+
+	task print_sq;
+		begin
+			$display("---------------------------------------------------------------SQ--------------------------------------------------");
+			$display("head: %d tail: %d", sq0.head, sq0.tail);
+			$display("addr and addr_ready:");
+			for (int i = 0; i < `SQ_SIZE; ++i) begin
+				$display("\taddr[%d] = %d ready[%d] = %b", i, sq0.addr[i], i, sq0.addr_ready[i]);
+			end
+			$display("data and data ready:");
+			for (int i = 0; i < `SQ_SIZE; ++i) begin
+				$display("\tdata[%d] = %d ready[%d] = %b", i, sq0.data[i], i, sq0.data_ready[i]);
+			end
 		end
 	endtask
 
@@ -135,6 +156,15 @@ module testbench;
 		end
 	endtask
 
+	task copy_test;
+		begin
+			addr_test = sq0.addr;
+			addr_ready_test = sq0.addr_ready;
+			data_test = sq0.data;
+			data_ready_test = sq0.data_ready;
+		end
+	endtask
+
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
 
@@ -170,6 +200,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		check_correct_reset;
+		copy_test;
 
 		$display("Reset Test Passed");
 
@@ -284,6 +315,91 @@ module testbench;
 		assert(sq0.data_ready[0] == 0) else #1 exit_on_error;
 
 		$display("Single Retire Passed");
+
+		$display("Testing Multiple Dispatch...");
+
+		// reset SQ
+		@(negedge clock);
+		reset = 1;
+		rd_en = 0;
+		addr_rd = 0;
+		ld_pos = 0;
+		dispatch_en = 0;
+		dispatch_addr = 0;
+		dispatch_addr_ready = 0;
+		dispatch_data = 0;
+		dispatch_data_ready = 0;
+		ex_en = 0;
+		ex_index = 0;
+		ex_addr = 0;
+		ex_addr_en = 0;
+		ex_data = 0;
+		ex_data_en = 0;
+		rt_en = 0;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_reset;
+
+		for (int i = 0; i < (`SQ_SIZE - 1); ++i) begin
+		
+			@(negedge clock);
+			reset = 0;
+			rd_en = 0;
+			addr_rd = 0;
+			ld_pos = 0;
+			dispatch_en = 1;
+			dispatch_addr = $urandom_range(2**32 - 1, 0);
+			dispatch_addr_ready = $urandom_range(1, 0);
+			dispatch_data = $urandom_range(2**64 - 1, 0);
+			dispatch_data_ready = $urandom_range(1, 0);
+			ex_en = 0;
+			ex_index = 0;
+			ex_addr = 0;
+			ex_addr_en = 0;
+			ex_data = 0;
+			ex_data_en = 0;
+			rt_en = 0;
+
+			tail_test = tail_out;
+
+			@(posedge clock);
+			`DELAY;
+			check_dispatch_in;
+			assert(tail_out == tail_test + 1) else #1 exit_on_error;
+
+		end
+		assert(full == 1) else #1 exit_on_error;
+
+		$display("Multiple Dispatch Passed");
+
+		$display("Testing Multiple Execute...");
+
+		for (int i = 0; i < (`SQ_SIZE - 1); ++i) begin
+			@(negedge clock);
+			reset = 0;
+			rd_en = 0;
+			addr_rd = 0;
+			ld_pos = 0;
+			dispatch_en = 0;
+			dispatch_addr = 0;
+			dispatch_addr_ready = 0;
+			dispatch_data = 0;
+			dispatch_data_ready = 0;
+			ex_en = 1;
+			ex_index = i;
+			ex_addr = $urandom_range(2**32 - 1, 0);
+			ex_addr_en = ~sq0.addr_ready[i];
+			ex_data = $urandom_range(2**64 - 1, 0);
+			ex_data_en = ~sq0.data_ready[i];
+			rt_en = 0;
+
+			@(posedge clock);
+			`DELAY;
+			check_ex_in;
+			assert(full == 1) else #1 exit_on_error;
+		end
+		$display("Multiple Execute Passed");
 
 		$display("ALL TESTS Passed");
 		$finish;
