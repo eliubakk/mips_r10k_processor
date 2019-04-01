@@ -532,14 +532,14 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         id_di_IR      <= `SD `NOOP_INST;
         id_di_valid_inst  <=`SD `FALSE;
         
-      end else if(id_di_enable) begin
+      end else if(id_di_enable) begin // Update the value
         id_di_rega    <= `SD id_rega_out;
         id_di_regb    <= `SD id_regb_out;
         id_di_inst_in <= `SD id_inst_out;
         id_di_NPC     <= `SD if_id_NPC;
         id_di_IR      <= `SD if_id_IR;
         id_di_valid_inst  <= `SD if_id_valid_inst;
-      end else if(!dispatch_no_hazard) begin
+      end else if(!dispatch_no_hazard) begin // Freeze current value
 	 id_di_rega    <= `SD id_di_rega;
         id_di_regb    <= `SD id_di_regb;
         id_di_inst_in <= `SD id_di_inst_in;
@@ -570,17 +570,17 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
  
-  assign RS_enable= dispatch_en & if_valid_inst_out ;
+  assign RS_enable= dispatch_en & id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
     // inputs
     .clock(clock), 
     .reset(reset), 
-    .enable(RS_enable), 
+    .enable(enable), 
     .CAM_en(CDB_enable), 
     .CDB_in(CDB_tag_out), 
-    .dispatch_valid(dispatch_en),
+    .dispatch_valid(RS_enable),
     .inst_in(id_di_inst_in), 
     .branch_not_taken(branch_not_taken), 
     .issue_stall(issue_stall),
@@ -1013,7 +1013,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.T_new_in(fr_rs_rob_T), // Comes from Free List During Dispatch
   	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
-  	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+  	.dispatch_en(RS_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
 	.id_halt(id_di_inst_in.inst.halt),
 
