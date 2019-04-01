@@ -203,7 +203,8 @@ typedef struct packed{
 //Freelist
 `define FL_SIZE `NUM_PHYS_REG
 
-
+// Store Queue
+`define SQ_SIZE 16
 
 //////////////////////////////////////////////
 //

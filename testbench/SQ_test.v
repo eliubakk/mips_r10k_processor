@@ -3,6 +3,7 @@
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define NUM_RAND_ITER 500
+`define index_t ($clog2(`SQ_SIZE) - 1)
 
 module testbench;
 
@@ -59,6 +60,12 @@ module testbench;
 	logic [`SQ_SIZE - 1:0] [63:0] data_test;
 	logic [`SQ_SIZE - 1:0] data_ready_test;
 	
+	logic [`SQ_SIZE - 1:0] [31:0] addr_out;
+	logic [`SQ_SIZE - 1:0] addr_ready_out;
+	logic [`SQ_SIZE - 1:0] [63:0] data_out;
+	logic [`SQ_SIZE - 1:0] data_ready_out;
+	logic [`index_t:0] head_out;
+	logic [`index_t:0] tail_out;
 	// initialize module
 
 	`DUT(SQ) sq0(
@@ -81,7 +88,12 @@ module testbench;
 		.ex_data_en(ex_data_en),
 		.rt_en(rt_en),
 
-		// outputs 
+		// outputs
+		.addr_out(addr_out),
+		.addr_ready_out(addr_ready_out),
+		.data_out(data_out),
+		.data_ready_out(data_ready_out),
+		.head_out(head_out),
 		.data_rd(data_rd),
 		.rd_valid(rd_valid),
 		.tail_out(tail_out),
@@ -100,14 +112,14 @@ module testbench;
 	task print_sq;
 		begin
 			$display("---------------------------------------------------------------SQ--------------------------------------------------");
-			$display("head: %d tail: %d", sq0.head, sq0.tail);
+			$display("head: %d tail: %d", head_out, tail_out);
 			$display("addr and addr_ready:");
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
-				$display("\taddr[%d] = %d ready[%d] = %b", i, sq0.addr[i], i, sq0.addr_ready[i]);
+				$display("\taddr[%d] = %d ready[%d] = %b", i, addr_out[i], i, addr_ready_out[i]);
 			end
 			$display("data and data ready:");
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
-				$display("\tdata[%d] = %d ready[%d] = %b", i, sq0.data[i], i, sq0.data_ready[i]);
+				$display("\tdata[%d] = %d ready[%d] = %b", i, data_out[i], i, data_ready_out[i]);
 			end
 		end
 	endtask
@@ -119,49 +131,49 @@ module testbench;
 			assert(full == 0) else #1 exit_on_error;
 
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
-				assert(sq0.addr[i] == 0) else #1 exit_on_error;
-				assert(sq0.data[i] == 0) else #1 exit_on_error;
-				assert(sq0.addr_ready[i] == 0) else #1 exit_on_error;
-				assert(sq0.data_ready[i] == 0) else #1 exit_on_error;
+				assert(addr_out[i] == 0) else #1 exit_on_error;
+				assert(data_out[i] == 0) else #1 exit_on_error;
+				assert(addr_ready_out[i] == 0) else #1 exit_on_error;
+				assert(data_ready_out[i] == 0) else #1 exit_on_error;
 			end
 
-			assert(sq0.head == 0) else #1 exit_on_error;
-			assert(sq0.tail == 0) else #1 exit_on_error;
+			assert(head_out == 0) else #1 exit_on_error;
+			assert(tail_out == 0) else #1 exit_on_error;
 		end
 	endtask
 
 	task check_dispatch_in;
 		begin
 			if (dispatch_addr_ready) begin
-				assert(sq0.addr[tail_test] == dispatch_addr) else #1 exit_on_error;
+				assert(addr_out[tail_test] == dispatch_addr) else #1 exit_on_error;
 			end
-			assert(sq0.addr_ready[tail_test] == dispatch_addr_ready) else #1 exit_on_error;
+			assert(addr_ready_out[tail_test] == dispatch_addr_ready) else #1 exit_on_error;
 			if (dispatch_data_ready) begin
-				assert(sq0.data[tail_test] == dispatch_data) else #1 exit_on_error;
+				assert(data_out[tail_test] == dispatch_data) else #1 exit_on_error;
 			end
-			assert(sq0.data_ready[tail_test] == dispatch_data_ready) else #1 exit_on_error;
+			assert(data_ready_out[tail_test] == dispatch_data_ready) else #1 exit_on_error;
 		end
 	endtask
 
 	task check_ex_in;
 		begin
 			if (ex_addr_en) begin
-				assert(sq0.addr[ex_index] == ex_addr) else #1 exit_on_error;
+				assert(addr_out[ex_index] == ex_addr) else #1 exit_on_error;
 			end
-			assert(sq0.addr_ready[ex_index] == 1) else #1 exit_on_error;
+			assert(addr_ready_out[ex_index] == 1) else #1 exit_on_error;
 			if (ex_data_en) begin
-				assert(sq0.data[ex_index] == ex_data) else #1 exit_on_error;
+				assert(data_out[ex_index] == ex_data) else #1 exit_on_error;
 			end
-			assert(sq0.data_ready[ex_index] == 1) else #1 exit_on_error;
+			assert(data_ready_out[ex_index] == 1) else #1 exit_on_error;
 		end
 	endtask
 
 	task copy_test;
 		begin
-			addr_test = sq0.addr;
-			addr_ready_test = sq0.addr_ready;
-			data_test = sq0.data;
-			data_ready_test = sq0.data_ready;
+			addr_test = addr_out;
+			addr_ready_test = addr_ready_out;
+			data_test = data_out;
+			data_ready_test = data_ready_out;
 			tail_test = tail_out;
 		end
 	endtask
@@ -311,9 +323,9 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		assert(tail_out == 1) else #1 exit_on_error;
-		assert(sq0.head == 1) else #1 exit_on_error;
-		assert(sq0.addr_ready[0] == 0) else #1 exit_on_error;
-		assert(sq0.data_ready[0] == 0) else #1 exit_on_error;
+		assert(head_out == 1) else #1 exit_on_error;
+		assert(addr_ready_out[0] == 0) else #1 exit_on_error;
+		assert(data_ready_out[0] == 0) else #1 exit_on_error;
 
 		$display("Single Retire Passed");
 
@@ -390,9 +402,9 @@ module testbench;
 			ex_en = 1;
 			ex_index = i;
 			ex_addr = $urandom_range(2**32 - 1, 0);
-			ex_addr_en = ~sq0.addr_ready[i];
+			ex_addr_en = ~addr_ready_out[i];
 			ex_data = $urandom_range(2**64 - 1, 0);
-			ex_data_en = ~sq0.data_ready[i];
+			ex_data_en = ~data_ready_out[i];
 			rt_en = 0;
 
 			@(posedge clock);
@@ -425,7 +437,7 @@ module testbench;
 
 			@(posedge clock);
 			`DELAY;
-			assert(sq0.head == i + 1) else #1 exit_on_error;
+			assert(head_out == i + 1) else #1 exit_on_error;
 			assert(tail_test == tail_out) else #1 exit_on_error;
 			assert(full == 0) else #1 exit_on_error;			
 		end

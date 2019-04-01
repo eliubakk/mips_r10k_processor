@@ -1,6 +1,5 @@
 `include "../../sys_defs.vh"
-
-`define SQ_SIZE 16
+`define DEBUG
 `define index_t ($clog2(`SQ_SIZE) - 1)
 
 module SQ(
@@ -31,6 +30,14 @@ module SQ(
 	input rt_en, // 1 when a store is at retire
 	// input [`index_t:0] rt_index, // the index/tag of the store that is being retired
 
+	`ifdef DEBUG
+	output logic [`SQ_SIZE - 1:0] [31:0] addr_out,
+	output logic [`SQ_SIZE - 1:0] addr_ready_out,
+	output logic [`SQ_SIZE - 1:0] [63:0] data_out,
+	output logic [`SQ_SIZE - 1:0] data_ready_out,
+	output logic [`index_t:0] head_out,
+	`endif
+
 	// read outputs
 	output logic [63:0] data_rd, // the data that is being read by the load
 	output logic rd_valid, // whether the data that is being read is ready
@@ -41,7 +48,6 @@ module SQ(
 );
 
 	// internal data
-
 	logic [`SQ_SIZE - 1:0] [31:0] addr;
 	logic [`SQ_SIZE - 1:0] [31:0] addr_next;
 
@@ -92,6 +98,12 @@ module SQ(
 	assign tail_out = tail;
 	assign full = (tail + 1'b1 == head);
 
+	assign addr_out = addr;
+	assign addr_ready_out = addr_ready;
+	assign data_out = data;
+	assign data_ready_out = data_ready;
+	assign head_out = head;
+	
 	always_comb begin
 		// default case
 		addr_next = addr;

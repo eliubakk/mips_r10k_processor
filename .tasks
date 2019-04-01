@@ -4,8 +4,7 @@ LSQ - Ash, Morteza
 Automated Regression Testing - Ash, Morteza
 
 LSQ
-- Implement Store Queue (Ash + Morteza)
-- Store Queue Testbench (Ash + Morteza)
+- Change RS to keep track of Load Tail Ptrs
 - LSQ Integration Test (Ash + Morteza)
 
 Automated Regression Testing
