@@ -192,12 +192,11 @@ typedef struct packed {
 
 //ROB_ROWS
 typedef struct packed{
-  PHYS_REG T_new_out;
-  PHYS_REG T_old_out;
+  PHYS_REG T_new;
+  PHYS_REG T_old;
 //  logic T_new_valid;
 //  logic T_old_valid;
   logic busy;
-  logic halt;
 } ROB_ROW_T;
 
 //Freelist

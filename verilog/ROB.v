@@ -1,226 +1,174 @@
 `include "../../sys_defs.vh"
 `define DEBUG
 
-/// CAM module
-module ROB_CAM(
-		input				enable,
-		input 				CAM_en, 
-		input PHYS_REG  		CDB_tag,
-		input ROB_ROW_T  [`ROB_SIZE-1:0] ROB_table,
-		output 	 logic [`ROB_SIZE-1:0] T1_hit
-		
-	);
-		
-	always_comb begin
-		T1_hit = {`ROB_SIZE{1'b0}};
-		if(CAM_en & enable) begin
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				T1_hit[i] = (ROB_table[i].T_new_out[5:0] == CDB_tag[5:0]);			 	
-			end		
-		end else begin
-			T1_hit = {`ROB_SIZE{1'b0}};
-			
-		end	
-	end		
-endmodule
-
 module ROB(
-	input 		    	clock,
-	input 		    	reset,
-	input 		    	enable,
-	input PHYS_REG 		T_old_in, // Comes from Map Table During Dispatch
-	input PHYS_REG		T_new_in, // Comes from Free List During Dispatch
-	input PHYS_REG 		CDB_tag_in, // Comes from CDB during Commit
-	input				CAM_en, // Comes from CDB during Commit
-	input				dispatch_en, // Structural Hazard detection during Dispatch
-	input 				branch_not_taken,
-	input			id_halt,
+		input clock,
+		input reset,
+		input enable,
+		input PHYS_REG [`SS_SIZE-1:0] T_old_in, // Comes from Map Table During Dispatch
+		input PHYS_REG [`SS_SIZE-1:0] T_new_in, // Comes from Free List During Dispatch
+		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
+		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
+		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
+		input branch_not_taken,
 
-	// OUTPUTS
-	
-	output PHYS_REG 	T_free, // Output for Retire Stage goes to Free List
-	output PHYS_REG     T_arch, // Output for Retire Stage goes to Arch Map
-
-	output logic		T_out_valid,
-	output logic [$clog2(`ROB_SIZE) - 1:0] rob_free_entries,
-	output logic							 rob_full, // Used for Dispatch Hazard
-	output logic					head_halt,
-	`ifdef DEBUG 
-	output  ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table_out,
-	output logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg
-	`endif
-);
-
-
-
-	logic [$clog2(`ROB_SIZE) - 1:0] tail, head;
-	//logic [$clog2(`ROB_SIZE) - 1:0] tail_reg, head_reg;
-	//logic [$clog2(`ROB_SIZE) - 1:0] ROB_idx;
-	
-	//logic head_halt_next;
-							
-	ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table;
-	ROB_ROW_T [`ROB_SIZE - 1:0]		ROB_table_reg;
-	logic check_loop;		// To keep a tab on the loop checking during dispatch stage
-	//logic T_new_valid_reg, T_old_valid_reg;
-	logic [(`ROB_SIZE) - 1:0] MSB_T1;
-
-
-	`ifdef DEBUG 
-	assign  	ROB_table_out = ROB_table_reg;
-	`endif
-
-	ROB_CAM robcam( 
-		.enable(enable),
-		.CAM_en(CAM_en), 
-		.CDB_tag(CDB_tag_in),
-		.ROB_table(ROB_table),
-		.T1_hit(MSB_T1)		
+		// OUTPUTS
+		output ROB_ROW_T [`SS_SIZE-1:0] retire_out, // Output for Retire Staget
+		output logic 	[$clog2(`ROB_SIZE):0] free_rows_next,
+		output wand	full // Used for Dispatch Hazard
+		`ifdef DEBUG 
+			, output ROB_ROW_T [`ROB_SIZE-1:0]	 ROB_table_out,
+			output logic [$clog2(`ROB_SIZE):0] tail_out, head_out,
+			output logic [$clog2(`ROB_SIZE):0] tail_next_out, head_next_out,
+			output logic [`ROB_SIZE-1:0] ready_to_retire_out,
+			output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] retire_idx_out,
+			output logic [`SS_SIZE-1:0] retire_idx_valid_out,
+			output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx_out
+		`endif
 	);
 
 
+	logic [$clog2(`ROB_SIZE):0] tail, tail_next, head, head_next;
+	logic head_next_busy;
 
-	//RETIRE STAGE
+	wire [`ROB_SIZE-1:0] ready_to_retire;
+	wire [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] retire_idx;
+	wire [`SS_SIZE-1:0] retire_idx_valid;
+	logic [`SS_SIZE-1:0] retired;
+
+	logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx;
+	logic [`SS_SIZE-1:0] dispatched;
+						
+	ROB_ROW_T [`ROB_SIZE-1:0] ROB_table, ROB_table_next;
+
+
+	//CAM VARIABLES
+	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
+	logic [(`ROB_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_table_in;
+	logic [(`ROB_SIZE-1):0][(`SS_SIZE-1):0] cam_hits;	
+
+	`ifdef DEBUG 
+		assign ROB_table_out = ROB_table;
+		assign tail_out = tail;
+		assign head_out = head;
+		assign tail_next_out = tail_next;
+		assign head_next_out = head_next;
+		assign ready_to_retire_out = ready_to_retire;
+		assign retire_idx_out = retire_idx;
+		assign retire_idx_valid_out = retire_idx_valid;
+		assign dispatch_idx_out = dispatch_idx;
+	`endif
+
+	genvar ig;
+	for (ig = 0; ig < `ROB_SIZE; ig += 1) begin
+		assign full = ROB_table[ig].busy;
+	end
+
+	//CAM LOGIC
+	for(ig = 0; ig < `ROB_SIZE; ig += 1) begin
+		assign cam_table_in[ig] = ROB_table[ig].T_new[($clog2(`NUM_PHYS_REG)-1):0];
+	end
+	for(ig = 0; ig < `SS_SIZE; ig += 1) begin
+		assign cam_tags_in[ig] = CDB_tag_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
+	end
+	//Instantiate CAM module for CBD
+	CAM #(.LENGTH(`ROB_SIZE),
+		  .WIDTH(1),
+		  .NUM_TAGS(`SS_SIZE),
+		  .TAG_SIZE($clog2(`NUM_PHYS_REG))) robcam ( 
+		.enable(CAM_en),
+		.tags(cam_tags_in),
+		.table_in(cam_table_in),
+		.hits(cam_hits)
+	);
+
+	for(ig = 0; ig < `ROB_SIZE; ig += 1) begin
+		assign ready_to_retire[ig] = (ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig]));
+	end
+
+	for(ig = `SS_SIZE-1; ig >= 0 ; ig -= 1) begin
+		assign retire_idx[ig] = ((head - (`SS_SIZE - 1 - ig)) < `ROB_SIZE)? (head - (`SS_SIZE - 1 - ig)) :
+																		 (`ROB_SIZE + head - (`SS_SIZE - 1 - ig));
+		assign retire_idx_valid[ig] = ((head < tail) & ((retire_idx[ig] <= head) | (retire_idx[ig] >= tail)))
+										| ((head >= tail) & (retire_idx[ig] >= tail));
+	end
 
 	always_comb begin
-	
-		ROB_table = ROB_table_reg;
-		T_out_valid= 1'b0;	// Intializing the valid bits after each cycle
-		head= head_reg;
-		tail= tail_reg;
-		T_free= `DUMMY_REG;
-		T_arch= `DUMMY_REG;
-		//head_halt_next = 1'b0;
-
-		// RETIRE STAGE
-		// if head is busy and dest tag is ready
-		if (ROB_table_reg[head_reg].busy & ROB_table_reg[head_reg].T_new_out[6]) begin
-			// above case is true, so retire the head inst
-			T_out_valid = 1;
-			T_free = ROB_table[head_reg].T_old_out;
-			T_arch = ROB_table[head_reg].T_new_out;
-
-			// If retiring halt instruction, then output is halt
-
-			head_halt = ROB_table[head_reg].halt;
-			// clear head entry
-			ROB_table[head_reg].busy = 0;
-			++head;
+		ROB_table_next = ROB_table;
+		retired = {`SS_SIZE{1'b0}};
+		dispatched = {`SS_SIZE{1'b0}};
+		head_next = head;
+		tail_next = tail;
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			retire_out[i].T_old = `DUMMY_REG;
+			retire_out[i].T_new = `DUMMY_REG;
+			retire_out[i].busy = 1'b0;
 		end
 
-/*
-		if((ROB_table_reg[head].busy)&(ROB_table_reg[head].T_new_out[6])) begin			// check for the head pointer and the ready bit of dest reg to know it has commited or not
-			T_out_valid= 1;
-			T_free= ROB_table[head].T_old_out;
-			T_arch= ROB_table[head].T_new_out;
-			ROB_table[head].busy= 0;
-			if (head_reg==5'd16) begin
-				head= 5'd1;
+		// update tag ready bits from CBD 
+		for (int i = 0; i < `ROB_SIZE; i += 1) begin
+			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
+		end
+
+		//RETIRE STAGE
+		for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+			if(enable & retire_idx_valid[i] & ready_to_retire[retire_idx[i]]) begin
+				//if table is busy and T_new is ready, retire
+				retire_out[i] = ROB_table_next[retire_idx[i]];
+				retired[i] = 1'b1;
+				ROB_table_next[retire_idx[i]].busy = 1'b0;
 			end else begin
-				head= head_reg + 1;
-			end 
-		end 	
-*/
-		// COMMIT STAGE
-
-	
-		// check if rob is full
-		rob_full = (tail + 1) == head;
-
-		// update T_new tags with CAM
-		for (int i = 0; i < `ROB_SIZE; ++i) begin
-			ROB_table[i].T_new_out[6] = MSB_T1[i] | ROB_table_reg[i].T_new_out[6];
-		end
-
-// 		rob_full = ROB_table_reg[16].busy & ROB_table_reg[1].busy & ROB_table_reg[2].busy & ROB_table_reg[3].busy & ROB_table_reg[4].busy 
-// 			& ROB_table_reg[5].busy & ROB_table_reg[6].busy & ROB_table_reg[7].busy & ROB_table_reg[8].busy & ROB_table_reg[9].busy 
-// 			& ROB_table_reg[10].busy & ROB_table_reg[11].busy &  ROB_table_reg[12].busy & ROB_table_reg[13].busy & ROB_table_reg[14].busy & ROB_table_reg[15].busy; 
-
-		if (head <= tail) begin
-			rob_free_entries = `ROB_SIZE - (tail - head) - 1;
-		end else begin
-			rob_free_entries = head - tail - 1;
-		end
-// 		rob_free_entries = `ROB_SIZE - (ROB_table[16].busy + ROB_table[1].busy + ROB_table[2].busy + ROB_table[3].busy +  ROB_table[4].busy + ROB_table[5].busy + ROB_table[6].busy + ROB_table[7].busy + ROB_table[8].busy + ROB_table[9].busy + ROB_table[10].busy + ROB_table[11].busy +  ROB_table[12].busy + ROB_table[13].busy + ROB_table[14].busy + ROB_table[15].busy); 
-
-
-		// Dispatch
-// 		check_loop = 1'b0;	
-
-		if (dispatch_en & ~rob_full) begin
-
-			ROB_table[tail_reg].T_new_out = T_new_in;
-			ROB_table[tail_reg].T_old_out = T_old_in;
-			ROB_table[tail_reg].busy = 1; 
-			ROB_table[tail_reg].halt = id_halt;
-			++tail;
-
-			/*
-			for (integer i=1; i<= `ROB_SIZE; i=i+1) begin
-				if (i > head) begin
-					if (!ROB_table[i].busy) begin
-						ROB_table[i].T_new_out= T_new_in;
-						ROB_table[i].T_old_out= T_old_in;
-						ROB_table[i].busy= 1;
-						check_loop = 1'b1;
-						if (tail_reg == 5'd16) begin
-							tail= 5'd1;
-						end
-						else begin
-							tail= tail_reg + 1;
-						end			
-						break;
-					end
-				end 
-			end
-	
-		
-			if(!check_loop) begin
-				for(integer i=1;i< `ROB_SIZE; i=i+1) begin
-					if(i<head) begin
-						if (!ROB_table[i].busy) begin
-							ROB_table[i].T_new_out= T_new_in;
-							ROB_table[i].T_old_out= T_old_in;
-							ROB_table[i].busy= 1;
-							if (tail_reg == 5'd16) begin
-								tail= 5'd1;
-							end else begin
-								tail= tail_reg + 1;
-							end		
-							break;
-						end
-					end
-				end
+				break;
 			end
 		end
-	
-		if (dispatch_en) begin
-			if(head==0) begin
-				head= head_reg+1;
+
+		head_next = (BIT_COUNT_LUT[retired] == 0)? head :
+					(retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] == tail)? tail :
+					(retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] == 0)? `ROB_SIZE - 1:
+												retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] - 1;
+												
+		head_next_busy = ROB_table_next[head_next].busy;
+			
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+				dispatch_idx[`SS_SIZE-1-i] = ((tail - head_next_busy - i) < `ROB_SIZE)? (tail - head_next_busy - i) :
+																		  (`ROB_SIZE + tail - head_next_busy - i);
+		end
+
+		//DISPATCH STAGE
+		for (int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+			if((((i == `SS_SIZE-1) && (dispatch_idx[i] == head_next)) | (dispatch_idx[i] != head_next))
+				& !ROB_table_next[dispatch_idx[i]].busy 
+				& dispatch_en[i]
+				& enable) begin
+				ROB_table_next[dispatch_idx[i]].T_new = T_new_in[i];
+				ROB_table_next[dispatch_idx[i]].T_old = T_old_in[i];
+				ROB_table_next[dispatch_idx[i]].busy = 1'b1;
+				dispatched[i] = 1'b1;
 			end
 		end
-		*/
-		end
+
+		tail_next = (BIT_COUNT_LUT[dispatched] == 0)? tail : 
+							dispatch_idx[`SS_SIZE-1-(BIT_COUNT_LUT[dispatched]-1)];	
+			
+		free_rows_next = (head_next == tail_next)? `ROB_SIZE - ROB_table_next[tail_next].busy :
+						  (head_next > tail_next)? `ROB_SIZE - (head_next - tail_next + 1) :
+						   				  		   (tail_next - head_next - 1);
 	end
-	
+
 	//UPDATE_FLIP_FLOPS
-	
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
-			for (int i = 0; i< `ROB_SIZE; ++i) begin
-				ROB_table_reg[i].T_new_out <= `SD `DUMMY_REG;
-				ROB_table_reg[i].T_old_out <=  `SD `DUMMY_REG;
-				ROB_table_reg[i].busy <= `SD 1'b0;
-				ROB_table_reg[i].halt <= `SD 1'b0;		
+			for (int i = 0; i < `ROB_SIZE; i += 1) begin
+				ROB_table[i].T_new <= `SD `DUMMY_REG;
+				ROB_table[i].T_old <= `SD `DUMMY_REG;
+				ROB_table[i].busy <= `SD 1'b0;		
 			end
-			tail_reg<= `SD 0;
-			head_reg<= `SD 0;
-			//head_halt<= `SD 0;
+			tail <= `SD `ROB_SIZE-1;
+			head <= `SD `ROB_SIZE-1;
 		end else begin
-		ROB_table_reg <= `SD ROB_table;
-		tail_reg <=  `SD tail;
-		head_reg <=  `SD head;	
-		//head_halt <= `SD head_halt_next;
+			ROB_table <= `SD ROB_table_next;
+			tail <= `SD tail_next;
+			head <= `SD head_next;
 		end
 	end
 
