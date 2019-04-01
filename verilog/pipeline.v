@@ -539,7 +539,23 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         id_di_NPC     <= `SD if_id_NPC;
         id_di_IR      <= `SD if_id_IR;
         id_di_valid_inst  <= `SD if_id_valid_inst;
-      end
+      end else if(!dispatch_no_hazard) begin
+	 id_di_rega    <= `SD id_di_rega;
+        id_di_regb    <= `SD id_di_regb;
+        id_di_inst_in <= `SD id_di_inst_in;
+        id_di_NPC     <= `SD id_di_NPC;
+        id_di_IR      <= `SD id_di_IR;
+        id_di_valid_inst  <=`SD id_di_valid_inst;
+     end else  begin
+	 id_di_rega    <= `SD 0;
+        id_di_regb    <= `SD 0;
+        id_di_inst_in <= `SD EMPTY_ROW;
+        id_di_NPC     <= `SD 0;
+        id_di_IR      <= `SD `NOOP_INST;
+        id_di_valid_inst  <=`SD `FALSE;
+        
+
+	end
   end
 
   //////////////////////////////////////////////////
