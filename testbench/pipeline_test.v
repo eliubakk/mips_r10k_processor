@@ -72,9 +72,9 @@ module testbench;
   logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc;
   logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode;
   logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst;
-  logic [4:0][63:0] ex_co_NPC;
-  logic [4:0] ex_co_IR;
-  logic [4:0]       ex_co_valid_inst;
+  logic [`NUM_FU_TOTAL-1:0][63:0] ex_co_NPC;
+  logic [`NUM_FU_TOTAL-1:0][31:0] ex_co_IR;
+  logic [`NUM_FU_TOTAL-1:0]       ex_co_valid_inst;
   logic [63:0] co_ret_NPC;
   logic [31:0] co_ret_IR;
   logic        co_ret_valid_inst;
@@ -679,14 +679,15 @@ module testbench;
           //for (integer i = 0; i < `NUM_FU_TOTAL; i=i+1) begin
          // if (`NUM_FU_TOTAL>pipe_counter)
             print_stage("|", issue_reg_inst_opcode[i], issue_reg_npc[i][31:0], {31'b0,issue_reg_inst_valid_inst[i]});
+            print_stage("|", ex_co_IR[i], ex_co_NPC[i][31:0], {31'b0,ex_co_valid_inst[i]});
           //end
          // else
             //print_stage("|", issue_reg_inst_opcode[0], issue_reg_npc[0][31:0], {0});
           if (pipe_counter==0) begin
-            print_stage("|", ex_co_IR, ex_co_NPC[31:0], {31'b0,ex_co_valid_inst});
+            
             print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
           end else begin
-            print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
+            //print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
             print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
           end
           print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
