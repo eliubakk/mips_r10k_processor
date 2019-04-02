@@ -351,7 +351,7 @@ module ex_stage(
 	  .mcand(opa_mux_out[3]),
     .mplier(opb_mux_out[3]),
 	  .start(issue_reg[3].inst.valid_inst),
-	  .product(ex_mult_result_out[3]),
+	  .product(ex_alu_result_out[3]),
 		.done(done)
   );
 
