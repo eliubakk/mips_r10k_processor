@@ -264,7 +264,7 @@ module pipeline (
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
 
-  assign pipeline_completed_insts = {3'b0, co_ret_valid_inst};
+  assign pipeline_completed_insts = {3'b0, rob_retire_out.busy};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
                                   rob_retire_out.halt? HALTED_ON_HALT :
                                   NO_ERROR;
@@ -787,7 +787,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     end else if(ex_co_enable[3]) begin
       ex_co_done  <= `SD done;
       ex_co_take_branch  <= `SD ex_take_branch_out;
-    end
+    end else begin
+		ex_co_done <= `SD 0;
+	end
   end
   
    

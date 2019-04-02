@@ -230,9 +230,9 @@ module testbench;
     real cpi;
 
     begin
-      cpi = (clock_count + 1.0) / instr_count;
+      cpi = (clock_count + 1.0) / instr_count+1;
       $display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
-                clock_count+1, instr_count, cpi);
+                clock_count+1, instr_count+1, cpi);
       $display("@@  %4.2f ns total time to execute\n@@\n",
                 clock_count*`VIRTUAL_CLOCK_PERIOD);
     end
@@ -530,7 +530,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 25) begin
+			 if (clock_count == 300) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
