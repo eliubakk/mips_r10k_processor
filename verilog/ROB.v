@@ -12,6 +12,8 @@ module ROB(
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
 		input branch_not_taken,
+		input [`SS_SIZE-1:0][31:0] opcode,
+		
 
 		// OUTPUTS
 		output ROB_ROW_T [`SS_SIZE-1:0] retire_out, // Output for Retire Staget
@@ -104,6 +106,7 @@ module ROB(
 			retire_out[i].T_new = `DUMMY_REG;
 			retire_out[i].halt = 1'b0;
 			retire_out[i].busy = 1'b0;
+			retire_out[i].opcode =  `NOOP_INST;
 		end
 
 		// update tag ready bits from CBD 
@@ -145,6 +148,7 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].T_old = T_old_in[i];
 				ROB_table_next[dispatch_idx[i]].halt = halt_in[i];
 				ROB_table_next[dispatch_idx[i]].busy = 1'b1;
+				ROB_table_next[dispatch_idx[i]].opcode = opcode[i];
 				dispatched[i] = 1'b1;
 			end
 		end
@@ -164,7 +168,8 @@ module ROB(
 				ROB_table[i].T_new <= `SD `DUMMY_REG;
 				ROB_table[i].T_old <= `SD `DUMMY_REG;
 				ROB_table[i].halt <= `SD 1'b0;
-				ROB_table[i].busy <= `SD 1'b0;		
+				ROB_table[i].busy <= `SD 1'b0;	
+				ROB_table[i].opcode <= `SD `NOOP_INST;
 			end
 			tail <= `SD `ROB_SIZE-1;
 			head <= `SD `ROB_SIZE-1;

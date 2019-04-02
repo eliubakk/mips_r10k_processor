@@ -998,6 +998,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
 	  .halt_in(id_inst_out.inst.halt),
+    .opcode(id_inst_out.inst_opcode),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),

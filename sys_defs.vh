@@ -201,6 +201,8 @@ typedef struct packed{
   PHYS_REG T_old;
   logic busy;
   logic halt;
+  logic [31:0] opcode;
+  logic valid_inst;
 } ROB_ROW_T;
 
 //Freelist
