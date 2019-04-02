@@ -61,7 +61,7 @@ module pipeline (
     output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
     output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
     output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
-
+    output RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next,
     // // Outputs from ID/EX Pipeline Register
     // output logic [63:0] id_ex_NPC,
     // output logic [31:0] id_ex_IR,
@@ -137,7 +137,7 @@ module pipeline (
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
   logic   [$clog2(`RS_SIZE):0] rs_free_rows_next_out;
   wand								rs_full;
-  RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next;
+ // RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next;
   
   //Outputs from IS/EX Pipeline Register
   RS_ROW_T [`NUM_FU_TOTAL-1:0] issue_reg;
@@ -610,6 +610,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
     assign issue_reg_tags[ig][0] = issue_next[ig].T1[$clog2(`NUM_PHYS_REG)-1:0];
     assign issue_reg_tags[ig][1] = issue_next[ig].T2[$clog2(`NUM_PHYS_REG)-1:0];
+    assign issue_reg_npc[ig] = issue_next[ig].npc;
     assign issue_reg_inst_opcode[ig] = issue_next[ig].inst_opcode;
     assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
   end
@@ -733,11 +734,21 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   end
  
   //enable signal for the multipler  register
-  assign ex_co_enable[3]=  (~done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
+  assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
 
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
-  
+  /*
+   always_comb begin
+	for (integer i=0; i<3; i=i+1) begin
+      ex_co_enable[i]= (ex_co_valid_inst[i] & co_selected[i]);
+    end
+  end
+ 
+  //enable signal for the multipler  register
+  assign ex_co_enable[3]=  (done & co_selected[3] & ex_co_valid_inst[3]); 
 
+  assign ex_co_enable[4]=  (ex_co_valid_inst[4] & co_selected[4]);
+  */
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin//Initialize all registers once
     for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin

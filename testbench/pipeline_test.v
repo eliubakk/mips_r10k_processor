@@ -765,8 +765,8 @@ module testbench;
         show_clk_count;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
-        //@(negedge clock);
-	//@(posedge clock);
+        @(negedge clock);
+	@(posedge clock);
 	#1 $finish;
       end
 
