@@ -207,7 +207,8 @@ typedef struct packed{
 //Freelist
 `define FL_SIZE `NUM_PHYS_REG
 
-
+// Store Queue
+`define SQ_SIZE 16
 
 //////////////////////////////////////////////
 //
@@ -442,6 +443,8 @@ const DECODED_INST EMPTY_INST =
   1'b0
 };
 
+`define NULL_LD_POS {($clog2(`SQ_SIZE) - 1){1'b1}}
+
 // RS_ROWS
 typedef struct packed{
   DECODED_INST inst;
@@ -451,6 +454,7 @@ typedef struct packed{
   logic        busy;
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
+  logic [$clog2(`SQ_SIZE) - 1:0] ld_pos;
 } RS_ROW_T;
 
 const RS_ROW_T EMPTY_ROW = 
@@ -461,7 +465,8 @@ const RS_ROW_T EMPTY_ROW =
   `DUMMY_REG,
   1'b0,
   `NOOP_INST,
-  64'b0
+  64'b0,
+  `NULL_LD_POS
 };
 
 `endif
