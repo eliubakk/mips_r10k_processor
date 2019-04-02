@@ -199,6 +199,13 @@ typedef struct packed{
   logic busy;
 } ROB_ROW_T;
 
+const ROB_ROW_T EMPTY_ROB_ROW = 
+{
+  `DUMMY_REG,
+  `DUMMY_REG,
+  1'b0
+};
+
 //Freelist
 `define FL_SIZE `NUM_PHYS_REG
 

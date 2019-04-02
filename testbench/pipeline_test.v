@@ -250,9 +250,7 @@ module testbench;
           showing_data=1;
         end else if(showing_data!=0) begin
           $display("@@@");
-          showing_data=0;
         end
-      $display("@@@");
     end
   endtask  // task show_mem_with_decimal
 
@@ -478,16 +476,16 @@ module testbench;
 			//display_memory;
 			//display_cache;
 			//display_icache;
-			display_if_stage;
-			display_if_id;
-			display_id_stage;
-			display_id_di;
-			display_di_issue;
+			// display_if_stage;
+			// display_if_id;
+			// display_id_stage;
+			// display_id_di;
+			// display_di_issue;
 			display_issue_ex;
-			display_is_ex_registers;
-			display_ex;
-			display_ex_co_registers;
-			display_complete;
+			// display_is_ex_registers;
+			// display_ex;
+			// display_ex_co_registers;
+			// display_complete;
 			// display_id_di;
 			// display_RS;
 			$display("\n");
@@ -613,6 +611,8 @@ module testbench;
         end
       end
       copy_pipe_counter = pipe_counter;
+      $display("@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@");
+      $display("issue_next_inst_opcode=%t issue_next_npc=%d issue_next_valid_inst=%b",issue_next_inst_opcode,issue_next_npc, issue_next_valid_inst);
       $display("@@@@@@@@@@@@@@@@@@  pipe_counter=%t",pipe_counter);
       if (`NUM_FU_TOTAL>copy_pipe_counter)begin
         for (integer i = copy_pipe_counter; i < `NUM_FU_TOTAL; i=i+1) begin        

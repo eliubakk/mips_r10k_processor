@@ -593,6 +593,7 @@ module pipeline (
     assign issue_reg_T1[i]= issue_reg[i].T1;
     assign issue_reg_T2[i]= issue_reg[i].T2;
     assign issue_reg_inst_opcode[i] = issue_reg[i].inst_opcode;
+    assign issue_reg_inst_valid_inst[i] = issue_reg[i].inst.valid_inst;
   end
   //Instantiating the physical register
   assign is_pr_enable = 1;
