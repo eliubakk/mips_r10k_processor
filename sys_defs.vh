@@ -41,16 +41,29 @@
 
 //////////////////////////////////////////////
 //
+// Pipeline Parameters
+//
+//////////////////////////////////////////////
+`define NUM_FU_TOTAL 5 // total number of functional units
+`define NUM_TYPE_FU 4 // number of different types of functional units
+`define NUM_LD 1
+`define RS_SIZE 16
+`define MAX_RS_SIZE 16
+`define SS_SIZE 1 // superscalar size
+`define ROB_SIZE 16
+
+//////////////////////////////////////////////
+//
 // Register Parameters
 //
 //////////////////////////////////////////////
-`define NUM_PHYS_REG 64
+`define NUM_GEN_REG 32
+typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
+
+`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
 `define phys_index_t ($clog2(`NUM_PHYS_REG) - 1) 
 typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
-
-`define NUM_GEN_REG 32
-typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
 //////////////////////////////////////////////
 //
@@ -154,14 +167,6 @@ typedef enum logic [4:0] {
 //                                         0000    0001    0010    0011    0100    0101    0110    0111    1000    1001    1010    1011    1100    1101    1110    1111
 const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001, 3'b010, 3'b010, 3'b011, 3'b001, 3'b010, 3'b010, 3'b011, 3'b010, 3'b011, 3'b011, 3'b100};
 
-`define NUM_FU_TOTAL 5 // total number of functional units
-`define NUM_TYPE_FU 4 // number of different types of functional units
-`define NUM_LD 1
-`define RS_SIZE 16
-`define MAX_RS_SIZE 16
-`define SS_SIZE 1 // superscalar size
-`define ROB_SIZE 16
-
 typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
 
 // the number of functional units of each specific type we instantiate.
@@ -192,11 +197,12 @@ typedef struct packed {
 
 //ROB_ROWS
 typedef struct packed{
-  PHYS_REG T_new_out;
-  PHYS_REG T_old_out;
-//  logic T_new_valid;
-//  logic T_old_valid;
+  PHYS_REG T_new;
+  PHYS_REG T_old;
   logic busy;
+  logic halt;
+  logic [31:0] opcode;
+  logic valid_inst;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 
@@ -209,7 +215,8 @@ const ROB_ROW_T EMPTY_ROB_ROW =
 //Freelist
 `define FL_SIZE `NUM_PHYS_REG
 
-
+// Store Queue
+`define SQ_SIZE 16
 
 //////////////////////////////////////////////
 //
@@ -444,6 +451,8 @@ const DECODED_INST EMPTY_INST =
   1'b0
 };
 
+`define NULL_LD_POS {($clog2(`SQ_SIZE) - 1){1'b1}}
+
 // RS_ROWS
 typedef struct packed{
   DECODED_INST inst;
@@ -453,6 +462,7 @@ typedef struct packed{
   logic        busy;
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
+  logic [$clog2(`SQ_SIZE) - 1:0] ld_pos;
 } RS_ROW_T;
 
 const RS_ROW_T EMPTY_ROW = 
@@ -463,7 +473,8 @@ const RS_ROW_T EMPTY_ROW =
   `DUMMY_REG,
   1'b0,
   `NOOP_INST,
-  64'b0
+  64'b0,
+  `NULL_LD_POS
 };
 
 `endif

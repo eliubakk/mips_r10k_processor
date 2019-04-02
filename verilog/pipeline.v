@@ -9,7 +9,6 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 `define DEBUG
 `define SD #1
 
@@ -18,6 +17,7 @@ module pipeline (
     //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
     input         clock,                    // System clock
     input         reset,                    // System reset
+    input	        enable,
     input [3:0]   mem2proc_response,        // Tag from memory about current request
     input [63:0]  mem2proc_data,            // Data coming back from memory
     input [3:0]   mem2proc_tag,              // Tag from memory about current reply
@@ -28,17 +28,14 @@ module pipeline (
 
     output logic [3:0]  pipeline_completed_insts,
     output ERROR_CODE   pipeline_error_status,
-    output logic [4:0]  pipeline_commit_wr_idx,
+    output logic [`NUM_FU_TOTAL-1:0]  pipeline_commit_wr_idx,
     output logic [63:0] pipeline_commit_wr_data,
     output logic        pipeline_commit_wr_en,
     output logic [63:0] pipeline_commit_NPC,
 
-
-
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
     // the final values in memory
-
 
     // Outputs from IF-Stage 
     output logic [63:0] if_NPC_out,
@@ -54,39 +51,31 @@ module pipeline (
     output logic [63:0] id_di_NPC,
     output logic [31:0] id_di_IR,
     output logic        id_di_valid_inst,
-    
 
+    // Outputs from DI/IS Pipeline Register       // can output the values from the RS
+    output logic [`RS_SIZE-1:0][63:0] rs_table_out_npc,
+    output logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode,
+    output logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst,
 
-
-   // Outputs from DI/IS Pipeline Register       // can output the values from the RS
-   output logic [`RS_SIZE-1:0][63:0] rs_table_out_npc,
-   output logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode,
-   output logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst,
-
-  // Outputs from IS/EX Pipeline Register   
-  output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
-  output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
-  output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
-  output RS_ROW_T[`NUM_FU_TOTAL-1 :0] issue_next,
-
+    // Outputs from IS/EX Pipeline Register   
+    output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
+    output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
+    output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
 
     // // Outputs from ID/EX Pipeline Register
     // output logic [63:0] id_ex_NPC,
     // output logic [31:0] id_ex_IR,
     // output logic        id_ex_valid_inst,
 
-    
-
     // // Outputs from EX/MEM Pipeline Register
     // output logic [4:0][63:0] ex_mem_NPC,
     // output logic [4:0] ex_mem_IR,
     // output logic [4:0]       ex_mem_valid_inst,
 
-
-     // Outputs from EX/COM Pipeline Register
-     output logic [4:0][63:0] ex_co_NPC,
-     output logic [4:0][31:0] ex_co_IR,
-     output logic [4:0]       ex_co_valid_inst,
+    // Outputs from EX/COM Pipeline Register
+    output logic [`NUM_FU_TOTAL-1:0][63:0] ex_co_NPC,
+    output logic [`NUM_FU_TOTAL-1:0][31:0] ex_co_IR,
+    output logic [`NUM_FU_TOTAL-1:0]       ex_co_valid_inst,
 
     // Outputs from COM/RET Pipeline Register
     output logic [63:0] co_ret_NPC,
@@ -94,24 +83,23 @@ module pipeline (
     output logic        co_ret_valid_inst,
 
     //Module outputs
-  output RS_ROW_T [(`RS_SIZE-1):0]		rs_table_out,
-  output PHYS_REG [`NUM_GEN_REG-1:0] arch_table, 
-  output  ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out,
-  output MAP_ROW_T [`NUM_GEN_REG-1:0]	map_table_out,
-  output PHYS_REG [`FL_SIZE-1:0] free_list_out,
-	output logic [$clog2(`FL_SIZE):0] tail_out,
+    output RS_ROW_T   [(`RS_SIZE-1):0]    rs_table_out,
+    output PHYS_REG   [`NUM_GEN_REG-1:0]  arch_table, 
+    output ROB_ROW_T  [`ROB_SIZE-1:0]	    ROB_table_out,
+    output MAP_ROW_T  [`NUM_GEN_REG-1:0]	map_table_out,
+    output PHYS_REG   [`FL_SIZE-1:0]      free_list_out,
 
-  output logic if_id_enable,
-  output logic RS_enable,
-  output logic is_pr_enable,
-  output logic CDB_enable, 
-  output logic ROB_enable, 
-  
-  output logic co_ret_enable, 
-  output logic dispatch_en, 
-  output logic branch_not_taken,
-  output  logic [4:0]   is_ex_enable,
-  output  logic [4:0]   ex_co_enable
+    output logic if_id_enable,
+    output logic RS_enable,
+    output logic is_pr_enable,
+    output logic CDB_enable, 
+    output logic ROB_enable, 
+    
+    output logic co_ret_enable, 
+    output logic dispatch_en, 
+    output logic branch_not_taken,
+    output logic [`NUM_FU_TOTAL-1:0]   is_ex_enable,
+    output logic [`NUM_FU_TOTAL-1:0]   ex_co_enable
 );
   parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
   parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
@@ -121,7 +109,7 @@ module pipeline (
   // logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
   // logic [4:0]   is_ex_enable, ex_co_enable;
   logic fr_read_en;
-  logic [4:0]   issue_stall;
+  logic [`NUM_FU_TOTAL-1:0] issue_stall;
   // Output from the branch predictor
   logic   bp_output;
   
@@ -142,30 +130,27 @@ module pipeline (
   GEN_REG id_di_rega;
   GEN_REG id_di_regb;
 
+  logic dispatch_no_hazard;
+  logic ROB_enable;
+
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
-  logic   [$clog2(`RS_SIZE):0] free_rows_next;
+  logic   [$clog2(`RS_SIZE):0] rs_free_rows_next_out;
   wand								rs_full;
-  
-  // outputs from dispatch stage
   RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next;
-  logic 	[$clog2(`NUM_FU_TOTAL) - 1:0]	issue_cnt;
-
   
   //Outputs from IS/EX Pipeline Register
   RS_ROW_T [`NUM_FU_TOTAL-1:0] issue_reg;
-  logic [4:0][63:0] is_ex_T1_value;
-  logic [4:0][63:0] is_ex_T2_value;
-  logic [4:0][63:0] pr_T1_value; 
-  logic [4:0][63:0] pr_T2_value;    
-  PHYS_REG [4:0] issue_reg_T1;
-   PHYS_REG [4:0] issue_reg_T2;
+  logic [`NUM_FU_TOTAL-1:0][63:0] is_ex_T1_value;
+  logic [`NUM_FU_TOTAL-1:0][63:0] is_ex_T2_value;
+  logic [`NUM_FU_TOTAL-1:0][1:0][63:0] pr_tags_values; 
+  logic [`NUM_FU_TOTAL-1:0][1:0][$clog2(`NUM_PHYS_REG)-1:0] issue_reg_tags;
+	logic [`NUM_PHYS_REG-1:0][63:0] phys_reg;
 
   // Outputs from EX-Stage
-  logic [4:0][63:0] ex_alu_result_out;
-  logic             ex_take_branch_out;
-	logic         done;
-  
+  logic [`NUM_FU_TOTAL-1:0][63:0] ex_alu_result_out;
+  logic ex_take_branch_out;
+	logic done;
 
 //   // Outputs from EX/MEM Pipeline Register
 //   logic   PHYS_REG [4:0] ex_mem_dest_reg_idx;//Physical register index[T]
@@ -184,8 +169,8 @@ module pipeline (
   // Outputs from EX/COM Pipeline Register
   FU_REG              ex_co_halt;
   FU_REG              ex_co_illegal;
-  PHYS_REG [4:0]      ex_co_dest_reg_idx;
-  logic  [4:0][63:0]  ex_co_alu_result;
+  logic  [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_co_dest_reg_idx;
+  logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_alu_result;
   logic               ex_co_take_branch;
   logic               ex_co_done;
   FU_REG              ex_co_wr_mem;  
@@ -221,13 +206,14 @@ module pipeline (
   logic         co_ret_branch_prediction;
 
   //outputs from the ROB
-  PHYS_REG                    rob_fl_arch_Told;
-  PHYS_REG                    rob_arch_retire_reg;
-  logic                       arch_fr_enable;
-  logic [$clog2(`ROB_SIZE):0] rob_free_entries;
-  logic							          rob_full;
+  //PHYS_REG                    rob_fl_arch_Told;
+  //PHYS_REG                    rob_arch_retire_reg;
+  //logic                       arch_fr_enable;
+  ROB_ROW_T rob_retire_out;
+  logic [$clog2(`ROB_SIZE):0] rob_free_rows_next_out;
+  logic							          rob_full_out;
   ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out;
-  logic [$clog2(`ROB_SIZE):0] tail_reg, head_reg;
+  logic [$clog2(`ROB_SIZE):0] rob_tail_out, rob_head_out;
 
   //Outputs for the free list
   PHYS_REG [`FL_SIZE-1:0]     fr_rs_rob_T;
@@ -247,7 +233,7 @@ module pipeline (
   //Outputs form the freelist check
   PHYS_REG [`FL_SIZE - 1:0]   free_list_check;
   logic [$clog2(`FL_SIZE):0]  tail_check;
-
+  logic fr_wr_en;
   
   // // Outputs from MEM/WB Pipeline Register
   // logic         mem_wb_halt;
@@ -260,6 +246,7 @@ module pipeline (
   logic [63:0] wb_reg_wr_data_out;
   logic  [4:0] wb_reg_wr_idx_out;
   logic        wb_reg_wr_en_out;
+	logic head_halt;
 
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
@@ -279,7 +266,7 @@ module pipeline (
 
   assign pipeline_completed_insts = {3'b0, co_ret_valid_inst};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
-                                  co_ret_halt     ? HALTED_ON_HALT :
+                                  rob_retire_out.halt? HALTED_ON_HALT :
                                   NO_ERROR;
 
   // assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
@@ -360,7 +347,7 @@ module pipeline (
     .co_ret_target_pc(co_ret_alu_result),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(dispatch_en),
+    .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
 
     // Outputs
@@ -375,7 +362,9 @@ module pipeline (
   //            IF/ID Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  assign if_id_enable = (dispatch_en && if_valid_inst_out); 
+  
+assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out); 
+//assign if_id_enable = (dispatch_no_hazard && Icache_valid_out); 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
@@ -386,10 +375,14 @@ module pipeline (
       if_id_NPC        <= `SD if_NPC_out;
       if_id_IR         <= `SD if_IR_out;
       if_id_valid_inst <= `SD if_valid_inst_out;
-    end else begin
+    end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
       if_id_NPC        <= `SD if_id_NPC;
       if_id_IR         <= `SD if_id_IR;
       if_id_valid_inst <= `SD if_id_valid_inst;
+    end else begin
+      if_id_NPC        <= `SD 0;
+      if_id_IR         <= `SD `NOOP_INST;
+      if_id_valid_inst <= `SD `FALSE;
     end
   end
   
@@ -403,6 +396,7 @@ module pipeline (
     .reset(reset),
     .if_id_IR(if_id_IR),
     .if_id_valid_inst(if_id_valid_inst),
+    // .if_id_valid_inst(if_valid_inst_out),
     // .wb_reg_wr_en_out(wb_reg_wr_en_out),
     // .wb_reg_wr_idx_out(wb_reg_wr_idx_out),
     // .wb_reg_wr_data_out(wb_reg_wr_data_out),
@@ -452,13 +446,15 @@ module pipeline (
 
   //Instantiating the freelist
   
-  assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
+  // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
+	assign fr_read_en = id_inst_out.inst.valid_inst;
+	assign fr_wr_en = (rob_retire_out.T_old == `DUMMY_REG) ? 0 : 1; 
   Free_List f0(
     // INPUTS
     .clock(clock),
     .reset(reset),
-    .enable(id_inst_out.inst.valid_inst),
-    .T_old(rob_fl_arch_Told), // Comes from ROB during Retire Stage
+    .enable(fr_wr_en),// Write enable from ROB during retire
+    .T_old(rob_retire_out.T_old), // Comes from ROB during Retire Stage
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
 
     // inputs for branch misprediction
@@ -476,7 +472,7 @@ module pipeline (
     .free_reg(fr_free_reg_T) // Output for Dispatch for other modules
   );
 
-//Instantiating the freelist check_point
+  //Instantiating the freelist check_point
   Free_List_Check flc(
     .clock(clock),
     .enable(enable),
@@ -490,9 +486,9 @@ module pipeline (
 
   always_comb begin
     if (id_inst_out.inst.valid_inst) begin
-    assign  id_inst_out.T = fr_free_reg_T;
+      assign  id_inst_out.T = fr_free_reg_T;
     end else begin
-    assign  id_inst_out.T = `DUMMY_REG;
+      assign  id_inst_out.T = `DUMMY_REG;
     end
   end
   // if (fr_read_en) assign id_inst_out.T = fr_free_reg_T;
@@ -504,12 +500,15 @@ module pipeline (
 
   //////////////////////////////////////////////////
   //                                              //
-  //                  ID/DI-Stage                 //
+  //                  ID/DI-registers             //
   //                                              //
   //////////////////////////////////////////////////
 
-  assign id_di_enable = (dispatch_en && if_valid_inst_out); // always enabled
-  // synopsys sync_set_reset "reset"
+  assign dispatch_no_hazard =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
+	assign id_di_enable = (dispatch_no_hazard && if_id_valid_inst); 
+  //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
+  //assign id_di_enable = if_valid_inst_out;
+	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
       if (reset) begin
         id_di_rega    <= `SD 0;
@@ -519,36 +518,55 @@ module pipeline (
         id_di_IR      <= `SD `NOOP_INST;
         id_di_valid_inst  <=`SD `FALSE;
         
-      end else if(id_di_enable) begin
+      end else if(id_di_enable) begin // Update the value
         id_di_rega    <= `SD id_rega_out;
         id_di_regb    <= `SD id_regb_out;
         id_di_inst_in <= `SD id_inst_out;
         id_di_NPC     <= `SD if_id_NPC;
         id_di_IR      <= `SD if_id_IR;
         id_di_valid_inst  <= `SD if_id_valid_inst;
-      end
+      end else if(!dispatch_no_hazard) begin // Freeze current value
+        id_di_rega    <= `SD id_di_rega;
+        id_di_regb    <= `SD id_di_regb;
+        id_di_inst_in <= `SD id_di_inst_in;
+        id_di_NPC     <= `SD id_di_NPC;
+        id_di_IR      <= `SD id_di_IR;
+        id_di_valid_inst  <=`SD id_di_valid_inst;
+     end else  begin
+        id_di_rega    <= `SD 0;
+        id_di_regb    <= `SD 0;
+        id_di_inst_in <= `SD EMPTY_ROW;
+        id_di_NPC     <= `SD 0;
+        id_di_IR      <= `SD `NOOP_INST;
+        id_di_valid_inst  <=`SD `FALSE;
+        
+
+	end
   end
 
   //////////////////////////////////////////////////
   //                                              //
-  //                  DI/ISSUE-Stage              //
+  //                  DI/ISSUE-stages             //
   //                                              //
   //////////////////////////////////////////////////
 
-  assign issue_stall= ~is_ex_enable;
-  assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full);
+  assign issue_stall = ~is_ex_enable;
+  //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
+  assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
   assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
-  assign RS_enable= (dispatch_en && if_valid_inst_out);
-  RS #(.FU_NAME_VAL(FU_NAME_VAL),
+  //assign RS_enable= (dispatch_en && if_id_valid_inst);
+  assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
+  assign RS_enable = dispatch_en & id_di_valid_inst;
+	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
     // inputs
     .clock(clock), 
     .reset(reset), 
-    .enable(RS_enable), 
+    .enable(enable), 
     .CAM_en(CDB_enable), 
-    .CDB_in(CDB_in), 
-    .dispatch_valid(dispatch_en),
+    .CDB_in(CDB_tag_out), 
+    .dispatch_valid(RS_enable),
     .inst_in(id_di_inst_in), 
     .branch_not_taken(branch_not_taken), 
     .issue_stall(issue_stall),
@@ -556,14 +574,14 @@ module pipeline (
     // outputs
     .rs_table_out(rs_table_out), 
     .issue_out(issue_next), 
-    .free_rows_next(free_rows_next),
+    .free_rows_next(rs_free_rows_next_out),
     .rs_full(rs_full)
   );
 
   genvar j;
   
   always_comb begin
-    for(integer i=0; i< `RS_SIZE; i=i+1) begin
+    for(int i = 0; i < `RS_SIZE; i += 1) begin
       rs_table_out_npc[i] = rs_table_out[i].npc;
       rs_table_out_inst_opcode[i] = rs_table_out[i].inst_opcode;
       rs_table_out_inst_valid_inst[i] = rs_table_out[i].inst.valid_inst;
@@ -578,35 +596,35 @@ module pipeline (
 
 
   // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if(reset) begin
-      for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-        issue_reg[i] <= `SD EMPTY_ROW;
-      end
-    end else if(is_ex_enable) begin
-      issue_reg <= `SD issue_next;
-    end
-  end
+  // always_ff @(posedge clock) begin
+  //   if(reset) begin
+  //     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
+  //       issue_reg[i] <= `SD EMPTY_ROW;
+  //     end
+  //   end else if(is_ex_enable) begin
+  //     issue_reg <= `SD issue_next;
+  //   end
+  // end
 
-  genvar i;
-  for(i=0; i< `NUM_FU_TOTAL; i=i+1) begin
-    assign issue_reg_T1[i]= issue_reg[i].T1;
-    assign issue_reg_T2[i]= issue_reg[i].T2;
-    assign issue_reg_inst_opcode[i] = issue_reg[i].inst_opcode;
-    assign issue_reg_inst_valid_inst[i] = issue_reg[i].inst.valid_inst;
+  genvar ig;
+  for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
+    assign issue_reg_tags[ig][0] = issue_next[ig].T1[$clog2(`NUM_PHYS_REG)-1:0];
+    assign issue_reg_tags[ig][1] = issue_next[ig].T2[$clog2(`NUM_PHYS_REG)-1:0];
+    assign issue_reg_inst_opcode[ig] = issue_next[ig].inst_opcode;
+    assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
   end
   //Instantiating the physical register
   assign is_pr_enable = 1;
   phys_regfile regf_0 (
-    .rda_idx(issue_reg_T1),
-    .rda_out(pr_T1_value), 
+    .rd_idx(issue_reg_tags),
+    .rd_out(pr_tags_values),
 
-    .rdb_idx(issue_reg_T2),
-    .rdb_out(pr_T2_value),
-
+    `ifdef DEBUG
+    	.phys_registers_out(phys_reg),
+    `endif
     .wr_clk(clock),
     .wr_en(ex_co_valid_inst),
-    .wr_idx(ex_co_dest_reg_idx[`phys_index_t:0]),
+    .wr_idx(ex_co_dest_reg_idx),
     .wr_data(ex_co_alu_result)
   );
 
@@ -623,43 +641,40 @@ module pipeline (
   //                                              //
   //////////////////////////////////////////////////
   always_comb begin
-    for (integer i=0; i<5; i=i+1) begin
-      is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i]));; // always enabled
+    for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
+    	//is_ex_enable[i] = (issue_reg[i].inst.valid_inst & ex_co_enable[i]);
+    	//is_ex_enable[i] = ex_co_enable[i];
+      is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i])); // always enabled - Original stuff
     end
   end
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if (reset) begin
-     // id_di_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
-     // id_di_IR            <= `SD `NOOP_INST;
-      is_ex_T1_value[0]   <= `SD 0;
-      is_ex_T1_value[1]   <= `SD 0;
-      is_ex_T1_value[2]   <= `SD 0;
-      is_ex_T1_value[3]   <= `SD 0;
-      is_ex_T1_value[4]   <= `SD 0;
-      is_ex_T1_value[5]   <= `SD 0;
-      is_ex_T2_value[0]   <= `SD 0;
-      is_ex_T2_value[1]   <= `SD 0;
-      is_ex_T2_value[2]   <= `SD 0;
-      is_ex_T2_value[3]   <= `SD 0;
-      is_ex_T2_value[4]   <= `SD 0;
-      is_ex_T2_value[5]   <= `SD 0;
-      // id_di_opa_select    <= `SD ALU_OPA_Iid_ex_rega
-      // id_ex_opb_select    <= `SD ALU_OPB_Iid_ex_rega
-      // id_ex_dest_reg_idx  <= `SD `ZERO_REGid_ex_rega
-      // id_ex_alu_func      <= `SD ALU_ADDQ;id_ex_rega
-      // id_ex_rd_mem        <= `SD 0;
-      // id_ex_wr_mem        <= `SD 0;
-      // id_ex_cond_branch   <= `SD 0;
-      // id_ex_uncond_branch <= `SD 0;
-      // id_ex_halt          <= `SD 0;
-      // id_ex_illegal       <= `SD 0;
-      // id_ex_valid_inst    <= `SD 0;
-    end else if(is_ex_enable) begin // if (reset)
+    for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
+      if (reset) begin
+        // id_di_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
+        // id_di_IR            <= `SD `NOOP_INST;
+        
+        is_ex_T1_value[i]   <= `SD 0;
+        is_ex_T2_value[i]   <= `SD 0;
+        issue_reg[i]        <= `SD EMPTY_ROW;
+        
+        // id_di_opa_select    <= `SD ALU_OPA_Iid_ex_rega
+        // id_ex_opb_select    <= `SD ALU_OPB_Iid_ex_rega
+        // id_ex_dest_reg_idx  <= `SD `ZERO_REGid_ex_rega
+        // id_ex_alu_func      <= `SD ALU_ADDQ;id_ex_rega
+        // id_ex_rd_mem        <= `SD 0;
+        // id_ex_wr_mem        <= `SD 0;
+        // id_ex_cond_branch   <= `SD 0;
+        // id_ex_uncond_branch <= `SD 0;
+        // id_ex_halt          <= `SD 0;
+        // id_ex_illegal       <= `SD 0;
+        // id_ex_valid_inst    <= `SD 0;
+      end else if(is_ex_enable[i]) begin // if (reset)
         //id_ex_NPC           <= `SD if_id_NPC;// alrady have a slot in issue table
-       // id_ex_IR            <= `SD if_id_IR;
-        is_ex_T1_value    <= `SD pr_T1_value;
-        is_ex_T2_value    <= `SD pr_T2_value;
+        // id_ex_IR            <= `SD if_id_IR;
+        is_ex_T1_value[i] <= `SD pr_tags_values[i][0];
+        is_ex_T2_value[i] <= `SD pr_tags_values[i][1];
+        issue_reg[i] <= `SD issue_next[i];
         // id_ex_opa_select    <= `SD id_opa_select_out;
         // id_ex_opb_select    <= `SD id_opb_select_out;
         // id_ex_dest_reg_idx  <= `SD id_dest_reg_idx_out;
@@ -671,7 +686,8 @@ module pipeline (
         // id_ex_halt          <= `SD id_halt_out;
         // id_ex_illegal       <= `SD id_illegal_out;
         // id_ex_valid_inst    <= `SD id_valid_inst_out;
-    end // else: !if(reset)
+      end // else: !if(reset)
+    end
   end // always
 
 
@@ -724,7 +740,7 @@ module pipeline (
 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin//Initialize all registers once
-    for (integer i=0; i<= 5; i=i+1) begin
+    for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin
       if (reset) begin
           ex_co_NPC[i]          <= `SD 0;
           ex_co_IR[i]           <= `SD `NOOP_INST;
@@ -740,7 +756,7 @@ module pipeline (
           // these are forwarded directly from ID/EX latches
           ex_co_NPC[i]          <= `SD issue_reg[i].npc;
           ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
-          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T;
+          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[$clog2(`NUM_PHYS_REG)-1:0];
          // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
           ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
           ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
@@ -896,7 +912,7 @@ module pipeline (
     .reset(reset),  // Asynchronous reset active low
     .enable(CDB_enable), // Clock Enable
     .tag_in(co_reg_wr_idx_out),	// Comes from FU, during commit
-    .ex_valid(ex_co_valid_inst_selected),
+    .ex_valid(co_valid_inst_selected),
 
     // Outputs
     .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules
@@ -977,32 +993,34 @@ module pipeline (
   	.reset(reset),
   	.enable(enable),
   	.T_old_in(T_old), // Comes from Map Table During Dispatch
-  	.T_new_in(fr_rs_rob_T), // Comes from Free List During Dispatch
+  	.T_new_in(fr_free_reg_T), // Comes from Free List During Dispatch
   	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
-  	.dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+  	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
-
-  	// OUTPUTS
-  	.T_free(rob_fl_arch_Told), // Output for Retire Stage goes to Free List
-  	.T_arch(rob_arch_retire_reg), // Output for Retire Stage goes to Arch Map
-
-  	.T_out_valid(arch_fr_enable),
-  	.rob_free_entries(rob_free_entries),
-  	.rob_full(rob_full), // Used for Dispatch Hazard
+	  .halt_in(id_inst_out.inst.halt),
+    .opcode(id_inst_out.inst_opcode),
   	
-  	.ROB_table_out(ROB_table_out),
-  	.tail_reg(tail_reg), 
-    .head_reg(head_reg)
+    // OUTPUTS
+    .retire_out(rob_retire_out),
+  	.free_rows_next(rob_free_rows_next_out),
+  	.full(rob_full_out), // Used for Dispatch Hazard
+  	//.head_halt(head_halt),
+    `ifdef DEBUG
+    .ROB_table_out(ROB_table_out),
+  	.tail_out(rob_tail_out), 
+    .head_out(rob_head_out)
+    `endif
   );
+
 
   //Intsantiating the arch map
   Arch_Map_Table a0(
   	.clock(clock),
   	.reset(reset),
-  	.enable(arch_enable),
-  	.T_new_in(rob_arch_retire_reg), // Comes from ROB during Retire
-    .T_old_in(rob_fl_arch_Told), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
+  	.enable(rob_retire_out.busy),
+  	.T_new_in(rob_retire_out.T_new), // Comes from ROB during Retire
+    .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
   	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
   );

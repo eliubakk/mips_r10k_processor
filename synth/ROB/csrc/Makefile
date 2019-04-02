@@ -8,7 +8,7 @@ VSRC=..
 TARGET_ARCH=
 
 # Choose name of executable 
-PRODUCTBASE=$(VSRC)/simv_Arch_Map_Table
+PRODUCTBASE=$(VSRC)/simv_ROB
 
 PRODUCT=$(PRODUCTBASE)
 
@@ -41,7 +41,7 @@ STRIPFLAGS=
 PRE_LDFLAGS= # Loader Flags
 LDFLAGS= -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg 
 # Picarchive Flags
-PICLDFLAGS=-Wl,-rpath-link=./ -Wl,-rpath='$$ORIGIN'/simv_Arch_Map_Table.daidir/ -Wl,-rpath=./simv_Arch_Map_Table.daidir/ -Wl,-rpath='$$ORIGIN'/simv_Arch_Map_Table.daidir//scsim.db.dir 
+PICLDFLAGS=-Wl,-rpath-link=./ -Wl,-rpath='$$ORIGIN'/simv_ROB.daidir/ -Wl,-rpath=./simv_ROB.daidir/ -Wl,-rpath='$$ORIGIN'/simv_ROB.daidir//scsim.db.dir 
 
 # C run time startup
 CRT0=

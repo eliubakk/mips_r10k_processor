@@ -8,7 +8,7 @@
 # added "-sverilog" and "SW_VCS=2012.09" option,
 #	and removed deprecated Virsim references -- jbbeau fall 2013
 # updated library path name -- jbbeau fall 2013
-VCS_BASE = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 
+VCS_BASE = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps 
 VCS = $(VCS_BASE)
 VCS_PIPE = $(VCS_BASE) +define+PIPELINE=1
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
@@ -96,6 +96,9 @@ $(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	mkdir -p $* && cd $* && \
 	$(VCS) +memcbk $(patsubst %.v,../../%.v,$^) -o dve -R -gui 
 
+clean_%:
+	cd $(SYN_DIR) && \
+	rm -rf $(subst clean_,,$@) 
 #####
 # Should be no need to modify after here
 #####
@@ -128,7 +131,8 @@ clean:
           dve *.vpd *.vcd *.dump ucli.key
 
 nuke:	clean
-	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf DVEfiles/
+	cd $(SYN_DIR) && \
+	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf *.sv DVEfiles/
 	
 .PHONY: dve clean nuke	
 

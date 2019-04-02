@@ -9,18 +9,25 @@
 
 
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
-
+`define DEBUG
 module regfile(
         input   [4:0] rda_idx, rdb_idx, wr_idx,    // read/write index
         input  [63:0] wr_data,            // write data
         input         wr_en, wr_clk,
+
+	/*`ifdef DEBUG
+		output logic [31:0] [63:0] registers_out,
+	`endif*/
 
         output logic [63:0] rda_out, rdb_out    // read data
           
       );
   
   logic    [31:0] [63:0] registers;   // 32, 64-bit Registers
+
+/*`ifdef DEBUG
+	assign registers_out = registers;
+`endif*/
 
   wire   [63:0] rda_reg = registers[rda_idx];
   wire   [63:0] rdb_reg = registers[rdb_idx];

@@ -1,5 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 module psel_generic(req, en, gnt_bus, gnt);
 	parameter WIDTH = 16; //number of grant lines that can be high at once.
 	parameter NUM_REQS = 3; //number of req lines arbitrating over

@@ -1,5 +1,4 @@
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 module Arch_Map_Table(
 	input	clock,
 	input 	reset,
@@ -29,6 +28,7 @@ module Arch_Map_Table(
 	if(`SS_SIZE == 1) begin
 		assign T_old_forwarded = T_old_in;
 		assign T_new_forwarded = T_new_in;
+		assign enable_forwarded = enable;
 	end else if(`SS_SIZE == 3) begin
 		assign T_idx0_over_idx1 = enable[0] & (T_new_in[1] == T_old_in[0]);
 		assign T_idx1_over_idx2 = enable[1] & (T_new_in[2] == T_old_in[1]);

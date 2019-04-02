@@ -28,6 +28,7 @@ module testbench;
   // variables used in the testbench
   logic        clock;
   logic        reset;
+  logic	       enable;
   logic [31:0] clock_count;
   logic [31:0] instr_count;
   int          wb_fileno;
@@ -104,6 +105,7 @@ module testbench;
     // Inputs
     .clock             (clock),
     .reset             (reset),
+    .enable		(1'b1),
     .mem2proc_response (mem2proc_response),
     .mem2proc_data     (mem2proc_data),
     .mem2proc_tag      (mem2proc_tag),
@@ -150,11 +152,12 @@ module testbench;
     .ex_co_valid_inst(ex_co_valid_inst),
     .co_ret_NPC(co_ret_NPC),
     .co_ret_IR(co_ret_IR),
-    .rs_table_out(rs_table_out),
+    .co_ret_valid_inst(co_ret_valid_inst),
+	.rs_table_out(rs_table_out),
     .arch_table(arch_table),
     .ROB_table_out(ROB_table_out),
     .free_list_out(free_list_out),
-    .issue_next(issue_next),
+    // .issue_next(issue_next),
     .co_ret_valid_inst(co_ret_valid_inst),
     .if_id_enable(if_id_enable),
     .RS_enable(RS_enable),
@@ -260,6 +263,22 @@ module testbench;
 				$display("**********************************************************\n");
 				$display("------------------------RS TABLE----------------------------\n");
 
+			$display("issue_reg");
+			for (int i = 0; i < 5; ++i) begin
+				$display("issue_reg[%d].inst.valid_inst: %b", i, pipeline_0.issue_reg[i].inst.valid_inst);
+				$display("ex_co_enable[%d]: %b", i, pipeline_0.ex_co_enable[i]);
+			end
+
+
+			$display("issue_idx_valid_shift");
+			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+				$display("issue_idx_valid_shifted[%d] = %b", i, pipeline_0.RS0.issue_idx_valid_shifted[i]);
+			end 
+			$display("issue_idx_valid");
+			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+				$display("issue_idx_valid[%d]: %b", i, pipeline_0.RS0.issue_idx_valid[i]);
+			end
+
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
 				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
 			end
@@ -277,16 +296,30 @@ module testbench;
 			$display("------------------------------------------\n");	
 		end
 	endtask
+  task display_map_table;
+		begin
+			$display("-----------Map Table-----------");
+			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
+				$display("Reg:%d, pluas: %b, Phys Reg : %d", k, pipeline_0.map_table_out[k][6],pipeline_0.map_table_out[k][5:0]); 
+			end
+			$display("------------------------------------------\n");	
+		end
+	endtask
+
 
   task display_ROB_table;
 		begin
-			@(posedge clock);
-			#2;
+		//	@(posedge clock);
+		//	#2;
 				$display("**********************************************************\n");
 				$display("------------------------ROB TABLE----------------------------\n");
 
-			for(integer i=1;i<=`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_new_out = %7.0b T_old_out = %7.0b ", i, ROB_table_out[i].busy, ROB_table_out[i].T_new_out, ROB_table_out[i].T_old_out);
+			$display("INPUTS");
+			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b branch_not_taken: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.branch_not_taken);
+			$display("OUTPUTS");
+			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
+			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
+				$display("ROB_Row = %d,  busy = %d, halt = %d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt,  pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
 			$display("*******************************************************************\n");
@@ -294,7 +327,7 @@ module testbench;
 		end
 	endtask
 
-  task display_free_list_table;
+ /* task display_free_list_table;
 		input	PHYS_REG [`NUM_PHYS_REG-1:0] list;
 		begin
     $display("**********************************************************\n");
@@ -305,7 +338,18 @@ module testbench;
 			end	
 		end
 	endtask
+*/
 
+
+ 	task display_free_list_table;
+		begin
+			$display("\n----------------------------Freelist Table----------------------------\n");
+			$display("Free_list_tail : %b", pipeline_0.fr_tail_out);
+			for (integer i = 0; i<`FL_SIZE; ++i) begin
+				$display("%dth line : %b", i, pipeline_0.fr_rs_rob_T[i]);
+			end
+		end
+	endtask
 	task display_inst;
 		input DECODED_INST _inst_in;
 		begin
@@ -323,6 +367,19 @@ module testbench;
 			for(int p=0;p<20;p++) begin
 				$display(" row %d : %h",p, memory.unified_memory[p][63:0]);
 			end
+		end
+	endtask
+
+	task display_phys_reg;
+		begin
+			$display("\n Physical register files-------------------------------------");
+      for(int p = 0; p < `NUM_FU_TOTAL; p += 1) begin
+			 $display("FU: %d rda_idx %b, rda_out: %d, rdb_idx: %b, rdb_out: %d, wr_en: %b, wr_idx: %b, wr_data: %d", p, pipeline_0.issue_reg_tags[p][0], pipeline_0.pr_tags_values[p][0], pipeline_0.issue_reg_tags[p][1], pipeline_0.pr_tags_values[p][0], pipeline_0.ex_co_valid_inst[p], pipeline_0.ex_co_dest_reg_idx[p], pipeline_0.ex_co_alu_result[p]);
+			end
+      for(int p=0;p<32+`ROB_SIZE;p++) begin
+				$display("%dth phys reg value : %d", p, pipeline_0.phys_reg[p]);
+				
+			end	
 		end
 	endtask
 
@@ -364,7 +421,7 @@ module testbench;
 	task display_if_id;
 		begin
 			$display("\nif_id pipeline registers---------------------------------------------------");
-			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
+			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_id_NPC, pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
 		end
 	endtask
 
@@ -387,7 +444,7 @@ module testbench;
 	task display_id_di;
 		begin
 			$display("\n id_di pipeline registers---------------------------------------------");
-			$display("id_di_enable: %b, dispatch_en: %b, if_valid_inst_out: %b", pipeline_0.id_di_enable, pipeline_0.dispatch_en, pipeline_0.if_valid_inst_out);
+			$display("id_di_enable: %b, dispatch_no_hazard: %b, if_valid_inst_out : %b", pipeline_0.id_di_enable, pipeline_0.dispatch_no_hazard, pipeline_0.if_valid_inst_out);
 			$display("id_di_rega: %d, id_di_regb: %d, id_di_inst_in: %h", pipeline_0.id_di_rega, pipeline_0.id_di_regb, pipeline_0.id_di_inst_in); 			
 			$display("id_di_NPC: %d, id_di_IR: %h, id_di_valid_inst: %b",pipeline_0.id_di_NPC, pipeline_0.id_di_IR, pipeline_0.id_di_valid_inst );
 
@@ -400,7 +457,7 @@ module testbench;
 			$display("\n di_issue stage---------------------------------------------------------");
 			$display("issue_stall: %b dispatch_en: %b branch_not_taken: %b RS_enable: %b", pipeline_0.issue_stall, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.RS_enable);
 			$display("\n RESERVATION STATION INPUT WIRES---------------------------------------");
-			$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
+			//$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
 			$display("\n INST GOING INTO RS");
 			display_inst(pipeline_0.id_di_inst_in);
 		end
@@ -411,11 +468,11 @@ module testbench;
 			$display("\n issue execute pipeline registers-----------------------------------------");
 			$display("issue_reg:");
 			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("\t\tissue_reg[%d] T = %d T1 = %d T2 = %d busy: %b inst_opcode: %d npc: %d", i, pipeline_0.issue_reg[i].T, pipeline_0.issue_reg[i].T1, pipeline_0.issue_reg[i].T2, pipeline_0.issue_reg[i].busy, pipeline_0.issue_reg[i].inst_opcode, pipeline_0.issue_reg[i].npc);
+				$display("\t\tissue_reg[%d] T = %d T1 = %d T2 = %d busy: %b inst_opcode: %h npc: %d", i, pipeline_0.issue_reg[i].T, pipeline_0.issue_reg[i].T1, pipeline_0.issue_reg[i].T2, pipeline_0.issue_reg[i].busy, pipeline_0.issue_reg[i].inst_opcode, pipeline_0.issue_reg[i].npc);
 			end
 			$display("issue_reg WIRES (those that are assigned");
 			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %d", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
+				//$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %h", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
 			end
 		end
 	endtask
@@ -464,31 +521,61 @@ module testbench;
 		end
 	endtask
 
+	task display_co_re_registers;
+		begin
+			$display("\n Complete/Retire pipeline registers----------------------------------------");
+			$display("co_ret_NPC: %h, co_ret_IR: %h, co_ret_halt: %b, co_ret_valid_inst: %b", pipeline_0.co_ret_NPC, pipeline_0.co_ret_IR, pipeline_0.co_ret_halt, pipeline_0.co_ret_valid_inst);
+		end
+	endtask
+
 	task display_stages;
 		begin
-			if (clock_count == 20) begin
+			 if (clock_count == 200) begin
 				$finish;
-			end
+			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			$display("Cycle: %d", clock_count);
+			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
 			//display_icache;
-			// display_if_stage;
-			// display_if_id;
-			// display_id_stage;
-			// display_id_di;
-			// display_di_issue;
+			//display_if_stage;
+			 display_if_id;
+			//display_id_stage;
+			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
+			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
+		display_id_di;
+			
+			display_di_issue;
+			display_RS_table;
+			display_ROB_table;
+			display_map_table;
+			$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
+			$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
+			$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
+		
 			display_issue_ex;
-			// display_is_ex_registers;
-			// display_ex;
-			// display_ex_co_registers;
-			// display_complete;
+			display_is_ex_registers;
+			display_ex;
+			display_ex_co_registers;
+			display_complete;
+			$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
+			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
+			display_co_re_registers;
+			display_arch_table;
+			display_free_list_table;
+			display_phys_reg;	
+			$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
+			//display_ROB_table;
+			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
+			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;
+			
+			//$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
+
 		end
 	endtask
 
@@ -516,7 +603,7 @@ module testbench;
     $display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime);
 
     wb_fileno = $fopen("../../writeback.out");
-
+	$display("@@@Start");
 
 //----Check issue_reg
 
@@ -543,21 +630,21 @@ module testbench;
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
 	`SD;
-	display_stages;
+	 display_stages;
   end  
 
   
   always @(negedge clock) begin
 
 
-	$display("co_ret_enable: %b co_halt_selected: %b", pipeline_0.co_ret_enable, pipeline_0.co_halt_selected);
+/*	$display("co_ret_enable: %b co_halt_selected: %b", pipeline_0.co_ret_enable, pipeline_0.co_halt_selected);
 	for(int p=0; p<5; p++) begin
 
 	$display("issue_reg.inst.halt[p] = %b", pipeline_0.issue_reg[p].inst.halt);
  
 	end
 	$display("pc_reg = %d", pipeline_0.if_stage_0.PC_reg);
-
+*/
 
     if(reset)
       $display("@@\n@@  %t : System STILL at reset, can't show anything\n@@",
@@ -678,7 +765,9 @@ module testbench;
         show_clk_count;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
-        #100 $finish;
+        //@(negedge clock);
+	//@(posedge clock);
+	#1 $finish;
       end
 
     end  // if(reset)   

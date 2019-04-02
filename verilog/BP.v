@@ -7,11 +7,6 @@
 `include "../../verilog/GSHARE.v"
 `include "../../verilog/RAS.v"
 `endif
-`timescale 1ns/100ps
-//`include "BTB.v"
-//`include "GSHARE.v"
-//`include "OBQ.v"
-
 `define	DEBUG
 
 // Branch misprediction : input is index and clear_en is 1

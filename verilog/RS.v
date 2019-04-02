@@ -1,7 +1,6 @@
 // MODULARIZED SUPER-SCALAR RS
 
 `include "../../sys_defs.vh"
-`timescale 1ns/100ps
 `define DEBUG
 
 //-----------------------------------------------------------------------------------------
@@ -170,7 +169,7 @@ module RS
 		  .WIDTH(2),
 		  .NUM_TAGS(`SS_SIZE),
 		  .TAG_SIZE($clog2(`NUM_PHYS_REG))) rscam ( 
-		.enable({`SS_SIZE{enable}} & CAM_en),
+		.enable(CAM_en),
 		.tags(cam_tags_in),
 		.table_in(cam_table_in),
 		.hits(cam_hits)
@@ -208,6 +207,12 @@ module RS
 				rs_table_next[dispatch_idx[i]].busy = 1'b1;
 			end 
 		end
+	//COMMIT STAGE
+		for(i = 0; i < `RS_SIZE; i = i + 1) begin
+			rs_table_next[i].T1[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][0]) | rs_table[i].T1[$clog2(`NUM_PHYS_REG)];
+			rs_table_next[i].T2[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][1]) | rs_table[i].T2[$clog2(`NUM_PHYS_REG)];
+		end 		
+
 
 		//DISPATCH CONTROL SIGNAL
 		//	number of rows that can be dispatched into next cycle

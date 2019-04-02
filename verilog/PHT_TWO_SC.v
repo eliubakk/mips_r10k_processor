@@ -2,7 +2,6 @@
 //
 `define DEBUG
 `define PHT_ROW 8
-`timescale 1ns/100ps
 module PHT_TWO_SC(
 		input				clock,
 		input				reset,

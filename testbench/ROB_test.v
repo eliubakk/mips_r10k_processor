@@ -5,50 +5,68 @@
 
 module testbench;
 	logic clock, reset, enable;
-	PHYS_REG 		                T_old_in; // Comes from Map Table During Dispatch
-	PHYS_REG		                T_new_in; // Comes from Free List During Dispatch
-	PHYS_REG 		                CDB_tag_in; // Comes from CDB during Commit
-	logic			                CDB_en; // Comes from CDB during Commit
-	logic			                dispatch_en; // Structural Hazard detection during Dispatch
-	logic			                branch_not_taken;
+	PHYS_REG [`SS_SIZE-1:0] T_old_in; // Comes from Map Table During Dispatch
+	PHYS_REG [`SS_SIZE-1:0] T_new_in; // Comes from Free List During Dispatch
+	logic 	 [`SS_SIZE-1:0] halt_in;
+	PHYS_REG [`SS_SIZE-1:0] CDB_tag_in; // Comes from CDB during Commit
+	logic	 [`SS_SIZE-1:0] CAM_en; // Comes from CDB during Commit
+	logic 	 [`SS_SIZE-1:0] dispatch_en; // Structural Hazard detection during Dispatch
+	logic	 branch_not_taken;
     //Outputs
-	PHYS_REG 	                    T_old_out; // Output for Retire Stage goes to Free List
-	PHYS_REG                        T_new_out; // Output for Retire Stage goes to Arch Map
-	logic 				            T_old_valid, T_new_valid;
-	logic [$clog2(`ROB_SIZE) - 1:0] rob_free_entries;
-    logic                           rob_full;
+    ROB_ROW_T [`SS_SIZE-1:0] retire_out, retire_test;
+	//PHYS_REG [`SS_SIZE-1:0] T_free_out, T_free_test; // Output for Retire Stage goes to Free List
+	//PHYS_REG [`SS_SIZE-1:0] T_arch_out, T_arch_test; // Output for Retire Stage goes to Arch Map
+	//logic 	 [`SS_SIZE-1:0] T_out_valid, T_out_valid_test;
+	logic [$clog2(`ROB_SIZE):0] free_rows_next_out, free_rows_next_test;
+    logic 						full_out, full_test;
 
-    `DUT(ROB) ROB0(
+    logic [$clog2(`ROB_SIZE):0] tail_out, head_out;
+    logic [$clog2(`ROB_SIZE):0] tail_next_out, head_next_out;
+    ROB_ROW_T [`ROB_SIZE-1:0] ROB_table_out, ROB_table_test;
+   	logic [`ROB_SIZE-1:0] ready_to_retire_out;
+	logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] retire_idx_out;
+	logic [`SS_SIZE-1:0] retire_idx_valid_out;
+	logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx_out;
+
+    ROB g1(
         //inputs
         .clock(clock),
         .reset(reset),
         .enable(enable),
         .T_old_in(T_old_in),
         .T_new_in(T_new_in),
+        .halt_in(halt_in),
         .CDB_tag_in(CDB_tag_in),
-        .CDB_en(CDB_en),
+        .CAM_en(CAM_en),
         .dispatch_en(dispatch_en),
         .branch_not_taken(branch_not_taken),
 
         //outputs
-        .T_old_out(T_old_out),
-        .T_new_out(T_new_out),
-        .T_old_valid(T_old_valid),
-        .T_new_valid(T_new_valid),
-        .rob_free_entries(rob_free_entries),
-        .rob_full(rob_full)
+        .retire_out(retire_out),
+        .free_rows_next(free_rows_next_out),
+        .full(full_out),
+        .tail_out(tail_out),
+        .head_out(head_out),
+        .tail_next_out(tail_next_out),
+        .head_next_out(head_next_out),
+        .ROB_table_out(ROB_table_out),
+        .ready_to_retire_out(ready_to_retire_out),
+        .retire_idx_out(retire_idx_out),
+        .retire_idx_valid_out(retire_idx_valid_out),
+        .dispatch_idx_out(dispatch_idx_out)
     );
 
     always #10 clock = ~clock;
 
-    typedef ROB_ROW_T [`ROB_SIZE] table_t;
+    typedef ROB_ROW_T [`ROB_SIZE-1:0] table_t;
 
-    function table_t clear_rob_table_test;
+	// TASKS
+	function table_t clear_rob_table_test;
 		begin
-			for (integer i = 0; i < `RS_SIZE; i += 1) begin
-				// rs_table_test[i] = '{($bits(RS_ROW_T)){0} };
-				clear_rob_table_test[i].T_new_out = `DUMMY_REG;
-				clear_rob_table_test[i].T_old_out = `DUMMY_REG;
+			for (integer i = 0; i < `ROB_SIZE; i += 1) begin
+				clear_rob_table_test[i].T_new = `DUMMY_REG;
+				clear_rob_table_test[i].T_old = `DUMMY_REG;
+				clear_rob_table_test[i].halt = 1'b0;
 				clear_rob_table_test[i].busy = 1'b0;
 			end
 		end
@@ -57,93 +75,59 @@ module testbench;
     task exit_on_error;
 		begin
 			#1;
+
 			$display("@@@Failed at time %f", $time);
 			$finish;
 		end
 	endtask
 
-    task print_rob_entry;
-		input ROB_ROW_T rob_entry;
-		begin
-			$display("\tT_old_out = %7.0b", rob_entry.T_old_out);
-			$display("\tT_new_out = %7.0b", rob_entry.T_new_out);
-            $display("\tBusy = %b", rob_entry.busy);
-		end
-	endtask
-
-    task print_rob_table;
-		input ROB_ROW_T  [(`ROB_SIZE - 1):0]	rob_table;
-		begin
-			$display("**********************************************************\n");
-			$display("------------------------ROB TABLE----------------------------\n");
-
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("Entry: %d", i);
-				print_rob_entry(rob_table[i]);
-			end
-			$display("*******************************************************************\n");
-		end
-	endtask
-
     task table_out;
 		begin
-				$display("**********************************************************\n");
-				$display("------------------------ROB TABLE----------------------------\n");
-
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_old_out = %7.0b, T_new_out = %7.0b ", i, rob_table_out[i].busy, rob_table_out[i].T_old_out, rob_table_out[i].T_new_out);
+			$display("**********************************************************\n");
+			$display("--------------------- ROB TABLE --------------------------\n");
+			$display("head = %d, tail = %d", head_out, tail_out);
+			for(integer i = `ROB_SIZE-1; i >= 0; i -= 1) begin
+				$display("Row = %d, busy = %d, halt = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_out[i].busy, ROB_table_out[i].halt, ROB_table_out[i].T_old, ROB_table_out[i].T_new);
 			end
-				$display("ROB full = %b, rob_free_entries = %d",rob_full, rob_free_entries);
-            $display("*******************************************************************\n");
+				$display("ROB full = %b, free_rows_next = %d", full_out, free_rows_next_out);
+				$display("ready_to_retire_out: %d", ready_to_retire_out[`ROB_SIZE-1]);
+			for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+				$display("retire_idx_out[%d]: %d", i, retire_idx_out[i]);
+				$display("retire_idx_valid_out[%d]: %d", i, retire_idx_valid_out[i]);
+				$display("dispatch_idx_out[%d]: %d", i, dispatch_idx_out[i]);
+			end
+			$display("head_next_out: %d", head_next_out);
+			$display("tail_next_out: %d", tail_next_out);
+            $display("**********************************************************\n");
+
+            $display("**********************************************************\n");
+			$display("----------------------- retire_out ----------------------------\n");
+			for(integer i = `SS_SIZE-1; i >= 0; i -= 1) begin
+				$display("Row: %d, halt: %d, T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_out[i].halt, retire_out[i].T_old, retire_out[i].T_new, retire_out[i].busy);
+			end
+			$display("**********************************************************\n");
         end
     endtask
 
     task table_test_out;
 		begin
 				$display("**********************************************************\n");
-				$display("------------------------ROB TABLE----------------------------\n");
+				$display("------------------------ ROB TABLE TEST ----------------------------\n");
 
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_old_out = %7.0b, T_new_out = %7.0b ", i, rob_table_test[i].busy, rob_table_test[i].T_old_out, rob_table_test[i].T_new_out);
+			for(integer i = `ROB_SIZE-1; i >= 0;i -= 1) begin
+				$display("ROB_Row = %d, busy = %d, halt = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_test[i].busy, ROB_table_test[i].halt, ROB_table_test[i].T_old, ROB_table_test[i].T_new);
 			end
-				$display("ROB full = %b, rob_free_entries = %d",rob_full_test, rob_free_entries_test);			
+				$display("ROB full = %b, free_rows_next = %d", full_test, free_rows_next_test);			
 			$display("*******************************************************************\n");
+
+			$display("**********************************************************\n");
+			$display("----------------------- retire_test ----------------------------\n");
+			for(integer i = `SS_SIZE-1; i >= 0; i -= 1) begin
+				$display("Row: %d, halt: %d T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_test[i].halt, retire_test[i].T_old, retire_test[i].T_new, retire_test[i].busy);
+			end
+			$display("**********************************************************\n");
 		end
 	endtask
-
-    //task entry_exists_in_table;
-		////input ROB_ROW_T inst_in;
-		//input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
-		//begin
-		//	integer i;
-		//	for (i = 0; i < `ROB_SIZE; i += 1) begin
-		//		if (rob_table_out[i].busy) begin
-		//			//if (rs_table_out[i] == inst_in) begin
-		//			return;
-		//			//end
-		//		end
-		//	end
-		//	$display("failed in entry_exists_in_table");
-		//	#1 exit_on_error;
-		//end
-	//endtask
-
-	//task entry_not_in_table;
-	//	//input RS_ROW_T inst_in;
-	//	input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
-	//	begin
-	//		integer i;
-	//		for (i = 0; i < `ROB_SIZE; i += 1) begin
-	//			if (rob_table_out[i].busy) begin
-	////				if (rs_table_out[i] == inst_in) begin
-		//				$display("failed in entry_not_in_table");
-		//				#1 exit_on_error;
-		////			end
-			//	end
-		//	end
-		//	return;
-		//end
-	//endtask
 
 	task table_has_N_entries;
 		input integer count;
@@ -160,7 +144,7 @@ module testbench;
 			assert(count == _count) else #1 exit_on_error;
 		end
 	endtask
-
+	
 	task tags_now_ready;
 		input integer tag;
 		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_out;
@@ -168,11 +152,8 @@ module testbench;
 			integer i;
 			for (i = 0; i < `ROB_SIZE; i += 1) begin
 				if (rob_table_out[i].busy) begin
-					if (rob_table_out[i].T_old_out[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rob_table_out[i].T_old_out[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
-					end
-					if (rob_table_out[i].T_new_out[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
-						assert(rob_table_out[i].T_new_out[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
+					if (rob_table_out[i].T_new[$clog2(`NUM_PHYS_REG)-1:0] == tag) begin
+						assert(rob_table_out[i].T_new[$clog2(`NUM_PHYS_REG)]) else #1 exit_on_error;
 					end
 				end
 			end
@@ -180,12 +161,21 @@ module testbench;
 		end
 	endtask
 
-	task rob_table_equal;
-		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table;
-		input ROB_ROW_T [(`ROB_SIZE - 1):0] rob_table_test;
+	task check_correct;
 		begin
 			for (int i = 0; i < `ROB_SIZE; i += 1) begin
-				assert(rob_table_test[i] === rob_table[i]) else #1 exit_on_error;
+				assert(ROB_table_test[i].busy === ROB_table_out[i].busy) else #1 exit_on_error;
+				if(ROB_table_test[i].busy) begin
+					assert(ROB_table_test[i] === ROB_table_out[i]) else #1 exit_on_error;
+				end
+			end
+			assert(full_out == full_test) else #1 exit_on_error;
+			assert(free_rows_next_out == free_rows_next_test) else #1 exit_on_error;
+			for(int i = 0; i < `SS_SIZE; i += 1) begin
+				assert(retire_out[i].busy === retire_test[i].busy) else #1 exit_on_error;
+				if(retire_test[i].busy) begin
+					assert(retire_out[i] === retire_test[i]) else #1 exit_on_error;
+				end
 			end
 		end
 	endtask
@@ -195,53 +185,870 @@ module testbench;
 	logic second = 1'b0;
 	ROB_ROW_T inst_1;
 	ROB_ROW_T inst_2;
+	int T_new_counter = `NUM_GEN_REG;
+	int retire_idx_counter;
+	int dispatch_idx_counter;
+	bit looped = 0;
 	
 	initial begin
-		
-	/*	$monitor("Clock: %4.0f, reset: $b, enable:%b, CAM_en:%b, CDB_in:%h, .dispatch_valid:%b, inst_in:%h, LSQ_busy : %b, \n rs_table_out:%h", clock, reset, enable, CAM_en, CDB_in,dispatch_valid, inst_in, LSQ_busy, rs_table_out);	
- 	*/
 		$monitor("Clock: %4.0f, reset: %b, enable:%b, ", clock, reset, enable);	
 		
 		// Initial value
 		clock = 1'b0;
 		reset = 1'b0;
 		enable = 1'b0;
-		T_old_in = 7'b1111111;
-		T_new_in = 7'b1111111;
-		CDB_tag_in = 7'b1111111;
-		CDB_en = 1'b0;
-		dispatch_en = 1'b0;
+		T_old_in = {`SS_SIZE{`DUMMY_REG}};
+		T_new_in = {`SS_SIZE{`DUMMY_REG}};
+		CDB_tag_in = {`SS_SIZE{`DUMMY_REG}};
+		CAM_en = {`SS_SIZE{1'b0}};
+		dispatch_en = {`SS_SIZE{1'b0}};
 		branch_not_taken = 1'b0; 
 
-		@(negedge clock);
-//Check reset
-		reset = 1;
-	@(negedge  clock);
-//Check enable
-		enable = 1;
-	@(negedge clock);
-//Dispatch
-		reset = 0;
-		enable = 1;
-		T_old_in = 7'b1111111;
-		T_new_in = 7'b1111111;
-		CDB_tag_in = 7'b1111111;
-		CDB_en = 1'b0;
-		dispatch_en = 1'b1;
-		branch_not_taken = 1'b0;	
-		$display("****************************************DISPATCH MULT R1 R2 R3************************************************");
+		//test variables
+		ROB_table_test = clear_rob_table_test();
+		full_test = 1'b0;
+		free_rows_next_test = 16;
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			retire_test[i].T_new = `DUMMY_REG;
+			retire_test[i].T_old = `DUMMY_REG;
+			retire_test[i].halt = 1'b0;
+			retire_test[i].busy = 1'b0;
+		end
 
-		// At this cycle, rob_table should be empty
-		// because currently dispatched instruction is seen
-		// in rob_table on the next cycle
+		//reset
+		@(negedge clock);
+		reset = 1;
+		@(negedge clock);
+		table_out();
+		check_correct();
+
+		reset = 0;
+		@(posedge clock);
+		`DELAY
+		table_out();
+		$display("###########################################################################");
+		$display("************** TEST 1 : Dispatch and retire one instruction ***************");
+		$display("###########################################################################\n"); 
+
+		$display("*********************** DISPATCH ADDQ R1 R2 R3 ****************************");
+		enable = 1;
+		T_old_in[`SS_SIZE-1] = 3;
+		T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+		T_new_in[`SS_SIZE-1] = T_new_counter;
+		halt_in[`SS_SIZE-1] = 1'b0;
+		dispatch_en[`SS_SIZE-1] = 1'b1;
+
+		//update test variables
+		free_rows_next_test -= 1;
+
+		@(negedge clock);
+		table_out();
+		check_correct();
+
 		@(posedge clock);
 		`DELAY;
+		dispatch_en[`SS_SIZE-1] = 1'b0;
+		`DELAY;
+		ROB_table_test[`ROB_SIZE-1].T_new = T_new_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].T_old = T_old_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].halt = halt_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].busy = 1'b1;
+		table_out();
+		check_correct();
 
-		table_has_N_entries(1, rob_table_out);
-		@(negedge clock);	
+		//commit T_new
+		CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+		CAM_en[`SS_SIZE-1] = 1'b1;
+
+		@(negedge clock);
+		retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-1];
+		retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+		free_rows_next_test += 1;
+		table_out();
+		check_correct();
+
+		@(posedge clock);
+		`DELAY;
+		CAM_en[`SS_SIZE-1] = 1'b0;
+		ROB_table_test[`ROB_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+		ROB_table_test[`ROB_SIZE-1].busy = 1'b0;
+		retire_test[`SS_SIZE-1].busy = 1'b0;
+		table_out();
+		check_correct();
+
+		$display("###########################################################################");
+		$display("***** TEST 2 : Dispatch five instructions, then retire. Tests ENABLE ******");
+		$display("###########################################################################\n"); 
+
+		for(int i = 0; i < 5; i += 1) begin
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+			enable = 1'b0;
+			T_old_in[`SS_SIZE-1] = i;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			T_new_counter += 1;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			enable = 1'b1;
+			//update test variables
+			free_rows_next_test -= 1;
+
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
+			table_out();
+			check_correct();
+		end
+		T_new_counter -= 5;
+		for(int i = 0; i < 5; i += 1) begin
+			//commit T_new
+			enable = 1'b0;
+			CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+			T_new_counter += 1;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			table_out();
+			check_correct();
+
+			enable = 1'b1;
+			@(negedge clock);
+			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-(i + 1)];
+			free_rows_next_test += 1;
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b0;
+			retire_test[`SS_SIZE-1].busy = 1'b0;
+			table_out();
+			check_correct();
+		end
+
+		$display("###########################################################################");
+		$display("****** TEST 3 : Dispatch instructions until tail loops, then retire *******");
+		$display("###########################################################################\n"); 
+		T_new_counter -= 5;
+		for(int i = 4; i <= `ROB_SIZE; i += 1) begin
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i + 1);
+			T_old_in[`SS_SIZE-1] = i + 1;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			T_new_counter += 1;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+
+			//update test variables
+			free_rows_next_test -= 1;
+
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].busy = 1'b1;
+			table_out();
+			check_correct();
+		end
+
+		T_new_counter -= (`ROB_SIZE - 3);
+		for(int i = 4; i <= `ROB_SIZE; i += 1) begin
+			//commit T_new
+			CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+			T_new_counter += 1;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+
+			@(negedge clock);
+			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)];
+			retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			free_rows_next_test += 1;
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].busy = 1'b0;
+			retire_test[`SS_SIZE-1].busy = 1'b0;
+			table_out();
+			check_correct();
+		end
+		T_new_counter -= (`ROB_SIZE - 3);
+
+		$display("###########################################################################");
+		$display("****** TEST 4 : Dispatch instruction, then dispatch and retire x 5 ********");
+		$display("###########################################################################\n"); 
+
+		$display("*********************** DISPATCH ADDQ R1 R2 R0 ****************************");
+		T_old_in[`SS_SIZE-1] = 0;
+		T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+		T_new_in[`SS_SIZE-1] = T_new_counter;
+		halt_in[`SS_SIZE-1] = 1'b0;
+		dispatch_en[`SS_SIZE-1] = 1'b1;
+
+		//update test variables
+		free_rows_next_test -= 1;
+
+		@(negedge clock);
+		table_out();
+		check_correct();
+
+		@(posedge clock);
+		`DELAY;
+		dispatch_en[`SS_SIZE-1] = 1'b0;
+		`DELAY;
+		ROB_table_test[`ROB_SIZE-1].T_new = T_new_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].T_old = T_old_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].halt = halt_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].busy = 1'b1;
+		table_out();
+		check_correct();
+
+		for(int i = 1; i <= 5; i += 1) begin
+			//commit T_new
+			CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+			T_new_counter += 1;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+			if(i < 5) begin
+				$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+				T_old_in[`SS_SIZE-1] = i;
+				T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+				T_new_in[`SS_SIZE-1] = T_new_counter;
+				halt_in[`SS_SIZE-1] = (i == 5)? 1'b1 : 1'b0;
+				dispatch_en[`SS_SIZE-1] = 1'b1;
+			end
+			@(negedge clock);
+			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-1];
+			retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			if(i == 5) begin
+				free_rows_next_test += 1;
+			end
+			table_out();
+			check_correct();	
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			ROB_table_test[`ROB_SIZE-1].busy = 1'b0;
+			retire_test[`SS_SIZE-1].busy = 1'b0;
+			if(i < 5) begin
+				ROB_table_test[`ROB_SIZE-1].T_new = T_new_in[`SS_SIZE-1];
+				ROB_table_test[`ROB_SIZE-1].T_old = T_old_in[`SS_SIZE-1];
+				ROB_table_test[`ROB_SIZE-1].halt = halt_in[`SS_SIZE-1];
+				ROB_table_test[`ROB_SIZE-1].busy = 1'b1;
+			end
+			table_out();
+			check_correct();	
+		end
+		T_new_counter -= 5;
+		$display("###########################################################################");
+		$display("***** TEST 5 : Fill the Rob, retire until head at top, then fill again ****");
+		$display("###########################################################################\n"); 
+
+		//run test 2 again to get head and tail to `ROB_SIZE - 1 - 4
+		for(int i = 0; i < 5; i += 1) begin
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+			T_old_in[`SS_SIZE-1] = i;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			T_new_counter += 1;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+
+			//update test variables
+			free_rows_next_test -= 1;
+
+			@(negedge clock);
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
+			check_correct();
+		end
+		T_new_counter -= 5;
+		for(int i = 0; i < 5; i += 1) begin
+			//commit T_new
+			CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+			T_new_counter += 1;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+
+			@(negedge clock);
+			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-(i + 1)];
+			retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			free_rows_next_test += 1;
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b0;
+			retire_test[`SS_SIZE-1].busy = 1'b0;
+			check_correct();
+		end
+		table_out();
+
+		T_new_counter -= 1;
+		for(int i = 4; i < (`ROB_SIZE + 4); i += 1) begin
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i + 1);
+			T_old_in[`SS_SIZE-1] = i + 1;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			T_new_counter += 1;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+
+			//update test variables
+			free_rows_next_test -= 1;
+
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].busy = 1'b1;
+			if(i == (`ROB_SIZE + 3)) begin
+				full_test = 1'b1;
+			end
+			table_out();
+			check_correct();
+			if(i == (`ROB_SIZE - 1)) begin
+				T_new_counter -= `ROB_SIZE;
+			end
+		end
+
+		for(int i = 4; i < `ROB_SIZE; i += 1) begin
+			//commit T_new
+			CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+			T_new_counter += 1;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+
+			@(negedge clock);
+			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)];
+			retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			free_rows_next_test += 1;
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].busy = 1'b0;
+			retire_test[`SS_SIZE-1].busy = 1'b0;
+			if(i == 4) begin
+				full_test = 1'b0;
+			end
+			table_out();
+			check_correct();
+		end
+
+		T_new_counter -= (`ROB_SIZE - 4);
+		for(int i = 4; i < `ROB_SIZE; i += 1) begin
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i + 1);
+			T_old_in[`SS_SIZE-1] = i + 1;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			T_new_counter += 1;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+
+			//update test variables
+			free_rows_next_test -= 1;
+
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
+			if(i == (`ROB_SIZE - 1)) begin
+				full_test = 1'b1;
+			end
+			table_out();
+			check_correct();
+		end
+
+		$display("###########################################################################");
+		$display("**** TEST 6 : When ROB is full, retire head and dispatch the same cycle ***");
+		$display("###########################################################################\n"); 
+
+		T_new_counter -= `ROB_SIZE;
+		for(int i = 0; i < `ROB_SIZE; i += 1) begin
+			//commit T_new
+			CDB_tag_in[`SS_SIZE-1] = T_new_counter;
+			T_new_counter += 1;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+			T_old_in[`SS_SIZE-1] = i;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = `ROB_SIZE + 1 + i;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+			@(negedge clock);
+			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-(i + 1)];
+			retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			retire_test[`SS_SIZE-1].busy = 1'b0;
+			ROB_table_test[`ROB_SIZE-(i+1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i+1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i+1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i+1)].busy = 1'b1;
+			table_out();
+			check_correct();	
+		end
+
+		$display("###########################################################################");
+		$display("********** TEST 7 : Commit not at head, should not retire. RESET **********");
+		$display("###########################################################################\n"); 
+
+		for(int i = `ROB_SIZE - 6; i >= 0; i -= 2) begin
+			//commit T_new
+			CDB_tag_in[`SS_SIZE-1] = `ROB_SIZE + 1 + i;
+			CAM_en[`SS_SIZE-1] = 1'b1;
+
+			@(negedge clock);
+			if(i == 0) begin
+				retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-(i + 1)];
+				retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				free_rows_next_test += 1;
+			end
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			CAM_en[`SS_SIZE-1] = 1'b0;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			if(i == 0) begin
+				ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b0;
+				retire_test[`SS_SIZE-1].busy = 1'b0;
+				full_test = 1'b0;
+			end
+			table_out();
+			check_correct();
+		end
+		if(`SS_SIZE == 1) begin
+			retire_idx_counter = `ROB_SIZE - 2;
+			retire_test[`SS_SIZE-1] = ROB_table_test[retire_idx_counter];
+			retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+			free_rows_next_test += 1;
+			for(int i = 1; i < 10; i += 2) begin
+				//commit T_new
+				CDB_tag_in[`SS_SIZE-1] = `ROB_SIZE + 1 + i;
+				CAM_en[`SS_SIZE-1] = 1'b1;
+
+				@(negedge clock);
+				table_out();
+				check_correct();
+
+				@(posedge clock);
+				`DELAY;
+				CAM_en[`SS_SIZE-1] = 1'b0;
+				ROB_table_test[`ROB_SIZE-(i + 1)].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				ROB_table_test[retire_idx_counter].busy = 1'b0;
+				retire_test[`SS_SIZE-1].busy = 1'b0;
+				retire_idx_counter -= 1;
+				retire_test[`SS_SIZE-1] = ROB_table_test[retire_idx_counter];
+				retire_test[`SS_SIZE-1].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				free_rows_next_test += 1;
+				table_out();
+				check_correct();
+			end
+		end
+
+		//reset
+		reset = 1'b1;
+		@(posedge clock);
+		`DELAY;
+		reset = 1'b0;
+		ROB_table_test = clear_rob_table_test();
+		full_test = 1'b0;
+		free_rows_next_test = 16;
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			retire_test[i].T_new = `DUMMY_REG;
+			retire_test[i].T_old = `DUMMY_REG;
+			retire_test[i].busy = 1'b0;
+		end
+
+		table_out();
+		check_correct();
+
+		$display("###########################################################################");
+		$display("******************** TEST 8 : Test branch_not_taken ***********************");
+		$display("###########################################################################\n"); 
+		T_new_counter = `NUM_GEN_REG;
+		for(int i = 0; i < 5; i += 1) begin
+			$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+			T_old_in[`SS_SIZE-1] = i;
+			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
+			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
+			T_new_counter += 1;
+			dispatch_en[`SS_SIZE-1] = 1'b1;
+
+			//update test variables
+			free_rows_next_test -= 1;
+
+			@(negedge clock);
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			dispatch_en[`SS_SIZE-1] = 1'b0;
+			`DELAY;
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
+			check_correct();
+		end
+
+		//branch mispredicted
+		branch_not_taken = 1'b1;
+		@(posedge clock);
+		`DELAY;
+		branch_not_taken = 1'b0;
+		ROB_table_test = clear_rob_table_test();
+		full_test = 1'b0;
+		free_rows_next_test = 16;
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			retire_test[i].T_new = `DUMMY_REG;
+			retire_test[i].T_old = `DUMMY_REG;
+			retire_test[i].busy = 1'b0;
+		end
+
+		if(`SS_SIZE == 1) begin
+			$display("@@@Passed");
+			$finish;
+		end
+
+		$display("###########################################################################");
+		$display("************ TEST 9 : Test Superscalar dispatch, commit, retire ***********");
+		$display("###########################################################################\n"); 
+		T_new_counter = `NUM_GEN_REG;
+		dispatch_idx_counter = `ROB_SIZE-1;
+		//Dispatch 1, 2, ..., `SS_SIZE
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+				T_old_in[`SS_SIZE-1-j] = `ROB_SIZE-1-(dispatch_idx_counter-j);
+				T_old_in[`SS_SIZE-1-j][$clog2(`NUM_PHYS_REG)] = 1'b1;
+				T_new_in[`SS_SIZE-1-j] = T_new_counter;
+				halt_in[`SS_SIZE-1-j] = 1'b0;
+				T_new_counter += 1;
+				dispatch_en[`SS_SIZE-1-j] = 1'b1;
+
+				//update test variables
+				free_rows_next_test -= 1;
+			end
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				dispatch_en[`SS_SIZE-1-j] = 1'b0;
+				ROB_table_test[dispatch_idx_counter].T_new = T_new_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].T_old = T_old_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].halt = halt_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].busy = 1'b1;
+				dispatch_idx_counter -= 1;
+			end
+			`DELAY;
+			table_out();
+			check_correct();
+		end
+		T_new_counter = `NUM_GEN_REG;
+		retire_idx_counter = `ROB_SIZE-1;
+		//Commit `SS_SIZE, `SS_SIZE-1, ..., 1
+		for(int i = 0; i < `SS_SIZE; i += 1) begin
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > `SS_SIZE-1-i) begin
+					continue;
+				end
+				//commit T_new
+				CDB_tag_in[`SS_SIZE-1-j] = T_new_counter;
+				T_new_counter += 1;
+				CAM_en[`SS_SIZE-1-j] = 1'b1;
+			end
+
+			@(negedge clock);
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > `SS_SIZE-1-i) begin
+					continue;
+				end
+				retire_test[`SS_SIZE-1-j] = ROB_table_test[retire_idx_counter-j];
+				retire_test[`SS_SIZE-1-j].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				free_rows_next_test += 1;
+			end
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > `SS_SIZE-1-i) begin
+					continue;
+				end
+				CAM_en[`SS_SIZE-1-j] = 1'b0;
+				ROB_table_test[retire_idx_counter].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				ROB_table_test[retire_idx_counter].busy = 1'b0;
+				retire_test[`SS_SIZE-1-j].busy = 1'b0;
+				retire_idx_counter -= 1;
+			end
+			table_out();
+			check_correct();
+		end
+
+		$display("###########################################################################");
+		$display("***** TEST 10 : Test Superscalar dispatch, retire when tail/head loop *****");
+		$display("###########################################################################\n"); 
+		T_new_counter = `NUM_GEN_REG;
+		dispatch_idx_counter += 1;
+		retire_idx_counter += 1;
+		//Dispatch `SS_SIZE until tail loops
+		for(int i = 0; ~looped; i += 1) begin
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+				T_old_in[`SS_SIZE-1-j] = (i*`SS_SIZE) + j;
+				T_old_in[`SS_SIZE-1-j][$clog2(`NUM_PHYS_REG)] = 1'b1;
+				T_new_in[`SS_SIZE-1-j] = T_new_counter;
+				halt_in[`SS_SIZE-1-j] = 1'b0;
+				T_new_counter += 1;
+				dispatch_en[`SS_SIZE-1-j] = 1'b1;
+
+				//update test variables
+				free_rows_next_test -= 1;
+			end
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				dispatch_en[`SS_SIZE-1-j] = 1'b0;
+				ROB_table_test[dispatch_idx_counter].T_new = T_new_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].T_old = T_old_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].halt = halt_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].busy = 1'b1;
+				if(dispatch_idx_counter == 0) begin
+					dispatch_idx_counter = `ROB_SIZE - 1;
+					looped = 1;
+				end else begin
+					dispatch_idx_counter -= 1;
+				end
+			end
+			`DELAY;
+			table_out();
+			table_test_out();
+			check_correct();
+		end
+		T_new_counter = `NUM_GEN_REG;
+		looped = 0;
+		//Commit `SS_SIZE, `SS_SIZE-1, ..., 1
+		for(int i = 0; ~looped; i += 1) begin
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				//commit T_new
+				CDB_tag_in[`SS_SIZE-1-j] = T_new_counter;
+				T_new_counter += 1;
+				CAM_en[`SS_SIZE-1-j] = 1'b1;
+			end
+
+			@(negedge clock);
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				retire_test[`SS_SIZE-1-j] = (retire_idx_counter >= j)? ROB_table_test[retire_idx_counter-j] :
+																	   ROB_table_test[`ROB_SIZE-(j-retire_idx_counter)];
+				retire_test[`SS_SIZE-1-j].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				free_rows_next_test += 1;
+			end
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				CAM_en[`SS_SIZE-1-j] = 1'b0;
+				ROB_table_test[retire_idx_counter].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				ROB_table_test[retire_idx_counter].busy = 1'b0;
+				retire_test[`SS_SIZE-1-j].busy = 1'b0;
+				if(retire_idx_counter == 0) begin 
+					retire_idx_counter = `ROB_SIZE - 1;
+					looped = 1;
+				end else begin
+					retire_idx_counter -= 1;
+				end
+			end
+			table_out();
+			check_correct();
+		end
+
+		$display("###########################################################################");
+		$display("*** TEST 11 : Test Superscalar dispatch/retire with 1, 2, ..., `SS_SIZE ***");
+		$display("###########################################################################\n"); 
+		T_new_counter = `NUM_GEN_REG;
+		dispatch_idx_counter = `ROB_SIZE-1;
+		retire_idx_counter = `ROB_SIZE-1;
+		looped = 0;
+		for(int i = 1; ~looped; i = (i%(`SS_SIZE-1)+1)) begin
+			//Dispatch 1, 2, ..., `SS_SIZE
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				$display("*********************** DISPATCH ADDQ R1 R2 R%d ****************************", i);
+				T_old_in[`SS_SIZE-1-j] = `ROB_SIZE-1-(dispatch_idx_counter-j);
+				T_old_in[`SS_SIZE-1-j][$clog2(`NUM_PHYS_REG)] = 1'b1;
+				T_new_in[`SS_SIZE-1-j] = (T_new_counter+j);
+				halt_in[`SS_SIZE-1-j] = (j == 2)? 1'b1 : 1'b0;
+				dispatch_en[`SS_SIZE-1-j] = 1'b1;
+
+				//update test variables
+				free_rows_next_test -= 1;
+			end
+			@(negedge clock);
+			table_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				dispatch_en[`SS_SIZE-1-j] = 1'b0;
+				ROB_table_test[dispatch_idx_counter].T_new = T_new_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].T_old = T_old_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].halt = halt_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].busy = 1'b1;
+				if(j < i) begin 
+					if(dispatch_idx_counter == 0) begin
+						dispatch_idx_counter = `ROB_SIZE - 1;
+						looped = 1;
+					end else begin
+						dispatch_idx_counter -= 1;
+					end
+				end
+			end
+			`DELAY;
+			table_out();
+			check_correct();
+
+			//Commit 1, 2, ..., `SS_SIZE
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				//commit T_new
+				CDB_tag_in[`SS_SIZE-1-j] = T_new_counter;
+				T_new_counter += 1;
+				CAM_en[`SS_SIZE-1-j] = 1'b1;
+			end
+
+			@(negedge clock);
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				if(retire_idx_counter >= j) begin
+					retire_test[`SS_SIZE-1-j] = ROB_table_test[retire_idx_counter-j];
+				end else begin
+					retire_test[`SS_SIZE-1-j] = ROB_table_test[`ROB_SIZE-(j - retire_idx_counter)];
+				end
+				retire_test[`SS_SIZE-1-j].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				free_rows_next_test += 1;
+			end
+			table_out();
+			table_test_out();
+			check_correct();
+
+			@(posedge clock);
+			`DELAY;
+			for(int j = 0; j < `SS_SIZE; j += 1) begin
+				if(j > i) begin
+					continue;
+				end
+				CAM_en[`SS_SIZE-1-j] = 1'b0;
+				ROB_table_test[retire_idx_counter].T_new[$clog2(`NUM_PHYS_REG)] = 1'b1;
+				ROB_table_test[retire_idx_counter].busy = 1'b0;
+				retire_test[`SS_SIZE-1-j].busy = 1'b0;
+				if(j < i) begin
+					if(retire_idx_counter == 0) begin 
+						retire_idx_counter = `ROB_SIZE - 1;
+						looped = 1;
+					end else begin
+						retire_idx_counter -= 1;
+					end
+				end
+			end
+			table_out();
+			check_correct();
+		end
 
 		$display("@@@Passed");
 		$finish;
 	end
-	
 endmodule
