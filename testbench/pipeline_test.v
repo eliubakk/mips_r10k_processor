@@ -319,9 +319,9 @@ module testbench;
 			$display("INPUTS");
 			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b branch_not_taken: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.branch_not_taken);
 			$display("OUTPUTS");
-			$display("T_free: %d T_arch: %d T_out_valid: %b rob_free_entries: %d rob_full: %b tail_reg: %d head_reg: %d", pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg, pipeline_0.arch_fr_enable, pipeline_0.rob_free_entries, pipeline_0.rob_full, pipeline_0.tail_reg, pipeline_0.head_reg);
+			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
 			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, halt = %b, T_new_out = %7.0b T_old_out = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt, pipeline_0.ROB_table_out[i].T_new_out, pipeline_0.ROB_table_out[i].T_old_out);
+				$display("ROB_Row = %d,  busy = %d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
 			$display("*******************************************************************\n");
@@ -375,8 +375,10 @@ module testbench;
 	task display_phys_reg;
 		begin
 			$display("\n Physical register files-------------------------------------");
-			$display("input : rda_idx %b, rda_out: %d. rdb_idx %b, rdb_out %d, wr_en : %b, wr_idx : %b, wr_data : %d", pipeline_0. issue_reg_T1, pipeline_0.pr_T1_value, pipeline_0.issue_reg_T2, pipeline_0.pr_T2_value, pipeline_0.ex_co_valid_inst, pipeline_0.ex_co_dest_reg_idx, pipeline_0.ex_co_alu_result);
-			for(int p=0;p<32+`ROB_SIZE;p++) begin
+      for(int p = 0; p < `NUM_FU_TOTAL; p += 1) begin
+			 $display("FU: %d rda_idx %b, rda_out: %d, rdb_idx: %b, rdb_out: %d, wr_en: %b, wr_idx: %b, wr_data: %d", p, pipeline_0.issue_reg_tags[p][0], pipeline_0.pr_tags_values[p][0], pipeline_0.issue_reg_tags[p][1], pipeline_0.pr_tags_values[p][0], pipeline_0.ex_co_valid_inst[p], pipeline_0.ex_co_dest_reg_idx[p], pipeline_0.ex_co_alu_result[p]);
+			end
+      for(int p=0;p<32+`ROB_SIZE;p++) begin
 				$display("%dth phys reg value : %d", p, pipeline_0.phys_reg[p]);
 				
 			end	
@@ -472,7 +474,7 @@ module testbench;
 			end
 			$display("issue_reg WIRES (those that are assigned");
 			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %h", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
+				//$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %h", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
 			end
 		end
 	endtask
@@ -566,14 +568,14 @@ module testbench;
 			display_arch_table;
 			display_free_list_table;
 			display_phys_reg;	
-			$display("ROB output to arch map - T_out_valid : %b, T_free : %b, T_arch : %b", pipeline_0.arch_fr_enable, pipeline_0.rob_fl_arch_Told, pipeline_0.rob_arch_retire_reg);				
+			$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;
 			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			// display_RS;
 			
-			$display("halt : %b", pipeline_0.head_halt);
+			//$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
 
 		end

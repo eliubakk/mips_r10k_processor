@@ -41,16 +41,29 @@
 
 //////////////////////////////////////////////
 //
+// Pipeline Parameters
+//
+//////////////////////////////////////////////
+`define NUM_FU_TOTAL 5 // total number of functional units
+`define NUM_TYPE_FU 4 // number of different types of functional units
+`define NUM_LD 1
+`define RS_SIZE 16
+`define MAX_RS_SIZE 16
+`define SS_SIZE 1 // superscalar size
+`define ROB_SIZE 16
+
+//////////////////////////////////////////////
+//
 // Register Parameters
 //
 //////////////////////////////////////////////
-`define NUM_PHYS_REG 64
+`define NUM_GEN_REG 32
+typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
+
+`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
 `define phys_index_t ($clog2(`NUM_PHYS_REG) - 1) 
 typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
-
-`define NUM_GEN_REG 32
-typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
 //////////////////////////////////////////////
 //
@@ -153,14 +166,6 @@ typedef enum logic [4:0] {
 //LUT for bit count of 4-bit numbers
 //                                         0000    0001    0010    0011    0100    0101    0110    0111    1000    1001    1010    1011    1100    1101    1110    1111
 const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001, 3'b010, 3'b010, 3'b011, 3'b001, 3'b010, 3'b010, 3'b011, 3'b010, 3'b011, 3'b011, 3'b100};
-
-`define NUM_FU_TOTAL 5 // total number of functional units
-`define NUM_TYPE_FU 4 // number of different types of functional units
-`define NUM_LD 1
-`define RS_SIZE 16
-`define MAX_RS_SIZE 16
-`define SS_SIZE 1 // superscalar size
-`define ROB_SIZE 16
 
 typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
 

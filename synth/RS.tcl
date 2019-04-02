@@ -21,8 +21,8 @@ elaborate RS
 set design_name RS
 set clock_name clock
 set reset_name reset
-#set CLK_PERIOD 5
-set CLK_PERIOD 10
+set CLK_PERIOD 6.5
+#set CLK_PERIOD 10
 
 
 
