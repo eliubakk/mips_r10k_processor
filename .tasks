@@ -8,8 +8,8 @@ LSQ
 
 Automated Regression Testing
 - Determine Desired Behavior
-	- Correctness Checking
-	- Performance Checking
+	- Correctness Checking (DONE) 
+	- Performance Checking (IN PROGRESS)
 	- 
 - Map out What we need to do correctness/performance checking
 - Implement
