@@ -7,6 +7,7 @@ module ROB(
 		input enable,
 		input PHYS_REG [`SS_SIZE-1:0] T_old_in, // Comes from Map Table During Dispatch
 		input PHYS_REG [`SS_SIZE-1:0] T_new_in, // Comes from Free List During Dispatch
+		input 		   [`SS_SIZE-1:0] halt_in,
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
@@ -26,7 +27,6 @@ module ROB(
 			output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx_out
 		`endif
 	);
-
 
 	logic [$clog2(`ROB_SIZE):0] tail, tail_next, head, head_next;
 	logic head_next_busy;
@@ -102,6 +102,7 @@ module ROB(
 		for(int i = 0; i < `SS_SIZE; i += 1) begin
 			retire_out[i].T_old = `DUMMY_REG;
 			retire_out[i].T_new = `DUMMY_REG;
+			retire_out[i].halt = 1'b0;
 			retire_out[i].busy = 1'b0;
 		end
 
@@ -142,6 +143,7 @@ module ROB(
 				& enable) begin
 				ROB_table_next[dispatch_idx[i]].T_new = T_new_in[i];
 				ROB_table_next[dispatch_idx[i]].T_old = T_old_in[i];
+				ROB_table_next[dispatch_idx[i]].halt = halt_in[i];
 				ROB_table_next[dispatch_idx[i]].busy = 1'b1;
 				dispatched[i] = 1'b1;
 			end
@@ -161,6 +163,7 @@ module ROB(
 			for (int i = 0; i < `ROB_SIZE; i += 1) begin
 				ROB_table[i].T_new <= `SD `DUMMY_REG;
 				ROB_table[i].T_old <= `SD `DUMMY_REG;
+				ROB_table[i].halt <= `SD 1'b0;
 				ROB_table[i].busy <= `SD 1'b0;		
 			end
 			tail <= `SD `ROB_SIZE-1;

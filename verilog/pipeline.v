@@ -266,7 +266,7 @@ module pipeline (
 
   assign pipeline_completed_insts = {3'b0, co_ret_valid_inst};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
-                                  head_halt       ? HALTED_ON_HALT :
+                                  rob_retire_out.halt? HALTED_ON_HALT :
                                   NO_ERROR;
 
   // assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
@@ -997,13 +997,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
   	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
-	  //.id_halt(id_inst_out.inst.halt),
-  	// OUTPUTS
+	  .halt_in(id_inst_out.inst.halt),
+  	
+    // OUTPUTS
     .retire_out(rob_retire_out),
-  	//.T_free(rob_fl_arch_Told), // Output for Retire Stage goes to Free List
-  	//.T_arch(rob_arch_retire_reg), // Output for Retire Stage goes to Arch Map
-
-  	//.T_out_valid(arch_fr_enable),
   	.free_rows_next(rob_free_rows_next_out),
   	.full(rob_full_out), // Used for Dispatch Hazard
   	//.head_halt(head_halt),

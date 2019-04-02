@@ -199,9 +199,8 @@ typedef struct packed {
 typedef struct packed{
   PHYS_REG T_new;
   PHYS_REG T_old;
-//  logic T_new_valid;
-//  logic T_old_valid;
   logic busy;
+  logic halt;
 } ROB_ROW_T;
 
 //Freelist

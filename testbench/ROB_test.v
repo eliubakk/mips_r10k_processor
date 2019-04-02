@@ -7,6 +7,7 @@ module testbench;
 	logic clock, reset, enable;
 	PHYS_REG [`SS_SIZE-1:0] T_old_in; // Comes from Map Table During Dispatch
 	PHYS_REG [`SS_SIZE-1:0] T_new_in; // Comes from Free List During Dispatch
+	logic 	 [`SS_SIZE-1:0] halt_in;
 	PHYS_REG [`SS_SIZE-1:0] CDB_tag_in; // Comes from CDB during Commit
 	logic	 [`SS_SIZE-1:0] CAM_en; // Comes from CDB during Commit
 	logic 	 [`SS_SIZE-1:0] dispatch_en; // Structural Hazard detection during Dispatch
@@ -34,6 +35,7 @@ module testbench;
         .enable(enable),
         .T_old_in(T_old_in),
         .T_new_in(T_new_in),
+        .halt_in(halt_in),
         .CDB_tag_in(CDB_tag_in),
         .CAM_en(CAM_en),
         .dispatch_en(dispatch_en),
@@ -64,6 +66,7 @@ module testbench;
 			for (integer i = 0; i < `ROB_SIZE; i += 1) begin
 				clear_rob_table_test[i].T_new = `DUMMY_REG;
 				clear_rob_table_test[i].T_old = `DUMMY_REG;
+				clear_rob_table_test[i].halt = 1'b0;
 				clear_rob_table_test[i].busy = 1'b0;
 			end
 		end
@@ -84,7 +87,7 @@ module testbench;
 			$display("--------------------- ROB TABLE --------------------------\n");
 			$display("head = %d, tail = %d", head_out, tail_out);
 			for(integer i = `ROB_SIZE-1; i >= 0; i -= 1) begin
-				$display("Row = %d, busy = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_out[i].busy, ROB_table_out[i].T_old, ROB_table_out[i].T_new);
+				$display("Row = %d, busy = %d, halt = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_out[i].busy, ROB_table_out[i].halt, ROB_table_out[i].T_old, ROB_table_out[i].T_new);
 			end
 				$display("ROB full = %b, free_rows_next = %d", full_out, free_rows_next_out);
 				$display("ready_to_retire_out: %d", ready_to_retire_out[`ROB_SIZE-1]);
@@ -100,7 +103,7 @@ module testbench;
             $display("**********************************************************\n");
 			$display("----------------------- retire_out ----------------------------\n");
 			for(integer i = `SS_SIZE-1; i >= 0; i -= 1) begin
-				$display("Row: %d, T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_out[i].T_old, retire_out[i].T_new, retire_out[i].busy);
+				$display("Row: %d, halt: %d, T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_out[i].halt, retire_out[i].T_old, retire_out[i].T_new, retire_out[i].busy);
 			end
 			$display("**********************************************************\n");
         end
@@ -112,7 +115,7 @@ module testbench;
 				$display("------------------------ ROB TABLE TEST ----------------------------\n");
 
 			for(integer i = `ROB_SIZE-1; i >= 0;i -= 1) begin
-				$display("ROB_Row = %d, busy = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_test[i].busy, ROB_table_test[i].T_old, ROB_table_test[i].T_new);
+				$display("ROB_Row = %d, busy = %d, halt = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_test[i].busy, ROB_table_test[i].halt, ROB_table_test[i].T_old, ROB_table_test[i].T_new);
 			end
 				$display("ROB full = %b, free_rows_next = %d", full_test, free_rows_next_test);			
 			$display("*******************************************************************\n");
@@ -120,7 +123,7 @@ module testbench;
 			$display("**********************************************************\n");
 			$display("----------------------- retire_test ----------------------------\n");
 			for(integer i = `SS_SIZE-1; i >= 0; i -= 1) begin
-				$display("Row: %d, T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_test[i].T_old, retire_test[i].T_new, retire_test[i].busy);
+				$display("Row: %d, halt: %d T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_test[i].halt, retire_test[i].T_old, retire_test[i].T_new, retire_test[i].busy);
 			end
 			$display("**********************************************************\n");
 		end
@@ -171,8 +174,7 @@ module testbench;
 			for(int i = 0; i < `SS_SIZE; i += 1) begin
 				assert(retire_out[i].busy === retire_test[i].busy) else #1 exit_on_error;
 				if(retire_test[i].busy) begin
-					assert(retire_out[i].T_old === retire_test[i].T_old) else #1 exit_on_error;
-					assert(retire_out[i].T_new === retire_test[i].T_new) else #1 exit_on_error;
+					assert(retire_out[i] === retire_test[i]) else #1 exit_on_error;
 				end
 			end
 		end
@@ -209,6 +211,7 @@ module testbench;
 		for(int i = 0; i < `SS_SIZE; i += 1) begin
 			retire_test[i].T_new = `DUMMY_REG;
 			retire_test[i].T_old = `DUMMY_REG;
+			retire_test[i].halt = 1'b0;
 			retire_test[i].busy = 1'b0;
 		end
 
@@ -232,6 +235,7 @@ module testbench;
 		T_old_in[`SS_SIZE-1] = 3;
 		T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 		T_new_in[`SS_SIZE-1] = T_new_counter;
+		halt_in[`SS_SIZE-1] = 1'b0;
 		dispatch_en[`SS_SIZE-1] = 1'b1;
 
 		//update test variables
@@ -247,6 +251,7 @@ module testbench;
 		`DELAY;
 		ROB_table_test[`ROB_SIZE-1].T_new = T_new_in[`SS_SIZE-1];
 		ROB_table_test[`ROB_SIZE-1].T_old = T_old_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].halt = halt_in[`SS_SIZE-1];
 		ROB_table_test[`ROB_SIZE-1].busy = 1'b1;
 		table_out();
 		check_correct();
@@ -281,6 +286,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			T_new_counter += 1;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 
@@ -304,6 +310,7 @@ module testbench;
 			`DELAY;
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
 			table_out();
 			check_correct();
@@ -347,6 +354,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i + 1;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			T_new_counter += 1;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 
@@ -363,6 +371,7 @@ module testbench;
 			`DELAY;
 			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].busy = 1'b1;
 			table_out();
 			check_correct();
@@ -401,6 +410,7 @@ module testbench;
 		T_old_in[`SS_SIZE-1] = 0;
 		T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 		T_new_in[`SS_SIZE-1] = T_new_counter;
+		halt_in[`SS_SIZE-1] = 1'b0;
 		dispatch_en[`SS_SIZE-1] = 1'b1;
 
 		//update test variables
@@ -416,6 +426,7 @@ module testbench;
 		`DELAY;
 		ROB_table_test[`ROB_SIZE-1].T_new = T_new_in[`SS_SIZE-1];
 		ROB_table_test[`ROB_SIZE-1].T_old = T_old_in[`SS_SIZE-1];
+		ROB_table_test[`ROB_SIZE-1].halt = halt_in[`SS_SIZE-1];
 		ROB_table_test[`ROB_SIZE-1].busy = 1'b1;
 		table_out();
 		check_correct();
@@ -430,6 +441,7 @@ module testbench;
 				T_old_in[`SS_SIZE-1] = i;
 				T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 				T_new_in[`SS_SIZE-1] = T_new_counter;
+				halt_in[`SS_SIZE-1] = (i == 5)? 1'b1 : 1'b0;
 				dispatch_en[`SS_SIZE-1] = 1'b1;
 			end
 			@(negedge clock);
@@ -452,6 +464,7 @@ module testbench;
 			if(i < 5) begin
 				ROB_table_test[`ROB_SIZE-1].T_new = T_new_in[`SS_SIZE-1];
 				ROB_table_test[`ROB_SIZE-1].T_old = T_old_in[`SS_SIZE-1];
+				ROB_table_test[`ROB_SIZE-1].halt = halt_in[`SS_SIZE-1];
 				ROB_table_test[`ROB_SIZE-1].busy = 1'b1;
 			end
 			table_out();
@@ -468,6 +481,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			T_new_counter += 1;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 
@@ -483,6 +497,7 @@ module testbench;
 			`DELAY;
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
 			check_correct();
 		end
@@ -515,6 +530,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i + 1;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			T_new_counter += 1;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 
@@ -531,6 +547,7 @@ module testbench;
 			`DELAY;
 			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-((i%`ROB_SIZE) + 1)].busy = 1'b1;
 			if(i == (`ROB_SIZE + 3)) begin
 				full_test = 1'b1;
@@ -574,6 +591,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i + 1;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			T_new_counter += 1;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 
@@ -590,6 +608,7 @@ module testbench;
 			`DELAY;
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
 			if(i == (`ROB_SIZE - 1)) begin
 				full_test = 1'b1;
@@ -612,6 +631,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = `ROB_SIZE + 1 + i;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 			@(negedge clock);
 			retire_test[`SS_SIZE-1] = ROB_table_test[`ROB_SIZE-(i + 1)];
@@ -627,6 +647,7 @@ module testbench;
 			retire_test[`SS_SIZE-1].busy = 1'b0;
 			ROB_table_test[`ROB_SIZE-(i+1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i+1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i+1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i+1)].busy = 1'b1;
 			table_out();
 			check_correct();	
@@ -717,6 +738,7 @@ module testbench;
 			T_old_in[`SS_SIZE-1] = i;
 			T_old_in[`SS_SIZE-1][$clog2(`NUM_PHYS_REG)] = 1'b1;
 			T_new_in[`SS_SIZE-1] = T_new_counter;
+			halt_in[`SS_SIZE-1] = 1'b0;
 			T_new_counter += 1;
 			dispatch_en[`SS_SIZE-1] = 1'b1;
 
@@ -732,6 +754,7 @@ module testbench;
 			`DELAY;
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_new = T_new_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].T_old = T_old_in[`SS_SIZE-1];
+			ROB_table_test[`ROB_SIZE-(i + 1)].halt = halt_in[`SS_SIZE-1];
 			ROB_table_test[`ROB_SIZE-(i + 1)].busy = 1'b1;
 			check_correct();
 		end
@@ -770,6 +793,7 @@ module testbench;
 				T_old_in[`SS_SIZE-1-j] = `ROB_SIZE-1-(dispatch_idx_counter-j);
 				T_old_in[`SS_SIZE-1-j][$clog2(`NUM_PHYS_REG)] = 1'b1;
 				T_new_in[`SS_SIZE-1-j] = T_new_counter;
+				halt_in[`SS_SIZE-1-j] = 1'b0;
 				T_new_counter += 1;
 				dispatch_en[`SS_SIZE-1-j] = 1'b1;
 
@@ -789,6 +813,7 @@ module testbench;
 				dispatch_en[`SS_SIZE-1-j] = 1'b0;
 				ROB_table_test[dispatch_idx_counter].T_new = T_new_in[`SS_SIZE-1-j];
 				ROB_table_test[dispatch_idx_counter].T_old = T_old_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].halt = halt_in[`SS_SIZE-1-j];
 				ROB_table_test[dispatch_idx_counter].busy = 1'b1;
 				dispatch_idx_counter -= 1;
 			end
@@ -851,6 +876,7 @@ module testbench;
 				T_old_in[`SS_SIZE-1-j] = (i*`SS_SIZE) + j;
 				T_old_in[`SS_SIZE-1-j][$clog2(`NUM_PHYS_REG)] = 1'b1;
 				T_new_in[`SS_SIZE-1-j] = T_new_counter;
+				halt_in[`SS_SIZE-1-j] = 1'b0;
 				T_new_counter += 1;
 				dispatch_en[`SS_SIZE-1-j] = 1'b1;
 
@@ -867,6 +893,7 @@ module testbench;
 				dispatch_en[`SS_SIZE-1-j] = 1'b0;
 				ROB_table_test[dispatch_idx_counter].T_new = T_new_in[`SS_SIZE-1-j];
 				ROB_table_test[dispatch_idx_counter].T_old = T_old_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].halt = halt_in[`SS_SIZE-1-j];
 				ROB_table_test[dispatch_idx_counter].busy = 1'b1;
 				if(dispatch_idx_counter == 0) begin
 					dispatch_idx_counter = `ROB_SIZE - 1;
@@ -936,6 +963,7 @@ module testbench;
 				T_old_in[`SS_SIZE-1-j] = `ROB_SIZE-1-(dispatch_idx_counter-j);
 				T_old_in[`SS_SIZE-1-j][$clog2(`NUM_PHYS_REG)] = 1'b1;
 				T_new_in[`SS_SIZE-1-j] = (T_new_counter+j);
+				halt_in[`SS_SIZE-1-j] = (j == 2)? 1'b1 : 1'b0;
 				dispatch_en[`SS_SIZE-1-j] = 1'b1;
 
 				//update test variables
@@ -954,6 +982,7 @@ module testbench;
 				dispatch_en[`SS_SIZE-1-j] = 1'b0;
 				ROB_table_test[dispatch_idx_counter].T_new = T_new_in[`SS_SIZE-1-j];
 				ROB_table_test[dispatch_idx_counter].T_old = T_old_in[`SS_SIZE-1-j];
+				ROB_table_test[dispatch_idx_counter].halt = halt_in[`SS_SIZE-1-j];
 				ROB_table_test[dispatch_idx_counter].busy = 1'b1;
 				if(j < i) begin 
 					if(dispatch_idx_counter == 0) begin
