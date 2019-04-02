@@ -611,6 +611,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     assign issue_reg_tags[ig][0] = issue_next[ig].T1[$clog2(`NUM_PHYS_REG)-1:0];
     assign issue_reg_tags[ig][1] = issue_next[ig].T2[$clog2(`NUM_PHYS_REG)-1:0];
     assign issue_reg_inst_opcode[ig] = issue_next[ig].inst_opcode;
+    assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
   end
   //Instantiating the physical register
   assign is_pr_enable = 1;
@@ -998,6 +999,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
 	  .halt_in(id_inst_out.inst.halt),
+    .opcode(id_inst_out.inst_opcode),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),

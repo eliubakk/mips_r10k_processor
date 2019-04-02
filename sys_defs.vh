@@ -201,7 +201,16 @@ typedef struct packed{
   PHYS_REG T_old;
   logic busy;
   logic halt;
+  logic [31:0] opcode;
+  logic valid_inst;
 } ROB_ROW_T;
+
+const ROB_ROW_T EMPTY_ROB_ROW = 
+{
+  `DUMMY_REG,
+  `DUMMY_REG,
+  1'b0
+};
 
 //Freelist
 `define FL_SIZE `NUM_PHYS_REG
