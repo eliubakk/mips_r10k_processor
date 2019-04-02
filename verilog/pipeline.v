@@ -687,7 +687,12 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         // id_ex_halt          <= `SD id_halt_out;
         // id_ex_illegal       <= `SD id_illegal_out;
         // id_ex_valid_inst    <= `SD id_valid_inst_out;
-      end // else: !if(reset)
+      end /*else begin
+		 is_ex_T1_value[i]   <= `SD 0;
+        	is_ex_T2_value[i]   <= `SD 0;
+        	issue_reg[i]        <= `SD EMPTY_ROW;
+        
+	end*/ // else: !if(reset)
     end
   end // always
 
