@@ -22,7 +22,7 @@ set design_name SQ
 set clock_name clock
 set reset_name reset
 #set CLK_PERIOD 5
-set CLK_PERIOD 5
+set CLK_PERIOD 4.8
 
 
 
