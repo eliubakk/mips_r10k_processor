@@ -321,7 +321,7 @@ module testbench;
 			$display("OUTPUTS");
 			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
 			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
+				$display("ROB_Row = %d,  busy = %d, halt = %d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt,  pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
 			$display("*******************************************************************\n");
@@ -765,8 +765,8 @@ module testbench;
         show_clk_count;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
-        @(negedge clock);
-	@(posedge clock);
+        //@(negedge clock);
+	//@(posedge clock);
 	#1 $finish;
       end
 
