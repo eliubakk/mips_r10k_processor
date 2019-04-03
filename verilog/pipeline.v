@@ -880,11 +880,12 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   
   assign psel_enable = ex_co_valid_inst[0] | ex_co_valid_inst[1] | ex_co_valid_inst[2] | done | ex_co_valid_inst[4]; // ask the use of wor
   //priority encoder to select the results of the execution stage to put in cdb
+  //Mult has the priority
   psel_generic #(`NUM_FU_TOTAL, 1) psel(
-		.req({ ex_co_valid_inst[4], ex_co_done, ex_co_valid_inst[2:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+		.req({ ex_co_done, ex_co_valid_inst[4], ex_co_valid_inst[2:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
-		.gnt(co_selected),
-    .gnt_bus(gnt_bus)
+		.gnt({co_selected[3], co_selected[4], co_selected[2:0]}),
+    .gnt_bus({gnt_bus[3], gnt_bus[4], gnt_bus[2:0]})
 	);
   
     always_comb begin
