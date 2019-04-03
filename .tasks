@@ -26,6 +26,8 @@ Cache Design
 	- Test Instruction Cache Behavior
 	- Test Data Cache Behavior
 
+Victim Cache
+
 Prefetcher
 - Determine Prefetch Strategy
 	- Strategy for Instruction Cache

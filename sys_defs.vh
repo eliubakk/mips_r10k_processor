@@ -39,6 +39,13 @@
 // the 0.49999 is to force ceiling(100/period).  The default behavior for
 // float to integer conversion is rounding to nearest
 
+// cache parameters/defines
+
+`define NUM_WAYS 2
+`define NUM_SETS (32 / `NUM_WAYS)
+`define NUM_SET_BITS $clog2(`NUM_SETS)
+`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
+
 //////////////////////////////////////////////
 //
 // Pipeline Parameters
