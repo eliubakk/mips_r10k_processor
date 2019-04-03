@@ -197,6 +197,8 @@ module RS
 				issue_out[i].T1[$clog2(`NUM_PHYS_REG)] = 1'b1;
 				issue_out[i].T2[$clog2(`NUM_PHYS_REG)] = 1'b1;
 				rs_table_next[issue_idx_shifted[i]].busy = 1'b0;
+			//	rs_table_next[issue_idx_shifted[i]].T1[$clog2(`NUM_PHYS_REG)] = 1'b0; // What Heewoo added
+			//	rs_table_next[issue_idx_shifted[i]].T2[$clog2(`NUM_PHYS_REG)] = 1'b0; // What Heewoo added 
 			end
 		end
 			
@@ -205,13 +207,24 @@ module RS
 			if(dispatch_valid[i] & inst_in[i].inst.valid_inst & dispatch_idx_valid[i]) begin
 				rs_table_next[dispatch_idx[i]] = inst_in[i];
 				rs_table_next[dispatch_idx[i]].busy = 1'b1;
+			// Update the cdb value, since it comes from
+			// Map table(during decode stage)
+				
+				rs_table_next[dispatch_idx[i]].T1[$clog2(`NUM_PHYS_REG)] = ( CAM_en[i] & (CDB_in == inst_in[i].T1 ))  |  inst_in[i].T1[$clog2(`NUM_PHYS_REG)]; 
+			
+				rs_table_next[dispatch_idx[i]].T2[$clog2(`NUM_PHYS_REG)] = ( CAM_en[i] & (CDB_in == inst_in[i].T2))  |  inst_in[i].T2[$clog2(`NUM_PHYS_REG)];
+				//rs_table_next[dispatch_idx[i]].T1[$clog2(`NUM_PHYS_REG)] = (|cam_hits[dispatch_idx[i]][0]) | inst_in[i].T1[$clog2(`NUM_PHYS_REG)];
+				//rs_table_next[dispatch_idx[i]].T2[$clog2(`NUM_PHYS_REG)] = (|cam_hits[dispatch_idx[i]][1]) | inst_in[i].T2[$clog2(`NUM_PHYS_REG)];	
+			
+			//	rs_table_next[dispatch_idx[i]].T1[$clog2(`NUM_PHYS_REG)] = (|cam_hits[dispatch_idx[i]][0]) | rs_table[dispatch_idx[i]].T1[$clog2(`NUM_PHYS_REG)];
+			//	rs_table_next[dispatch_idx[i]].T2[$clog2(`NUM_PHYS_REG)] = (|cam_hits[dispatch_idx[i]][1]) | rs_table[dispatch_idx[i]].T2[$clog2(`NUM_PHYS_REG)];	
 			end 
 		end
 	//COMMIT STAGE
-		for(i = 0; i < `RS_SIZE; i = i + 1) begin
+		/*for(i = 0; i < `RS_SIZE; i = i + 1) begin
 			rs_table_next[i].T1[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][0]) | rs_table[i].T1[$clog2(`NUM_PHYS_REG)];
 			rs_table_next[i].T2[$clog2(`NUM_PHYS_REG)] = (|cam_hits[i][1]) | rs_table[i].T2[$clog2(`NUM_PHYS_REG)];
-		end 		
+		end*/ 		
 
 
 		//DISPATCH CONTROL SIGNAL

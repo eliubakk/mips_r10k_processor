@@ -27,7 +27,7 @@ do
 	echo "Running $file"
 
 	# run test case
-	timeout $TIMEOUT make clean_pipeline simv_pipeline
+	timeout $TIMEOUT make simv_pipeline
 	echo "Saving $file output"
 	
 	# save the output
