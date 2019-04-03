@@ -726,7 +726,7 @@ end*/
     .wr_clk(clock),
     .wr_en(ex_co_valid_inst),
     .wr_idx(ex_co_dest_reg_idx),
-    .wr_data(ex_co_alu_result)
+    .wr_data({ex_co_alu_result[4], ex_alu_result_out[3], ex_co_alu_result[2:0]})
   );
 
  
@@ -762,11 +762,12 @@ ex_stage ex_stage_0 (
   );
 
 // Registers for multiplication pipeline. issue_reg_in[3] is the input
-//
+// multiplication output is pipelined... We should directly use mult output as
+// a register.
 
 always_ff @(posedge clock) begin
 	if(reset) begin
-		for(integer i=0 ; i<4; ++i) begin
+		for(integer i=0 ; i<3; ++i) begin
 			ex_mult_reg[i].npc <= `SD 0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
 			ex_mult_reg[i].T <= `SD `ZERO_REG;
@@ -777,7 +778,7 @@ always_ff @(posedge clock) begin
 			ex_mult_reg[i].inst.valid_inst <= `SD 0;
 		end
 	end else begin
-		ex_mult_reg <=  `SD {ex_mult_reg[2],ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
+		ex_mult_reg <=  `SD {ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
 	end
 end
 
@@ -797,6 +798,8 @@ end
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
   assign ex_co_enable[3] = 1 ;
+  assign ex_co_done = done; // Done itself is enabled during complete stage
+  //assign ex_co_alu_result[3] = ex_alu_result_out[3];// Multiplication output is in during complete stage
 
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
   /*
@@ -825,7 +828,7 @@ end
           ex_co_valid_inst[i]   <= `SD 0;
           //ex_co_rega[i]         <= `SD 0;
           ex_co_alu_result[i]   <= `SD 0;
-	  ex_co_done		<= `SD 1'b0;
+	  //ex_co_done		<= `SD 1'b0;
       end else if (ex_co_enable[i] && i!=3) begin
 		     // these are forwarded directly from ID/EX latches
 			ex_co_NPC[i]          <= `SD issue_reg[i].npc;
@@ -842,16 +845,16 @@ end
 	
 	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
-          		ex_co_NPC[3]          <= `SD ex_mult_reg[3].npc;
-       			ex_co_IR[3]           <= `SD ex_mult_reg[3].inst_opcode;
- 		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[3].T[$clog2(`NUM_PHYS_REG)-1:0];
- 		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[3].inst.wr_mem;
-      			ex_co_halt[3]         <= `SD ex_mult_reg[3].inst.halt;
-       			ex_co_illegal[3]      <= `SD ex_mult_reg[3].inst.illegal;
-       			ex_co_valid_inst[3]   <= `SD ex_mult_reg[3].inst.valid_inst;
+          		ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
+       			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
+ 		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
+ 		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[2].inst.wr_mem;
+      			ex_co_halt[3]         <= `SD ex_mult_reg[2].inst.halt;
+       			ex_co_illegal[3]      <= `SD ex_mult_reg[2].inst.illegal;
+       			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
-     		        ex_co_alu_result[3]   <= `SD ex_alu_result_out[i];  
-			ex_co_done	      <= `SD done;
+     		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3];  
+			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
     end // for loop end
   end // always
