@@ -724,9 +724,9 @@ end*/
     	.phys_registers_out(phys_reg),
     `endif
     .wr_clk(clock),
-    .wr_en(ex_reg_valid),
-    .wr_idx({ex_reg_tags}),
-    .wr_data(ex_alu_result_out)
+    .wr_en(ex_co_valid_inst),
+    .wr_idx(ex_co_dest_reg_idx),
+    .wr_data(ex_co_alu_result)
   );
 
  
@@ -766,7 +766,7 @@ ex_stage ex_stage_0 (
 
 always_ff @(posedge clock) begin
 	if(reset) begin
-		for(integer i=0 ; i<4; ++i) begin
+		for(integer i=0 ; i<3; ++i) begin
 			ex_mult_reg[i].npc <= `SD 0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
 			ex_mult_reg[i].T <= `SD `ZERO_REG;
@@ -777,7 +777,7 @@ always_ff @(posedge clock) begin
 			ex_mult_reg[i].inst.valid_inst <= `SD 0;
 		end
 	end else begin
-		ex_mult_reg <=  `SD {ex_mult_reg[2], ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
+		ex_mult_reg <=  `SD {ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
 	end
 end
 
@@ -842,13 +842,13 @@ end
 	
 	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
-          		ex_co_NPC[3]          <= `SD ex_mult_reg[3].npc;
-       			ex_co_IR[3]           <= `SD ex_mult_reg[3].inst_opcode;
- 		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[3].T[$clog2(`NUM_PHYS_REG)-1:0];
- 		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[3].inst.wr_mem;
-      			ex_co_halt[3]         <= `SD ex_mult_reg[3].inst.halt;
-       			ex_co_illegal[3]      <= `SD ex_mult_reg[3].inst.illegal;
-       			ex_co_valid_inst[3]   <= `SD ex_mult_reg[3].inst.valid_inst;
+          		ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
+       			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
+ 		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
+ 		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[2].inst.wr_mem;
+      			ex_co_halt[3]         <= `SD ex_mult_reg[2].inst.halt;
+       			ex_co_illegal[3]      <= `SD ex_mult_reg[2].inst.illegal;
+       			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
      		        ex_co_alu_result[3]   <= `SD ex_alu_result_out[i];  
 			ex_co_done	      <= `SD done;
