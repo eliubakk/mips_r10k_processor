@@ -9,8 +9,30 @@ LSQ
 Automated Regression Testing
 - Determine Desired Behavior
 	- Correctness Checking (DONE) 
-	- Performance Checking (IN PROGRESS)
+	- Performance Checking 
 	- 
 - Map out What we need to do correctness/performance checking
 - Implement
 - Test
+
+Cache Design
+- Determine Organization
+	- Determine Associativity of Instruction Cache
+	- Determine Associativity of Data Cache
+- Implement Organization
+	- Implement Organization of Instruction Cache
+	- Implement Organization of Data Cache
+- Test Cache Behaviors
+	- Test Instruction Cache Behavior
+	- Test Data Cache Behavior
+
+Prefetcher
+- Determine Prefetch Strategy
+	- Strategy for Instruction Cache
+	- Strategy for Data Cache
+- Implement Strategy
+	- Implement Strategy for Instruction Cache
+	- Implement Strategy for Data Cache
+- Test Strategy
+	- Test Strategy for Instruction Cache
+	- Test Strategy for Data Cache
