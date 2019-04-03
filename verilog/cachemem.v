@@ -30,7 +30,7 @@ module cache(
 	logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags; 
 	logic [31:0]        			valids;
 	logic [`NUM_SETS-1:0]				enable_bus;
-	logic [`NUM_SETS-1:0] [(`NUM_TAG_BITS - 1):0] tags_bus;
+	logic [31:0] tag_bus;
 	// internal wires
 
 	 logic [31:0] tag_hits;
@@ -48,31 +48,35 @@ module cache(
 	`endif
 
 	encoder #(
-		.WIDTH(`NUM_TAG_BITS)
+		.WIDTH(32)
 	)
 	enc (
-		.in(tag_hits),
+		.in(tag_bus),
 		.out(tag_idx)
 	);
 
+
 	CAM #(
-		.LENGTH(`NUM_WAYS),
+		.LENGTH(32),
 		.WIDTH(`NUM_TAG_BITS),
 		.NUM_TAGS(1),
 		.TAG_SIZE(`NUM_TAG_BITS)
 	)
-	cam [`NUM_SETS-1:0] (
-		.enable(enable_bus),
-		.tags(wr1_en? wr1_tag : rd1_tag),
-		.table_in(tags_bus),
+	cam (
+		.enable(1),
+		.tags(wr1_en ? wr1_tag : rd1_tag),
+		.table_in(tags),
 		.hits(tag_hits)
 	);
 
 	// combinational logic
 	 always_comb begin
-		for (int i = 0; i < `NUM_SETS; ++i) begin
-			enable_bus[i] = (rd1_idx == i) | (wr1_en & wr1_idx == i);
-			tags_bus[i] = tags[(i*`NUM_WAYS)+:((i + 1)*(`NUM_WAYS))];
+		for (int i = 0; i < 32; ++i) begin
+			if (wr1_en) begin
+				tag_bus[i] = tag_hits[i] & (wr1_idx*`NUM_WAYS <= i) & (i < ((wr1_idx + 1)*`NUM_WAYS));
+			end else begin
+				tag_bus[i] = tag_hits[i] & (rd1_idx*`NUM_WAYS <= i) & (i < ((rd1_idx + 1)*`NUM_WAYS));
+			end
 		end
 	 end
 
@@ -80,6 +84,9 @@ module cache(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			valids <= `SD 31'b0;
+			for (int i = 0; i < 32; ++i) begin
+				tags[i] <= `SD 0;
+			end
 		end else if (wr1_en) begin
 			valids[tag_idx] <= `SD 1;
 		end
@@ -91,24 +98,5 @@ module cache(
 			tags[tag_idx] <= `SD wr1_tag;
 		end
 	end
-
-	/*
-  assign rd1_data = data[rd1_idx];
-  assign rd1_valid = valids[rd1_idx] && (tags[rd1_idx] == rd1_tag);
-
-  always_ff @(posedge clock) begin
-    if(reset)
-      valids <= `SD 31'b0;
-    else if(wr1_en) 
-      valids[wr1_idx] <= `SD 1;
-  end
-  
-  always_ff @(posedge clock) begin
-    if(wr1_en) begin
-      data[wr1_idx] <= `SD wr1_data;
-      tags[wr1_idx] <= `SD wr1_tag;
-    end
-  end
-	*/
 
 endmodule

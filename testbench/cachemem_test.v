@@ -75,6 +75,14 @@ module testbench;
 		end
 	endtask
 
+	task check_correct_reset;
+		begin
+			for (int i = 0; i < 32; ++i) begin
+				assert(valids_out[i] == 0) else #1 exit_on_error;
+			end
+		end
+	endtask
+
 	// set clock change
 	always `CLOCK_PERIOD clock = ~clock;
 
@@ -106,9 +114,31 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		display_cache;
+		// display_cache;
+		check_correct_reset;
 
 		$display("Reset Test Passed");
+
+		$display("Testing Single Write...");
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 1;
+		wr1_idx = 3;
+		wr1_tag = 4;
+		wr1_data = 69;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		$display("tag_hits: %b", c0.tag_hits);
+		$display("tag_bus: %b", c0.tag_bus);
+		$display("tag_idx: %d", c0.tag_idx);
+		`DELAY;
+		display_cache;
+
+		$display("Single Write Passed");
+
 		$display("@@@Passed");
 		$finish;
 	end
