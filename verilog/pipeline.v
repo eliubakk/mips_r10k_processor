@@ -152,6 +152,7 @@ module pipeline (
   logic ex_take_branch_out;
 	logic done;
 
+   RS_ROW_T [2:0] ex_mult_reg; // multiplicationn registers
 //   // Outputs from EX/MEM Pipeline Register
 //   logic   PHYS_REG [4:0] ex_mem_dest_reg_idx;//Physical register index[T]
 //   logic   [4:0]      ex_mem_rd_mem;
@@ -725,6 +726,26 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .done(done)
   );
 
+// Registers for multiplication pipeline. issue_reg_in[3] is the input
+//
+
+always_ff @(posedge clock) begin
+	if(reset) begin
+		for(integer i=0 ; i<3; ++i) begin
+			ex_mult_reg[i].npc <= `SD 0;
+			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
+			ex_mult_reg[i].T <= `SD `ZERO_REG;
+			ex_mult_reg[i].inst.wr_mem <= `SD 0;
+			
+			ex_mult_reg[i].inst.halt<= `SD 0;
+			ex_mult_reg[i].inst.illegal <= `SD 0;
+			ex_mult_reg[i].inst.valid_inst <= `SD 0;
+		end
+	end else begin
+		ex_mult_reg <=  `SD {ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
+	end
+end
+
 
   //////////////////////////////////////////////////
   //                                              //
@@ -739,7 +760,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   end
  
   //enable signal for the multipler  register
-  assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
+  //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
+  assign ex_co_enable[3] = done;
 
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
   /*
@@ -768,20 +790,33 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
           ex_co_valid_inst[i]   <= `SD 0;
           //ex_co_rega[i]         <= `SD 0;
           ex_co_alu_result[i]   <= `SD 0;
-      end else if(ex_co_enable[i]) begin
+      end else if(ex_co_enable[i]  ) begin
           // these are forwarded directly from ID/EX latches
-          ex_co_NPC[i]          <= `SD issue_reg[i].npc;
-          ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
-          ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[$clog2(`NUM_PHYS_REG)-1:0];
-         // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
-          ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
-          ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
-          ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
-          ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
-          //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
-          // these are results of EX stage
-          ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];      
-      end // else: !if(reset)
+          if(i == 3) begin
+		ex_co_NPC[i]          <= `SD ex_mult_reg[2].npc;
+       		ex_co_IR[i]           <= `SD ex_mult_reg[2].inst_opcode;
+ 	        ex_co_dest_reg_idx[i] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
+ 	        ex_co_wr_mem[i]       <= `SD ex_mult_reg[2].inst.wr_mem;
+      		ex_co_halt[i]         <= `SD ex_mult_reg[2].inst.halt;
+       		ex_co_illegal[i]      <= `SD ex_mult_reg[2].inst.illegal;
+       		ex_co_valid_inst[i]   <= `SD ex_mult_reg[2].inst.valid_inst;
+       		   // these are results of EX stage
+     	        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
+
+	  end else begin
+		ex_co_NPC[i]          <= `SD issue_reg[i].npc;
+       		ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
+ 	        ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[$clog2(`NUM_PHYS_REG)-1:0];
+      		   // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
+ 	        ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
+      		ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
+       		ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
+       		ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
+       		   //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
+       		   // these are results of EX stage
+     	        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
+	  end    
+      end// else: !if(reset)
     end // for loop end
   end // always
 
