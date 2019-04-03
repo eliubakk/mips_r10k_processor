@@ -29,20 +29,18 @@ module cache(
 	logic [31:0] 	[63:0] 			data;
 	logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags; 
 	logic [31:0]        			valids;
-
+	logic [`NUM_SETS-1:0]				enable_bus;
+	logic [`NUM_SETS-1:0] [(`NUM_TAG_BITS - 1):0] tags_bus;
 	// internal wires
-	logic [(`NUM_TAG_BITS - 1):0] [(`NUM_WAYS - 1):0] tags_in;
-	logic [(`NUM_WAYS - 1):0] tag_hits;
 
-	logic [(`NUM_TAG_BITS - 1):0] tag_in;
-
-	logic [(`NUM_TAG_BITS - 1):0] tag_idx;
+	 logic [31:0] tag_hits;
+	 logic [4:0] tag_idx;
 
 	// assign statements
 
-	assign rd1_data = data[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )) + tag_idx];
-	assign rd1_valid = valids[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )) + tag_idx] && (tags[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )) + tag_idx] == rd1_tag);
-
+	assign rd1_data = data[tag_idx];
+	assign rd1_valid = valids[tag_idx];
+	
 	`ifdef DEBUG
 		assign data_out = data;
 		assign tags_out = tags;
@@ -63,34 +61,34 @@ module cache(
 		.NUM_TAGS(1),
 		.TAG_SIZE(`NUM_TAG_BITS)
 	)
-	cam (
-		.enable(1),
-		.tags(tag_in),
-		.table_in(tags_in),
+	cam [`NUM_SETS-1:0] (
+		.enable(enable_bus),
+		.tags(wr1_en? wr1_tag : rd1_tag),
+		.table_in(tags_bus),
 		.hits(tag_hits)
 	);
-	// possible optimization: have multiple cams (1 cam per set)
 
 	// combinational logic
-	always_comb begin
-		// determine inputs to CAM
-		tag_in = wr1_en ? wr1_tag : rd1_tag;
-		tags_in = tags[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )):(`NUM_WAYS * (( wr1_en ? wr1_idx : rd1_idx  ) + 1) - 1)];
-	end
+	 always_comb begin
+		for (int i = 0; i < `NUM_SETS; ++i) begin
+			enable_bus[i] = (rd1_idx == i) | (wr1_en & wr1_idx == i);
+			tags_bus[i] = tags[(i*`NUM_WAYS)+:((i + 1)*(`NUM_WAYS))];
+		end
+	 end
 
 	// sequential logic
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			valids <= `SD 31'b0;
 		end else if (wr1_en) begin
-			valids[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )) + tag_idx] <= `SD 1;
+			valids[tag_idx] <= `SD 1;
 		end
 	end
 
 	always_ff @(posedge clock) begin
 		if (wr1_en) begin
-			data[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )) + tag_idx] <= `SD wr1_data;
-			tags[(`NUM_WAYS * ( wr1_en ? wr1_idx : rd1_idx  )) + tag_idx] <= `SD wr1_tag;
+			data[tag_idx] <= `SD wr1_data;
+			tags[tag_idx] <= `SD wr1_tag;
 		end
 	end
 
