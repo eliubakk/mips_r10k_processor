@@ -148,14 +148,11 @@ module pipeline (
 	logic [`NUM_PHYS_REG-1:0][63:0] phys_reg;
 
   // Outputs from EX-Stage
-  logic [`NUM_FU_TOTAL-1:0][63:0] ex_alu_result_out;
+  logic [`NUM_FU_TOTAL-1:0][63:0] ex_alu_result_out ;
   logic ex_take_branch_out;
 	logic done;
 
-  logic [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_reg_tags;
-  logic [`NUM_FU_TOTAL-1:0]				ex_reg_valid;
-  
- RS_ROW_T [3:0] ex_mult_reg; // multiplicationn registers
+   RS_ROW_T [2:0] ex_mult_reg; // multiplicationn registers
 //   // Outputs from EX/MEM Pipeline Register
 //   logic   PHYS_REG [4:0] ex_mem_dest_reg_idx;//Physical register index[T]
 //   logic   [4:0]      ex_mem_rd_mem;
@@ -209,6 +206,12 @@ module pipeline (
   logic         co_ret_branch_valid;
   logic         co_ret_branch_prediction;
 
+  // outputs from the retire register
+  logic [4:0] retire_reg_wr_idx;
+  logic retire_reg_wr_en;
+  logic [63:0] retire_reg_wr_data;
+  logic [31:0] retire_reg_NPC;
+
   //outputs from the ROB
   //PHYS_REG                    rob_fl_arch_Told;
   //PHYS_REG                    rob_arch_retire_reg;
@@ -228,6 +231,8 @@ module pipeline (
 
   //Outputs from the arch map
   PHYS_REG [`NUM_GEN_REG-1:0] arch_table;
+  PHYS_REG [`NUM_GEN_REG-1:0] arch_table_next;
+
 
   //Outputs form cdb
   PHYS_REG  CDB_tag_out;
@@ -272,11 +277,11 @@ module pipeline (
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
                                   rob_retire_out.halt? HALTED_ON_HALT :
                                   NO_ERROR;
-
-  // assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
-  // assign pipeline_commit_wr_data = wb_reg_wr_data_out;
-  // assign pipeline_commit_wr_en = wb_reg_wr_en_out;
-  // assign pipeline_commit_NPC = mem_wb_NPC;
+   
+   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
+   assign pipeline_commit_wr_data = retire_reg_wr_data;
+   assign pipeline_commit_wr_en = retire_reg_wr_en;
+   assign pipeline_commit_NPC = retire_reg_NPC;
 
 	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
 	// FOR MEMORY INSTRUCTIONS
@@ -616,16 +621,30 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //   end
   // end
 
-/*  genvar ig;
+  genvar ig;
   for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
     assign issue_reg_tags[ig][0] = issue_next[ig].T1[$clog2(`NUM_PHYS_REG)-1:0];
     assign issue_reg_tags[ig][1] = issue_next[ig].T2[$clog2(`NUM_PHYS_REG)-1:0];
     assign issue_reg_npc[ig] = issue_next[ig].npc;
     assign issue_reg_inst_opcode[ig] = issue_next[ig].inst_opcode;
     assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
-  end*/
+  end
   //Instantiating the physical register
-   // Note: Decode signals for load-lock/store-conditional and "get CPU ID"
+  assign is_pr_enable = 1;
+  phys_regfile regf_0 (
+    .rd_idx(issue_reg_tags),
+    .rd_out(pr_tags_values),
+
+    `ifdef DEBUG
+    	.phys_registers_out(phys_reg),
+    `endif
+    .wr_clk(clock),
+    .wr_en(ex_co_valid_inst),
+    .wr_idx(ex_co_dest_reg_idx),
+    .wr_data(ex_co_alu_result)
+  );
+
+  // Note: Decode signals for load-lock/store-conditional and "get CPU ID"
   //  instructions (id_{ldl,stc}_mem_out, id_cpuid_out) are not connected
   //  to anything because the provided EX and MEM stages do not implement
   //  these instructions.  You will have to implement these instructions
@@ -651,8 +670,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         // id_di_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
         // id_di_IR            <= `SD `NOOP_INST;
         
-        //is_ex_T1_value[i]   <= `SD 0;
-        //is_ex_T2_value[i]   <= `SD 0;
+        is_ex_T1_value[i]   <= `SD 0;
+        is_ex_T2_value[i]   <= `SD 0;
         issue_reg[i]        <= `SD EMPTY_ROW;
         
         // id_di_opa_select    <= `SD ALU_OPA_Iid_ex_rega
@@ -669,8 +688,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
       end else if(is_ex_enable[i]) begin // if (reset)
         //id_ex_NPC           <= `SD if_id_NPC;// alrady have a slot in issue table
         // id_ex_IR            <= `SD if_id_IR;
-        //is_ex_T1_value[i] <= `SD pr_tags_values[i][0];
-        //is_ex_T2_value[i] <= `SD pr_tags_values[i][1];
+        is_ex_T1_value[i] <= `SD pr_tags_values[i][0];
+        is_ex_T2_value[i] <= `SD pr_tags_values[i][1];
         issue_reg[i] <= `SD issue_next[i];
         // id_ex_opa_select    <= `SD id_opa_select_out;
         // id_ex_opb_select    <= `SD id_opb_select_out;
@@ -683,12 +702,12 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         // id_ex_halt          <= `SD id_halt_out;
         // id_ex_illegal       <= `SD id_illegal_out;
         // id_ex_valid_inst    <= `SD id_valid_inst_out;
-      end else begin
-	//	 is_ex_T1_value[i]   <= `SD 0;
-        //	is_ex_T2_value[i]   <= `SD 0;
+      end /*else begin
+		 is_ex_T1_value[i]   <= `SD 0;
+        	is_ex_T2_value[i]   <= `SD 0;
         	issue_reg[i]        <= `SD EMPTY_ROW;
         
-	end // else: !if(reset)
+	end*/ // else: !if(reset)
     end
   end // always
 
@@ -698,53 +717,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //                  EX-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
- genvar ig; // Input of physreg
-  for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
-    assign issue_reg_tags[ig][0] = issue_reg[ig].T1[$clog2(`NUM_PHYS_REG)-1:0];
-    assign issue_reg_tags[ig][1] = issue_reg[ig].T2[$clog2(`NUM_PHYS_REG)-1:0];
-    assign issue_reg_npc[ig] = issue_reg[ig].npc;
-    assign issue_reg_inst_opcode[ig] = issue_reg[ig].inst_opcode;
-    assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
-  end
-
-/*genvar ip; // Output of physreg
-  for(ip = 0; ip < `NUM_FU_TOTAL; ip += 1) begin
-       if(ip == 3) begin
-		 assign ex_reg_valid[3] =  ex_mult_reg[3].inst.valid_inst;
-		 assign ex_reg_tags[3] = ex_mult_reg[3].T[$clog2(`NUM_PHYS_REG)-1:0];
-
-
-	end else begin
-		assign ex_reg_valid[ip] = issue_reg[ip].inst.valid_inst;
-       		assign ex_reg_tags[ip] = issue_reg[ip].T1[$clog2(`NUM_PHYS_REG)-1:0];
-  	end
-end*/
-
-// Multiplication : Write after execution 
- assign is_pr_enable = 1;
-  phys_regfile regf_0 (
-    .rd_idx(issue_reg_tags),
-    .rd_out(pr_tags_values),
-
-    `ifdef DEBUG
-    	.phys_registers_out(phys_reg),
-    `endif
-    .wr_clk(clock),
-    .wr_en(ex_co_valid_inst),
-    .wr_idx(ex_co_dest_reg_idx),
-    .wr_data({ex_co_alu_result[4], ex_alu_result_out[3], ex_co_alu_result[2:0]})
-  );
-
- 
-genvar ik;
-  for(ik = 0; ik < `NUM_FU_TOTAL; ++ik) begin
-	//assign is_ex_T1_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][0] : 0;
-	//assign is_ex_T2_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][1] : 0;  
-	assign is_ex_T1_value[ik] = reset? 0 : pr_tags_values[ik][0];
-	assign is_ex_T2_value[ik] = reset? 0 : pr_tags_values[ik][1];  
-end
-
-ex_stage ex_stage_0 (
+  ex_stage ex_stage_0 (
     // Inputs
     .clock(clock),
     .reset(reset), 
@@ -768,11 +741,10 @@ ex_stage ex_stage_0 (
   );
 
 // Registers for multiplication pipeline. issue_reg_in[3] is the input
-// multiplication output is pipelined... We should directly use mult output as
-// a register.
+//
 
 always_ff @(posedge clock) begin
-	if(reset | branch_not_taken) begin
+	if(reset) begin
 		for(integer i=0 ; i<3; ++i) begin
 			ex_mult_reg[i].npc <= `SD 0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
@@ -803,9 +775,7 @@ end
  
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
-  assign ex_co_enable[3] = 1 ;
-  assign ex_co_done = done; // Done itself is enabled during complete stage
-  //assign ex_co_alu_result[3] = ex_alu_result_out[3];// Multiplication output is in during complete stage
+  assign ex_co_enable[3] = done;
 
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
   /*
@@ -834,47 +804,45 @@ end
           ex_co_valid_inst[i]   <= `SD 0;
           //ex_co_rega[i]         <= `SD 0;
           ex_co_alu_result[i]   <= `SD 0;
-	  //ex_co_done		<= `SD 1'b0;
-      end else if (ex_co_enable[i] && i!=3) begin
-		     // these are forwarded directly from ID/EX latches
-			ex_co_NPC[i]          <= `SD issue_reg[i].npc;
-       			ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
- 		        ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[$clog2(`NUM_PHYS_REG)-1:0];
-      			   // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
- 		        ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
-      			ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
-       			ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
-       			ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
-       			   //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
-       			   // these are results of EX stage
-     		        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
-	
-	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
+      end else if(ex_co_enable[i]  ) begin
+          // these are forwarded directly from ID/EX latches
+          if(i == 3) begin
+		ex_co_NPC[i]          <= `SD ex_mult_reg[2].npc;
+       		ex_co_IR[i]           <= `SD ex_mult_reg[2].inst_opcode;
+ 	        ex_co_dest_reg_idx[i] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
+ 	        ex_co_wr_mem[i]       <= `SD ex_mult_reg[2].inst.wr_mem;
+      		ex_co_halt[i]         <= `SD ex_mult_reg[2].inst.halt;
+       		ex_co_illegal[i]      <= `SD ex_mult_reg[2].inst.illegal;
+       		ex_co_valid_inst[i]   <= `SD ex_mult_reg[2].inst.valid_inst;
+       		   // these are results of EX stage
+     	        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
 
-          		ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
-       			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
- 		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
- 		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[2].inst.wr_mem;
-      			ex_co_halt[3]         <= `SD ex_mult_reg[2].inst.halt;
-       			ex_co_illegal[3]      <= `SD ex_mult_reg[2].inst.illegal;
-       			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
-			  // these are results of EX stage
-     		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3];  
-			//ex_co_done	      <= `SD done;
+	  end else begin
+		ex_co_NPC[i]          <= `SD issue_reg[i].npc;
+       		ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
+ 	        ex_co_dest_reg_idx[i] <= `SD issue_reg[i].T[$clog2(`NUM_PHYS_REG)-1:0];
+      		   // ex_co_rd_mem       <= `SD issue_reg.inst.rd_mem;
+ 	        ex_co_wr_mem[i]       <= `SD issue_reg[i].inst.wr_mem;
+      		ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
+       		ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
+       		ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
+       		   //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
+       		   // these are results of EX stage
+     	        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
+	  end    
       end// else: !if(reset)
     end // for loop end
   end // always
 
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
-      //ex_co_done <= `SD 0;
-
+      ex_co_done <= `SD 0;
       ex_co_take_branch  <= `SD 0;
-    end else if(done) begin
-      //ex_co_done  <= `SD done;
+    end else if(ex_co_enable[3]) begin
+      ex_co_done  <= `SD done;
       ex_co_take_branch  <= `SD ex_take_branch_out;
     end else begin
-		//ex_co_done <= `SD 0;
+		ex_co_done <= `SD 0;
 	end
   end
   
@@ -983,6 +951,7 @@ end
             co_alu_result_selected        =    ex_co_alu_result[i];
              if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
              else                  co_branch_valid =    0;    
+            
              if(i == 4)  co_take_branch_selected = ex_co_take_branch;
              else        co_take_branch_selected = 0;
           end
@@ -1050,7 +1019,7 @@ end
 // how to handle the target pc for the branch
 
 
-
+assign co_ret_illegal= 1'b0;
   //////////////////////////////////////////////////
   //                                              //
   //           COMPLETE/RETIRE Pipeline Register  //
@@ -1063,7 +1032,7 @@ end
       co_ret_NPC          <= `SD 0;
       co_ret_IR           <= `SD `NOOP_INST;
       co_ret_halt         <= `SD 0;
-      co_ret_illegal      <= `SD 0;
+      //co_ret_illegal      <= `SD 0;
       co_ret_valid_inst   <= `SD 0;
       co_ret_dest_reg_idx <= `SD `ZERO_REG;
       co_ret_take_branch  <= `SD 0;
@@ -1075,7 +1044,7 @@ end
       co_ret_NPC          <= `SD co_NPC_selected;
       co_ret_IR           <= `SD co_IR_selected;
       co_ret_halt         <= `SD co_halt_selected;
-      co_ret_illegal      <= `SD co_illegal_selected;
+     // co_ret_illegal      <= `SD 1'b0;
       co_ret_valid_inst   <= `SD co_valid_inst_selected;
       co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
       co_ret_take_branch  <= `SD co_take_branch_selected;
@@ -1103,6 +1072,8 @@ end
 	  .halt_in(id_inst_out.inst.halt),
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
+    .wr_idx(id_rdest_idx),
+    .npc(if_id_NPC),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),
@@ -1116,6 +1087,19 @@ end
     `endif
   );
 
+   always_ff @ (posedge clock) begin
+    if (reset | branch_not_taken) begin
+      retire_reg_wr_idx <= `SD `ZERO_REG;
+      retire_reg_wr_data <= `SD  64'b0;
+      retire_reg_wr_en <= `SD 0;
+      retire_reg_NPC <= `SD `NOOP_INST;
+    end else begin
+      retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
+      retire_reg_wr_data <= `SD  phys_reg[arch_table_next[rob_retire_out.wr_idx][5:0]];
+      retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(pipeline_commit_wr_idx == `ZERO_REG));
+      retire_reg_NPC <= `SD rob_retire_out.npc;
+    end 
+  end
 
   //Intsantiating the arch map
   Arch_Map_Table a0(
@@ -1125,7 +1109,8 @@ end
   	.T_new_in(rob_retire_out.T_new), // Comes from ROB during Retire
     .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
-  	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
+  	.arch_map_table(arch_table), // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
+    .arch_map_table_next(arch_table_next)
   );
 
 
