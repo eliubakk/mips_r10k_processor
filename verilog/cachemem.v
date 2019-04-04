@@ -26,9 +26,75 @@ module cache(
 	// output data at index of match
 
 
+	/*
 	logic [31:0] 	[63:0] 			data;
 	logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags; 
 	logic [31:0]        			valids;
+	*/
+
+	// internal data
+	CACHE_SET_T [(`NUM_SETS - 1):0] sets;
+
+	logic [(`NUM_TAG_BITS - 1):0] tag_in;
+	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in;
+	logic [(`NUM_WAYS - 1):0] tag_hits;
+	logic [(`NUM_TAG_BITS - 1):0] tag_idx;
+
+	// assign statements
+	`ifdef DEBUG
+		
+	`endif
+	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx].data;
+	assign rd1_valid = sets[rd1_idx].cache_lines[tag_idx].valid;
+	assign tag_in = wr1_en ? wr1_tag : rd1_tag;
+
+	// modules
+
+	CAM #(
+		.LENGTH(`NUM_WAYS),
+		.WIDTH(`NUM_TAG_BITS),
+		.NUM_TAGS(1),
+		.TAG_SIZE(`NUM_TAG_BITS))
+	cam(
+		.enable(1),
+		.tags(tag_in),
+		.table_in(tag_table_in),
+		.hits(tag_hits));
+
+	encoder #(.WIDTH(`NUM_TAG_BITS)) enc(
+				.in(tag_hits),
+				.out(tag_idx));
+	
+	// combinational logic
+	always_comb begin
+		if (wr1_en) begin
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				tag_table_in[i] = sets[wr1_idx].cache_lines[i].tag;
+			end
+		end else begin
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				tag_table_in[i] = sets[rd1_idx].cache_lines[i].tag;
+			end
+		end
+	end
+
+	// sequential logic
+	always_ff @(posedge clock) begin
+		if (reset) begin
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				for (int j = 0; j < `NUM_WAYS; ++j) begin
+					sets[i].cache_lines[j].tag <= `SD 0;
+					sets[i].cache_lines[j].valid <= `SD 0;
+				end
+			end
+		end else if (wr1_en) begin
+			sets[wr1_idx].cache_lines[tag_idx].data <= `SD wr1_data;
+			sets[wr1_idx].cache_lines[tag_idx].tag <= `SD wr1_tag;
+			sets[wr1_idx].cache_lines[tag_idx].valid <= `SD 1;
+		end
+	end
+
+	/*
 	logic [`NUM_SETS-1:0]				enable_bus;
 	logic [31:0] tag_bus;
 	// internal wires
@@ -89,14 +155,9 @@ module cache(
 			end
 		end else if (wr1_en) begin
 			valids[tag_idx] <= `SD 1;
-		end
-	end
-
-	always_ff @(posedge clock) begin
-		if (wr1_en) begin
 			data[tag_idx] <= `SD wr1_data;
 			tags[tag_idx] <= `SD wr1_tag;
 		end
 	end
-
+	*/
 endmodule

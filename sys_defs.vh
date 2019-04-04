@@ -46,6 +46,16 @@
 `define NUM_SET_BITS $clog2(`NUM_SETS)
 `define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
+typedef struct packed {
+	logic [63:0] data;
+	logic [(`NUM_TAG_BITS - 1):0] tag;
+	logic valid;
+} CACHE_LINE_T;
+
+typedef struct packed {
+	CACHE_LINE_T [(`NUM_WAYS - 1):0] cache_lines;
+} CACHE_SET_T;
+
 //////////////////////////////////////////////
 //
 // Pipeline Parameters
