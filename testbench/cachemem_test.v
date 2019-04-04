@@ -131,13 +131,68 @@ module testbench;
 		rd1_tag = 0;
 
 		@(posedge clock);
-		$display("tag_hits: %b", c0.tag_hits);
-		$display("tag_bus: %b", c0.tag_bus);
-		$display("tag_idx: %d", c0.tag_idx);
 		`DELAY;
 		display_cache;
+		assert(data_out[6] == wr1_data) else #1 exit_on_error;
+		assert(tags_out[6] == wr1_tag) else #1 exit_on_error;
+		assert(valids_out[6] == 1) else #1 exit_on_error;
 
 		$display("Single Write Passed");
+
+		$display("Testing Single Write to Same Set...");
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 1;
+		wr1_idx = 3;
+		wr1_tag = 5;
+		wr1_data = 100;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		`DELAY;
+		assert(data_out[7] == wr1_data) else #1 exit_on_error;
+		assert(tags_out[7] == wr1_tag) else #1 exit_on_error;
+		assert(valids_out[7] == 1) else #1 exit_on_error;
+
+		$display("Single Write to Same Set Passed");
+
+		$display("Testing Multiple Writes...");
+
+		@(negedge clock);
+		reset = 1;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_reset;
+
+		for (int i = 0; i < `NUM_SETS; ++i) begin
+			for (int j = 0; j < `NUM_WAYS; ++j) begin
+				@(negedge clock);
+				reset = 0;
+				wr1_en = 1;
+				wr1_idx = i;
+				wr1_tag = j;
+				wr1_data = i*j;
+				rd1_idx = 0;
+				rd1_tag = 0;
+
+				@(posedge clock);
+				`DELAY;
+				assert(data_out[(`NUM_WAYS * i) + j] == i*j) else #1 exit_on_error;
+				assert(tags_out[(`NUM_WAYS * i) + j] == j) else #1 exit_on_error;
+				assert(valids_out[(`NUM_WAYS * i) + j] == 1) else #1 exit_on_error;
+			end
+		end
+
+		$display("Multiple Writes Passed");
 
 		$display("@@@Passed");
 		$finish;
