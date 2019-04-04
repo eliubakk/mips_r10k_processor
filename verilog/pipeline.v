@@ -370,7 +370,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 //assign if_id_enable = (dispatch_no_hazard && Icache_valid_out); 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if(reset) begin
+    if(reset | branch_not_taken) begin
       if_id_NPC        <= `SD 0;
       if_id_IR         <= `SD `NOOP_INST;
       if_id_valid_inst <= `SD `FALSE;
@@ -513,7 +513,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //assign id_di_enable = if_valid_inst_out;
 	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-      if (reset) begin
+      if (reset | branch_not_taken) begin
         id_di_rega    <= `SD 0;
         id_di_regb    <= `SD 0;
         id_di_inst_in <= `SD EMPTY_ROW;
@@ -556,7 +556,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign issue_stall = ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
-  assign branch_not_taken = 0;//!co_ret_take_branch;    // for flushing
+   assign branch_not_taken = rob_retire_out.take_branch;
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
   assign RS_enable = dispatch_en & id_di_valid_inst;
@@ -640,7 +640,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-      if (reset) begin
+      if (reset | branch_not_taken) begin
         // id_di_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
         // id_di_IR            <= `SD `NOOP_INST;
         
@@ -765,7 +765,7 @@ ex_stage ex_stage_0 (
 // a register.
 
 always_ff @(posedge clock) begin
-	if(reset) begin
+	if(reset | branch_not_taken) begin
 		for(integer i=0 ; i<3; ++i) begin
 			ex_mult_reg[i].npc <= `SD 0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
@@ -816,7 +816,7 @@ end
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin//Initialize all registers once
     for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-      if (reset) begin
+      if (reset | branch_not_taken) begin
           ex_co_NPC[i]          <= `SD 0;
           ex_co_IR[i]           <= `SD `NOOP_INST;
           ex_co_dest_reg_idx[i] <= `SD `ZERO_REG;
@@ -859,15 +859,15 @@ end
   end // always
 
   always_ff @(posedge clock) begin
-    if (reset) begin
+    if (reset | branch_not_taken) begin
      // ex_co_done <= `SD 0;
       ex_co_take_branch  <= `SD 0;
-    end else if(done) begin
-      //ex_co_done  <= `SD done;
+    end else if(ex_co_enable[4]) begin
+     
       ex_co_take_branch  <= `SD ex_take_branch_out;
-    end else begin
+    end 
 		//ex_co_done <= `SD 0;
-	end
+
   end
   
    
@@ -971,10 +971,12 @@ end
             co_illegal_selected           =    ex_co_illegal[i];
             co_valid_inst_selected        =    ex_co_valid_inst[i];
             co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
-            co_take_branch_selected       =    ex_co_take_branch[i];
+           // co_take_branch_selected       =    ex_co_take_branch[i];
             co_alu_result_selected        =    ex_co_alu_result[i];
              if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
-             else                  co_branch_valid =    0;    
+             else                  co_branch_valid =    0;  
+             if(i == 4)  co_take_branch_selected = ex_co_take_branch;
+             else        co_take_branch_selected = 0;  
           end
         end         
       end else begin
@@ -1049,7 +1051,7 @@ end
   assign co_ret_enable = 1'b1; // always enabled
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if (reset) begin
+    if (reset | branch_not_taken) begin
       co_ret_NPC          <= `SD 0;
       co_ret_IR           <= `SD `NOOP_INST;
       co_ret_halt         <= `SD 0;
@@ -1078,7 +1080,12 @@ end
   end // always
 
   // INSTANTIATING THE ROB
+   assign branch_valid_disp= (id_inst_out.inst.fu_name ==  FU_BR) ? 1:0 ;
    
+   genvar ig;
+   for (i=0; i< `ROB_SIZE; i=i+1) begin
+    if (rob_retire_out.)
+   end
   ROB R0(
     // INPUTS
   	.clock(clock),
@@ -1092,6 +1099,8 @@ end
   	.branch_not_taken(branch_not_taken),
 	  .halt_in(id_inst_out.inst.halt),
     .opcode(id_inst_out.inst_opcode),
+    .take_branch(co_take_branch_selected),
+    .branch_valid(branch_valid_disp),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),

@@ -13,7 +13,8 @@ module ROB(
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
 		input branch_not_taken,
 		input [`SS_SIZE-1:0][31:0] opcode,
-		
+		input			take_branch,
+		input 			branch_valid,
 
 		// OUTPUTS
 		output ROB_ROW_T [`SS_SIZE-1:0] retire_out, // Output for Retire Staget
@@ -107,6 +108,8 @@ module ROB(
 			retire_out[i].halt = 1'b0;
 			retire_out[i].busy = 1'b0;
 			retire_out[i].opcode =  `NOOP_INST;
+			retire_out[i].take_branch = 1'b0;
+			retire_out[i].branch_valid = 1'b0;
 		end
 
 		// update tag ready bits from CBD 
@@ -149,6 +152,8 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].halt = halt_in[i];
 				ROB_table_next[dispatch_idx[i]].busy = 1'b1;
 				ROB_table_next[dispatch_idx[i]].opcode = opcode[i];
+				ROB_table_next[dispatch_idx[i]].take_branch = take_branch;
+				ROB_table_next[dispatch_idx[i]].branch_valid = branch_valid;
 				dispatched[i] = 1'b1;
 			end
 		end
@@ -170,6 +175,8 @@ module ROB(
 				ROB_table[i].halt <= `SD 1'b0;
 				ROB_table[i].busy <= `SD 1'b0;	
 				ROB_table[i].opcode <= `SD `NOOP_INST;
+				ROB_table[i].take_branch <= `SD 1'b0;
+				ROB_table[i].branch_valid <= `SD 1'b0;
 			end
 			tail <= `SD `ROB_SIZE-1;
 			head <= `SD `ROB_SIZE-1;

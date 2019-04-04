@@ -203,7 +203,7 @@ typedef struct packed{
   logic busy;
   logic halt;
   logic [31:0] opcode;
-  logic valid_inst;
+  logic take_branch;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 
