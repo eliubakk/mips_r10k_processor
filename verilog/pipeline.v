@@ -246,8 +246,9 @@ module pipeline (
   // logic         mem_wb_take_branch;
 
   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
+  logic	       retire_inst_busy;
   logic [63:0] retire_reg_wr_data;
-  logic  [4:0] retire_reg_wr_idx;
+  logic  [5:0] retire_reg_wr_idx;
   logic        retire_reg_wr_en;
   logic [63:0] retire_reg_NPC;
 	logic head_halt;
@@ -268,7 +269,7 @@ module pipeline (
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
 
-  assign pipeline_completed_insts = {3'b0, rob_retire_out.busy};
+  assign pipeline_completed_insts = {3'b0, retire_inst_busy};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
                                   rob_retire_out.halt? HALTED_ON_HALT :
                                   NO_ERROR;
@@ -717,7 +718,7 @@ end*/
     .rd_out(pr_tags_values),
 
     `ifdef DEBUG
-    	.phys_registers_out(phys_reg),
+   	.phys_registers_out(phys_reg),
     `endif
     .wr_clk(clock),
     .wr_en(ex_co_valid_inst),
@@ -1103,33 +1104,35 @@ end
   );
 
 
-  //assign pipeline_commit_wr_idx = retire_reg_wr_idx;
+  assign pipeline_commit_wr_idx = retire_reg_wr_idx;
   //assign pipeline_commit_wr_data = retire_reg_wr_data;
-  //assign pipeline_commit_wr_en = retire_reg_wr_en;
-  //assign pipeline_commit_NPC = retire_reg_NPC;
+  assign pipeline_commit_wr_en = retire_reg_wr_en;
+  assign pipeline_commit_NPC = retire_reg_NPC;
 
-  assign pipeline_commit_wr_idx = rob_retire_out.T_new;
-  assign pipeline_commit_wr_data = phys_reg[rob_retire_out.T_new[5:0]];
-  assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
-  assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
+  //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
+  assign pipeline_commit_wr_data = phys_reg[retire_reg_wr_idx];
+  //assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
+  //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
 
   
 
-/*
+
 always_ff @ (posedge clock) begin
 	if(reset) begin
+		retire_inst_busy <= `SD 0;
 		retire_reg_wr_idx <= `SD `ZERO_REG;
 		//retire_reg_wr_data <= `SD 64'h0;
 		retire_reg_wr_en <= `SD 0;
 		retire_reg_NPC <= `SD 64'h4;
 	end else begin
+		retire_inst_busy <= rob_retire_out.busy;
 		retire_reg_wr_idx <= `SD rob_retire_out.T_new;
 		//retire_reg_wr_data <= `SD phys_reg[rob_retire_out.T_new[5:0]];
 		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG));
-		retire_reg_NPC <= `SD 64'h8;
+		retire_reg_NPC <= `SD retire_reg_NPC + 4*retire_reg_wr_en;
 	end
   end
-*/
+
 
 
   //Intsantiating the arch map

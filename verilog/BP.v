@@ -76,7 +76,7 @@ module  BP(
 	`endif
 
 	output		logic						next_pc_valid,		// Enabled when next_pc value is valid pc
-	output 		logic 	[$clog2(`OBQ_SIZE) - 1:0]			next_pc_index, 		// ************Index from OBQ	
+	output 		logic 	[$clog2(`OBQ_SIZE) - 1:0]		next_pc_index, 		// ************Index from OBQ	
 	output		logic	[31:0]					next_pc,
 	output		logic						next_pc_prediction	// enabled when next pc is predicted to be taken
 	
