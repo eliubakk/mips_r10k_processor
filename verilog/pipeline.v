@@ -246,9 +246,10 @@ module pipeline (
   // logic         mem_wb_take_branch;
 
   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  logic [63:0] wb_reg_wr_data_out;
-  logic  [4:0] wb_reg_wr_idx_out;
-  logic        wb_reg_wr_en_out;
+  logic [63:0] retire_reg_wr_data;
+  logic  [4:0] retire_reg_wr_idx;
+  logic        retire_reg_wr_en;
+  logic [63:0] retire_reg_NPC;
 	logic head_halt;
 
   // Memory interface/arbiter wires
@@ -272,11 +273,7 @@ module pipeline (
                                   rob_retire_out.halt? HALTED_ON_HALT :
                                   NO_ERROR;
 
-  // assign pipeline_commit_wr_idx = wb_reg_wr_idx_out;
-  // assign pipeline_commit_wr_data = wb_reg_wr_data_out;
-  // assign pipeline_commit_wr_en = wb_reg_wr_en_out;
-  // assign pipeline_commit_NPC = mem_wb_NPC;
-
+  
 	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
 	// FOR MEMORY INSTRUCTIONS
 	assign proc2Dmem_command = BUS_NONE;
@@ -400,9 +397,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .if_id_IR(if_id_IR),
     .if_id_valid_inst(if_id_valid_inst),
     // .if_id_valid_inst(if_valid_inst_out),
-    // .wb_reg_wr_en_out(wb_reg_wr_en_out),
-    // .wb_reg_wr_idx_out(wb_reg_wr_idx_out),
-    // .wb_reg_wr_data_out(wb_reg_wr_data_out),
+    // .retire_reg_wr_en(retire_reg_wr_en),
+    // .retire_reg_wr_idx(retire_reg_wr_idx),
+    // .retire_reg_wr_data(wb_reg_wr_data_out),
 
     // Outputs
     //.id_ra_value_out(id_rega_out),
@@ -1017,7 +1014,7 @@ end
 //     // Inputs
 //     .clock(clock),
 //     .reset(reset),
-//     .mem_wb_NPC(ex_co_NPC_selected),
+//     .retire_reg_NPC(ex_co_NPC_selected),
 //     .mem_wb_result(co_reg_wr_data_out),
 //     .mem_wb_dest_reg_idx(co_reg_wr_idx_out),
 //     .mem_wb_take_branch(ex_co_take_branch_selected),
@@ -1106,6 +1103,35 @@ end
   );
 
 
+  //assign pipeline_commit_wr_idx = retire_reg_wr_idx;
+  //assign pipeline_commit_wr_data = retire_reg_wr_data;
+  //assign pipeline_commit_wr_en = retire_reg_wr_en;
+  //assign pipeline_commit_NPC = retire_reg_NPC;
+
+  assign pipeline_commit_wr_idx = rob_retire_out.T_new;
+  assign pipeline_commit_wr_data = phys_reg[rob_retire_out.T_new[5:0]];
+  assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
+  assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
+
+  
+
+/*
+always_ff @ (posedge clock) begin
+	if(reset) begin
+		retire_reg_wr_idx <= `SD `ZERO_REG;
+		//retire_reg_wr_data <= `SD 64'h0;
+		retire_reg_wr_en <= `SD 0;
+		retire_reg_NPC <= `SD 64'h4;
+	end else begin
+		retire_reg_wr_idx <= `SD rob_retire_out.T_new;
+		//retire_reg_wr_data <= `SD phys_reg[rob_retire_out.T_new[5:0]];
+		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG));
+		retire_reg_NPC <= `SD 64'h8;
+	end
+  end
+*/
+
+
   //Intsantiating the arch map
   Arch_Map_Table a0(
   	.clock(clock),
@@ -1127,16 +1153,16 @@ end
   //   // Inputs
   //   .clock(clock),
   //   .reset(reset),
-  //   .mem_wb_NPC(mem_wb_NPC),
+  //   .retire_reg_NPC(mem_wb_NPC),
   //   .mem_wb_result(mem_wb_result),
   //   .mem_wb_dest_reg_idx(mem_wb_dest_reg_idx),
   //   .mem_wb_take_branch(mem_wb_take_branch),
   //   .mem_wb_valid_inst(mem_wb_valid_inst),
 
   //   // Outputs
-  //   .reg_wr_data_out(wb_reg_wr_data_out),
-  //   .reg_wr_idx_out(wb_reg_wr_idx_out),
-  //   .reg_wr_en_out(wb_reg_wr_en_out)
+  //   .reg_wr_data_out(retire_reg_wr_data),
+  //   .reg_wr_idx_out(retire_reg_wr_idx),
+  //   .reg_wr_en_out(retire_reg_wr_en)
   // );
 
 endmodule  // module verisimple
