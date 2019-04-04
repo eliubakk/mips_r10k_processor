@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 //                                                                     //
 //   Modulename :  sys_defs.vh                                         //
 //                                                                     //
@@ -203,9 +203,7 @@ typedef struct packed{
   logic busy;
   logic halt;
   logic [31:0] opcode;
-  logic take_branch;
-  logic [4:0] wr_idx;
-  logic [31:0] npc; 
+  logic valid_inst;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 
@@ -481,3 +479,4 @@ const RS_ROW_T EMPTY_ROW =
 };
 
 `endif
+

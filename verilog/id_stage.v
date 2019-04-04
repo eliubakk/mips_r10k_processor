@@ -42,7 +42,7 @@ module decoder(
   
   assign valid_inst = valid_inst_in && !illegal;
 
-  assign ra_idx= ((opa_select == ALU_OPA_IS_REGA)| (fu_name== FU_BR)) ? inst[25:21] : `ZERO_REG;
+  assign ra_idx= (opa_select == ALU_OPA_IS_REGA) ? inst[25:21] : `ZERO_REG;
   assign rb_idx= (opb_select == ALU_OPB_IS_REGB) ? inst[20:16] : `ZERO_REG;
   assign rdest_idx= (dest_reg == DEST_IS_REGC) ? inst[4:0] :
                     (dest_reg == DEST_IS_REGA) ? inst[25:21]  : `ZERO_REG;
@@ -209,7 +209,7 @@ module decoder(
         begin
           opa_select = ALU_OPA_IS_NPC;
           opb_select = ALU_OPB_IS_BR_DISP;
-         fu_name = FU_BR;
+         
           alu_func = ALU_ADDQ;
           case (inst[31:26])
             `FBEQ_INST, `FBLT_INST, `FBLE_INST,
@@ -223,7 +223,7 @@ module decoder(
             begin
               dest_reg = DEST_IS_REGA;
               uncond_branch = `TRUE;
-              
+              fu_name = FU_BR;
             end
 
             default:
