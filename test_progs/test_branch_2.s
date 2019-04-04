@@ -29,8 +29,6 @@
 	lda $r2,0
 	lda $r3,0
 	lda $r4,1
-	cmpeq $r2,$r4,$r5
-	bne $r5,cond1
 	cmpeq $r2,$r3,$r5
 	bne $r5,cond2
 	addq $r4,$r4,$3

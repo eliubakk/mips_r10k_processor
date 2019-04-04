@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 //                                                                     //
 //   Modulename :  if_stage.v                                          //
 //                                                                     //
@@ -52,7 +52,8 @@ module if_stage(
   // the next sequential PC (PC+4) if no branch
   // (halting is handled with the enable PC_enable;
   assign next_PC = (co_ret_take_branch) ? 
-                          co_ret_target_pc : PC_plus_4;
+
++                          co_ret_target_pc : PC_plus_4;
 
   // The take-branch signal must override stalling (otherwise it may be lost)
   //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;

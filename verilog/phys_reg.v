@@ -32,8 +32,8 @@ module phys_regfile(
   genvar ig, jg;
   for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
     for(jg = 0; jg < 2; jg += 1) begin
-      assign rd_out[ig][jg] = (rd_idx[ig][jg] === {$clog2(`NUM_PHYS_REG){1'b1}})? 64'b0 :
-               (wr_en[ig] && (wr_idx[ig] === rd_idx[ig][jg]))? wr_data[ig] :
+      assign rd_out[ig][jg] = (rd_idx[ig][jg] == {$clog2(`NUM_PHYS_REG){1'b1}})? 64'b0 :
+               (wr_en[ig] && (wr_idx[ig] == rd_idx[ig][jg]))? wr_data[ig] :
                                                               phys_registers[rd_idx[ig][jg]];
     end
   end
@@ -41,6 +41,9 @@ module phys_regfile(
   //
   // Write port
   //
+  //
+  //
+
   always_ff @(posedge wr_clk) begin
     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
       if (wr_en[i]) begin
