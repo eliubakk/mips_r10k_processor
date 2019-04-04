@@ -41,7 +41,7 @@
 
 // cache parameters/defines
 
-`define NUM_WAYS 2
+`define NUM_WAYS 4
 `define NUM_SETS (32 / `NUM_WAYS)
 `define NUM_SET_BITS $clog2(`NUM_SETS)
 `define NUM_TAG_BITS (13 - `NUM_SET_BITS)

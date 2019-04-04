@@ -16,8 +16,8 @@ module cache(
 		output logic [31:0]        			valids_out, 
 	`endif
 
-        output [63:0] rd1_data,
-        output rd1_valid
+        output logic [63:0] rd1_data,
+        output logic rd1_valid
         
       );
 
@@ -33,7 +33,13 @@ module cache(
 	logic [(`NUM_WAYS - 1):0] tag_hits;
 	logic [(`NUM_WAYS - 1):0] enc_in;
 	logic full;
+	logic found;
 	logic [(`NUM_TAG_BITS - 1):0] tag_idx;
+
+	logic [(`NUM_WAYS - 1):0] req_in;
+	logic p_en;
+	logic [(`NUM_WAYS - 1):0] gnt_out;
+	
 
 	// assign statements
 	`ifdef DEBUG
@@ -48,7 +54,7 @@ module cache(
 	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx].data;
 	assign rd1_valid = sets[rd1_idx].cache_lines[tag_idx].valid;
 	assign tag_in = wr1_en ? wr1_tag : rd1_tag;
-
+	assign p_en = wr1_en & ~(|tag_hits) & ~full;
 
 	// modules
 
@@ -63,6 +69,14 @@ module cache(
 		.table_in(tag_table_in),
 		.hits(tag_hits));
 
+	psel_generic #(
+		.WIDTH(`NUM_WAYS),
+		.NUM_REQS(1))
+	psel(
+		.req(req_in),
+		.en(p_en),
+		.gnt(gnt_out));
+
 	encoder #(.WIDTH(`NUM_WAYS)) enc(
 				.in(enc_in),
 				.out(tag_idx));
@@ -75,17 +89,22 @@ module cache(
 				full &= sets[wr1_idx].cache_lines[i].valid;
 				tag_table_in[i] = sets[wr1_idx].cache_lines[i].tag;
 			end
-			if (~full) begin
-				for (int i = 0; i < `NUM_WAYS; ++i) begin
-					enc_in[`NUM_WAYS - i - 1] = sets[wr1_idx].cache_lines[i].valid;
-				end
+			if (|tag_hits == 1) begin
+				// if the tag was found
+				enc_in = tag_hits;
+			end else if (full) begin
+				
 			end else begin
-				enc_in = tag_table_in;
+				// insert into first available position
+				for (int i = 0; i < `NUM_WAYS; ++i) begin
+					req_in[`NUM_WAYS - i - 1] = ~sets[wr1_idx].cache_lines[i].valid;
+				end
+				for (int i = 0; i < `NUM_WAYS; ++i) begin
+					enc_in[`NUM_WAYS - i - 1] = gnt_out[i];
+				end
 			end
 		end else begin
-			for (int i = 0; i < `NUM_WAYS; ++i) begin
-				tag_table_in[i] = sets[rd1_idx].cache_lines[i].tag;
-			end
+			enc_in = tag_hits;
 		end
 	end
 
