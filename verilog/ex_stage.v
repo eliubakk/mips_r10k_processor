@@ -105,13 +105,13 @@ module ex_stage(
     input [4:0][63:0] T1_value,
     input [4:0][63:0]  T2_value,
     
-    output [4:0][63:0]  ex_alu_result_out,   // ALU0 result
+    output logic[4:0][63:0]  ex_alu_result_out,   // ALU0 result
     
    
-		output done,
+		output logic done,
    
    
-    output         ex_take_branch_out // is this a taken branch?
+    output logic       ex_take_branch_out // is this a taken branch?
     
   );
 
@@ -362,7 +362,7 @@ module ex_stage(
     .func(issue_reg[4].inst.alu_func),
 
     // Output
-    .result(ex_alu_ls_result_out[4])
+    .result(ex_alu_result_out[4])
   ); 
   
 

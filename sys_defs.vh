@@ -67,7 +67,8 @@
 `define NUM_GEN_REG 32
 typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
-`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
+//`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
+`define NUM_PHYS_REG 63
 `define phys_index_t ($clog2(`NUM_PHYS_REG) - 1) 
 typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
@@ -210,6 +211,7 @@ typedef struct packed{
   logic halt;
   logic [31:0] opcode;
   logic valid_inst;
+  logic take_branch;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 

@@ -376,8 +376,8 @@ module testbench;
       for(int p = 0; p < `NUM_FU_TOTAL; p += 1) begin
 			 $display("FU: %d rda_idx %b, rda_out: %d, rdb_idx: %b, rdb_out: %d, wr_en: %b, wr_idx: %b, wr_data: %d", p, pipeline_0.issue_reg_tags[p][0], pipeline_0.pr_tags_values[p][0], pipeline_0.issue_reg_tags[p][1], pipeline_0.pr_tags_values[p][0], pipeline_0.ex_co_valid_inst[p], pipeline_0.ex_co_dest_reg_idx[p], pipeline_0.ex_co_alu_result[p]);
 			end
-      for(int p=0;p<32+`ROB_SIZE;p++) begin
-				$display("%dth phys reg value : %d", p, pipeline_0.phys_reg[p]);
+      for(int p=0;p<64;p++) begin
+				$display("%dth phys reg value : %h", p, pipeline_0.phys_reg[p]);
 				
 			end	
 		end
