@@ -691,7 +691,11 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         // id_ex_halt          <= `SD id_halt_out;
         // id_ex_illegal       <= `SD id_illegal_out;
         // id_ex_valid_inst    <= `SD id_valid_inst_out;
-      end else begin
+      end else if (~is_ex_enable[i])begin
+
+		issue_reg[i] <= `SD issue_reg[i];
+
+	end else begin
 	//	 is_ex_T1_value[i]   <= `SD 0;
         //	is_ex_T2_value[i]   <= `SD 0;
         	issue_reg[i]        <= `SD EMPTY_ROW;
@@ -1141,7 +1145,7 @@ end
   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
   //assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
   assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
-  assign pipeline_commit_wr_en = retire_reg_wr_en & !rob_retire_out_take_branch;
+  assign pipeline_commit_wr_en = retire_reg_wr_en & (retire_reg_wr_idx != `ZERO_REG) ;
   assign pipeline_commit_NPC = retire_reg_NPC;
   assign pipeline_commit_phys_reg = retire_reg_phys; 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
