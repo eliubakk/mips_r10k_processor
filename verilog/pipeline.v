@@ -571,7 +571,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign issue_stall = ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
-   assign branch_not_taken = rob_retire_out.take_branch;
+   assign branch_not_taken = rob_retire_out_take_branch;
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
   assign RS_enable = dispatch_en & id_di_valid_inst;
@@ -691,7 +691,11 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
         // id_ex_halt          <= `SD id_halt_out;
         // id_ex_illegal       <= `SD id_illegal_out;
         // id_ex_valid_inst    <= `SD id_valid_inst_out;
-      end else begin
+      end else if (~is_ex_enable[i])begin
+
+		issue_reg[i] <= `SD issue_reg[i];
+
+	end else begin
 	//	 is_ex_T1_value[i]   <= `SD 0;
         //	is_ex_T2_value[i]   <= `SD 0;
         	issue_reg[i]        <= `SD EMPTY_ROW;
@@ -1141,7 +1145,7 @@ end
   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
   //assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
   assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
-  assign pipeline_commit_wr_en = retire_reg_wr_en & !rob_retire_out_take_branch;
+  assign pipeline_commit_wr_en = retire_reg_wr_en & (retire_reg_wr_idx != `ZERO_REG) ;
   assign pipeline_commit_NPC = retire_reg_NPC;
   assign pipeline_commit_phys_reg = retire_reg_phys; 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
@@ -1152,7 +1156,7 @@ end
 // FF between complete and retire
 
 always_ff @ (posedge clock) begin
-	if(reset) begin
+	if(reset | branch_not_taken) begin
 		retire_inst_busy <= `SD 0;
 		retire_reg_wr_idx <= `SD `ZERO_REG;
 		retire_reg_wr_en <= `SD 0;
@@ -1161,14 +1165,14 @@ always_ff @ (posedge clock) begin
 		rob_retire_out_halt <= `SD 0;
 		rob_retire_out_take_branch <= `SD 0;
 
-	end else begin
+	end else begin 
 		retire_inst_busy <= rob_retire_out.busy;
 		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
 		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG) & !rob_retire_out.halt);
 		retire_reg_NPC <= `SD rob_retire_out.npc;
 		retire_reg_phys <= `SD rob_retire_out.T_new;
 		rob_retire_out_halt <= `SD rob_retire_out.halt;
-    rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
+    		rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 	end
   end
 
