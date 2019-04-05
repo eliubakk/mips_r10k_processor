@@ -458,6 +458,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
 	assign fr_read_en = id_inst_out.inst.valid_inst;
 	assign fr_wr_en = (rob_retire_out.T_old == `DUMMY_REG) ? 0 : 1; 
+	
+	logic id_branch;
+	assign id_branch = id_inst_out.inst.cond_branch | id_inst_out.inst.uncond_branch;
+
   Free_List f0(
     // INPUTS
     .clock(clock),
@@ -465,7 +469,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .enable(fr_wr_en),// Write enable from ROB during retire
     .T_old(rob_retire_out.T_old), // Comes from ROB during Retire Stage
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
-
+    .id_branch(id_branch), // enabled when dispatched instruction is branch
     // inputs for branch misprediction
     .branch_incorrect(branch_not_taken),
     //.free_check_point(free_list_check),

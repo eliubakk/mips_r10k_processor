@@ -550,7 +550,7 @@ module testbench;
 			
 			//display_di_issue;
 			//display_RS_table;
-		//	display_ROB_table;
+		display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
