@@ -13,12 +13,10 @@ module testbench;
 
 	// initialize wires
 
-	logic [31:0] 	[63:0] 			data_test;
-	logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags_test; 
-	logic [31:0]        			valids_test;
-	logic 					full_test;
-	int					index_test;
+	CACHE_SET_T [(`NUM_SETS - 1):0] sets_test;
 
+	int index_to_write;
+	
 	// input wires
 
 	logic clock;
@@ -35,10 +33,8 @@ module testbench;
 	logic [63:0] rd1_data;
 	logic rd1_valid;
 	
-	logic [31:0] 	[63:0] 			data_out;
-	logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags_out; 
-	logic [31:0]        			valids_out;
-	
+	CACHE_SET_T [(`NUM_SETS - 1):0] sets_out;
+
 	// initialize module
 
 	`DUT(cache) c0(
@@ -51,10 +47,7 @@ module testbench;
 		.rd1_idx(rd1_idx),
 		.rd1_tag(rd1_tag),
 
-		.data_out(data_out),
-		.tags_out(tags_out),
-		.valids_out(valids_out),
-
+		.sets_out(sets_out),
 		.rd1_data(rd1_data),
 		.rd1_valid(rd1_valid)
 	);
@@ -68,11 +61,21 @@ module testbench;
 		end
 	endtask
 
+	task print_set;
+		input CACHE_SET_T set_in;
+		begin
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				$display("\tdata[%d] = %d tag[%d] = %d valid[%d] = %b", i, set_in.cache_lines[i].data, i, set_in.cache_lines[i].tag, i, set_in.cache_lines[i].valid);
+			end
+		end
+	endtask
+
 	task display_cache;
 		begin
 			$display("------------------------------------------------Cache-----------------------------------------------");
-			for (int i = 0; i < 32; ++i) begin
-				$display("data[%d] = %d tags[%d] = %d valids[%d] = %b", i, data_out[i], i, tags_out[i], i, valids_out[i]);
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				$display("set: %d", i);
+				print_set(sets_out[i]);
 			end
 		end
 	endtask
@@ -80,57 +83,112 @@ module testbench;
 	task display_cache_test;
 		begin
 			$display("------------------------------------------------Cache Test------------------------------------------");
-			for (int i = 0; i < 32; ++i) begin
-				$display("data[%d] = %d tags[%d] = %d valids[%d] = %b", i, data_test[i], i, tags_test[i], i, valids_test[i]);
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				$display("set: %d", i);
+				print_set(sets_test[i]);
 			end
 		end
 	endtask
 
 	task check_correct_reset;
 		begin
-			for (int i = 0; i < 32; ++i) begin
-				assert(valids_out[i] == 0) else #1 exit_on_error;
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				for (int j = 0; j < `NUM_WAYS; ++j) begin
+					assert(sets_out[i].cache_lines[j].valid == 0) else #1 exit_on_error;
+				end
+			end
+		end
+	endtask
+
+	task check_block_in_set;
+		input CACHE_LINE_T line;
+		input CACHE_SET_T set;
+		begin
+			int found;
+			found = 0;
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				if (set.cache_lines[i].valid) begin
+					if (line.tag == set.cache_lines[i].tag) begin
+						assert(line.data == set.cache_lines[i].data) else #1 exit_on_error;
+					found = 1;
+					end
+				end
+			end
+			assert(found == 1) else #1 exit_on_error;
+		end 
+	endtask
+
+	task check_equal_set;
+		input CACHE_SET_T set_1;
+		input CACHE_SET_T set_2;
+		begin
+			// check same number valid
+			int count_1, count_2;
+			count_1 = 0;
+			count_2 = 0;
+
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				if (set_1.cache_lines[i].valid) begin
+					++count_1;
+				end
+				if (set_2.cache_lines[i].valid) begin
+					++count_2;
+				end
+			end
+
+			assert(count_1 == count_2) else #1 exit_on_error;
+
+			// check set_1 is a subset of set_2
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				if (set_1.cache_lines[i].valid) begin
+					check_block_in_set(set_1.cache_lines[i], set_2);
+				end
+			end
+
+			// check set_2 is a subset of set_1
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				if (set_2.cache_lines[i].valid) begin
+					check_block_in_set(set_2.cache_lines[i], set_1);
+				end
 			end
 		end
 	endtask
 
 	task check_correct_test;
 		begin
-			for (int i = 0; i < 32; ++i) begin
-				assert(valids_out[i] == valids_test[i]) else #1 exit_on_error;
-				if (valids_out[i]) begin
-					assert(data_out[i] == data_test[i]) else #1 exit_on_error;
-					assert(tags_out[i] == tags_test[i]) else #1 exit_on_error;
-				end
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				check_equal_set(sets_out[i], sets_test[i]);
 			end
 		end
 	endtask
 
 	task write_to_test;
 		begin
-			assert(wr1_en == 1) else #1 exit_on_error;
-			// first check for empty spot
-			full_test = 1;
+
+			int num_valid;
+			int found;
+			found = 0;
+			num_valid = 0;
+
+			index_to_write = 0;
+
 			for (int i = 0; i < `NUM_WAYS; ++i) begin
-				full_test &= valids_test[(`NUM_WAYS * wr1_idx) + i];
-			end
-			// insert into empty spot if available
-			// otherwise write to pseudo lru
-			if (~full_test) begin
-
-				for (int i = 0; i < `NUM_WAYS; ++i) begin
-					if (!valids_test[(`NUM_WAYS * wr1_idx) + i]) begin
-						index_test = i;
-						break;
-					end
+				if (sets_test[wr1_idx].cache_lines[i].valid && sets_test[wr1_idx].cache_lines[i].tag == wr1_tag) begin
+					index_to_write = i;
+					break;
+				end else if (sets_test[wr1_idx].cache_lines[i].valid) begin
+					++num_valid;
+				end else begin
+					index_to_write = i;
 				end
+			end
 
-				$display("index_test: %d", index_test);
-				data_test[(`NUM_WAYS * wr1_idx) + index_test] = wr1_data;
-				tags_test[(`NUM_WAYS * wr1_idx) + index_test] = wr1_tag;
-				valids_test[(`NUM_WAYS * wr1_idx) + index_test] = 1;
-			end else begin
+			if (num_valid == `NUM_WAYS) begin
 				// eviction logic
+			end else begin
+				sets_test[wr1_idx].cache_lines[index_to_write].valid = 1;
+				sets_test[wr1_idx].cache_lines[index_to_write].data = wr1_data;
+				sets_test[wr1_idx].cache_lines[index_to_write].tag = wr1_tag;
 			end
 		end
 	endtask
@@ -167,9 +225,12 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		check_correct_reset;
+		sets_test = sets_out;
+		/*
 		data_test = data_out;
 		tags_test = tags_out;
 		valids_test = valids_out;
+		*/
 
 		$display("Reset Test Passed");
 
@@ -185,9 +246,11 @@ module testbench;
 		rd1_tag = 0;
 		write_to_test;
 
+
 		@(posedge clock);
 		`DELAY;
-
+		display_cache;
+		display_cache_test;
 		// assert(data_out[6] == wr1_data) else #1 exit_on_error;
 		// assert(tags_out[6] == wr1_tag) else #1 exit_on_error;
 		// assert(valids_out[6] == 1) else #1 exit_on_error;
@@ -208,11 +271,21 @@ module testbench;
 		write_to_test;
 
 		@(posedge clock);
+		for (int i = 0; i < `NUM_WAYS; ++i) begin
+			$display("tag_table_in_write[%d] = %d", i, c0.tag_table_in_write[i]);
+		end
+		$display("|tag_hits_write: %b", |c0.tag_hits_write);
+		$display("has_invalid: %b", c0.has_invalid);
+		$display("invalid_sel: %b", c0.invalid_sel);
+		$display("enc_in_write: %b", c0.enc_in_write);
+		$display("tag_hits_write: %b", c0.tag_hits_write);
 		`DELAY;
 
 		//assert(data_out[7] == wr1_data) else #1 exit_on_error;
 		//assert(tags_out[7] == wr1_tag) else #1 exit_on_error;
 		//assert(valids_out[7] == 1) else #1 exit_on_error;
+		display_cache;
+		display_cache_test;
 		check_correct_test;
 
 		$display("Single Write to Same Set Passed");
@@ -231,10 +304,7 @@ module testbench;
 		@(posedge clock);
 		`DELAY;
 		check_correct_reset;
-		data_test = data_out;
-		tags_test = tags_out;
-		valids_test = valids_out;
-
+		sets_test = sets_out;
 		for (int i = 0; i < `NUM_SETS; ++i) begin
 			for (int j = 0; j < `NUM_WAYS; ++j) begin
 				@(negedge clock);
@@ -248,18 +318,7 @@ module testbench;
 				write_to_test;
 
 				@(posedge clock);
-				$display("wr1_en: %b", wr1_en);
-				$display("tag_hits: %b", c0.tag_hits);
-				$display("full: %b", c0.full);
-				$display("p_en: %b", c0.p_en);
-				$display("req_in: %b", c0.req_in);
-				$display("gnt_out: %b", c0.gnt_out);
 				`DELAY
-				display_cache;
-				display_cache_test;
-				// assert(data_out[(`NUM_WAYS * i) + j] == i*j) else #1 exit_on_error;
-				// assert(tags_out[(`NUM_WAYS * i) + j] == j) else #1 exit_on_error;
-				// assert(valids_out[(`NUM_WAYS * i) + j] == 1) else #1 exit_on_error;
 				check_correct_test;
 			end
 		end
@@ -305,6 +364,78 @@ module testbench;
 		end
 
 		$display("Multiple Read Passed");
+
+		$display("Testing Single Over-Write...");
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 1;
+		wr1_idx = 2;
+		wr1_tag = 1;
+		wr1_data = 999;
+		rd1_idx = 0;
+		rd1_tag = 0;
+		write_to_test;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_test;
+
+		$display("Single Over-Write Passed");
+
+		$display("Testing Multiple Over-Write...");
+
+		@(negedge clock);
+		reset = 1;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_reset;
+		sets_test = sets_out;	
+
+		for (int i = 0; i < 3; ++i) begin
+			for (int j = 0; j < `NUM_SETS; ++j) begin
+				for (int k = 0; k < `NUM_TAGS; ++k) begin
+					@(negedge clock);
+					reset = 0;
+					wr1_en = 1;
+					wr1_idx = j;
+					wr1_tag = k;
+					wr1_data = $urandom_range(999, 0);
+					rd1_idx = 0;
+					rd1_tag = 0;
+					write_into_test;
+
+					@(posedge clock);
+					`DELAY;
+								
+		end
+
+		for (int i = 0; i < 10; ++i) begin
+			@(negedge clock);
+			reset = 0;
+			wr1_en = 1;
+			wr1_idx = $urandom_range(2**`NUM_SET_BITS, 0);
+			wr1_tag = $urandom_range(2**`NUM_TAG_BITS, 0);
+			wr1_data = $urandom_range(9999, 0);
+			rd1_idx = 0;
+			rd1_tag = 0;
+			write_to_test;
+
+			@(posedge clock);
+			`DELAY;
+			display_cache;
+			display_cache_test;
+			check_correct_test;
+		end
+
+		$display("Multiple Over-Write Passed");
 
 		$display("@@@Passed");
 		$finish;

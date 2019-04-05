@@ -10,10 +10,12 @@ module cache(
         input [63:0] wr1_data, 
 
 	`ifdef DEBUG
-
+		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
+		/*
 		output logic [31:0] 	[63:0] 			data_out,
 		output logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags_out, 
 		output logic [31:0]        			valids_out, 
+		*/
 	`endif
 
         output logic [63:0] rd1_data,
@@ -27,101 +29,106 @@ module cache(
 
 	// internal data
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets;
+	CACHE_SET_T [(`NUM_SETS - 1):0] sets_next;
 
 	logic [(`NUM_TAG_BITS - 1):0] tag_in;
-	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in;
-	logic [(`NUM_WAYS - 1):0] tag_hits;
-	logic [(`NUM_WAYS - 1):0] enc_in;
-	logic full;
-	logic found;
-	logic [(`NUM_TAG_BITS - 1):0] tag_idx;
-
-	logic [(`NUM_WAYS - 1):0] req_in;
-	logic p_en;
-	logic [(`NUM_WAYS - 1):0] gnt_out;
-	
-
-	// assign statements
-	`ifdef DEBUG
-	for (genvar ig = 0; ig < `NUM_SETS; ++ig) begin
-		for (genvar jg = 0; jg < `NUM_WAYS; ++jg) begin
-			assign data_out[(`NUM_WAYS * ig) + jg] = sets[ig].cache_lines[jg].data;
-			assign tags_out[(`NUM_WAYS * ig) + jg] = sets[ig].cache_lines[jg].tag;
-			assign valids_out[(`NUM_WAYS * ig) + jg] = sets[ig].cache_lines[jg].valid;
-		end
-	end	
-	`endif
-	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx].data;
-	assign rd1_valid = sets[rd1_idx].cache_lines[tag_idx].valid;
-	assign tag_in = wr1_en ? wr1_tag : rd1_tag;
-	assign p_en = wr1_en & ~(|tag_hits) & ~full;
+	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_read;
+	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_write;
+	logic [(`NUM_WAYS - 1):0] tag_hits_read;
+	logic [(`NUM_WAYS - 1):0] tag_hits_write;
+	logic [(`NUM_WAYS - 1):0] has_invalid;
+	logic [(`NUM_WAYS - 1):0] invalid_sel;
+	logic [(`NUM_WAYS - 1):0] enc_in_write;
+	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_read;
+	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write;
 
 	// modules
-
 	CAM #(
 		.LENGTH(`NUM_WAYS),
 		.WIDTH(`NUM_TAG_BITS),
 		.NUM_TAGS(1),
 		.TAG_SIZE(`NUM_TAG_BITS))
-	cam(
+	read_cam(
 		.enable(1),
-		.tags(tag_in),
-		.table_in(tag_table_in),
-		.hits(tag_hits));
+		.tags(rd1_tag),
+		.table_in(tag_table_in_read),
+		.hits(tag_hits_read));
+
+	encoder #(.WIDTH(`NUM_WAYS))
+	read_enc(
+		.in(tag_hits_read),
+		.out(tag_idx_read));
 
 	psel_generic #(
-		.WIDTH(`NUM_WAYS),
-		.NUM_REQS(1))
-	psel(
-		.req(req_in),
-		.en(p_en),
-		.gnt(gnt_out));
+			.WIDTH(`NUM_WAYS),
+			.NUM_REQS(1))
+	idx_psel(
+		.req(has_invalid),
+		.en(wr1_en),
+		.gnt(invalid_sel));
 
-	encoder #(.WIDTH(`NUM_WAYS)) enc(
-				.in(enc_in),
-				.out(tag_idx));
-	
-	// combinational logic
+	CAM #(
+		.LENGTH(`NUM_WAYS),
+		.WIDTH(1),
+		.NUM_TAGS(1),
+		.TAG_SIZE(`NUM_TAG_BITS))
+	write_cam(
+		.enable(wr1_en),
+		.tags(wr1_tag),
+		.table_in(tag_table_in_write),
+		.hits(tag_hits_write));
+
+	encoder #(.WIDTH(`NUM_WAYS)) 
+	write_enc(
+		.in(enc_in_write),
+		.out(tag_idx_write));
+
+	// assign statements
+	assign sets_out = sets;
+	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
+	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
+
+	for (genvar i = 0; i < `NUM_WAYS; ++i) begin
+		assign has_invalid[i] = ~sets[wr1_idx].cache_lines[i].valid;
+		assign tag_table_in_read[i] = sets[rd1_idx].cache_lines[i].tag;
+		assign tag_table_in_write[i] = sets[wr1_idx].cache_lines[i].tag;
+	end
+
 	always_comb begin
+		sets_next = sets;
+
 		if (wr1_en) begin
-			full = 1;
-			for (int i = 0; i < `NUM_WAYS; ++i) begin
-				full &= sets[wr1_idx].cache_lines[i].valid;
-				tag_table_in[i] = sets[wr1_idx].cache_lines[i].tag;
-			end
-			if (|tag_hits == 1) begin
-				// if the tag was found
-				enc_in = tag_hits;
-			end else if (full) begin
-				
+			// check if tag matches
+			if (|tag_hits_write) begin
+				enc_in_write = tag_hits_write;
+			end else if (|has_invalid) begin
+				enc_in_write = invalid_sel;
 			end else begin
-				// insert into first available position
-				for (int i = 0; i < `NUM_WAYS; ++i) begin
-					req_in[`NUM_WAYS - i - 1] = ~sets[wr1_idx].cache_lines[i].valid;
-				end
-				for (int i = 0; i < `NUM_WAYS; ++i) begin
-					enc_in[`NUM_WAYS - i - 1] = gnt_out[i];
-				end
+				enc_in_write = 1;
 			end
-		end else begin
-			enc_in = tag_hits;
+			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
+			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
+			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;
+			// if matches, write at same position
+			// if no match, check if empty spot available
+			// if spot available, write there
+			// else write in lru position
 		end
 	end
 
-	// sequential logic
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `NUM_SETS; ++i) begin
 				for (int j = 0; j < `NUM_WAYS; ++j) begin
+					sets[i].cache_lines[j].data <= `SD 0;
 					sets[i].cache_lines[j].tag <= `SD 0;
 					sets[i].cache_lines[j].valid <= `SD 0;
 				end
 			end
-		end else if (wr1_en) begin
-			sets[wr1_idx].cache_lines[tag_idx].data <= `SD wr1_data;
-			sets[wr1_idx].cache_lines[tag_idx].tag <= `SD wr1_tag;
-			sets[wr1_idx].cache_lines[tag_idx].valid <= `SD 1;
+		end else begin
+			sets <= `SD sets_next;
 		end
 	end
+
 
 endmodule
