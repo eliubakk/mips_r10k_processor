@@ -226,11 +226,6 @@ module testbench;
 		`DELAY;
 		check_correct_reset;
 		sets_test = sets_out;
-		/*
-		data_test = data_out;
-		tags_test = tags_out;
-		valids_test = valids_out;
-		*/
 
 		$display("Reset Test Passed");
 
@@ -249,11 +244,6 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
-		display_cache;
-		display_cache_test;
-		// assert(data_out[6] == wr1_data) else #1 exit_on_error;
-		// assert(tags_out[6] == wr1_tag) else #1 exit_on_error;
-		// assert(valids_out[6] == 1) else #1 exit_on_error;
 		check_correct_test;
 
 		$display("Single Write Passed");
@@ -271,21 +261,7 @@ module testbench;
 		write_to_test;
 
 		@(posedge clock);
-		for (int i = 0; i < `NUM_WAYS; ++i) begin
-			$display("tag_table_in_write[%d] = %d", i, c0.tag_table_in_write[i]);
-		end
-		$display("|tag_hits_write: %b", |c0.tag_hits_write);
-		$display("has_invalid: %b", c0.has_invalid);
-		$display("invalid_sel: %b", c0.invalid_sel);
-		$display("enc_in_write: %b", c0.enc_in_write);
-		$display("tag_hits_write: %b", c0.tag_hits_write);
 		`DELAY;
-
-		//assert(data_out[7] == wr1_data) else #1 exit_on_error;
-		//assert(tags_out[7] == wr1_tag) else #1 exit_on_error;
-		//assert(valids_out[7] == 1) else #1 exit_on_error;
-		display_cache;
-		display_cache_test;
 		check_correct_test;
 
 		$display("Single Write to Same Set Passed");
@@ -401,7 +377,7 @@ module testbench;
 
 		for (int i = 0; i < 3; ++i) begin
 			for (int j = 0; j < `NUM_SETS; ++j) begin
-				for (int k = 0; k < `NUM_TAGS; ++k) begin
+				for (int k = 0; k < `NUM_WAYS; ++k) begin
 					@(negedge clock);
 					reset = 0;
 					wr1_en = 1;
@@ -410,29 +386,13 @@ module testbench;
 					wr1_data = $urandom_range(999, 0);
 					rd1_idx = 0;
 					rd1_tag = 0;
-					write_into_test;
+					write_to_test;
 
 					@(posedge clock);
 					`DELAY;
-								
-		end
-
-		for (int i = 0; i < 10; ++i) begin
-			@(negedge clock);
-			reset = 0;
-			wr1_en = 1;
-			wr1_idx = $urandom_range(2**`NUM_SET_BITS, 0);
-			wr1_tag = $urandom_range(2**`NUM_TAG_BITS, 0);
-			wr1_data = $urandom_range(9999, 0);
-			rd1_idx = 0;
-			rd1_tag = 0;
-			write_to_test;
-
-			@(posedge clock);
-			`DELAY;
-			display_cache;
-			display_cache_test;
-			check_correct_test;
+					check_correct_test;
+				end
+			end
 		end
 
 		$display("Multiple Over-Write Passed");
