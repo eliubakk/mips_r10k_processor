@@ -256,7 +256,7 @@ logic branch_valid_disp;  //branch_valid_disp
   logic [63:0] retire_reg_NPC;
   logic  [5:0] retire_reg_phys;;
 	logic head_halt;
-
+  logic rob_retire_out_halt;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
   logic  [1:0] proc2Dmem_command, proc2Imem_command;
@@ -275,7 +275,7 @@ logic branch_valid_disp;  //branch_valid_disp
 
   assign pipeline_completed_insts = {3'b0, retire_inst_busy};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
-                                  rob_retire_out.halt? HALTED_ON_HALT :
+                                  rob_retire_out_halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
   
@@ -1135,7 +1135,7 @@ end
   //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
 
   
-
+// FF between complete and retire
 
 always_ff @ (posedge clock) begin
 	if(reset) begin
@@ -1144,12 +1144,14 @@ always_ff @ (posedge clock) begin
 		retire_reg_wr_en <= `SD 0;
 		retire_reg_NPC <= `SD 64'h4;
 		retire_reg_phys <= `SD 0;
+		rob_retire_out_halt <= `SD 0;
 	end else begin
 		retire_inst_busy <= rob_retire_out.busy;
 		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
-		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG));
+		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG) & !rob_retire_out.halt);
 		retire_reg_NPC <= `SD rob_retire_out.npc;
 		retire_reg_phys <= `SD rob_retire_out.T_new;
+		rob_retire_out_halt <= `SD rob_retire_out.halt;
 	end
   end
 
