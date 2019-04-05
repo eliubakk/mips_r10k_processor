@@ -32,7 +32,7 @@
 
 // probably not a good idea to change this second one
 `define VIRTUAL_CLOCK_PERIOD   30.0 // Clock period from dc_shell
-`define VERILOG_CLOCK_PERIOD   10.0 // Clock period from test bench
+`define VERILOG_CLOCK_PERIOD   20.0 // Clock period from test bench
 
 `define MEM_LATENCY_IN_CYCLES 0.001
 //`define MEM_LATENCY_IN_CYCLES (100.0/`VERILOG_CLOCK_PERIOD+0.49999)
@@ -204,6 +204,7 @@ typedef struct packed{
   logic halt;
   logic [31:0] opcode;
   logic take_branch;
+  logic branch_valid;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 

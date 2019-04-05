@@ -117,6 +117,15 @@ module ROB(
 			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
 		end
 
+	// if(take_branch)	begin
+	// 	for (int i=0 ; i< `ROB_SIZE; i= i+1) begin
+	// 		if (ROB_table[i].branch_valid) begin
+	// 			ROB_table_next[i].take_branch = take_branch;
+	// 			break; 
+	// 		end
+	// 	end
+	// end
+
 		//RETIRE STAGE
 		for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
 			if(enable & retire_idx_valid[i] & ready_to_retire[retire_idx[i]]) begin

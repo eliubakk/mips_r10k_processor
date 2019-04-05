@@ -208,6 +208,8 @@ module pipeline (
   logic         co_ret_branch_valid;
   logic         co_ret_branch_prediction;
 
+
+logic branch_valid_disp;  //branch_valid_disp
   //outputs from the ROB
   //PHYS_REG                    rob_fl_arch_Told;
   //PHYS_REG                    rob_arch_retire_reg;
@@ -1080,10 +1082,14 @@ end
   // INSTANTIATING THE ROB
    assign branch_valid_disp= (id_inst_out.inst.fu_name ==  FU_BR) ? 1:0 ;
    
-   genvar ig;
-   for (i=0; i< `ROB_SIZE; i=i+1) begin
-    if (rob_retire_out.)
-   end
+  //  genvar i;
+  //  for (i=0; i< `ROB_SIZE; i=i+1) begin
+  //     if (ROB_table_out[i].branch_valid) begin
+  //       take_branch_reg = ex_co_take_branch;
+  //       break;
+  //     end
+    
+   
   ROB R0(
     // INPUTS
   	.clock(clock),
@@ -1099,6 +1105,7 @@ end
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
     .branch_valid(branch_valid_disp),
+  
   	
     // OUTPUTS
     .retire_out(rob_retire_out),
