@@ -42,11 +42,11 @@ module testbench;
 
   logic  [3:0] pipeline_completed_insts;
   ERROR_CODE   pipeline_error_status;
-  logic  [4:0] pipeline_commit_wr_idx;
+  logic  [5:0] pipeline_commit_wr_idx;
   logic [63:0] pipeline_commit_wr_data;
   logic        pipeline_commit_wr_en;
   logic [63:0] pipeline_commit_NPC;
-
+  logic	[5:0]  pipeline_commit_phys_reg;
 
   logic [63:0] if_NPC_out;
   logic [31:0] if_IR_out;
@@ -122,6 +122,7 @@ module testbench;
     .pipeline_commit_wr_idx(pipeline_commit_wr_idx),
     .pipeline_commit_wr_en(pipeline_commit_wr_en),
     .pipeline_commit_NPC(pipeline_commit_NPC),
+    .pipeline_commit_phys_reg(pipeline_commit_phys_reg),
 
     .if_NPC_out(if_NPC_out),
     .if_IR_out(if_IR_out),
@@ -735,10 +736,11 @@ module testbench;
        // print the writeback information to writeback.out
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)
-           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x",
+           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x	 PHYS_REG=%x",
                      pipeline_commit_NPC-4,
                      pipeline_commit_wr_idx,
-                     pipeline_commit_wr_data
+                     pipeline_commit_wr_data,
+		     pipeline_commit_phys_reg
 		     );
         else
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC-4);

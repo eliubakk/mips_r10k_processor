@@ -205,6 +205,8 @@ typedef struct packed{
   logic [31:0] opcode;
   logic take_branch;
   logic branch_valid;
+  logic [4:0] wr_idx;
+  logic [31:0] npc;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 

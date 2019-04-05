@@ -31,6 +31,7 @@ module pipeline (
     output logic [63:0] pipeline_commit_wr_data,
     output logic        pipeline_commit_wr_en,
     output logic [63:0] pipeline_commit_NPC,
+    output logic [5:0]  pipeline_commit_phys_reg,
 
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
@@ -253,6 +254,7 @@ logic branch_valid_disp;  //branch_valid_disp
   logic  [5:0] retire_reg_wr_idx;
   logic        retire_reg_wr_en;
   logic [63:0] retire_reg_NPC;
+  logic  [5:0] retire_reg_phys;;
 	logic head_halt;
 
   // Memory interface/arbiter wires
@@ -1105,7 +1107,8 @@ end
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
     .branch_valid(branch_valid_disp),
-  
+    .wr_idx(id_rdest_idx),
+    .npc(id_inst_out.npc),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),
@@ -1119,14 +1122,14 @@ end
     `endif
   );
 
+// retire_reg_wr_idx is physical register
 
   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
-  //assign pipeline_commit_wr_data = retire_reg_wr_data;
+  assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
   assign pipeline_commit_wr_en = retire_reg_wr_en;
   assign pipeline_commit_NPC = retire_reg_NPC;
-
+  assign pipeline_commit_phys_reg = retire_reg_phys; 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
-  assign pipeline_commit_wr_data = phys_reg[retire_reg_wr_idx];
   //assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
   //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
 
@@ -1137,15 +1140,15 @@ always_ff @ (posedge clock) begin
 	if(reset) begin
 		retire_inst_busy <= `SD 0;
 		retire_reg_wr_idx <= `SD `ZERO_REG;
-		//retire_reg_wr_data <= `SD 64'h0;
 		retire_reg_wr_en <= `SD 0;
 		retire_reg_NPC <= `SD 64'h4;
+		retire_reg_phys <= `SD 0;
 	end else begin
 		retire_inst_busy <= rob_retire_out.busy;
-		retire_reg_wr_idx <= `SD rob_retire_out.T_new;
-		//retire_reg_wr_data <= `SD phys_reg[rob_retire_out.T_new[5:0]];
+		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
 		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG));
-		retire_reg_NPC <= `SD retire_reg_NPC + 4*retire_reg_wr_en;
+		retire_reg_NPC <= `SD rob_retire_out.npc;
+		retire_reg_phys <= `SD rob_retire_out.T_new;
 	end
   end
 
