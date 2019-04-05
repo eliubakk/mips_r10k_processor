@@ -9,7 +9,7 @@ module Free_List(
 	input enable,	// enable signal for the writing of the freelist i.e the new freed regiter
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
 	input dispatch_en, // Structural Hazard detection during Dispatch
-
+	input id_branch, // Enabled when instruction is branch
 	// inputs for branch misprediction
 	input branch_incorrect,
 	//input PHYS_REG [`FL_SIZE-1:0] free_check_point,
@@ -110,22 +110,28 @@ module Free_List(
 				free_list[i] 		<= `SD {0, `NUM_GEN_REG + i};
 				free_check_point[i]		<= `SD {0, `NUM_GEN_REG + i};
 			end
-			tail 		<= `SD `ROB_SIZE;
+			tail 			<= `SD `ROB_SIZE;
 			tail_check_point	<= `SD `ROB_SIZE;
 		end else begin
 			if(dispatch_en) begin
-				free_list <= `SD next_free_list;
-				tail <= `SD next_tail;
-				free_check_point <= `SD next_free_list;
-				tail_check_point <= `SD next_tail;
-			end else if(branch_incorrect) begin
+				if(id_branch) begin // When branch is dispatched
+					free_list <= `SD next_free_list;
+					tail <= `SD next_tail;
+					free_check_point <= `SD next_free_list;
+					tail_check_point <= `SD next_tail;
+				end else begin	// When non-branch instruction is dispatched
+					free_list <= `SD next_free_list;
+					tail <= `SD next_tail;
+					
+				end
+			end else if(branch_incorrect) begin // When branch instruction is retired
 				free_list <= `SD free_check_point;
 				tail <= `SD tail_check_point;
 				for (int i = 0; i < `ROB_SIZE; i += 1) begin
 					free_check_point[i]		<= `SD {0, `NUM_GEN_REG + i};
 				end
 				tail_check_point <= `SD `ROB_SIZE;
-			end else begin
+			end else begin // When nornal instruction is retired
 				free_list <= `SD next_free_list;
 				tail <= `SD next_tail;
 						

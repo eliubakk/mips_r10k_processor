@@ -3,7 +3,7 @@ mkdir -p pipeline && cd pipeline && \
 SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps  +define+PIPELINE=1 ../../verilog/pipeline.v ../../verilog/misc/CAM.v ../../verilog/misc/encoder.v ../../verilog/misc/psel_generic.v ../../verilog/misc/psel_single.v ../../verilog/PHT_TWO_SC.v ../../verilog/phys_reg.v ../../verilog/id_stage.v ../../verilog/ex_stage.v ../../verilog/cachemem.v ../../verilog/Free_List.v ../../verilog/RS.v ../../verilog/wb_stage.v ../../verilog/pipe_mult.v ../../verilog/BP.v ../../verilog/cdb.v ../../verilog/BTB.v ../../verilog/ROB.v ../../verilog/Free_List_Check.v ../../verilog/OBQ.v ../../verilog/if_stage.v ../../verilog/RAS.v ../../verilog/Arch_Map_Table.v ../../verilog/mult_stage.v ../../verilog/SQ.v ../../verilog/GSHARE.v ../../verilog/Map_Table.v ../../verilog/icache.v ../../verilog/regfile.v ../../verilog/mem_stage.v ../../testbench/pipe_print.c ../../testbench/mem.v ../../testbench/pipeline_test.v -o simv_pipeline &&\
 ./simv_pipeline | tee pipeline_simv_program.out
                          Chronologic VCS (TM)
-      Version N-2017.12-SP2-1_Full64 -- Fri Apr  5 14:48:52 2019
+      Version N-2017.12-SP2-1_Full64 -- Fri Apr  5 16:02:57 2019
                Copyright (c) 1991-2017 by Synopsys Inc.
                          ALL RIGHTS RESERVED
 
@@ -203,7 +203,7 @@ Warning-[TFIPC] Too few instance port connections
 
 
 Warning-[TFIPC] Too few instance port connections
-../../verilog/pipeline.v, 576
+../../verilog/pipeline.v, 580
 "RS #(.FU_NAME_VAL(FU_NAME_VAL), .FU_BASE_IDX(FU_BASE_IDX), .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0( .clock (clock),  .reset (reset),  .enable (enable),  .CAM_en (CDB_enable),  .CDB_in (CDB_tag_out),  .dispatch_valid (RS_enable),  .inst_in (id_di_inst_in),  .branch_not_taken (branch_not_taken),  .issue_stall (issue_stall),  .rs_table_out (rs_table_out),  .issue_out (issue_next),  .free_rows_next (rs_free_rows_next_out),  .rs_full (rs_full));"
   The above instance has fewer port connections than the module definition.
   Please use '+lint=TFIPC-L' to print out detailed information of unconnected 
@@ -211,7 +211,7 @@ Warning-[TFIPC] Too few instance port connections
 
 
 Warning-[TFIPC] Too few instance port connections
-../../verilog/pipeline.v, 1104
+../../verilog/pipeline.v, 1108
 "ROB R0( .clock (clock),  .reset (reset),  .enable (enable),  .T_old_in (T_old),  .T_new_in (fr_free_reg_T),  .CDB_tag_in (CDB_tag_out),  .CAM_en (CDB_enable),  .dispatch_en (ROB_enable),  .branch_not_taken (branch_not_taken),  .halt_in (id_inst_out.inst.halt),  .opcode (id_inst_out.inst_opcode),  .take_branch (co_take_branch_selected),  .branch_valid (branch_valid_disp),  .wr_idx (id_rdest_idx),  .npc (id_inst_out.npc),  .co_alu_result (co_alu_result_selected),  .retire_out (rob_retire_out),  .free_rows_next (rob_free_rows_next_out),  .full (rob_full_out),  .ROB_table_out (ROB_table_out),  .tail_out (rob_tail_out),  .head_out (rob_head_out));"
   The above instance has fewer port connections than the module definition.
   Please use '+lint=TFIPC-L' to print out detailed information of unconnected 
@@ -256,7 +256,7 @@ Warning-[CWUC] Concatenations with unsized constants
 
 
 Warning-[CWUC] Concatenations with unsized constants
-../../verilog/Free_List.v, 125
+../../verilog/Free_List.v, 131
 "0"
   An unsized constant '0' is used in the concatenation. The unsized constant 
   will be used as a 32-bit constant.
@@ -352,7 +352,7 @@ Warning-[PCWM-W] Port connection width mismatch
 
 
 Warning-[PCWM-W] Port connection width mismatch
-../../verilog/pipeline.v, 1104
+../../verilog/pipeline.v, 1108
 "ROB R0( .clock (clock),  .reset (reset),  .enable (enable),  .T_old_in (T_old),  .T_new_in (fr_free_reg_T),  .CDB_tag_in (CDB_tag_out),  .CAM_en (CDB_enable),  .dispatch_en (ROB_enable),  .branch_not_taken (branch_not_taken),  .halt_in (id_inst_out.inst.halt),  .opcode (id_inst_out.inst_opcode),  .take_branch (co_take_branch_selected),  .branch_valid (branch_valid_disp),  .wr_idx (id_rdest_idx),  .npc (id_inst_out.npc),  .co_alu_result (co_alu_result_selected),  .retire_out (rob_retire_out),  .free_rows_next (rob_free_rows_next_out),  .full (rob_full_out),  .ROB_table_out (ROB_table_out),  .tail_out (rob_tail_out),  .head_out (rob_head_out));"
   The following 64-bit expression is connected to 32-bit port "npc" of module 
   "ROB", instance "R0".
@@ -360,7 +360,7 @@ Warning-[PCWM-W] Port connection width mismatch
   	use +lint=PCWM for more details
 
 Starting vcs inline pass...
-16 modules and 0 UDP read.
+17 modules and 0 UDP read.
 recompiling module pipeline
 recompiling module CAM
 recompiling module encoder
@@ -371,25 +371,26 @@ recompiling module alu
 recompiling module wb_stage
 recompiling module BP
 recompiling module Free_List_Check
+recompiling module Arch_Map_Table
 recompiling module mult_stage
 recompiling module SQ
 recompiling module regfile
 recompiling module mem_stage
 recompiling module mem
 recompiling module testbench
-All of 16 modules done
+All of 17 modules done
 make[1]: Entering directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
 make[1]: Leaving directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
 make[1]: Entering directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
 rm -f _csrc*.so pre_vcsobj_*.so share_vcsobj_*.so
 if [ -x ../simv_pipeline ]; then chmod -x ../simv_pipeline; fi
-g++  -o ../simv_pipeline    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir/ -Wl,-rpath=./simv_pipeline.daidir/ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg  pipe_print.o   objs/amcQw_d.o   _19925_archive_1.so  SIM_l.o      rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
+g++  -o ../simv_pipeline    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir/ -Wl,-rpath=./simv_pipeline.daidir/ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg  pipe_print.o   objs/amcQw_d.o   _15904_archive_1.so  SIM_l.o      rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
 ../simv_pipeline up to date
 make[1]: Leaving directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
-CPU time: .772 seconds to compile + .251 seconds to elab + .106 seconds to link
+CPU time: .778 seconds to compile + .248 seconds to elab + .105 seconds to link
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr  5 14:48 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr  5 16:02 2019
 @@
 @@
 @@                     0  Asserting System reset......
@@ -400,6 +401,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          x-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      x CDB_tag_in: 127 CAM_en: x dispatch_en: x branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next:  x rob_full: x tail:  x head:  x
+ROB_Row =           0,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           1,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           2,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           3,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           4,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           5,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           6,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           7,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           8,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           9,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          10,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          11,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          12,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          13,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          14,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          15,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+*******************************************************************
+
 
 
 @@
@@ -409,6 +436,32 @@ Pipeline Assigns
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          x-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      x CDB_tag_in:   0 CAM_en: x dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next:  x rob_full: x tail:  x head:  x
+ROB_Row =           0,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           1,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           2,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           3,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           4,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           5,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           6,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           7,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           8,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =           9,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          10,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          11,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          12,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          13,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          14,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+ROB_Row =          15,  busy = x, halt = x, T_new = xxxxxxx T_old = xxxxxxx 
+*******************************************************************
+
 
 
 @@
@@ -420,6 +473,32 @@ Pipeline Assigns
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          0-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      X CDB_tag_in:   0 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @@
@@ -429,6 +508,32 @@ Pipeline Assigns
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          0-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      X CDB_tag_in:   0 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @@
@@ -447,6 +552,32 @@ issue_reg.inst.halt[p] = 0
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          0-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -456,6 +587,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          0-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -465,6 +622,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          1-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -474,6 +657,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          2-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:   x T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -483,6 +692,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          3-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  65 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 15 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -492,6 +727,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          4-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  66 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 15 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          15,  busy = 1, halt = 0, T_new = 0100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -501,6 +762,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          5-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 14 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 1, halt = 0, T_new = 0100001 T_old = 1000010 
+ROB_Row =          15,  busy = 1, halt = 0, T_new = 0100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -510,6 +797,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          6-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 14 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 1, halt = 0, T_new = 0100001 T_old = 1000010 
+ROB_Row =          15,  busy = 1, halt = 0, T_new = 0100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -519,6 +832,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          7-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  67 T_new_in:                                                                                                      X CDB_tag_in:  32 CAM_en: 1 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  65 rob_retire.T_new:  96 rob_retire.busy: 1 rob_free_rows_next: 14 rob_full: 0 tail: 14 head: 15
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          14,  busy = 1, halt = 0, T_new = 0100001 T_old = 1000010 
+ROB_Row =          15,  busy = 1, halt = 0, T_new = 0100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -528,6 +867,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          8-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  68 T_new_in:                                                                                                      X CDB_tag_in:  33 CAM_en: 1 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  66 rob_retire.T_new:  97 rob_retire.busy: 1 rob_free_rows_next: 14 rob_full: 0 tail: 13 head: 14
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          13,  busy = 1, halt = 0, T_new = 0100010 T_old = 1000011 
+ROB_Row =          14,  busy = 1, halt = 0, T_new = 0100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -537,15 +902,67 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:          9-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 12 head: 13
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 1, halt = 0, T_new = 0100011 T_old = 1000100 
+ROB_Row =          13,  busy = 1, halt = 0, T_new = 0100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
-issue_next_inst_opcode=46305510486986924032 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978118404616014885833146368 issue_next_valid_inst=00010
+issue_next_inst_opcode=25939349119287627776 issue_next_npc=1067993517960455041255406897703434155013137753682670338905770455298125629557203971410098638553088 issue_next_valid_inst=00100
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         10-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 12 head: 13
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 1, halt = 0, T_new = 0100011 T_old = 1000100 
+ROB_Row =          13,  busy = 1, halt = 0, T_new = 0100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -555,6 +972,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         11-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  69 T_new_in:                                                                                                      X CDB_tag_in:  34 CAM_en: 1 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  67 rob_retire.T_new:  98 rob_retire.busy: 1 rob_free_rows_next: 14 rob_full: 0 tail: 12 head: 13
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          12,  busy = 1, halt = 0, T_new = 0100011 T_old = 1000100 
+ROB_Row =          13,  busy = 1, halt = 0, T_new = 0100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -564,24 +1007,102 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         12-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  70 T_new_in:                                                                                                      X CDB_tag_in:  35 CAM_en: 1 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  68 rob_retire.T_new:  99 rob_retire.busy: 1 rob_free_rows_next: 14 rob_full: 0 tail: 11 head: 12
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 1, halt = 0, T_new = 0100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
-issue_next_inst_opcode=25939349119287627776 issue_next_npc=                  2373737829364982006186343743545795451374122721540695865248672560560203913756672 issue_next_valid_inst=10000
+issue_next_inst_opcode=25939349119287627776 issue_next_npc=1067993517960455041197510853084776057430032846753753340632324628270327493652159472298746489864192 issue_next_valid_inst=01000
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         13-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 10 head: 11
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 0100101 T_old = 1000110 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
-issue_next_inst_opcode=46488451268885553152 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978118552189967475509559296 issue_next_valid_inst=00010
+issue_next_inst_opcode=46398379405187162112 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978118552189967475509559296 issue_next_valid_inst=00010
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         14-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail: 10 head: 11
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 0100101 T_old = 1000110 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -591,6 +1112,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         15-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  71 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 13 rob_full: 0 tail: 10 head: 11
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 0100101 T_old = 1000110 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -600,6 +1147,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         16-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  72 T_new_in:                                                                                                      X CDB_tag_in:  37 CAM_en: 1 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 12 rob_full: 0 tail:  9 head: 11
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 0100101 T_old = 1000110 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -609,15 +1182,67 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         17-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 12 rob_full: 0 tail:  8 head: 11
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
-issue_next_inst_opcode=25939349119287627776 issue_next_npc=1067993517960455041255406897703434155016276304550363679282243832138994447349841155413422364426240 issue_next_valid_inst=00000
+issue_next_inst_opcode=25939349119287627776 issue_next_npc=1067993517960455041197510853084776057480249660636846786743010943655988824980978315854458765967360 issue_next_valid_inst=01000
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         18-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in:  36 CAM_en: 1 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  69 rob_retire.T_new: 100 rob_retire.busy: 1 rob_free_rows_next: 13 rob_full: 0 tail:  8 head: 11
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 1, halt = 0, T_new = 0100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -627,6 +1252,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         19-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in: 127 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  70 rob_retire.T_new: 101 rob_retire.busy: 1 rob_free_rows_next: 13 rob_full: 0 tail:  8 head: 10
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 1, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -636,6 +1287,67 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         20-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 13 rob_full: 0 tail:  7 head:  9
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 0101000 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
+
+
+@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
+issue_next_inst_opcode=      58632343065750 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978118773550896360024178688 issue_next_valid_inst=00010
+@@@@@@@@@@@@@@@@@@  pipe_counter=                  50
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+------------------------------------------------------------------------------Cycle:         21-----------------------------------------------------------------------
+Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 13 rob_full: 0 tail:  7 head:  9
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 0101000 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -643,26 +1355,69 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-------------------------------------------------------------------------------Cycle:         21-----------------------------------------------------------------------
-Pipeline Assigns
-
-
-@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
-issue_next_inst_opcode=46305492576973299712 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978119068698801539377004544 issue_next_valid_inst=00010
-@@@@@@@@@@@@@@@@@@  pipe_counter=                  50
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         22-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 13 rob_full: 0 tail:  7 head:  9
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 0101000 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
-issue_next_inst_opcode=      58632343065750 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978119142485777834215211008 issue_next_valid_inst=00010
+issue_next_inst_opcode=46767111710577467392 issue_next_npc=1067993517960455041255406897703434155016276304550363679282073690955533978118699763920065185972224 issue_next_valid_inst=00010
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         23-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in:  38 CAM_en: 1 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  71 rob_retire.T_new: 102 rob_retire.busy: 1 rob_free_rows_next: 14 rob_full: 0 tail:  7 head:  9
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 0101000 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 1, halt = 0, T_new = 0100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -672,6 +1427,32 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         24-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in:  40 CAM_en: 1 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 14 rob_full: 0 tail:  7 head:  8
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 0101000 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -681,6 +1462,67 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ------------------------------------------------------------------------------Cycle:         25-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in:  39 CAM_en: 1 dispatch_en: 1 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old:  72 rob_retire.T_new: 103 rob_retire.busy: 1 rob_free_rows_next: 15 rob_full: 0 tail:  7 head:  8
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 1101000 T_old = 1111111 
+ROB_Row =           8,  busy = 1, halt = 0, T_new = 0100111 T_old = 1001000 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
+
+
+@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
+issue_next_inst_opcode=25939349119287627776 issue_next_npc=1067993517960455041255406897703434155016276304550363679282243832138994447349841155413422364426240 issue_next_valid_inst=00000
+@@@@@@@@@@@@@@@@@@  pipe_counter=                  50
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+------------------------------------------------------------------------------Cycle:         26-----------------------------------------------------------------------
+Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 104 rob_retire.busy: 1 rob_free_rows_next: 16 rob_full: 0 tail:  7 head:  7
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 1, halt = 1, T_new = 1101000 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1100111 T_old = 1001000 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 @*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@
@@ -688,13 +1530,11 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@@@@@@@@@@@@@@@@  pipe_counter=                  50
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 207f0000205f0000 : 2341590331799044096
-@@@ mem[    8] = 404305a5209f0001 : 4630551048642035713
-@@@ mem[   16] = 40840403f4a00007 : 4648845130388733959
-@@@ mem[   24] = 4d64040b4063040a : 5576586684962898954
-@@@ mem[   32] = 000005554d6b040c : 5863929218060
-@@@ mem[   40] = 0000055540440402 : 5863708558338
-@@@ mem[   48] = 0000055540430404 : 5863708492804
+@@@ mem[    0] = 205f0002203f0003 : 2332583141132140547
+@@@ mem[    8] = 209f0005207f0004 : 2350597552530718724
+@@@ mem[   16] = 406404064c220405 : 4639837941192066053
+@@@ mem[   24] = 40e704084ca60407 : 4676711171739747335
+@@@ mem[   32] = 0000000000000555 : 1365
 @@@
 @@@
 @@@
@@ -8880,25 +9720,53 @@ issue_next_inst_opcode=25939349119287627776 issue_next_npc=106799351796045504125
 @@@
 @@@
 @@@
-@@                  6220 : System halted
+@@@
+@@@
+@@                  6420 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  27 cycles / 7 instrs = 5.500000 CPI
+@@  28 cycles / 9 instrs = 4.500000 CPI
 @@
-@@  780.00 ns total time to execute
+@@  810.00 ns total time to execute
 @@
 
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-------------------------------------------------------------------------------Cycle:         26-----------------------------------------------------------------------
+------------------------------------------------------------------------------Cycle:         27-----------------------------------------------------------------------
 Pipeline Assigns
+**********************************************************
+
+------------------------ROB TABLE----------------------------
+
+INPUTS
+T_old_in:  40 T_new_in:                                                                                                      X CDB_tag_in: 127 CAM_en: 0 dispatch_en: 0 branch_not_taken: 0
+OUTPUTS
+rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next: 16 rob_full: 0 tail:  7 head:  7
+ROB_Row =           0,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           1,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           2,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           3,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           4,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           5,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           6,  busy = 0, halt = 0, T_new = 1111111 T_old = 1111111 
+ROB_Row =           7,  busy = 0, halt = 1, T_new = 1101000 T_old = 1111111 
+ROB_Row =           8,  busy = 0, halt = 0, T_new = 1100111 T_old = 1001000 
+ROB_Row =           9,  busy = 0, halt = 0, T_new = 1100110 T_old = 1000111 
+ROB_Row =          10,  busy = 0, halt = 0, T_new = 1100101 T_old = 1000110 
+ROB_Row =          11,  busy = 0, halt = 0, T_new = 1100100 T_old = 1000101 
+ROB_Row =          12,  busy = 0, halt = 0, T_new = 1100011 T_old = 1000100 
+ROB_Row =          13,  busy = 0, halt = 0, T_new = 1100010 T_old = 1000011 
+ROB_Row =          14,  busy = 0, halt = 0, T_new = 1100001 T_old = 1000010 
+ROB_Row =          15,  busy = 0, halt = 0, T_new = 1100000 T_old = 1000001 
+*******************************************************************
+
 
 
 $finish called from file "../../testbench/pipeline_test.v", line 774.
-$finish at simulation time                 6410
+$finish at simulation time                 6610
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 641000 ps
-CPU Time:      0.210 seconds;       Data structure size:   0.2Mb
-Fri Apr  5 14:48:54 2019
+Time: 661000 ps
+CPU Time:      0.220 seconds;       Data structure size:   0.2Mb
+Fri Apr  5 16:02:59 2019
