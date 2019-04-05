@@ -236,7 +236,10 @@ logic branch_valid_disp;  //branch_valid_disp
   logic 		CDB_en_out; 
   logic 		busy;
 
-  //Outputs form the freelist check
+  //Inputs and Outputs form the freelist check
+  PHYS_REG [`FL_SIZE - 1:0]   free_list_in;
+  logic [$clog2(`FL_SIZE):0]  tail_in;
+  
   PHYS_REG [`FL_SIZE - 1:0]   free_list_check;
   logic [$clog2(`FL_SIZE):0]  tail_check;
   logic fr_wr_en;
@@ -477,6 +480,11 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .empty(fr_empty), // Used for Dispatch Hazard
     .free_reg(fr_free_reg_T) // Output for Dispatch for other modules
   );
+
+ // Update the free list check point when the instruction is branch
+ assign free_list_in = ;
+ assign tail_in = ;
+  
 
   //Instantiating the freelist check_point
   Free_List_Check flc(
