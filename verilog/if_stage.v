@@ -37,7 +37,7 @@ module if_stage(
   logic           PC_enable;
   logic           next_ready_for_valid;
 
-	assign PC_enable = dispatch_en & Imem_valid ;
+	assign PC_enable = (dispatch_en & Imem_valid) | (co_ret_take_branch);
 
  
   assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
@@ -51,9 +51,7 @@ module if_stage(
   // next PC is target_pc if there is a taken branch or
   // the next sequential PC (PC+4) if no branch
   // (halting is handled with the enable PC_enable;
-  assign next_PC = (co_ret_take_branch) ? 
-
-+                          co_ret_target_pc : PC_plus_4;
+  assign next_PC = (co_ret_take_branch) ?  co_ret_target_pc : PC_plus_4;
 
   // The take-branch signal must override stalling (otherwise it may be lost)
   //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;

@@ -257,6 +257,7 @@ logic branch_valid_disp;  //branch_valid_disp
   logic  [5:0] retire_reg_phys;;
 	logic head_halt;
   logic rob_retire_out_halt;
+  logic rob_retire_out_take_branch;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
   logic  [1:0] proc2Dmem_command, proc2Imem_command;
@@ -347,9 +348,9 @@ logic branch_valid_disp;  //branch_valid_disp
     // Inputs
     .clock (clock),
     .reset (reset),
-    .co_ret_valid_inst(co_ret_valid_inst),
-    .co_ret_take_branch(co_ret_take_branch),
-    .co_ret_target_pc(co_ret_alu_result),
+    .co_ret_valid_inst(retire_inst_busy),
+    .co_ret_take_branch(rob_retire_out_take_branch),
+    .co_ret_target_pc(retire_reg_NPC),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_id_enable),
@@ -1109,6 +1110,7 @@ end
     .branch_valid(branch_valid_disp),
     .wr_idx(id_rdest_idx),
     .npc(id_inst_out.npc),
+    .co_alu_result(co_alu_result_selected),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),
@@ -1145,6 +1147,8 @@ always_ff @ (posedge clock) begin
 		retire_reg_NPC <= `SD 64'h4;
 		retire_reg_phys <= `SD 0;
 		rob_retire_out_halt <= `SD 0;
+		rob_retire_out_take_branch <= `SD 0;
+
 	end else begin
 		retire_inst_busy <= rob_retire_out.busy;
 		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
@@ -1152,6 +1156,7 @@ always_ff @ (posedge clock) begin
 		retire_reg_NPC <= `SD rob_retire_out.npc;
 		retire_reg_phys <= `SD rob_retire_out.T_new;
 		rob_retire_out_halt <= `SD rob_retire_out.halt;
+    rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 	end
   end
 

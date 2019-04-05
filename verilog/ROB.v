@@ -17,6 +17,7 @@ module ROB(
 		input 			branch_valid,
 		input [`SS_SIZE][4:0]	wr_idx,
 		input [`SS_SIZE][31:0]	npc,
+		input [63:0] co_alu_result,
 
 		// OUTPUTS
 		output ROB_ROW_T [`SS_SIZE-1:0] retire_out, // Output for Retire Staget
@@ -119,6 +120,8 @@ module ROB(
 		// update tag ready bits from CBD 
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
 			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
+			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_valid) ? 1:0;
+			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_valid) ? co_alu_result : ROB_table[i].npc;
 		end
 
 	// if(take_branch)	begin

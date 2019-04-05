@@ -413,7 +413,7 @@ module testbench;
 		begin
 			$display("\nif_stage---------------------------------------------------------------------");
 			$display("inputs");
-			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_alu_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
+			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
 			$display("outputs");
 			$display("if_NPC_out: %d, if_IR_out: %h proc2Imem_addr: %h if_valid_inst_out: %d", pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.proc2Icache_addr, pipeline_0.if_valid_inst_out);
 		end
@@ -531,7 +531,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 100000) begin
+			 if (clock_count == 100) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");

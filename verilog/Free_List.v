@@ -67,23 +67,25 @@ module Free_List(
 				// next_free_list[tail] = T_old;
 				next_tail = tail + 1;
 			end
-		end else if (dispatch_en) begin
+		end else begin 
+			if (dispatch_en) begin
 			// Register is getting dispatched
-			if (tail == 0) begin
-				next_free_list = free_list;
-				next_tail = tail;
-			end else begin 
-				for (int i = 0; i < `FL_SIZE; ++i) begin
-					next_free_list[i] = free_list[i + 1];
+				if (tail == 0) begin
+					next_free_list = free_list;
+					next_tail = tail;
+				end else begin 
+					for (int i = 0; i < `FL_SIZE; ++i) begin
+						next_free_list[i] = free_list[i + 1];
+					end
+					next_tail = tail - 1;
 				end
-				next_tail = tail - 1;
-			end
-
-		end else begin
+				
+			end	 else begin
 			// Remain the same state
 			// nothing getting pushed or popped off
-			next_free_list = free_list;
-			next_tail = tail;
+				next_free_list = free_list;
+				next_tail = tail;
+			end
 		end
 	end
 
