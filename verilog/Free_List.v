@@ -12,8 +12,8 @@ module Free_List(
 
 	// inputs for branch misprediction
 	input branch_incorrect,
-	input PHYS_REG [`FL_SIZE-1:0] free_check_point,
-	input [$clog2(`FL_SIZE):0] tail_check_point,
+	//input PHYS_REG [`FL_SIZE-1:0] free_check_point,
+	//input [$clog2(`FL_SIZE):0] tail_check_point,
 
 	`ifdef DEBUG
 	output PHYS_REG [`FL_SIZE-1:0] free_list_out,
@@ -36,6 +36,13 @@ module Free_List(
 	logic [$clog2(`FL_SIZE):0] next_tail;
 
 	// Free_list_checkpoints
+
+	PHYS_REG [`FL_SIZE - 1:0] free_check_point;
+
+	logic [$clog2(`FL_SIZE):0] tail_check_point;
+
+
+
 
 
 	assign empty = (tail == 0);
@@ -101,11 +108,29 @@ module Free_List(
 			// pr(num_gen- 1)
 			for (int i = 0; i < `ROB_SIZE; i += 1) begin
 				free_list[i] 		<= `SD {0, `NUM_GEN_REG + i};
+				free_check_point[i]		<= `SD {0, `NUM_GEN_REG + i};
 			end
 			tail 		<= `SD `ROB_SIZE;
+			tail_check_point	<= `SD `ROB_SIZE;
 		end else begin
-			free_list <= `SD next_free_list;
-			tail <= `SD next_tail;
+			if(dispatch_en) begin
+				free_list <= `SD next_free_list;
+				tail <= `SD next_tail;
+				free_check_point <= `SD next_free_list;
+				tail_check_point <= `SD next_tail;
+			end else if(branch_incorrect) begin
+				free_list <= `SD free_check_point;
+				tail <= `SD tail_check_point;
+				for (int i = 0; i < `ROB_SIZE; i += 1) begin
+					free_check_point[i]		<= `SD {0, `NUM_GEN_REG + i};
+				end
+				tail_check_point <= `SD `ROB_SIZE;
+			end else begin
+				free_list <= `SD next_free_list;
+				tail <= `SD next_tail;
+						
+
+			end
 		end
 	end
 

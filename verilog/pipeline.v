@@ -468,8 +468,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
     // inputs for branch misprediction
     .branch_incorrect(branch_not_taken),
-    .free_check_point(free_list_check),
-    .tail_check_point(tail_check),
+    //.free_check_point(free_list_check),
+    //.tail_check_point(tail_check),
 
     `ifdef DEBUG
     .free_list_out(fr_rs_rob_T),
@@ -482,12 +482,12 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   );
 
  // Update the free list check point when the instruction is branch
- assign free_list_in = ;
- assign tail_in = ;
+// assign free_list_in = ;
+ //assign tail_in = ;
   
 
   //Instantiating the freelist check_point
-  Free_List_Check flc(
+ /* Free_List_Check flc(
     .clock(clock),
     .enable(enable),
     .free_list_in(free_list_in),
@@ -496,7 +496,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .free_list_check(free_list_check),
 
     .tail_check(tail_check)
-  );
+  );*/
 
   always_comb begin
     if (id_inst_out.inst.valid_inst) begin
@@ -1137,7 +1137,7 @@ end
   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
   //assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
   assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
-  assign pipeline_commit_wr_en = retire_reg_wr_en;
+  assign pipeline_commit_wr_en = retire_reg_wr_en & !rob_retire_out_take_branch;
   assign pipeline_commit_NPC = retire_reg_NPC;
   assign pipeline_commit_phys_reg = retire_reg_phys; 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;

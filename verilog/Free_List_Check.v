@@ -11,12 +11,10 @@ module Free_List_Check(
 );
 
 	// internal data
+	PHYS_REG [`FL_SIZE - 1:0] free_list, free_list_next;
 
-	PHYS_REG [`FL_SIZE - 1:0] free_list;
-	PHYS_REG [`FL_SIZE - 1:0] free_list_next;
+	logic [$clog2(`FL_SIZE):0] tail, tail_next;
 
-	logic [$clog2(`FL_SIZE):0] tail;
-	logic [$clog2(`FL_SIZE):0] tail_next;
 
 	// assign 
 	assign free_list_check = free_list;
