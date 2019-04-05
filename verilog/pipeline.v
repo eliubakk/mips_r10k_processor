@@ -31,6 +31,7 @@ module pipeline (
     output logic [63:0] pipeline_commit_wr_data,
     output logic        pipeline_commit_wr_en,
     output logic [63:0] pipeline_commit_NPC,
+    output logic [5:0]  pipeline_commit_phys_reg,
 
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
@@ -208,6 +209,8 @@ module pipeline (
   logic         co_ret_branch_valid;
   logic         co_ret_branch_prediction;
 
+
+logic branch_valid_disp;  //branch_valid_disp
   //outputs from the ROB
   //PHYS_REG                    rob_fl_arch_Told;
   //PHYS_REG                    rob_arch_retire_reg;
@@ -233,7 +236,10 @@ module pipeline (
   logic 		CDB_en_out; 
   logic 		busy;
 
-  //Outputs form the freelist check
+  //Inputs and Outputs form the freelist check
+  PHYS_REG [`FL_SIZE - 1:0]   free_list_in;
+  logic [$clog2(`FL_SIZE):0]  tail_in;
+  
   PHYS_REG [`FL_SIZE - 1:0]   free_list_check;
   logic [$clog2(`FL_SIZE):0]  tail_check;
   logic fr_wr_en;
@@ -251,8 +257,10 @@ module pipeline (
   logic  [5:0] retire_reg_wr_idx;
   logic        retire_reg_wr_en;
   logic [63:0] retire_reg_NPC;
+  logic  [5:0] retire_reg_phys;;
 	logic head_halt;
-
+  logic rob_retire_out_halt;
+  logic rob_retire_out_take_branch;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
   logic  [1:0] proc2Dmem_command, proc2Imem_command;
@@ -271,7 +279,7 @@ module pipeline (
 
   assign pipeline_completed_insts = {3'b0, retire_inst_busy};
   assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
-                                  rob_retire_out.halt? HALTED_ON_HALT :
+                                  rob_retire_out_halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
   
@@ -343,9 +351,9 @@ module pipeline (
     // Inputs
     .clock (clock),
     .reset (reset),
-    .co_ret_valid_inst(co_ret_valid_inst),
-    .co_ret_take_branch(co_ret_take_branch),
-    .co_ret_target_pc(co_ret_alu_result),
+    .co_ret_valid_inst(retire_inst_busy),
+    .co_ret_take_branch(rob_retire_out_take_branch),
+    .co_ret_target_pc(retire_reg_NPC),
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_id_enable),
@@ -460,8 +468,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
     // inputs for branch misprediction
     .branch_incorrect(branch_not_taken),
-    .free_check_point(free_list_check),
-    .tail_check_point(tail_check),
+    //.free_check_point(free_list_check),
+    //.tail_check_point(tail_check),
 
     `ifdef DEBUG
     .free_list_out(fr_rs_rob_T),
@@ -473,8 +481,13 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .free_reg(fr_free_reg_T) // Output for Dispatch for other modules
   );
 
+ // Update the free list check point when the instruction is branch
+// assign free_list_in = ;
+ //assign tail_in = ;
+  
+
   //Instantiating the freelist check_point
-  Free_List_Check flc(
+ /* Free_List_Check flc(
     .clock(clock),
     .enable(enable),
     .free_list_in(free_list_in),
@@ -483,7 +496,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .free_list_check(free_list_check),
 
     .tail_check(tail_check)
-  );
+  );*/
 
   always_comb begin
     if (id_inst_out.inst.valid_inst) begin
@@ -1080,10 +1093,14 @@ end
   // INSTANTIATING THE ROB
    assign branch_valid_disp= (id_inst_out.inst.fu_name ==  FU_BR) ? 1:0 ;
    
-   genvar ig;
-   for (i=0; i< `ROB_SIZE; i=i+1) begin
-    if (rob_retire_out.)
-   end
+  //  genvar i;
+  //  for (i=0; i< `ROB_SIZE; i=i+1) begin
+  //     if (ROB_table_out[i].branch_valid) begin
+  //       take_branch_reg = ex_co_take_branch;
+  //       break;
+  //     end
+    
+   
   ROB R0(
     // INPUTS
   	.clock(clock),
@@ -1099,6 +1116,9 @@ end
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
     .branch_valid(branch_valid_disp),
+    .wr_idx(id_rdest_idx),
+    .npc(id_inst_out.npc),
+    .co_alu_result(co_alu_result_selected),
   	
     // OUTPUTS
     .retire_out(rob_retire_out),
@@ -1112,33 +1132,39 @@ end
     `endif
   );
 
+// retire_reg_wr_idx is physical register
 
   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
-  //assign pipeline_commit_wr_data = retire_reg_wr_data;
-  assign pipeline_commit_wr_en = retire_reg_wr_en;
+  //assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
+  assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
+  assign pipeline_commit_wr_en = retire_reg_wr_en & !rob_retire_out_take_branch;
   assign pipeline_commit_NPC = retire_reg_NPC;
-
+  assign pipeline_commit_phys_reg = retire_reg_phys; 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
-  assign pipeline_commit_wr_data = phys_reg[retire_reg_wr_idx];
   //assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
   //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
 
   
-
+// FF between complete and retire
 
 always_ff @ (posedge clock) begin
 	if(reset) begin
 		retire_inst_busy <= `SD 0;
 		retire_reg_wr_idx <= `SD `ZERO_REG;
-		//retire_reg_wr_data <= `SD 64'h0;
 		retire_reg_wr_en <= `SD 0;
 		retire_reg_NPC <= `SD 64'h4;
+		retire_reg_phys <= `SD 0;
+		rob_retire_out_halt <= `SD 0;
+		rob_retire_out_take_branch <= `SD 0;
+
 	end else begin
 		retire_inst_busy <= rob_retire_out.busy;
-		retire_reg_wr_idx <= `SD rob_retire_out.T_new;
-		//retire_reg_wr_data <= `SD phys_reg[rob_retire_out.T_new[5:0]];
-		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG));
-		retire_reg_NPC <= `SD retire_reg_NPC + 4*retire_reg_wr_en;
+		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
+		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG) & !rob_retire_out.halt);
+		retire_reg_NPC <= `SD rob_retire_out.npc;
+		retire_reg_phys <= `SD rob_retire_out.T_new;
+		rob_retire_out_halt <= `SD rob_retire_out.halt;
+    rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 	end
   end
 
@@ -1153,7 +1179,7 @@ always_ff @ (posedge clock) begin
     .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
   	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
-  );
+ );
 
 
   //////////////////////////////////////////////////

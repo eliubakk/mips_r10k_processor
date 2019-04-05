@@ -12,8 +12,8 @@ module Free_List(
 
 	// inputs for branch misprediction
 	input branch_incorrect,
-	input PHYS_REG [`FL_SIZE-1:0] free_check_point,
-	input [$clog2(`FL_SIZE):0] tail_check_point,
+	//input PHYS_REG [`FL_SIZE-1:0] free_check_point,
+	//input [$clog2(`FL_SIZE):0] tail_check_point,
 
 	`ifdef DEBUG
 	output PHYS_REG [`FL_SIZE-1:0] free_list_out,
@@ -35,6 +35,16 @@ module Free_List(
 	logic [$clog2(`FL_SIZE):0] tail;
 	logic [$clog2(`FL_SIZE):0] next_tail;
 
+	// Free_list_checkpoints
+
+	PHYS_REG [`FL_SIZE - 1:0] free_check_point;
+
+	logic [$clog2(`FL_SIZE):0] tail_check_point;
+
+
+
+
+
 	assign empty = (tail == 0);
 	assign free_reg = free_list[0];
 	assign num_free_entries = tail;
@@ -48,42 +58,44 @@ module Free_List(
 		if (branch_incorrect) begin
 			next_free_list = free_check_point;
 			next_tail = tail_check_point;
-		end else if (dispatch_en & enable) begin
-			// Reg is getting retired AND getting sent out
-			for (int i = 0; i < `FL_SIZE; ++i) begin
-				next_free_list[i] = free_list[i+1];
-			end
-			next_free_list[tail - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
-			// next_free_list[tail - 1] = T_old;
-			next_tail = tail;
-		end else if (enable) begin
-			// Register is getting retired
-			if (tail == `FL_SIZE) begin
-				next_free_list = free_list;
-				next_tail = tail;
-			end else begin
-				next_free_list = free_list;
-				next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
-				// next_free_list[tail] = T_old;
-				next_tail = tail + 1;
-			end
-		end else if (dispatch_en) begin
-			// Register is getting dispatched
-			if (tail == 0) begin
-				next_free_list = free_list;
-				next_tail = tail;
-			end else begin 
-				for (int i = 0; i < `FL_SIZE; ++i) begin
-					next_free_list[i] = free_list[i + 1];
-				end
-				next_tail = tail - 1;
-			end
-
 		end else begin
+		 	if (dispatch_en & enable) begin
+			// Reg is getting retired AND getting sent out
+				for (int i = 0; i < `FL_SIZE; ++i) begin
+					next_free_list[i] = free_list[i+1];
+				end
+				next_free_list[tail - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+			// next_free_list[tail - 1] = T_old;
+				next_tail = tail;
+			end else if (enable) begin
+			// Register is getting retired
+				if (tail == `FL_SIZE) begin
+					next_free_list = free_list;
+					next_tail = tail;
+				end else begin
+					next_free_list = free_list;
+					next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+					// next_free_list[tail] = T_old;
+					next_tail = tail + 1;
+				end
+			end else if (dispatch_en) begin
+			// Register is getting dispatched
+				if (tail == 0) begin
+					next_free_list = free_list;
+					next_tail = tail;
+				end else begin 
+					for (int i = 0; i < `FL_SIZE; ++i) begin
+						next_free_list[i] = free_list[i + 1];
+					end
+					next_tail = tail - 1;
+				end
+
+			 end else begin
 			// Remain the same state
 			// nothing getting pushed or popped off
-			next_free_list = free_list;
-			next_tail = tail;
+				next_free_list = free_list;
+				next_tail = tail;
+			end
 		end
 	end
 
@@ -94,13 +106,31 @@ module Free_List(
 			// this is because the map_table initializes
 			// all the gen purpose regs to be pr0 to 
 			// pr(num_gen- 1)
-			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
+			for (int i = 0; i < `ROB_SIZE; i += 1) begin
 				free_list[i] 		<= `SD {0, `NUM_GEN_REG + i};
+				free_check_point[i]		<= `SD {0, `NUM_GEN_REG + i};
 			end
-			tail 		<= `SD `NUM_GEN_REG;
+			tail 		<= `SD `ROB_SIZE;
+			tail_check_point	<= `SD `ROB_SIZE;
 		end else begin
-			free_list <= `SD next_free_list;
-			tail <= `SD next_tail;
+			if(dispatch_en) begin
+				free_list <= `SD next_free_list;
+				tail <= `SD next_tail;
+				free_check_point <= `SD next_free_list;
+				tail_check_point <= `SD next_tail;
+			end else if(branch_incorrect) begin
+				free_list <= `SD free_check_point;
+				tail <= `SD tail_check_point;
+				for (int i = 0; i < `ROB_SIZE; i += 1) begin
+					free_check_point[i]		<= `SD {0, `NUM_GEN_REG + i};
+				end
+				tail_check_point <= `SD `ROB_SIZE;
+			end else begin
+				free_list <= `SD next_free_list;
+				tail <= `SD next_tail;
+						
+
+			end
 		end
 	end
 

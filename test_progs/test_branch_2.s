@@ -32,6 +32,9 @@
 	cmpeq $r2,$r3,$r5
 	bne $r5,cond2
 	addq $r4,$r4,$3
+	addq $r3,$r3,$r10
+	mulq $r11,$r4,$r11
+	mulq $r11,$r11,$r12
 	call_pal	0x555
 cond1:	addq $r2,$r4,$r2
 	call_pal	0x555

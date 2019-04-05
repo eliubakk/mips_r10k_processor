@@ -32,7 +32,7 @@
 
 // probably not a good idea to change this second one
 `define VIRTUAL_CLOCK_PERIOD   30.0 // Clock period from dc_shell
-`define VERILOG_CLOCK_PERIOD   10.0 // Clock period from test bench
+`define VERILOG_CLOCK_PERIOD   20.0 // Clock period from test bench
 
 `define MEM_LATENCY_IN_CYCLES 0.001
 //`define MEM_LATENCY_IN_CYCLES (100.0/`VERILOG_CLOCK_PERIOD+0.49999)
@@ -77,8 +77,8 @@ typedef struct packed {
 `define NUM_GEN_REG 32
 typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
-//`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
-`define NUM_PHYS_REG 63
+`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
+//`define NUM_PHYS_REG 48
 `define phys_index_t ($clog2(`NUM_PHYS_REG) - 1) 
 typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
@@ -221,6 +221,9 @@ typedef struct packed{
   logic halt;
   logic [31:0] opcode;
   logic take_branch;
+  logic branch_valid;
+  logic [4:0] wr_idx;
+  logic [31:0] npc;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 
