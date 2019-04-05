@@ -94,10 +94,10 @@ module Free_List(
 			// this is because the map_table initializes
 			// all the gen purpose regs to be pr0 to 
 			// pr(num_gen- 1)
-			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
+			for (int i = 0; i < `ROB_SIZE; i += 1) begin
 				free_list[i] 		<= `SD {0, `NUM_GEN_REG + i};
 			end
-			tail 		<= `SD `NUM_GEN_REG;
+			tail 		<= `SD `ROB_SIZE;
 		end else begin
 			free_list <= `SD next_free_list;
 			tail <= `SD next_tail;
