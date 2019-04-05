@@ -1125,7 +1125,8 @@ end
 // retire_reg_wr_idx is physical register
 
   assign pipeline_commit_wr_idx = retire_reg_wr_idx;
-  assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
+  //assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
+  assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
   assign pipeline_commit_wr_en = retire_reg_wr_en;
   assign pipeline_commit_NPC = retire_reg_NPC;
   assign pipeline_commit_phys_reg = retire_reg_phys; 
@@ -1163,7 +1164,7 @@ always_ff @ (posedge clock) begin
     .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
   	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
-  );
+ );
 
 
   //////////////////////////////////////////////////

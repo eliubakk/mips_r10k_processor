@@ -7,6 +7,7 @@ module Arch_Map_Table(
 	input PHYS_REG	[`SS_SIZE-1:0] T_old_in, //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
 	output PHYS_REG [`NUM_GEN_REG-1:0] arch_map_table // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
+	//output PHYS_REG [`NUM_GEN_REG-1:0] arch_map_table_next
 );
 
 	PHYS_REG		[`NUM_GEN_REG-1:0]	 	arch_map_table_next; 

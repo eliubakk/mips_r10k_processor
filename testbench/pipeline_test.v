@@ -531,7 +531,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 300) begin
+			 if (clock_count == 100000) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
@@ -542,32 +542,32 @@ module testbench;
 			//display_cache;
 			//display_icache;
 			//display_if_stage;
-			 display_if_id;
+			// display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-		display_id_di;
+		//display_id_di;
 			
-			display_di_issue;
-			display_RS_table;
-			display_ROB_table;
-			display_map_table;
-			$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
-			$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
-			$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
+			//display_di_issue;
+			//display_RS_table;
+		//	display_ROB_table;
+		//	display_map_table;
+		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
+		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
+		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
-			display_issue_ex;
-			display_is_ex_registers;
-			display_ex;
-			display_ex_co_registers;
-			display_complete;
-			$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
+		//	display_issue_ex;
+		//	display_is_ex_registers;
+		//	display_ex;
+		//	display_ex_co_registers;
+		//	display_complete;
+		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
-			display_co_re_registers;
-			display_arch_table;
-			display_free_list_table;
-			display_phys_reg;	
-			$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
+		//	display_co_re_registers;
+		//	display_arch_table;
+		//	display_free_list_table;
+		//	display_phys_reg;	
+		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;
 			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
@@ -736,11 +736,11 @@ module testbench;
        // print the writeback information to writeback.out
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)
-           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x	 PHYS_REG=%x",
+           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x",
                      pipeline_commit_NPC-4,
                      pipeline_commit_wr_idx,
-                     pipeline_commit_wr_data,
-		     pipeline_commit_phys_reg
+                     pipeline_commit_wr_data//,
+		    //pipeline_commit_phys_reg, 
 		     );
         else
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC-4);
@@ -769,8 +769,8 @@ module testbench;
         show_clk_count;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
-        @(negedge clock);
 	@(posedge clock);
+	@(negedge clock);
 	#1 $finish;
       end
 
