@@ -5,7 +5,8 @@ module vic_cache(
     input clock,
     input reset,
     input valid,//cacheline input
-    input CACHE_LINE_T  new_victim,
+    input valid_cam,//for camming
+    input CACHE_LINE_T  new_victim,// i don't do anything with new_victim.valid
     input [(`NUM_SET_BITS - 1):0] set_index_cam,
     input [(`NUM_SET_BITS - 1):0] set_index,
     input [(`NUM_TAG_BITS - 1):0] tag_cam,
@@ -35,31 +36,37 @@ module vic_cache(
         set_index_table_next = set_index_table_out;
         vic_table_next = vic_table_out;
 
-        if (set_index_table_out[3][`NUM_SET_BITS]) begin
-            fired_valid = 1'b1;
-            set_index_table_next[3][`NUM_SET_BITS] = 1'b0;
-        end
-
-        for (int i=2; i>=0; i-=1) begin
-            if (!set_index_table_out[i+1][`NUM_SET_BITS])begin
-                set_index_table_next[i+1] = set_index_table_out[i];
-                vic_table_next[i+1] = vic_table_out[i];
-            end
-        end
-
-        if (!set_index_table_out[0][`NUM_SET_BITS] & valid) begin
-            vic_table_next[0] = new_victim;
-            set_index_table_next[0] = {1'b1,set_index};
-        end
-
         for (int i; i<4; i+=1) begin
             set_index_table_temp[i]=set_index_table_out[i][`NUM_SET_BITS-1:0];
             vic_table_out_temp[i] = vic_table_out[i].tag;
         end
 
-        if (vic_table_hits == set_index_table_hits & (|vic_table_hits)) begin
+        if (valid_cam & (vic_table_hits == set_index_table_hits) & (|vic_table_hits)) begin
             out_valid = 1'b1;
+            set_index_table_next[index_table]=0;
+            vic_table_next[index_table]=0;
         end
+
+        if (set_index_table_out[3][`NUM_SET_BITS] & ~(out_valid & (index_table==2'b11))) begin
+            fired_valid = 1'b1;
+            set_index_table_next[3][`NUM_SET_BITS] = 1'b0;
+        end
+
+        for (int i=2; i>=0; i-=1) begin
+            //if (!set_index_table_out[i+1][`NUM_SET_BITS])begin
+            set_index_table_next[i+1] = set_index_table_out[i];
+            vic_table_next[i+1] = vic_table_out[i];
+            //end
+        end
+
+        vic_table_next[0] = 0;
+        set_index_table_next[0] = 0;
+
+        if (valid) begin
+            vic_table_next[0] = new_victim;
+            set_index_table_next[0] = {1'b1,set_index};
+        end
+
     end
 
     CAM #(
@@ -82,7 +89,7 @@ module vic_cache(
         
     cam1(
         .enable(1),
-        .tags(index_cam),
+        .tags(set_index_cam),
         .table_in(set_index_table_temp),
         .hits(set_index_table_hits));
 
@@ -93,8 +100,10 @@ module vic_cache(
     always_ff @(posedge clock) begin
         if (reset) begin
             for (int i = 0; i < 4; i += 1) begin
-                set_index_table_out[i][`NUM_SET_BITS] <= `SD 1'b0;
-                vic_table_out[i].valid <= `SD 1'b0;
+                set_index_table_out[i] <= `SD 0;
+                vic_table_out[i].valid <= `SD 0;
+                vic_table_out[i].data <= `SD 0;
+                vic_table_out[i].tag <= `SD 0;
             end
         end else begin
             vic_table_out <= `SD vic_table_next;
