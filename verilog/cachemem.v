@@ -3,7 +3,7 @@
 `include "../../sys_defs.vh"
 `define DEBUG
 
-module cache(
+module cachemem(
         input clock, reset, wr1_en,
         input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx,
         input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag,
@@ -11,11 +11,6 @@ module cache(
 
 	`ifdef DEBUG
 		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
-		/*
-		output logic [31:0] 	[63:0] 			data_out,
-		output logic [31:0]  	[(`NUM_TAG_BITS - 1):0]	tags_out, 
-		output logic [31:0]        			valids_out, 
-		*/
 	`endif
 
         output logic [63:0] rd1_data,
@@ -31,7 +26,6 @@ module cache(
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets;
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_next;
 
-	logic [(`NUM_TAG_BITS - 1):0] tag_in;
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_read;
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_write;
 	logic [(`NUM_WAYS - 1):0] tag_hits_read;
@@ -45,11 +39,11 @@ module cache(
 	// modules
 	CAM #(
 		.LENGTH(`NUM_WAYS),
-		.WIDTH(`NUM_TAG_BITS),
+		.WIDTH(1),
 		.NUM_TAGS(1),
 		.TAG_SIZE(`NUM_TAG_BITS))
 	read_cam(
-		.enable(1),
+		.enable(1'b1),
 		.tags(rd1_tag),
 		.table_in(tag_table_in_read),
 		.hits(tag_hits_read));
@@ -96,23 +90,23 @@ module cache(
 
 	always_comb begin
 		sets_next = sets;
+		enc_in_write = tag_hits_write;
 
 		if (wr1_en) begin
 			// check if tag matches
 			if (|tag_hits_write) begin
+				// if matches, write at same position
 				enc_in_write = tag_hits_write;
 			end else if (|has_invalid) begin
+				// if no match, check if empty spot available
 				enc_in_write = invalid_sel;
 			end else begin
+				// else write in lru position
 				enc_in_write = 1;
 			end
 			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;
-			// if matches, write at same position
-			// if no match, check if empty spot available
-			// if spot available, write there
-			// else write in lru position
 		end
 	end
 

@@ -37,7 +37,7 @@ module testbench;
 
 	// initialize module
 
-	`DUT(cache) c0(
+	`DUT(cachemem) c0(
 		.clock(clock),
 		.reset(reset),
 		.wr1_en(wr1_en),
