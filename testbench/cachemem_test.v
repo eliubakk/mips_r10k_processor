@@ -25,6 +25,7 @@ module testbench;
 	logic [4:0] wr1_idx;
 	logic [7:0] wr1_tag;
 	logic [63:0] wr1_data;
+	logic rd1_en;
 	logic [4:0] rd1_idx;
 	logic [7:0] rd1_tag;
 	
@@ -45,6 +46,7 @@ module testbench;
 		.wr1_idx(wr1_idx),
 		.wr1_tag(wr1_tag),
 		.wr1_data(wr1_data),
+		.rd1_en(rd1_en),
 		.rd1_idx(rd1_idx),
 		.rd1_tag(rd1_tag),
 
@@ -61,6 +63,14 @@ module testbench;
 			#1;
 			$display("@@@Failed at time %f", $time);
 			$finish;
+		end
+	endtask
+
+	task print_bst;
+		begin
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				$display("bst_out[%d]: %b", i, bst_out[i]);
+			end
 		end
 	endtask
 
@@ -88,6 +98,8 @@ module testbench;
 				$display("set: %d", i);
 				print_set(sets_out[i]);
 			end
+
+			print_bst;
 		end
 	endtask
 
@@ -98,6 +110,8 @@ module testbench;
 				$display("set: %d", i);
 				print_set(sets_test[i]);
 			end
+
+			print_bst_test;
 		end
 	endtask
 
@@ -175,9 +189,98 @@ module testbench;
 		end
 	endtask
 
+	int bst_test_depth = $clog2(`NUM_WAYS);
+	int next_idx;
+	int acc_update = `NUM_WAYS;
+
+	task update_bst_test;
+		input int set_idx;
+		input int idx;
+		begin
+			/*
+			next_idx = idx;
+
+			while (next_
+
+			for (int i = 0; i < bst_test_depth; ++i) begin
+				if (bst_test[set_idx][next_idx]) begin
+					bst_test[set_idx][next_idx] = 0;
+					next_idx = (2 * next_idx) + 2;
+				end else begin
+					bst_test[set_idx][next_idx] = 1;
+					next_idx = (2 * next_idx) + 1;
+				end
+			end
+			*/
+		end
+	endtask
+
+	task read_from_test;
+		begin
+			int found_read;
+			int idx_read;
+			int depth_read = $clog2(`NUM_WAYS);
+			int acc_read = `NUM_WAYS;
+			int next_idx_read;
+
+			found_read = 0;
+			idx_read = 0;
+			next_idx_read = 0;
+
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				if (sets_test[rd1_idx].cache_lines[i].valid && sets_test[rd1_idx].cache_lines[i].tag == rd1_tag) begin
+					found_read = 1;
+					idx_read = i;
+					break;
+				end
+			end
+
+			if (found_read) begin
+				update_bst_test(rd1_idx, idx_read);
+			end
+		end
+	endtask
+
 	task write_to_test;
 		begin
 
+			int found_write;
+			int idx_write;
+			int depth_write = $clog2(`NUM_WAYS);
+			int acc_write = `NUM_WAYS;
+			int next_idx = 0;
+
+			found_write = 0;
+			idx_write = 0;
+			next_idx = 0;
+
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				if (sets_test[wr1_idx].cache_lines[i].valid && sets_test[wr1_idx].cache_lines[i].tag == wr1_tag) begin
+					found_write = 1;
+					idx_write = i;
+					break;
+				end
+			end
+
+
+			if (!found_write) begin
+				idx_write = 0;
+				for (int i = 0; i < depth_write; ++i) begin
+					if (bst_test[next_idx] == 1) begin
+						idx_write += acc_write / 2;
+					end
+					acc_write /= 2;
+				end
+			end
+
+			sets_test[wr1_idx].cache_lines[idx_write].valid = 1;
+			sets_test[wr1_idx].cache_lines[idx_write].data = wr1_data;
+			sets_test[wr1_idx].cache_lines[idx_write].tag = wr1_tag;
+
+			// update bst bits
+			update_bst_test(wr1_idx, idx_write);
+
+			/*
 			int num_valid;
 			int found;
 			found = 0;
@@ -203,6 +306,7 @@ module testbench;
 				sets_test[wr1_idx].cache_lines[index_to_write].data = wr1_data;
 				sets_test[wr1_idx].cache_lines[index_to_write].tag = wr1_tag;
 			end
+			*/
 		end
 	endtask
 
@@ -221,6 +325,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 
@@ -232,6 +337,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 
@@ -251,13 +357,17 @@ module testbench;
 		wr1_idx = 3;
 		wr1_tag = 4;
 		wr1_data = 69;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 		write_to_test;
 
 
 		@(posedge clock);
+		$display("tag_hits_write: %b", c0.tag_hits_write);
 		`DELAY;
+		display_cache;
+		display_cache_test;
 		check_correct_test;
 
 		$display("Single Write Passed");
@@ -270,6 +380,7 @@ module testbench;
 		wr1_idx = 3;
 		wr1_tag = 5;
 		wr1_data = 100;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 		write_to_test;
@@ -288,6 +399,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 
@@ -305,6 +417,7 @@ module testbench;
 				wr1_idx = i;
 				wr1_tag = j;
 				wr1_data = i*j;
+				rd1_en = 0;
 				rd1_idx = 0;
 				rd1_tag = 0;
 				write_to_test;
@@ -325,6 +438,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		rd1_en = 1;
 		rd1_idx = 2;
 		rd1_tag = 1;
 
@@ -345,6 +459,7 @@ module testbench;
 				wr1_idx = 0;
 				wr1_tag = 0;
 				wr1_data = 0;
+				rd1_en = 1;
 				rd1_idx = i;
 				rd1_tag = j;
 
@@ -365,6 +480,7 @@ module testbench;
 		wr1_idx = 2;
 		wr1_tag = 1;
 		wr1_data = 999;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 		write_to_test;
@@ -383,6 +499,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 
@@ -401,6 +518,7 @@ module testbench;
 					wr1_idx = j;
 					wr1_tag = k;
 					wr1_data = $urandom_range(999, 0);
+					rd1_en = 0;
 					rd1_idx = 0;
 					rd1_tag = 0;
 					write_to_test;
@@ -422,6 +540,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
 
@@ -429,6 +548,7 @@ module testbench;
 		`DELAY;
 		check_correct_reset;
 		sets_test = sets_out;
+		bst_test = bst_out;
 
 		@(negedge clock);
 

@@ -4,7 +4,7 @@
 `define DEBUG
 
 module cachemem(
-        input clock, reset, wr1_en,
+        input clock, reset, wr1_en, rd1_en,
         input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx,
         input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag,
         input [63:0] wr1_data, 
@@ -29,7 +29,10 @@ module cachemem(
 
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst; 
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_next;
- 
+
+	logic [($clog2(`NUM_WAYS - 1) - 1):0] next_bst_idx;
+	logic [($clog2(`NUM_WAYS) - 1):0] acc; 
+
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_read;
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_write;
 	logic [(`NUM_WAYS - 1):0] tag_hits_read;
@@ -39,6 +42,8 @@ module cachemem(
 	logic [(`NUM_WAYS - 1):0] enc_in_write;
 	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_read;
 	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write;
+	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write_out;
+	logic [$clog2(`NUM_WAYS) - 1:0] temp_idx;
 
 	// modules
 	CAM #(
@@ -79,7 +84,7 @@ module cachemem(
 	encoder #(.WIDTH(`NUM_WAYS)) 
 	write_enc(
 		.in(enc_in_write),
-		.out(tag_idx_write));
+		.out(tag_idx_write_out));
 
 	// assign statements
 	assign sets_out = sets;
@@ -97,8 +102,45 @@ module cachemem(
 		sets_next = sets;
 		bst_next = bst;
 		enc_in_write = tag_hits_write;
+		tag_idx_write = tag_idx_write_out;
 
 		if (wr1_en) begin
+			if (|tag_hits_write) begin
+				enc_in_write = tag_hits_write;
+				next_bst_idx = 0;
+				acc = `NUM_WAYS / 2;
+				temp_idx = `NUM_WAYS / 2;
+
+				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
+					bst_next[wr1_idx][next_bst_idx] = ~bst_next[wr1_idx][next_bst_idx];
+					if (tag_idx_write >= temp_idx) begin
+						next_bst_idx = (2 * next_bst_idx) + 2;
+						temp_idx += (acc / 2);
+					end else begin
+						next_bst_idx = (2 * next_bst_idx) + 1;
+						temp_idx -= (acc / 2);
+					end
+					acc /= 2;
+				end
+			end else begin
+				// find positoin based on bst
+				tag_idx_write = 0;
+				next_bst_idx = 0;
+				acc = `NUM_WAYS / 2;
+
+				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
+					if (bst_next[next_bst_idx]) begin
+						// bst_next[next_bst_idx] = 0;
+						tag_idx_write += acc;
+						next_bst_idx = (2 * next_bst_idx) + 2;
+					end else begin
+						// bst_next[next_bst_idx] = 1;
+						next_bst_idx = (2 * next_bst_idx) + 1;
+					end
+					acc /= 2;
+				end
+			end
+			/*
 			// check if tag matches
 			if (|tag_hits_write) begin
 				// if matches, write at same position
@@ -110,9 +152,32 @@ module cachemem(
 				// else write in lru position
 				enc_in_write = 1;
 			end
+			*/
+			for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin	
+
+			end
 			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;
+		end
+
+		if (rd1_en) begin
+			if (|tag_hits_read) begin
+				next_bst_idx = 0;
+				acc = `NUM_WAYS / 2;
+				temp_idx = `NUM_WAYS / 2;
+
+				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
+					bst_next[rd1_idx][next_bst_idx] = ~bst_next[rd1_idx][next_bst_idx];
+					if (tag_idx_read >= temp_idx) begin
+						next_bst_idx = (2 * next_bst_idx) + 2;
+						temp_idx += (acc / 2);
+					end else begin
+						next_bst_idx = (2 * next_bst_idx) + 1;
+					end
+					acc /= 2;
+				end
+			end
 		end
 	end
 
