@@ -1,13 +1,16 @@
 `include "../../sys_defs.vh"
 `define DEBUG
 // would be good idea to create a queue module and create an instance of that
-// here...
+// here..
+// Synchronize free list update for retirement (T_new is removed from free
+// list checkpoint.
 
 module Free_List(
 	input clock,
 	input reset,
 	input enable,	// enable signal for the writing of the freelist i.e the new freed regiter
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
+	input PHYS_REG T_new, //****Comes from ROB during retires stage to update checkpoint
 	input dispatch_en, // Structural Hazard detection during Dispatch
 	input id_branch, // Enabled when instruction is branch
 	// inputs for branch misprediction
@@ -37,9 +40,9 @@ module Free_List(
 
 	// Free_list_checkpoints
 
-	PHYS_REG [`FL_SIZE - 1:0] free_check_point;
+	PHYS_REG [`FL_SIZE - 1:0] free_check_point, next_free_check_point;
 
-	logic [$clog2(`FL_SIZE):0] tail_check_point;
+	logic [$clog2(`FL_SIZE):0] tail_check_point, next_tail_check_point;
 
 
 
@@ -54,12 +57,36 @@ module Free_List(
 	`endif
 
 	always_comb begin
+			next_free_list = free_list; 
+			next_tail = tail; 
+			next_free_check_point = free_check_point;
+			next_tail_check_point = tail_check_point;
+
+		if(enable) begin
+			// For free_list checkpoint
+			for (int i = 0; i < `FL_SIZE; ++i) begin
+				next_free_check_point[i] = free_check_point[i+1];
+			end
+			next_free_check_point[tail_check_point - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+			next_tail_check_point = tail_check_point;
+
+		end
+
+
 
 		if (branch_incorrect) begin
+			// Checkpoint should be updated anyway...
+			/*for (int i = 0; i < `FL_SIZE; ++i) begin
+					next_free_check_point[i] = free_check_point[i+1];
+				end
+				next_free_check_point[tail_check_point - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+				next_tail_check_point = tail_check_point;
+*/
+
 			next_free_list = free_check_point;
 			next_tail = tail_check_point;
 		end else begin
-		 	if (dispatch_en & enable) begin
+			if (dispatch_en & enable) begin // For updating freelist
 			// Reg is getting retired AND getting sent out
 				for (int i = 0; i < `FL_SIZE; ++i) begin
 					next_free_list[i] = free_list[i+1];
@@ -78,6 +105,7 @@ module Free_List(
 					// next_free_list[tail] = T_old;
 					next_tail = tail + 1;
 				end
+			
 			end else if (dispatch_en) begin
 			// Register is getting dispatched
 				if (tail == 0) begin
@@ -113,13 +141,12 @@ module Free_List(
 			tail 			<= `SD `ROB_SIZE;
 			tail_check_point	<= `SD `ROB_SIZE;
 		end else begin
-			if(dispatch_en) begin
-				if(id_branch) begin // When branch is dispatched
-					free_list <= `SD next_free_list;
-					tail <= `SD next_tail;
-					free_check_point <= `SD next_free_list;
-					tail_check_point <= `SD next_tail;
-				end else begin	// When non-branch instruction is dispatched
+
+				free_list <= `SD next_free_list;
+				tail <= `SD next_tail;
+				free_check_point <= `SD next_free_check_point;
+				tail_check_point <= `SD next_tail_check_point;
+			/*if(dispatch_en) begin
 					free_list <= `SD next_free_list;
 					tail <= `SD next_tail;
 					
@@ -136,7 +163,7 @@ module Free_List(
 				tail <= `SD next_tail;
 						
 
-			end
+			end*/
 		end
 	end
 
