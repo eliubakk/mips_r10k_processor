@@ -11,6 +11,7 @@ module cachemem(
 
 	`ifdef DEBUG
 		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
+		output logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out,
 	`endif
 
         output logic [63:0] rd1_data,
@@ -26,6 +27,9 @@ module cachemem(
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets;
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_next;
 
+	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst; 
+	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_next;
+ 
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_read;
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_write;
 	logic [(`NUM_WAYS - 1):0] tag_hits_read;
@@ -79,6 +83,7 @@ module cachemem(
 
 	// assign statements
 	assign sets_out = sets;
+	assign bst_out = bst;
 	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
 	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
 
@@ -90,6 +95,7 @@ module cachemem(
 
 	always_comb begin
 		sets_next = sets;
+		bst_next = bst;
 		enc_in_write = tag_hits_write;
 
 		if (wr1_en) begin
@@ -118,9 +124,11 @@ module cachemem(
 					sets[i].cache_lines[j].tag <= `SD 0;
 					sets[i].cache_lines[j].valid <= `SD 0;
 				end
+				bst[i] <= `SD 0;
 			end
 		end else begin
 			sets <= `SD sets_next;
+			bst <= `SD bst_next;
 		end
 	end
 

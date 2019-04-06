@@ -14,7 +14,7 @@ module testbench;
 	// initialize wires
 
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_test;
-
+	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_test;
 	int index_to_write;
 	
 	// input wires
@@ -34,6 +34,7 @@ module testbench;
 	logic rd1_valid;
 	
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_out;
+	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out;
 
 	// initialize module
 
@@ -48,6 +49,8 @@ module testbench;
 		.rd1_tag(rd1_tag),
 
 		.sets_out(sets_out),
+		.bst_out(bst_out),
+
 		.rd1_data(rd1_data),
 		.rd1_valid(rd1_valid)
 	);
@@ -58,6 +61,14 @@ module testbench;
 			#1;
 			$display("@@@Failed at time %f", $time);
 			$finish;
+		end
+	endtask
+
+	task print_bst_test;
+		begin
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				$display("bst_test[%d]: %b", i, bst_test[i]);
+			end
 		end
 	endtask
 
@@ -96,6 +107,7 @@ module testbench;
 				for (int j = 0; j < `NUM_WAYS; ++j) begin
 					assert(sets_out[i].cache_lines[j].valid == 0) else #1 exit_on_error;
 				end
+				assert(bst_out[i] == 0) else #1 exit_on_error;
 			end
 		end
 	endtask
@@ -158,6 +170,7 @@ module testbench;
 		begin
 			for (int i = 0; i < `NUM_SETS; ++i) begin
 				check_equal_set(sets_out[i], sets_test[i]);
+				assert(bst_out[i] == bst_test[i]) else #1 exit_on_error;
 			end
 		end
 	endtask
@@ -226,6 +239,7 @@ module testbench;
 		`DELAY;
 		check_correct_reset;
 		sets_test = sets_out;
+		bst_test = bst_out;
 
 		$display("Reset Test Passed");
 
@@ -281,6 +295,8 @@ module testbench;
 		`DELAY;
 		check_correct_reset;
 		sets_test = sets_out;
+		bst_test = bst_out;
+
 		for (int i = 0; i < `NUM_SETS; ++i) begin
 			for (int j = 0; j < `NUM_WAYS; ++j) begin
 				@(negedge clock);
@@ -374,6 +390,7 @@ module testbench;
 		`DELAY;
 		check_correct_reset;
 		sets_test = sets_out;	
+		bst_test = bst_out;
 
 		for (int i = 0; i < 3; ++i) begin
 			for (int j = 0; j < `NUM_SETS; ++j) begin
@@ -396,6 +413,29 @@ module testbench;
 		end
 
 		$display("Multiple Over-Write Passed");
+
+		$display("Testing Single Pseudo-LRU Write...");
+
+		@(negedge clock);
+		reset = 1;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_reset;
+		sets_test = sets_out;
+
+		@(negedge clock);
+
+		@(posedge clock);
+		`DELAY;
+
+		$display("Single Pseudo-LRU Write Passed");
 
 		$display("@@@Passed");
 		$finish;
