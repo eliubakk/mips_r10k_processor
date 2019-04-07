@@ -292,7 +292,7 @@ module testbench;
 		begin
 			$display("-----------Archtecture Map Table-----------");
 			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
-				$display("Reg:%d, Phys Reg : %d", k, arch_table[k][5:0]); 
+				$display("Reg:%d, busy: %b, Phys Reg : %d", k, arch_table[k][6], arch_table[k][5:0]); 
 			end
 			$display("------------------------------------------\n");	
 		end
@@ -346,10 +346,18 @@ module testbench;
 		begin
 			$display("\n----------------------------Freelist Table----------------------------\n");
 			$display("Free_list_size : %d, Free_list_tail : %d",`FL_SIZE, pipeline_0.fr_tail_out);
-			for (integer i = 0; i<`FL_SIZE; ++i) begin
+			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
 				$display("%dth line : %d", i, pipeline_0.fr_rs_rob_T[i]);
 			end
+		
+
+			$display("/n-------------------Freelist Checkpoint Table-----------/n");
+			$display("Check_point_size : %d, Check_point_tail : %d",`FL_SIZE, pipeline_0.f0.tail_check_point);
+			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
+				$display("%dth line : %d", i, pipeline_0.f0.free_check_point[i]);
+			end
 		end
+
 	endtask
 	task display_inst;
 		input DECODED_INST _inst_in;
@@ -413,7 +421,7 @@ module testbench;
 		begin
 			$display("\nif_stage---------------------------------------------------------------------");
 			$display("inputs");
-			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_alu_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
+			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
 			$display("outputs");
 			$display("if_NPC_out: %d, if_IR_out: %h proc2Imem_addr: %h if_valid_inst_out: %d", pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.proc2Icache_addr, pipeline_0.if_valid_inst_out);
 		end
@@ -531,7 +539,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 100000) begin
+			 if (clock_count == 1000) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
@@ -550,7 +558,7 @@ module testbench;
 			
 			//display_di_issue;
 			//display_RS_table;
-		//	display_ROB_table;
+		display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
@@ -565,7 +573,8 @@ module testbench;
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 		//	display_co_re_registers;
 			//display_arch_table;
-			//display_free_list_table;
+			display_free_list_table;
+			display_arch_table;
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;

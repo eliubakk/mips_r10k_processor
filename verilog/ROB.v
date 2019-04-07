@@ -17,6 +17,7 @@ module ROB(
 		input 			branch_valid,
 		input [`SS_SIZE][4:0]	wr_idx,
 		input [`SS_SIZE][31:0]	npc,
+		input [63:0] co_alu_result,
 
 		// OUTPUTS
 		output ROB_ROW_T [`SS_SIZE-1:0] retire_out, // Output for Retire Staget
@@ -119,6 +120,8 @@ module ROB(
 		// update tag ready bits from CBD 
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
 			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
+			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_valid) ? 1:ROB_table[i].take_branch;
+			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_valid) ? co_alu_result : ROB_table[i].npc;
 		end
 
 	// if(take_branch)	begin
@@ -131,16 +134,34 @@ module ROB(
 	// end
 
 		//RETIRE STAGE
-		for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
-			if(enable & retire_idx_valid[i] & ready_to_retire[retire_idx[i]]) begin
-				//if table is busy and T_new is ready, retire
-				retire_out[i] = ROB_table_next[retire_idx[i]];
-				retired[i] = 1'b1;
-				ROB_table_next[retire_idx[i]].busy = 1'b0;
-			end else begin
-				break;
+		if(!branch_not_taken) begin	// When it is not flush
+			for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+				if(enable & retire_idx_valid[i] & ready_to_retire[retire_idx[i]]) begin
+					//if table is busy and T_new is ready, retire
+					retire_out[i] = ROB_table_next[retire_idx[i]];
+					retired[i] = 1'b1;
+					ROB_table_next[retire_idx[i]].busy = 1'b0;
+				end else begin
+					break;
+				end
 			end
+		end else begin // during flush, do not retire
+			retired = {`SS_SIZE{1'b0}};
+			for(int i = 0; i < `SS_SIZE; i += 1) begin
+				retire_out[i].T_old = `DUMMY_REG;
+				retire_out[i].T_new = `DUMMY_REG;
+				retire_out[i].halt = 1'b0;
+				retire_out[i].busy = 1'b0;
+				retire_out[i].opcode =  `NOOP_INST;
+				retire_out[i].take_branch = 1'b0;
+				retire_out[i].branch_valid = 1'b0;
+				retire_out[i].wr_idx = `ZERO_REG;
+				retire_out[i].npc = 64'h0;
+			end
+	
+
 		end
+		
 
 		head_next = (BIT_COUNT_LUT[retired] == 0)? head :
 					(retire_idx[`SS_SIZE-1-(BIT_COUNT_LUT[retired]-1)] == tail)? tail :
