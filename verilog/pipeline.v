@@ -1334,8 +1334,8 @@ end
 	  .halt_in(id_inst_out.inst.halt),
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
-    //.branch_valid(branch_valid_disp), // Same as id_di_branch_inst.en
-    .di_branch_inst(id_di_branch_inst.en),
+    //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
+    .di_branch_inst(id_di_branch_inst.en), // ***Heewoo
     .wr_idx(id_rdest_idx),
     .npc(id_inst_out.npc),
     .co_alu_result(co_alu_result_selected),

@@ -212,7 +212,7 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].opcode = opcode[i];
 				ROB_table_next[dispatch_idx[i]].take_branch = take_branch;
 				//ROB_table_next[dispatch_idx[i]].branch_valid = branch_valid;
-				ROB_table_next[dispatch_idx[i]].branch_inst = id_branch_inst; // What Heewoo Added 
+				ROB_table_next[dispatch_idx[i]].branch_inst = di_branch_inst; // What Heewoo Added 
 				ROB_table_next[dispatch_idx[i]].wr_idx = wr_idx[i];
 				ROB_table_next[dispatch_idx[i]].npc = npc[i];
 				dispatched[i] = 1'b1;
@@ -241,14 +241,14 @@ module ROB(
 				ROB_table[i].wr_idx <= `SD `ZERO_REG;
 				ROB_table[i].npc <= `SD 64'h0;
 
-				ROB_table[i].branch_inst.en 		= 1'b0;
-				ROB_table[i].branch_inst.cond 		= 1'b0;
-				ROB_table[i].branch_inst.direct 	= 1'b0;
-				ROB_table[i].branch_inst.return 	= 1'b0;
-				ROB_table[i].branch_inst.pc 		= 64'h0;
-				ROB_table[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
-				ROB_table[i].branch_inst.prediction 	= 0;
-				ROB_table[i].branch_inst.taken 	= 0;
+				ROB_table[i].branch_inst.en 		<= `SD 1'b0;
+				ROB_table[i].branch_inst.cond 		<= `SD 1'b0;
+				ROB_table[i].branch_inst.direct 	<= `SD 1'b0;
+				ROB_table[i].branch_inst.return 	<= `SD 1'b0;
+				ROB_table[i].branch_inst.pc 		<= `SD 64'h0;
+				ROB_table[i].branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				ROB_table[i].branch_inst.prediction 	<= `SD 0;
+				ROB_table[i].branch_inst.taken 		<= `SD 0;
 
 
 
