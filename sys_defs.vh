@@ -98,8 +98,8 @@ typedef struct packed{
   logic cond;
   logic direct;
   logic return;
-  logic [31:0] pc;
-  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  
+  logic [31:0] pc;	// Current pc, NOT NEXT PC!
+  logic [$clog2(`OBQ_SIZE) -1 :0] idx;  
   logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
   logic taken;		// 1: branch actual taken, 0: branch actual not taken
   

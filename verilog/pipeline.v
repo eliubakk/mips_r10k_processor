@@ -366,21 +366,39 @@ logic rob_retire_out_T_old;
   //                  IF-Stage                    //
   //                                              //
   //////////////////////////////////////////////////
-  if_stage if_stage_0 (
+ 
+BR_SIG if_branch_inst;
+BR_SIG id_branch_inst;
+BR_SIG di_branch_inst;
+BR_SIG is_branch_inst;
+BR_SIG ex_branch_inst;
+BR_SIG co_branch_inst;
+BR_SIG ret_branch_inst;
+logic [31:0] if_PC_reg;
+logic ret_pred_correct;
+
+logic if_bp_NPC_valid;
+logic [31:0] if_bp_NPC;
+
+logic if_fetch_NPC_out;
+
+
+ if_stage if_stage_0 (
     // Inputs
     .clock (clock),
     .reset (reset),
-    .co_ret_valid_inst(retire_inst_busy),
-    .co_ret_take_branch(rob_retire_out_take_branch),
-    .co_ret_target_pc(retire_reg_NPC),
+    .co_ret_valid_inst(retire_inst_busy),		// RM
+    .co_ret_take_branch(rob_retire_out_take_branch),	// RM
+    .co_ret_target_pc(retire_reg_NPC),			// RM
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
 
     // Outputs
-    .if_NPC_out(if_NPC_out), 
+    .if_NPC_out(if_fetch_NPC_out), 
     .if_IR_out(if_IR_out),
+    .if_PC_reg(if_PC_reg),
     .proc2Imem_addr(proc2Icache_addr),
     .if_valid_inst_out(if_valid_inst_out)
   );
@@ -399,6 +417,7 @@ logic rob_retire_out_T_old;
 		if_branch_inst.taken = 0;
 
 		if(if_valid_inst_out) begin
+			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
 				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST. `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
@@ -442,30 +461,30 @@ logic rob_retire_out_T_old;
 
 
 // Branch predictor
+assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 
-BR_SIG if_branch_inst;
-    
+ 
 	BP bp0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 
 		.enable(enable),
 		
-		.if_en_branch(if_en_branch),
-		.if_cond_branch(if_cond_branch),
-		.if_direct_branch(if_direct_branch),
-		.if_return_branch(if_return_branch), 
-		.if_pc_in(if_pc_in),
-		
-		.rt_en_branch(rt_en_branch),
-		.rt_cond_branch(rt_cond_branch),
-		.rt_direct_branch(rt_direct_branch),
-		.rt_return_branch(rt_return_branch),
-		.rt_pc(rt_pc),
-		.rt_branch_taken(rt_branch_taken),
-		.rt_prediction_correct(rt_prediction_correct),
-		.rt_calculated_pc(rt_calculated_pc),
-		.rt_branch_index(rt_branch_index),		
+		.if_en_branch(if_branch_inst.en),
+		.if_cond_branch(if_branch_inst.cond,
+		.if_direct_branch(if_branch_inst.direct),
+		.if_return_branch(if_branch_inst.return), 
+		.if_pc_in(if_PC_reg),
+
+		.rt_en_branch(ret_branch_inst.en),			//Get value from retire_inst_busy
+		.rt_cond_branch(ret_branch_inst.cond),			
+		.rt_direct_branch(ret_branch_inst.direct),		 
+		.rt_return_branch(ret_branch_inst.return),
+		.rt_pc(ret_branch_inst.pc),
+		.rt_branch_taken(ret_branch_inst.taken),		// Get value from ret_branch_inst.taken
+		.rt_prediction_correct(ret_pred_correct),
+		.rt_calculated_pc(retire_reg_NPC),			// Get value from retire_reg_NPC
+		.rt_branch_index(ret_branch_inst.idx),		
 
 		// outputs 
 		`ifdef DEBUG
@@ -481,12 +500,26 @@ BR_SIG if_branch_inst;
 		.ras_head_out(ras_head_out),
 		.ras_tail_out(ras_tail_out),
 		`endif
-		.next_pc_valid(next_pc_valid),
-		.next_pc_index(next_pc_index),
-		.next_pc(next_pc),
-		.next_pc_prediction(next_pc_prediction)
+		.next_pc_valid(if_bp_NPC_valid),
+		.next_pc_index(if_branch_inst.idx),
+		.next_pc(if_bp_NPC),
+		.next_pc_prediction(if_branch_inst.prediction)
 
 	);
+
+  // Determine the next pc (from Fetch unit or from BP)
+	always_comb begin
+		// When prediction is incorrect, roll back
+		
+
+
+		// No roll backk
+		if_NPC_out = if_fetch_NPC_out;
+		if(if_bp_NPC_valid) begin
+			if_NPC_out = if_bp_NPC; 
+		end
+	end
+
   //////////////////////////////////////////////////
   //                                              //
   //            IF/ID Pipeline Register           //

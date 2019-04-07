@@ -23,6 +23,7 @@ module if_stage(
     input co_ret_branch_valid,                  // whether the inst is branch or not
 
     output logic [63:0] proc2Imem_addr,    // Address sent to Instruction memory
+    output logic [63:0] if_PC_reg, 	   // Current PC, used in BP to calculate next_PC **** Heewoo Change
     output logic [63:0] if_NPC_out,        // PC of instruction after fetched (PC+4).
     output logic [31:0] if_IR_out,        // fetched instruction out
     output logic        if_valid_inst_out  // when low, instruction is garbage
@@ -36,6 +37,8 @@ module if_stage(
   logic    [63:0] next_PC;
   logic           PC_enable;
   logic           next_ready_for_valid;
+
+	assign if_PC_reg = PC_reg;
 
 	assign PC_enable = (dispatch_en & Imem_valid) | (co_ret_take_branch);
 
