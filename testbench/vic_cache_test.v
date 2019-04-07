@@ -8,36 +8,46 @@ module testbench;
     logic clock;
     logic reset;
     logic valid;
-    logic valid_cam;
+    logic valid_cam1;
+    logic valid_cam2;
     CACHE_LINE_T  new_victim;
-    logic [(`NUM_SET_BITS - 1):0] set_index_cam;
+    logic [(`NUM_SET_BITS - 1):0] set_index_cam1;
+    logic [(`NUM_SET_BITS - 1):0] set_index_cam2;
     logic [(`NUM_SET_BITS - 1):0] set_index;
-    logic [(`NUM_TAG_BITS - 1):0] tag_cam;
+    logic [(`NUM_TAG_BITS - 1):0] tag_cam1;
+    logic [(`NUM_TAG_BITS - 1):0] tag_cam2;
     //outputs
     CACHE_LINE_T [3:0]	 vic_table_out;
     logic [3:0][`NUM_SET_BITS:0] set_index_table_out;
     CACHE_LINE_T  fired_victim;
-    CACHE_LINE_T  out_victim;
+    CACHE_LINE_T  out_victim1;
+    CACHE_LINE_T  out_victim2;
     logic               fired_valid;
-    logic               out_valid;
+    logic               out_valid1;
+    logic               out_valid2;
 
     // set clock change
     `DUT(vic_cache) vic_cache0(
     .clock(clock),
     .reset(reset),
     .valid(valid),
-    .valid_cam(valid_cam),
+    .valid_cam1(valid_cam1),
+    .valid_cam2(valid_cam2),
     .new_victim(new_victim),
-    .set_index_cam(set_index_cam),
+    .set_index_cam1(set_index_cam1),
+    .set_index_cam2(set_index_cam2),
     .set_index(set_index),
-    .tag_cam(tag_cam),
+    .tag_cam1(tag_cam1),
+    .tag_cam2(tag_cam2),
 
     .vic_table_out(vic_table_out),
     .set_index_table_out(set_index_table_out),
     .fired_victim(fired_victim),
-    .out_victim(out_victim),
+    .out_victim1(out_victim1),
+    .out_victim2(out_victim2),
     .fired_valid(fired_valid),
-    .out_valid(out_valid)
+    .out_valid1(out_valid1),
+    .out_valid2(out_valid2)
  	);
 
     //intermediate signals
@@ -161,14 +171,26 @@ module testbench;
         end
     endtask
 
-    task check_cam_output;
-        input valid_test;
-        input cam_valid_test;
-        input CACHE_LINE_T cam_victim_test;
+    task check_cam_output1;
+        input valid_test1;
+        input cam_valid_test1;
+        input CACHE_LINE_T cam_victim_test1;
         begin
-            assert(valid_test==out_valid) else #1 exit_on_error;
-            if (valid_test) begin
-                assert(cam_victim_test==out_victim) else #1 exit_on_error;
+            assert(valid_test1==out_valid1) else #1 exit_on_error;
+            if (valid_test1) begin
+                assert(cam_victim_test1==out_victim1) else #1 exit_on_error;
+            end
+        end
+    endtask
+
+    task check_cam_output2;
+        input valid_test2;
+        input cam_valid_test2;
+        input CACHE_LINE_T cam_victim_test2;
+        begin
+            assert(valid_test2==out_valid2) else #1 exit_on_error;
+            if (valid_test2) begin
+                assert(cam_victim_test2==out_victim2) else #1 exit_on_error;
             end
         end
     endtask
@@ -177,28 +199,34 @@ module testbench;
 
     initial begin
         // monitor wires
-        $monitor("clock: %b reset: %b valid: %b new_victim: %b set_index_cam: %d set_index: %d tag_cam: %d", clock, reset, valid, new_victim, set_index_cam, set_index, tag_cam);
+        $monitor("clock: %b reset: %b valid: %b new_victim: %b set_index_cam1: %d set_index_cam2: %d set_index: %d tag_cam1: %d tag_cam2: %d", clock, reset, valid, new_victim, set_index_cam1, set_index_cam2, set_index, tag_cam1, tag_cam2);
         // intial values
         clock = 0;
         reset = 0;
         valid = 0;
-        valid_cam = 0;
+        valid_cam1 = 0;
+        valid_cam2 = 0;
         new_victim.valid = 0;
-        set_index_cam = 0;
+        set_index_cam1 = 0;
+        set_index_cam2 = 0;
         set_index = 0;
-        tag_cam = 0;
+        tag_cam1 = 0;
+        tag_cam2 = 0;
 
         $display("Testing Reset...");
         @(negedge clock);
         reset = 1;
         valid = 0;
-        valid_cam = 0;
+        valid_cam1 = 0;
+        valid_cam2 = 0;
         new_victim.valid = 0;
         new_victim.data = 0;
         new_victim.tag = 0;
-        set_index_cam = 0;
+        set_index_cam1 = 0;
+        set_index_cam2 = 0;
         set_index = 0;
-        tag_cam = 0;
+        tag_cam1 = 0;
+        tag_cam2 = 0;
         test_tables_reset;
         @(posedge clock);
         `DELAY;
@@ -210,13 +238,16 @@ module testbench;
  		@(negedge clock);
  		reset = 0;
         valid = 1;
-        valid_cam = 0;
+        valid_cam1 = 0;
+        valid_cam2 = 0;
         new_victim.valid = 1;
         new_victim.data = 5;
         new_victim.tag = 10;
-        set_index_cam = 0;
+        set_index_cam1 = 0;
+        set_index_cam2 = 0;
         set_index = 15;
-        tag_cam = 0;
+        tag_cam1 = 0;
+        tag_cam2 = 0;
         vic_array_test[0]=new_victim;
         set_index_array_test[0]=set_index;
         write_to_vic_test(2'b00,1'b1,vic_array_test[0]);
@@ -233,13 +264,16 @@ module testbench;
  		@(negedge clock);
  		reset = 0;
         valid = 1;
-        valid_cam = 0;
+        valid_cam1 = 0;
+        valid_cam2 = 0;
         new_victim.valid = 1;
         new_victim.data = 2;
         new_victim.tag = 4;
-        set_index_cam = 0;
+        set_index_cam1 = 0;
+        set_index_cam2 = 0;
         set_index = 13;
-        tag_cam = 0;
+        tag_cam1 = 0;
+        tag_cam2 = 0;
         vic_array_test[1]=new_victim;
         set_index_array_test[1]=set_index;
         write_to_vic_test(2'b01,1'b1,vic_array_test[0]);
@@ -258,13 +292,16 @@ module testbench;
  		@(negedge clock);
  		reset = 0;
         valid = 1;
-        valid_cam = 0;
+        valid_cam1 = 0;
+        valid_cam2 = 0;
         new_victim.valid = 1;
         new_victim.data = 3;
         new_victim.tag = 6;
-        set_index_cam = 0;
+        set_index_cam1 = 0;
+        set_index_cam2 = 0;
         set_index = 9;
-        tag_cam = 0;
+        tag_cam1 = 0;
+        tag_cam2 = 0;
         vic_array_test[2]=new_victim;
         set_index_array_test[2]=set_index;
         write_to_vic_test(2'b10,1'b1,vic_array_test[0]);
@@ -285,13 +322,16 @@ module testbench;
  		@(negedge clock);
  		reset = 0;
         valid = 1;
-        valid_cam = 0;
+        valid_cam1 = 0;
+        valid_cam2 = 0;
         new_victim.valid = 1;
         new_victim.data = 4;
         new_victim.tag = 8;
-        set_index_cam = 0;
+        set_index_cam1 = 0;
+        set_index_cam2 = 0;
         set_index = 12;
-        tag_cam = 0;
+        tag_cam1 = 0;
+        tag_cam2 = 0;
         vic_array_test[3]=new_victim;
         set_index_array_test[3]=set_index;
         write_to_vic_test(2'b11,1'b1,vic_array_test[0]);
@@ -319,13 +359,16 @@ module testbench;
  		@(negedge clock);
  		reset = 0;
         valid = 1;
-        valid_cam = 1;
+        valid_cam1 = 1;
+        valid_cam2 = 1;
         new_victim.valid = 1;
         new_victim.data = 6;
         new_victim.tag = 12;
-        set_index_cam = 5;
+        set_index_cam1 = 5;
+        set_index_cam2 = 2;
         set_index = 18;
-        tag_cam = 4;
+        tag_cam1 = 4;
+        tag_cam2 = 12;
         vic_array_test[4]=new_victim;
         set_index_array_test[4]=set_index;
         write_to_vic_test(2'b11,1'b1,vic_array_test[1]);
@@ -342,7 +385,8 @@ module testbench;
         display_set_index_table_out;
         check_correct_test;
         check_fired_output(1,fired_valid,vic_array_test[0]);
-        check_cam_output(1,out_valid,vic_array_test[1]);
+        check_cam_output1(1,out_valid1,vic_array_test[1]);
+        check_cam_output2(1,out_valid2,vic_array_test[4]);
  		$display("CAM Passed"); 
 
         @(posedge clock);
