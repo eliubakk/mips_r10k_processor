@@ -15,18 +15,9 @@ Automated Regression Testing
 - Implement
 - Test
 
-Cache Design
-- Determine Organization
-	- Determine Associativity of Instruction Cache
-	- Determine Associativity of Data Cache
-- Implement Organization
-	- Implement Organization of Instruction Cache
-	- Implement Organization of Data Cache
-- Test Cache Behaviors
-	- Test Instruction Cache Behavior
-	- Test Data Cache Behavior
+Victim Cache (IN PROGRESS)
 
-Victim Cache
+Cache Integration (NOT STARTED)
 
 Prefetcher
 - Determine Prefetch Strategy
