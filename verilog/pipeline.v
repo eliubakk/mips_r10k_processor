@@ -112,6 +112,23 @@ module pipeline (
   logic [`NUM_FU_TOTAL-1:0] issue_stall;
   // Output from the branch predictor
   logic   bp_output;
+
+`ifdef DEBUG
+	logic		[`BH_SIZE-1:0]				gshare_ght_out;
+	logic		[2**(`BH_SIZE)-1:0]			gshare_pht_out;
+	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				obq_out;
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_head_out;
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_tail_out;
+	logic 		[`BTB_ROW-1:0]				btb_valid_out;
+	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		btb_tag_out;
+	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	btb_target_address_out;
+	logic 		[`RAS_SIZE - 1:0] [31:0] 		ras_stack_out;
+	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_head_out;
+	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_out;
+`endif
+
+
+
   
   // Outputs from ID stage
   logic [63:0]  id_rega_out;
@@ -368,11 +385,67 @@ logic rob_retire_out_T_old;
     .if_valid_inst_out(if_valid_inst_out)
   );
 
+// Small decoder for branch predictor
+
+	always_comb begin
+		// Initial value
+		if_branch_inst.en = 1'b0;
+		if_branch_inst.cond = 1'b0;
+		if_branch_inst.direct = 1'b0;
+		if_branch_inst.return = 1'b0;
+		if_branch_inst.pc = 32'h0;
+		if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
+		if_branch_inst.prediction = 0;
+		if_branch_inst.taken = 0;
+
+		if(if_valid_inst_out) begin
+			case (if_IR_out[31:26])
+				//COND & DIRECT
+				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST. `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
+					if_branch_inst.en = 1'b1;
+					if_branch_inst.cond = 1'b1;
+					if_branch_inst.direct = 1'b1;
+					if_branch_inst.return = 1'b0;
+				end
+				//UNCOND & DIRECT
+				`BR_INST, `BSR_INST : begin
+					if_branch_inst.en = 1'b1;
+					if_branch_inst.cond = 1'b0;
+					if_branch_inst.direct = 1'b1;
+					if_branch_inst.return = 1'b0;
+				end
+				// UNCOND & INDIRECT
+				`JSR_GRP begin
+					case (if_IR_out[20:19])
+					// NOT RETURN
+						`JMP_INST, `JSR_INST, `JSR_CO_INST : begin
+							if_branch_inst.en = 1'b1;
+							if_branch_inst.cond = 1'b0;
+							if_branch_inst.direct = 1'b0;
+							if_branch_inst.return = 1'b0;
+						end
+					// RETURN
+						`RET_INST : begin
+							if_branch_inst.en = 1'b1;
+							if_branch_inst.cond = 1'b0;
+							if_branch_inst.direct = 1'b0;
+							if_branch_inst.return = 1'b1;
+						end
+					endcase
+				end			
+
+			endcase	
+		end
+
+
+	end
+
 
 // Branch predictor
 
-
-    BP bp0(
+BR_SIG if_branch_inst;
+    
+	BP bp0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 
@@ -414,24 +487,6 @@ logic rob_retire_out_T_old;
 		.next_pc_prediction(next_pc_prediction)
 
 	);
-// Small decoder for branch predictor
-
-	always_comb begin
-			if(valid_inst_out) begin
-
-
-
-			end
-			if_IR_out	
-	
-		// COND & DIRECT
-		// UNCOND & DIRECT
-		// UNCOND & INDIRECT
-		// UNCOND & INDIRECT & RETURN
-
-
-	end
-
   //////////////////////////////////////////////////
   //                                              //
   //            IF/ID Pipeline Register           //
