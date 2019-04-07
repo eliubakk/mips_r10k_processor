@@ -118,7 +118,14 @@ module  BP(
 		logic 	[$clog2(`OBQ_SIZE) - 1:0]	next_pc_index_calc; 		
 		logic	[31:0]			next_pc_calc;
 		logic				next_pc_prediction_calc;	
-	
+
+
+	// BP module output, should be combinational 
+		assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
+		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
+		assign next_pc			= reset ? 32'h0 : next_pc_calc;
+		assign next_pc_prediction	= reset ? 1'b0 : next_pc_prediction_calc;	    
+
 	//----------Value evaluation
 
 	assign roll_back	= rt_en_branch & rt_cond_branch & ~rt_prediction_correct; 
@@ -337,7 +344,7 @@ module  BP(
 	end
 
 
-	always_ff @(posedge clock) begin
+/*	always_ff @(posedge clock) begin
 
 		if(reset) begin
 			next_pc_valid		<= 1'b0;
@@ -351,6 +358,7 @@ module  BP(
 			next_pc_prediction	<= next_pc_prediction_calc;
 
 		end
+*/
 
 /*
 		// Next PC value,	

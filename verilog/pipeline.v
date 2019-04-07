@@ -368,6 +368,70 @@ logic rob_retire_out_T_old;
     .if_valid_inst_out(if_valid_inst_out)
   );
 
+
+// Branch predictor
+
+
+    BP bp0(
+		// inputs
+		.clock(clock), 
+		.reset(reset), 
+		.enable(enable),
+		
+		.if_en_branch(if_en_branch),
+		.if_cond_branch(if_cond_branch),
+		.if_direct_branch(if_direct_branch),
+		.if_return_branch(if_return_branch), 
+		.if_pc_in(if_pc_in),
+		
+		.rt_en_branch(rt_en_branch),
+		.rt_cond_branch(rt_cond_branch),
+		.rt_direct_branch(rt_direct_branch),
+		.rt_return_branch(rt_return_branch),
+		.rt_pc(rt_pc),
+		.rt_branch_taken(rt_branch_taken),
+		.rt_prediction_correct(rt_prediction_correct),
+		.rt_calculated_pc(rt_calculated_pc),
+		.rt_branch_index(rt_branch_index),		
+
+		// outputs 
+		`ifdef DEBUG
+		.gshare_ght_out(gshare_ght_out),
+		.gshare_pht_out(gshare_pht_out),		
+		.obq_out(obq_out),
+		.obq_head_out(obq_head_out),
+		.obq_tail_out(obq_tail_out),
+		.btb_valid_out(btb_valid_out),
+		.btb_tag_out(btb_tag_out),
+		.btb_target_address_out(btb_target_address_out),
+		.ras_stack_out(ras_stack_out),
+		.ras_head_out(ras_head_out),
+		.ras_tail_out(ras_tail_out),
+		`endif
+		.next_pc_valid(next_pc_valid),
+		.next_pc_index(next_pc_index),
+		.next_pc(next_pc),
+		.next_pc_prediction(next_pc_prediction)
+
+	);
+// Small decoder for branch predictor
+
+	always_comb begin
+			if(valid_inst_out) begin
+
+
+
+			end
+			if_IR_out	
+	
+		// COND & DIRECT
+		// UNCOND & DIRECT
+		// UNCOND & INDIRECT
+		// UNCOND & INDIRECT & RETURN
+
+
+	end
+
   //////////////////////////////////////////////////
   //                                              //
   //            IF/ID Pipeline Register           //
@@ -1102,7 +1166,7 @@ end
   end // always
 
   // INSTANTIATING THE ROB
-   assign branch_valid_disp= (id_inst_out.inst.fu_name ==  FU_BR) ? 1:0 ;
+   assign branch_valid_disp = (id_inst_out.inst.fu_name ==  FU_BR) ? 1:0 ;
    
   //  genvar i;
   //  for (i=0; i< `ROB_SIZE; i=i+1) begin
