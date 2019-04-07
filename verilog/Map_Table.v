@@ -72,7 +72,7 @@ module Map_Table(
 					T1[i] = next_map_table[reg_a[i]].phys_tag;
 					T2[i] = next_map_table[reg_b[i]].phys_tag;
 					T_old[i] = next_map_table[reg_dest[i]].phys_tag;
-					next_map_table[reg_dest[i]].phys_tag = free_reg[i];
+					next_map_table[reg_dest[i]].phys_tag = (reg_dest[i] == `ZERO_REG)? `DUMMY_REG : free_reg[i];
 				end
 			end
 		end
@@ -85,7 +85,7 @@ module Map_Table(
 				map_table[i].phys_tag 		<= `SD i;
 				map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] <= `SD 1'b1;
 			end
-			map_table[`NUM_GEN_REG - 1].phys_tag <= `SD `DUMMY_REG;
+			map_table[`NUM_GEN_REG-1].phys_tag <= `SD `DUMMY_REG;
 		end else begin
 			// update the map_table's next state
 			map_table <= `SD next_map_table;

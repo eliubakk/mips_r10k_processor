@@ -68,7 +68,20 @@ typedef struct packed {
 `define MAX_RS_SIZE 16
 `define SS_SIZE 1 // superscalar size
 `define ROB_SIZE 16
+`define NUM_WAYS 4
+`define NUM_SETS (32 / `NUM_WAYS)
+`define NUM_SET_BITS $clog2(`NUM_SETS)
+`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
+ typedef struct packed {
+ 	logic [63:0] data;
+ 	logic [(`NUM_TAG_BITS - 1):0] tag;
+ 	logic valid;
+ } CACHE_LINE_T;
+
+  typedef struct packed {
+ 	CACHE_LINE_T [(`NUM_WAYS - 1):0] cache_lines;
+ } CACHE_SET_T;
 //////////////////////////////////////////////
 //
 // Register Parameters

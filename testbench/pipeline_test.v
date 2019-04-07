@@ -292,7 +292,7 @@ module testbench;
 		begin
 			$display("-----------Archtecture Map Table-----------");
 			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
-				$display("Reg:%d, Phys Reg : %d", k, arch_table[k][5:0]); 
+				$display("Reg:%d, busy: %b, Phys Reg : %d", k, arch_table[k][6], arch_table[k][5:0]); 
 			end
 			$display("------------------------------------------\n");	
 		end
@@ -346,10 +346,18 @@ module testbench;
 		begin
 			$display("\n----------------------------Freelist Table----------------------------\n");
 			$display("Free_list_size : %d, Free_list_tail : %d",`FL_SIZE, pipeline_0.fr_tail_out);
-			for (integer i = 0; i<`FL_SIZE; ++i) begin
+			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
 				$display("%dth line : %d", i, pipeline_0.fr_rs_rob_T[i]);
 			end
+		
+
+			$display("/n-------------------Freelist Checkpoint Table-----------/n");
+			$display("Check_point_size : %d, Check_point_tail : %d",`FL_SIZE, pipeline_0.f0.tail_check_point);
+			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
+				$display("%dth line : %d", i, pipeline_0.f0.free_check_point[i]);
+			end
 		end
+
 	endtask
 	task display_inst;
 		input DECODED_INST _inst_in;
@@ -565,7 +573,8 @@ module testbench;
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 		//	display_co_re_registers;
 			//display_arch_table;
-			//display_free_list_table;
+			display_free_list_table;
+			display_arch_table;
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;

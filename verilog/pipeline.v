@@ -261,6 +261,8 @@ logic branch_valid_disp;  //branch_valid_disp
 	logic head_halt;
   logic rob_retire_out_halt;
   logic rob_retire_out_take_branch;
+logic rob_retire_out_T_new; 
+logic rob_retire_out_T_old; 	
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
   logic  [1:0] proc2Dmem_command, proc2Imem_command;
@@ -468,6 +470,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .reset(reset),
     .enable(fr_wr_en),// Write enable from ROB during retire
     .T_old(rob_retire_out.T_old), // Comes from ROB during Retire Stage
+    .T_new(rob_retire_out.T_new),
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
     .id_branch(id_branch), // enabled when dispatched instruction is branch
     // inputs for branch misprediction
@@ -1164,6 +1167,8 @@ always_ff @ (posedge clock) begin
 		retire_reg_phys <= `SD 0;
 		rob_retire_out_halt <= `SD 0;
 		rob_retire_out_take_branch <= `SD 0;
+		rob_retire_out_T_new <= `SD `DUMMY_REG;
+		rob_retire_out_T_old <= `SD `DUMMY_REG;
 
 	end else begin 
 		retire_inst_busy <= rob_retire_out.busy;
@@ -1173,16 +1178,19 @@ always_ff @ (posedge clock) begin
 		retire_reg_phys <= `SD rob_retire_out.T_new;
 		rob_retire_out_halt <= `SD rob_retire_out.halt;
     		rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
+		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
+		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
 	end
   end
 
-
+logic arch_enable;
+assign arch_enable = rob_retire_out.busy & !rob_retire_out.take_branch;
 
   //Intsantiating the arch map
   Arch_Map_Table a0(
   	.clock(clock),
   	.reset(reset),
-  	.enable(rob_retire_out.busy),
+  	.enable(arch_enable),
   	.T_new_in(rob_retire_out.T_new), // Comes from ROB during Retire
     .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 

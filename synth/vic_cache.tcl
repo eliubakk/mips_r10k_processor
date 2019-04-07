@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : RS.tcl                                  */
+#/*   FILE        : vic_cache.tcl                                 */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,20 +11,16 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-#read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.ddc" "CAM_NUM_TAG1.ddc" "encoder.ddc"]
-#set_dont_touch psel_generic_NUM_REQS1
+#read_file -f ddc [list "CAM_NUM_TAG1.ddc" "encoder.ddc"]
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/RS.v" $misc_files]
-elaborate RS
-set design_name RS
+analyze -f sverilog [concat "../../verilog/vic_cache.v" $misc_files]
+elaborate vic_cache
+set design_name vic_cache
 set clock_name clock
 set reset_name reset
-#SINGLESCALAR
-set CLK_PERIOD 6.5
-#SUPERSCALAR
-set CLK_PERIOD 10
+set CLK_PERIOD 5
 
 
 
