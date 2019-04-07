@@ -304,10 +304,15 @@ module testbench;
  		@(posedge clock);
  		`DELAY;
         //display_vic_table_out;
-        display_set_index_table_out;
+        //display_set_index_table_out;
         check_correct_test;
-        check_fired_output(1,fired_valid,vic_array_test[0]);
+        check_fired_output(0,fired_valid,vic_array_test[0]);
  		$display("Four Write Passed");
+
+        //@(posedge clock);
+ 		//`DELAY;
+        //check_fired_output(1,fired_valid,vic_array_test[0]);
+ 		//$display("Fired out Passed");
 
         $display("Testing CAM...");
  		@(negedge clock);
@@ -335,15 +340,14 @@ module testbench;
         display_vic_table_out;
         display_set_index_table_out;
         check_correct_test;
-        check_fired_output(0,fired_valid,vic_array_test[1]);
-        //$display("vic_table_hits:%d set_index_table_hits:%d",vic_cache0.vic_table_hits,vic_cache0.set_index_table_hits);
-        //for (int i = 0; i<4; i+=1) begin
-        //    $display("set_index_table_temp[%d]=%d",i,vic_cache0.set_index_table_temp[i]);
-        //end
+        check_fired_output(1,fired_valid,vic_array_test[0]);
         check_cam_output(1,out_valid,vic_array_test[1]);
  		$display("CAM Passed"); 
 
-
+        @(posedge clock);
+ 		`DELAY;
+        check_fired_output(0,fired_valid,vic_array_test[1]);
+ 		$display("Fired Out After CAM Passed"); 
 
         $display("@@@Passed");
 

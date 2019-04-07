@@ -26,12 +26,14 @@ module vic_cache(
     logic [1:0]                  index_table;
     logic [3:0][`NUM_SET_BITS-1:0] set_index_table_temp;
     logic [3:0][`NUM_TAG_BITS-1:0] vic_table_out_temp;
+    CACHE_LINE_T  fired_victim_next;
+    logic              fired_valid_next;
 
-    assign fired_victim = vic_table_out[3];
+    assign fired_victim_next = vic_table_out[3];
     assign out_victim = vic_table_out[index_table];
 
     always_comb begin
-        fired_valid = 1'b0;
+        fired_valid_next = 1'b0;
         out_valid = 1'b0;
         set_index_table_next = set_index_table_out;
         vic_table_next = vic_table_out;
@@ -48,7 +50,7 @@ module vic_cache(
         end
 
         if (set_index_table_out[3][`NUM_SET_BITS] & ~(out_valid & (index_table==2'b11))) begin
-            fired_valid = 1'b1;
+            fired_valid_next = 1'b1;
             set_index_table_next[3][`NUM_SET_BITS] = 1'b0;
         end
 
@@ -104,10 +106,14 @@ module vic_cache(
                 vic_table_out[i].valid <= `SD 0;
                 vic_table_out[i].data <= `SD 0;
                 vic_table_out[i].tag <= `SD 0;
+                fired_valid <= `SD 1'b0;
+                fired_victim <= `SD 0;
             end
         end else begin
             vic_table_out <= `SD vic_table_next;
             set_index_table_out <= `SD set_index_table_next;
+            fired_valid <= `SD fired_valid_next;
+            fired_victim <= `SD fired_victim_next;
         end
     end
 endmodule
