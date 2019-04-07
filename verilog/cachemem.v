@@ -14,9 +14,21 @@ module cachemem(
 		output logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out,
 	`endif
 
+	// victim cache outputs
+	output logic victim_valid,
+	output CACHE_LINE_T victim,
+	output logic [(`NUM_SET_BITS - 1):0] vic_idx,
+
+	output logic miss_valid_rd,
+	output logic [(`NUM_SET_BITS - 1):0] miss_idx_rd,
+	output logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd,
+
+	output logic miss_valid_wr,
+	output logic [(`NUM_SET_BITS - 1):0] miss_idx_wr,
+	output logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr,
+
         output logic [63:0] rd1_data,
-        output logic rd1_valid
-        
+        output logic rd1_valid 
       );
 
 	// given addr, find set index
@@ -93,6 +105,15 @@ module cachemem(
 	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
 	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
 
+	assign vic_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
+	assign victim = sets[wr1_idx].cache_lines[tag_idx_write];
+
+	assign miss_idx_rd = rd1_idx;
+	assign miss_tag_rd = rd1_tag;
+
+	assign miss_idx_wr = wr1_idx;
+	assign miss_tag_wr = wr1_tag;
+
 	for (genvar i = 0; i < `NUM_WAYS; ++i) begin
 		assign has_invalid[i] = ~sets[wr1_idx].cache_lines[i].valid;
 		assign tag_table_in_read[i] = sets[rd1_idx].cache_lines[i].tag;
@@ -105,6 +126,8 @@ module cachemem(
 		enc_in_write = tag_hits_write;
 		tag_idx_write = tag_idx_write_out;
 		tag_hits_write_found = tag_hits_write & ~has_invalid;
+		miss_valid_rd = 0;
+		miss_valid_wr = 0;
 
 		if (wr1_en) begin
 			if (|tag_hits_write_found) begin
@@ -125,6 +148,7 @@ module cachemem(
 					acc /= 2;
 				end
 			end else begin
+				miss_valid_wr = 1;
 				// find positoin based on bst
 				tag_idx_write = 0;
 				next_bst_idx = 0;
@@ -162,6 +186,8 @@ module cachemem(
 					end
 					acc /= 2;
 				end
+			end else begin
+				miss_valid_rd = 1;
 			end
 		end
 	end
