@@ -191,27 +191,28 @@ module testbench;
 
 	int bst_test_depth = $clog2(`NUM_WAYS);
 	int next_idx;
-	int acc_update = `NUM_WAYS;
+	int update_bst_idx;
+	int acc_update = `NUM_WAYS / 2;
 
 	task update_bst_test;
 		input int set_idx;
 		input int idx;
 		begin
-			/*
-			next_idx = idx;
-
-			while (next_
+			acc_update = `NUM_WAYS / 2;
+			update_bst_idx = 0;
+			next_idx = acc_update;
 
 			for (int i = 0; i < bst_test_depth; ++i) begin
-				if (bst_test[set_idx][next_idx]) begin
-					bst_test[set_idx][next_idx] = 0;
-					next_idx = (2 * next_idx) + 2;
+				bst_test[set_idx][update_bst_idx] = ~bst_test[set_idx][update_bst_idx];
+				if (next_idx > idx) begin
+					update_bst_idx = (2 * update_bst_idx) + 1;
+					next_idx -= acc_update / 2;
 				end else begin
-					bst_test[set_idx][next_idx] = 1;
-					next_idx = (2 * next_idx) + 1;
+					update_bst_idx = (2 * update_bst_idx) + 2;
+					next_idx += acc_update / 2;
 				end
+				acc_update /= 2;
 			end
-			*/
 		end
 	endtask
 
@@ -241,14 +242,16 @@ module testbench;
 		end
 	endtask
 
+	int acc_write;
+	int next_idx;
+
 	task write_to_test;
 		begin
 
 			int found_write;
 			int idx_write;
 			int depth_write = $clog2(`NUM_WAYS);
-			int acc_write = `NUM_WAYS;
-			int next_idx = 0;
+			acc_write  = `NUM_WAYS;
 
 			found_write = 0;
 			idx_write = 0;
@@ -262,12 +265,14 @@ module testbench;
 				end
 			end
 
-
 			if (!found_write) begin
 				idx_write = 0;
 				for (int i = 0; i < depth_write; ++i) begin
-					if (bst_test[next_idx] == 1) begin
+					if (bst_test[wr1_idx][next_idx] == 1) begin
+						next_idx = (2 * next_idx) + 2;
 						idx_write += acc_write / 2;
+					end else begin
+						next_idx = (2 * next_idx) + 1;
 					end
 					acc_write /= 2;
 				end
@@ -279,34 +284,6 @@ module testbench;
 
 			// update bst bits
 			update_bst_test(wr1_idx, idx_write);
-
-			/*
-			int num_valid;
-			int found;
-			found = 0;
-			num_valid = 0;
-
-			index_to_write = 0;
-
-			for (int i = 0; i < `NUM_WAYS; ++i) begin
-				if (sets_test[wr1_idx].cache_lines[i].valid && sets_test[wr1_idx].cache_lines[i].tag == wr1_tag) begin
-					index_to_write = i;
-					break;
-				end else if (sets_test[wr1_idx].cache_lines[i].valid) begin
-					++num_valid;
-				end else begin
-					index_to_write = i;
-				end
-			end
-
-			if (num_valid == `NUM_WAYS) begin
-				// eviction logic
-			end else begin
-				sets_test[wr1_idx].cache_lines[index_to_write].valid = 1;
-				sets_test[wr1_idx].cache_lines[index_to_write].data = wr1_data;
-				sets_test[wr1_idx].cache_lines[index_to_write].tag = wr1_tag;
-			end
-			*/
 		end
 	endtask
 
@@ -362,12 +339,8 @@ module testbench;
 		rd1_tag = 0;
 		write_to_test;
 
-
 		@(posedge clock);
-		$display("tag_hits_write: %b", c0.tag_hits_write);
 		`DELAY;
-		display_cache;
-		display_cache_test;
 		check_correct_test;
 
 		$display("Single Write Passed");
@@ -441,11 +414,13 @@ module testbench;
 		rd1_en = 1;
 		rd1_idx = 2;
 		rd1_tag = 1;
+		read_from_test;
 
 		@(posedge clock);
 		`DELAY;
 		assert(rd1_data == 2) else #1 exit_on_error;
 		assert(rd1_valid == 1) else #1 exit_on_error;
+		check_correct_test;
 
 		$display("Single Read Passed");
 
@@ -462,11 +437,13 @@ module testbench;
 				rd1_en = 1;
 				rd1_idx = i;
 				rd1_tag = j;
+				read_from_test;
 
 				@(posedge clock);
 				`DELAY;
 				assert(rd1_data == i*j) else #1 exit_on_error;
 				assert(rd1_valid == 1) else #1 exit_on_error;
+				check_correct_test;
 			end
 		end
 

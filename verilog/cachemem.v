@@ -37,6 +37,7 @@ module cachemem(
 	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_write;
 	logic [(`NUM_WAYS - 1):0] tag_hits_read;
 	logic [(`NUM_WAYS - 1):0] tag_hits_write;
+	logic [(`NUM_WAYS - 1):0] tag_hits_write_found;
 	logic [(`NUM_WAYS - 1):0] has_invalid;
 	logic [(`NUM_WAYS - 1):0] invalid_sel;
 	logic [(`NUM_WAYS - 1):0] enc_in_write;
@@ -103,9 +104,10 @@ module cachemem(
 		bst_next = bst;
 		enc_in_write = tag_hits_write;
 		tag_idx_write = tag_idx_write_out;
+		tag_hits_write_found = tag_hits_write & ~has_invalid;
 
 		if (wr1_en) begin
-			if (|tag_hits_write) begin
+			if (|tag_hits_write_found) begin
 				enc_in_write = tag_hits_write;
 				next_bst_idx = 0;
 				acc = `NUM_WAYS / 2;
@@ -129,32 +131,15 @@ module cachemem(
 				acc = `NUM_WAYS / 2;
 
 				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					if (bst_next[next_bst_idx]) begin
-						// bst_next[next_bst_idx] = 0;
+					bst_next[wr1_idx][next_bst_idx] = ~bst_next[wr1_idx][next_bst_idx];
+					if (~bst_next[wr1_idx][next_bst_idx]) begin
 						tag_idx_write += acc;
 						next_bst_idx = (2 * next_bst_idx) + 2;
 					end else begin
-						// bst_next[next_bst_idx] = 1;
 						next_bst_idx = (2 * next_bst_idx) + 1;
 					end
 					acc /= 2;
 				end
-			end
-			/*
-			// check if tag matches
-			if (|tag_hits_write) begin
-				// if matches, write at same position
-				enc_in_write = tag_hits_write;
-			end else if (|has_invalid) begin
-				// if no match, check if empty spot available
-				enc_in_write = invalid_sel;
-			end else begin
-				// else write in lru position
-				enc_in_write = 1;
-			end
-			*/
-			for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin	
-
 			end
 			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
