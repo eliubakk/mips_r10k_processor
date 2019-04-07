@@ -375,8 +375,7 @@ module  BP(
 			next_pc_index	<= bh_index; //*********************default bh_idx
 			next_pc_valid	<= prediction_valid;
 		end
-*/
 
-	end
+	end*/
 
 endmodule

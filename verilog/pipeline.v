@@ -424,8 +424,8 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 		if_branch_inst.direct = 1'b0;
 		if_branch_inst.ret = 1'b0;
 		if_branch_inst.pc = 64'h0;
-		if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
-		if_branch_inst.prediction = 0;
+		//if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
+		//if_branch_inst.prediction = 0;
 		if_branch_inst.taken = 0;
 
 		if(if_valid_inst_out & dispatch_no_hazard & !ret_branch_inst.taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
@@ -446,7 +446,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 					if_branch_inst.ret = 1'b0;
 				end
 				// UNCOND & INDIRECT
-				`JSR_GRP begin
+				`JSR_GRP : begin
 					case (if_IR_out[20:19])
 					// NOT RETURN
 						`JMP_INST, `JSR_INST, `JSR_CO_INST : begin
@@ -496,7 +496,7 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 		.rt_branch_taken(ret_branch_inst.taken),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
 		.rt_calculated_pc(retire_reg_NPC),			// This is not come from ret_branc_inst 
-		.rt_branch_index(ret_branch_inst.idx),		
+		.rt_branch_index(ret_branch_inst.br_idx),		
 
 		// outputs 
 		`ifdef DEBUG
@@ -513,7 +513,7 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 		.ras_tail_out(ras_tail_out),
 		`endif
 		.next_pc_valid(if_bp_NPC_valid),
-		.next_pc_index(if_branch_inst.idx),
+		.next_pc_index(if_branch_inst.br_idx),
 		.next_pc(if_bp_NPC),
 		.next_pc_prediction(if_branch_inst.prediction)
 
@@ -521,8 +521,15 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 
 
   // Determine the next pc (from Fetch unit or from BP)
-	assign if_NPC_out = if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
+	//assign if_NPC_out = if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
 
+	always_comb begin
+		if_NPC_out = if_fetch_NPC_out;
+		if(if_bp_NPC_valid) begin
+			if_NPC_out = if_bp_NPC;
+		end
+
+	end
 
   //////////////////////////////////////////////////
   //                                              //
@@ -572,7 +579,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	if_id_branch_inst.en 		<= `SD 1'b0;
 	if_id_branch_inst.cond 		<= `SD 1'b0;
 	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.re	t 	<= `SD 1'b0;
+	if_id_branch_inst.ret	 	<= `SD 1'b0;
 	if_id_branch_inst.pc 		<= `SD 64'h0;
 	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	if_id_branch_inst.prediction 	<= `SD 0;
@@ -1094,7 +1101,7 @@ end
     if (reset | branch_not_taken) begin
      // ex_co_done <= `SD 0;
       ex_co_take_branch  <= `SD 0;
-      ex_co_branch_index <= `SD {$clog2(`OBQ_ROW){0}};
+      ex_co_branch_index <= `SD {$clog2(`OBQ_SIZE){0}};
       ex_co_branch_target <= `SD 0;
     end else if(ex_co_enable[4]) begin
      

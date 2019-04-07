@@ -11,14 +11,14 @@ module ROB(
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
 		input						CDB_br_valid, // ** Heewoo added ,need a way to deal with multiple branches
-		input [`SS_SIZE-1:0] [$clog2(`OBQ_SIZE)-1 : 0 ] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
+		input  [$clog2(`OBQ_SIZE)-1 : 0 ] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
 		input branch_not_taken,
 		input [`SS_SIZE-1:0][31:0] opcode,
 		input			take_branch,
 		//input 			branch_valid,    //***Heewoo
 		//: Replaced with di_branch_inst
-		input BR_SIG		di_branch_inst;		//***Heewoo
+		input BR_SIG		di_branch_inst,		//***Heewoo
 		input [`SS_SIZE][4:0]	wr_idx,
 		input [`SS_SIZE][31:0]	npc,
 		input [63:0] co_alu_result,
@@ -135,7 +135,7 @@ module ROB(
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
 			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
 			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROB_table[i].branch_inst.br_idx)) ? 1 : ROB_table[i].take_branch; // **** Heewoo changed for multiple branches
-			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROb_table[i].branch_inst.br_idx)) ? co_alu_result : ROB_table[i].npc; // **** Heewoo changed for multiple branches
+			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROB_table[i].branch_inst.br_idx)) ? co_alu_result : ROB_table[i].npc; // **** Heewoo changed for multiple branches
 		end
 
 	// if(take_branch)	begin

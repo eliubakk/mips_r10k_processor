@@ -207,7 +207,7 @@ module RS
 		for(i = 0; i < `SS_SIZE; i = i + 1) begin
 			if(dispatch_valid[i] & inst_in[i].inst.valid_inst & dispatch_idx_valid[i]) begin
 				rs_table_next[dispatch_idx[i]] = inst_in[i];
-				rs_table_next[dispatch_dix[i]].br_idx = id_di_branch_inst.br_idx;// **** Heewoo added for branch
+				rs_table_next[dispatch_idx[i]].br_idx = di_branch_inst_idx;// **** Heewoo added for branch
 				rs_table_next[dispatch_idx[i]].busy = 1'b1;
 			// Update the cdb value, since it comes from
 			// Map table(during decode stage)

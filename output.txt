@@ -3,7 +3,7 @@ mkdir -p pipeline && cd pipeline && \
 SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps  +define+PIPELINE=1 ../../verilog/pipeline.v ../../verilog/misc/CAM.v ../../verilog/misc/encoder.v ../../verilog/misc/psel_generic.v ../../verilog/misc/psel_single.v ../../verilog/PHT_TWO_SC.v ../../verilog/phys_reg.v ../../verilog/id_stage.v ../../verilog/ex_stage.v ../../verilog/cachemem.v ../../verilog/Free_List.v ../../verilog/RS.v ../../verilog/wb_stage.v ../../verilog/pipe_mult.v ../../verilog/BP.v ../../verilog/cdb.v ../../verilog/BTB.v ../../verilog/ROB.v ../../verilog/Free_List_Check.v ../../verilog/OBQ.v ../../verilog/if_stage.v ../../verilog/RAS.v ../../verilog/Arch_Map_Table.v ../../verilog/mult_stage.v ../../verilog/SQ.v ../../verilog/GSHARE.v ../../verilog/Map_Table.v ../../verilog/icache.v ../../verilog/regfile.v ../../verilog/mem_stage.v ../../testbench/pipe_print.c ../../testbench/mem.v ../../testbench/pipeline_test.v -o simv_pipeline &&\
 ./simv_pipeline | tee pipeline_simv_program.out
                          Chronologic VCS (TM)
-      Version N-2017.12-SP2-1_Full64 -- Sun Apr  7 19:32:44 2019
+      Version N-2017.12-SP2-1_Full64 -- Sun Apr  7 19:35:20 2019
                Copyright (c) 1991-2017 by Synopsys Inc.
                          ALL RIGHTS RESERVED
 
@@ -70,13 +70,63 @@ Warning-[IPDW] Identifier previously declared
   Identifier 'arch_table' previously declared as output port. 
   [../../verilog/pipeline.v, 87]
 
+Parsing design file '../../verilog/misc/CAM.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/CAM.v'.
+Parsing design file '../../verilog/misc/encoder.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/encoder.v'.
+Parsing design file '../../verilog/misc/psel_generic.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/psel_generic.v'.
+Parsing design file '../../verilog/misc/psel_single.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/misc/psel_single.v'.
+Parsing design file '../../verilog/PHT_TWO_SC.v'
+Parsing design file '../../verilog/phys_reg.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/phys_reg.v'.
+Parsing design file '../../verilog/id_stage.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/id_stage.v'.
+Parsing design file '../../verilog/ex_stage.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/ex_stage.v'.
+Parsing design file '../../verilog/cachemem.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/cachemem.v'.
+Parsing design file '../../verilog/Free_List.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/Free_List.v'.
+Parsing design file '../../verilog/RS.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/RS.v'.
+Parsing design file '../../verilog/wb_stage.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/wb_stage.v'.
+Parsing design file '../../verilog/pipe_mult.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/pipe_mult.v'.
+Parsing design file '../../verilog/BP.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/BP.v'.
+Parsing design file '../../verilog/cdb.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/cdb.v'.
+Parsing design file '../../verilog/BTB.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/BTB.v'.
+Parsing design file '../../verilog/ROB.v'
+Parsing included file '../../sys_defs.vh'.
+Back to file '../../verilog/ROB.v'.
 
 Error-[SE] Syntax error
   Following verilog source has syntax error :
-  "../../verilog/pipeline.v", 449: token is 'begin'
-  				`JSR_GRP begin
-                                                ^
+  "../../verilog/ROB.v", 21: token is ';'
+  		input BR_SIG		di_branch_inst;		
+  //***Heewoo
+                                                             ^
 
 8 warnings
 1 error
-CPU time: .108 seconds to compile
+CPU time: .135 seconds to compile
