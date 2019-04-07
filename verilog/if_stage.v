@@ -22,6 +22,9 @@ module if_stage(
     input dispatch_en,                   /// dispatch enable signal
     input co_ret_branch_valid,                  // whether the inst is branch or not
 
+    input [63:0] if_bp_NPC,
+    input if_bp_NPC_valid,
+
     output logic [63:0] proc2Imem_addr,    // Address sent to Instruction memory
     output logic [63:0] if_PC_reg, 	   // Current PC, used in BP to calculate next_PC **** Heewoo Change
     output logic [63:0] if_NPC_out,        // PC of instruction after fetched (PC+4).
@@ -40,7 +43,8 @@ module if_stage(
 
 	assign if_PC_reg = PC_reg;
 
-	assign PC_enable = (dispatch_en & Imem_valid) | (co_ret_take_branch);
+	assign PC_enable = (dispatch_en & Imem_valid) | (co_ret_take_branch) | (if_bp_NPC_valid);
+	// When NPC is given by branch predictor
 
  
   assign proc2Imem_addr = {PC_reg[63:3], 3'b0};
@@ -53,8 +57,10 @@ module if_stage(
 
   // next PC is target_pc if there is a taken branch or
   // the next sequential PC (PC+4) if no branch
+  // For branch instruction, NPC will be the PC from BP
   // (halting is handled with the enable PC_enable;
-  assign next_PC = (co_ret_take_branch) ?  co_ret_target_pc : PC_plus_4;
+  assign next_PC = (co_ret_take_branch) ?  co_ret_target_pc : 
+			if_bp_NPC_valid ? if_bp_NPC : PC_plus_4;
 
   // The take-branch signal must override stalling (otherwise it may be lost)
   //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;

@@ -374,11 +374,11 @@ BR_SIG is_branch_inst;
 BR_SIG ex_branch_inst;
 BR_SIG co_branch_inst;
 BR_SIG ret_branch_inst;
-logic [31:0] if_PC_reg;
+logic [63:0] if_PC_reg;
 logic ret_pred_correct;
 
 logic if_bp_NPC_valid;
-logic [31:0] if_bp_NPC;
+logic [63:0] if_bp_NPC;
 
 logic if_fetch_NPC_out;
 
@@ -387,13 +387,15 @@ logic if_fetch_NPC_out;
     // Inputs
     .clock (clock),
     .reset (reset),
-    .co_ret_valid_inst(retire_inst_busy),		// RM
-    .co_ret_take_branch(rob_retire_out_take_branch),	// RM
-    .co_ret_target_pc(retire_reg_NPC),			// RM
+    .co_ret_valid_inst(retire_inst_busy),		// ret_branch_inst.en
+    .co_ret_take_branch(rob_retire_out_take_branch),	// ret_branch_inst.taken
+    .co_ret_target_pc(retire_reg_NPC),			// 
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
+    .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
+    .if_bp_NPC_valid(if_bp_NPC_valid).
 
     // Outputs
     .if_NPC_out(if_fetch_NPC_out), 
@@ -411,12 +413,12 @@ logic if_fetch_NPC_out;
 		if_branch_inst.cond = 1'b0;
 		if_branch_inst.direct = 1'b0;
 		if_branch_inst.return = 1'b0;
-		if_branch_inst.pc = 32'h0;
+		if_branch_inst.pc = 64'h0;
 		if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
 		if_branch_inst.prediction = 0;
 		if_branch_inst.taken = 0;
 
-		if(if_valid_inst_out) begin
+		if(if_valid_inst_out & dispatch_no_hazard & !ret_branch_inst.taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
 			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
@@ -471,7 +473,7 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 		.enable(enable),
 		
 		.if_en_branch(if_branch_inst.en),
-		.if_cond_branch(if_branch_inst.cond,
+		.if_cond_branch(if_branch_inst.cond),
 		.if_direct_branch(if_branch_inst.direct),
 		.if_return_branch(if_branch_inst.return), 
 		.if_pc_in(if_PC_reg),
@@ -483,7 +485,7 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 		.rt_pc(ret_branch_inst.pc),
 		.rt_branch_taken(ret_branch_inst.taken),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
-		.rt_calculated_pc(retire_reg_NPC),			// Get value from retire_reg_NPC
+		.rt_calculated_pc(retire_reg_NPC),			// 
 		.rt_branch_index(ret_branch_inst.idx),		
 
 		// outputs 
@@ -507,18 +509,10 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 
 	);
 
+
   // Determine the next pc (from Fetch unit or from BP)
-	always_comb begin
-		// When prediction is incorrect, roll back
-		
+	assign if_NPC_out = if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
 
-
-		// No roll backk
-		if_NPC_out = if_fetch_NPC_out;
-		if(if_bp_NPC_valid) begin
-			if_NPC_out = if_bp_NPC; 
-		end
-	end
 
   //////////////////////////////////////////////////
   //                                              //
