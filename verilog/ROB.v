@@ -10,11 +10,14 @@ module ROB(
 		input 		   [`SS_SIZE-1:0] halt_in,
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
+		input [`SS_SIZE-1:0] [$clog2(`OBQ_SIZE)-1 : 0 ] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
 		input branch_not_taken,
 		input [`SS_SIZE-1:0][31:0] opcode,
 		input			take_branch,
-		input 			branch_valid,
+		//input 			branch_valid,    //***Heewoo
+		//: Replaced with di_branch_inst
+		input BR_SIG		di_branch_inst;		//***Heewoo
 		input [`SS_SIZE][4:0]	wr_idx,
 		input [`SS_SIZE][31:0]	npc,
 		input [63:0] co_alu_result,
@@ -112,16 +115,26 @@ module ROB(
 			retire_out[i].busy = 1'b0;
 			retire_out[i].opcode =  `NOOP_INST;
 			retire_out[i].take_branch = 1'b0;
-			retire_out[i].branch_valid = 1'b0;
+			//retire_out[i].branch_valid = 1'b0;
 			retire_out[i].wr_idx = `ZERO_REG;
 			retire_out[i].npc = 64'h0;
+	
+			retire_out[i].branch_inst.en 		= 1'b0;
+			retire_out[i].branch_inst.cond 		= 1'b0;
+			retire_out[i].branch_inst.direct 	= 1'b0;
+			retire_out[i].branch_inst.return 	= 1'b0;
+			retire_out[i].branch_inst.pc 		= 64'h0;
+			retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
+			retire_out[i].branch_inst.prediction 	= 0;
+			retire_out[i].branch_inst.taken 	= 0;
+
 		end
 
 		// update tag ready bits from CBD 
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
 			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
-			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_valid) ? 1:ROB_table[i].take_branch;
-			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_valid) ? co_alu_result : ROB_table[i].npc;
+			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROB_table[i].branch_inst.br_idx)) ? 1 : ROB_table[i].take_branch; // **** Heewoo changed for multiple branches
+			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROb_table[i].branch_inst.br_idx)) ? co_alu_result : ROB_table[i].npc; // **** Heewoo changed for multiple branches
 		end
 
 	// if(take_branch)	begin
@@ -154,9 +167,20 @@ module ROB(
 				retire_out[i].busy = 1'b0;
 				retire_out[i].opcode =  `NOOP_INST;
 				retire_out[i].take_branch = 1'b0;
-				retire_out[i].branch_valid = 1'b0;
+			//	retire_out[i].branch_valid = 1'b0;
 				retire_out[i].wr_idx = `ZERO_REG;
 				retire_out[i].npc = 64'h0;
+
+				retire_out[i].branch_inst.en 		= 1'b0;
+				retire_out[i].branch_inst.cond 		= 1'b0;
+				retire_out[i].branch_inst.direct 	= 1'b0;
+				retire_out[i].branch_inst.return 	= 1'b0;
+				retire_out[i].branch_inst.pc 		= 64'h0;
+				retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
+				retire_out[i].branch_inst.prediction 	= 0;
+				retire_out[i].branch_inst.taken 	= 0;
+
+
 			end
 	
 
@@ -187,7 +211,8 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].busy = 1'b1;
 				ROB_table_next[dispatch_idx[i]].opcode = opcode[i];
 				ROB_table_next[dispatch_idx[i]].take_branch = take_branch;
-				ROB_table_next[dispatch_idx[i]].branch_valid = branch_valid;
+				//ROB_table_next[dispatch_idx[i]].branch_valid = branch_valid;
+				ROB_table_next[dispatch_idx[i]].branch_inst = id_branch_inst; // What Heewoo Added 
 				ROB_table_next[dispatch_idx[i]].wr_idx = wr_idx[i];
 				ROB_table_next[dispatch_idx[i]].npc = npc[i];
 				dispatched[i] = 1'b1;
@@ -212,9 +237,21 @@ module ROB(
 				ROB_table[i].busy <= `SD 1'b0;	
 				ROB_table[i].opcode <= `SD `NOOP_INST;
 				ROB_table[i].take_branch <= `SD 1'b0;
-				ROB_table[i].branch_valid <= `SD 1'b0;
+				//ROB_table[i].branch_valid <= `SD 1'b0;
 				ROB_table[i].wr_idx <= `SD `ZERO_REG;
 				ROB_table[i].npc <= `SD 64'h0;
+
+				ROB_table[i].branch_inst.en 		= 1'b0;
+				ROB_table[i].branch_inst.cond 		= 1'b0;
+				ROB_table[i].branch_inst.direct 	= 1'b0;
+				ROB_table[i].branch_inst.return 	= 1'b0;
+				ROB_table[i].branch_inst.pc 		= 64'h0;
+				ROB_table[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
+				ROB_table[i].branch_inst.prediction 	= 0;
+				ROB_table[i].branch_inst.taken 	= 0;
+
+
+
 			end
 			tail <= `SD `ROB_SIZE-1;
 			head <= `SD `ROB_SIZE-1;
