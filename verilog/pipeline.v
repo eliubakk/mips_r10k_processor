@@ -797,6 +797,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .inst_in(id_di_inst_in), 
     .branch_not_taken(branch_not_taken), 
     .issue_stall(issue_stall),
+    .di_branch_inst_idx(id_di_branch_inst.br_idx),//*** Heewoo added to store branch index in RS
     
     // outputs
     .rs_table_out(rs_table_out), 
@@ -1335,7 +1336,7 @@ end
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
     //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
-    .di_branch_inst(id_di_branch_inst.en), // ***Heewoo
+    .di_branch_inst(id_di_branch_inst.en), // ***Heewoo added 
     .wr_idx(id_rdest_idx),
     .npc(id_inst_out.npc),
     .co_alu_result(co_alu_result_selected),

@@ -484,6 +484,7 @@ typedef struct packed{
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
   logic [$clog2(`SQ_SIZE) - 1:0] ld_pos;
+  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  //*****Heewoo :  Added for branch instruction
 } RS_ROW_T;
 
 const RS_ROW_T EMPTY_ROW = 
@@ -495,7 +496,9 @@ const RS_ROW_T EMPTY_ROW =
   1'b0,
   `NOOP_INST,
   64'b0,
-  `NULL_LD_POS
+  `NULL_LD_POS,
+  {$clog2(`OBQ_SIZE){0}}
+  
 };
 
 `endif
