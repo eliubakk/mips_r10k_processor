@@ -38,7 +38,7 @@ module vic_cache(
         set_index_table_next = set_index_table_out;
         vic_table_next = vic_table_out;
 
-        for (int i; i<4; i+=1) begin
+        for (int i = 0; i<4; i+=1) begin
             set_index_table_temp[i]=set_index_table_out[i][`NUM_SET_BITS-1:0];
             vic_table_out_temp[i] = vic_table_out[i].tag;
         end
@@ -78,7 +78,7 @@ module vic_cache(
         .TAG_SIZE(`NUM_TAG_BITS))
 
     cam0(
-        .enable(1),
+        .enable(1'b1),
         .tags(tag_cam),
         .table_in(vic_table_out_temp),
         .hits(vic_table_hits));
@@ -90,7 +90,7 @@ module vic_cache(
         .TAG_SIZE(`NUM_SET_BITS))
         
     cam1(
-        .enable(1),
+        .enable(1'b1),
         .tags(set_index_cam),
         .table_in(set_index_table_temp),
         .hits(set_index_table_hits));
