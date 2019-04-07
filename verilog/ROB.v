@@ -10,6 +10,7 @@ module ROB(
 		input 		   [`SS_SIZE-1:0] halt_in,
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
+		input						CDB_br_valid, // ** Heewoo added ,need a way to deal with multiple branches
 		input [`SS_SIZE-1:0] [$clog2(`OBQ_SIZE)-1 : 0 ] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
 		input branch_not_taken,
@@ -122,7 +123,7 @@ module ROB(
 			retire_out[i].branch_inst.en 		= 1'b0;
 			retire_out[i].branch_inst.cond 		= 1'b0;
 			retire_out[i].branch_inst.direct 	= 1'b0;
-			retire_out[i].branch_inst.return 	= 1'b0;
+			retire_out[i].branch_inst.ret	 	= 1'b0;
 			retire_out[i].branch_inst.pc 		= 64'h0;
 			retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
 			retire_out[i].branch_inst.prediction 	= 0;
@@ -174,7 +175,7 @@ module ROB(
 				retire_out[i].branch_inst.en 		= 1'b0;
 				retire_out[i].branch_inst.cond 		= 1'b0;
 				retire_out[i].branch_inst.direct 	= 1'b0;
-				retire_out[i].branch_inst.return 	= 1'b0;
+				retire_out[i].branch_inst.ret	 	= 1'b0;
 				retire_out[i].branch_inst.pc 		= 64'h0;
 				retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
 				retire_out[i].branch_inst.prediction 	= 0;
@@ -244,7 +245,7 @@ module ROB(
 				ROB_table[i].branch_inst.en 		<= `SD 1'b0;
 				ROB_table[i].branch_inst.cond 		<= `SD 1'b0;
 				ROB_table[i].branch_inst.direct 	<= `SD 1'b0;
-				ROB_table[i].branch_inst.return 	<= `SD 1'b0;
+				ROB_table[i].branch_inst.ret	 	<= `SD 1'b0;
 				ROB_table[i].branch_inst.pc 		<= `SD 64'h0;
 				ROB_table[i].branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 				ROB_table[i].branch_inst.prediction 	<= `SD 0;

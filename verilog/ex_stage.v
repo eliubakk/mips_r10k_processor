@@ -356,7 +356,7 @@ module ex_stage(
   );
 
   
-    alu alu_branch (// Inputs                //    *******LOAD AND STORE**********
+    alu alu_branch (// Inputs                //    *******BRANCH**********
     .opa(opa_mux_out[4]),
     .opb(opb_mux_out[4]),
     .func(issue_reg[4].inst.alu_func),

@@ -380,6 +380,7 @@ BR_SIG ex_co_branch_inst;
 BR_SIG co_branch_inst;
 BR_SIG co_ret_branch_inst;
 BR_SIG ret_branch_inst;
+
 logic [63:0] if_PC_reg;
 logic ret_pred_correct;
 
@@ -387,6 +388,9 @@ logic if_bp_NPC_valid;
 logic [63:0] if_bp_NPC;
 
 logic if_fetch_NPC_out;
+
+logic [$clog2(`OBQ_SIZE)-1 : 0] ex_co_branch_index, co_branch_index;
+logic [63:0]	ex_co_branch_target, co_branch_target;
 
 
  if_stage if_stage_0 (
@@ -401,7 +405,7 @@ logic if_fetch_NPC_out;
     .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
     .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
-    .if_bp_NPC_valid(if_bp_NPC_valid).
+    .if_bp_NPC_valid(if_bp_NPC_valid),
 
     // Outputs
     .if_NPC_out(if_fetch_NPC_out), 
@@ -418,7 +422,7 @@ logic if_fetch_NPC_out;
 		if_branch_inst.en = 1'b0;
 		if_branch_inst.cond = 1'b0;
 		if_branch_inst.direct = 1'b0;
-		if_branch_inst.return = 1'b0;
+		if_branch_inst.ret = 1'b0;
 		if_branch_inst.pc = 64'h0;
 		if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
 		if_branch_inst.prediction = 0;
@@ -428,18 +432,18 @@ logic if_fetch_NPC_out;
 			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
-				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST. `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
+				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST, `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
 					if_branch_inst.en = 1'b1;
 					if_branch_inst.cond = 1'b1;
 					if_branch_inst.direct = 1'b1;
-					if_branch_inst.return = 1'b0;
+					if_branch_inst.ret = 1'b0;
 				end
 				//UNCOND & DIRECT
 				`BR_INST, `BSR_INST : begin
 					if_branch_inst.en = 1'b1;
 					if_branch_inst.cond = 1'b0;
 					if_branch_inst.direct = 1'b1;
-					if_branch_inst.return = 1'b0;
+					if_branch_inst.ret = 1'b0;
 				end
 				// UNCOND & INDIRECT
 				`JSR_GRP begin
@@ -449,14 +453,14 @@ logic if_fetch_NPC_out;
 							if_branch_inst.en = 1'b1;
 							if_branch_inst.cond = 1'b0;
 							if_branch_inst.direct = 1'b0;
-							if_branch_inst.return = 1'b0;
+							if_branch_inst.ret = 1'b0;
 						end
 					// RETURN
 						`RET_INST : begin
 							if_branch_inst.en = 1'b1;
 							if_branch_inst.cond = 1'b0;
 							if_branch_inst.direct = 1'b0;
-							if_branch_inst.return = 1'b1;
+							if_branch_inst.ret = 1'b1;
 						end
 					endcase
 				end			
@@ -481,13 +485,13 @@ assign ret_pred_correct = ret_branch_inst.taken & ret_branch_inst.prediction;
 		.if_en_branch(if_branch_inst.en),
 		.if_cond_branch(if_branch_inst.cond),
 		.if_direct_branch(if_branch_inst.direct),
-		.if_return_branch(if_branch_inst.return), 
+		.if_return_branch(if_branch_inst.ret), 
 		.if_pc_in(if_PC_reg),
 
 		.rt_en_branch(ret_branch_inst.en),			//Get value from retire_inst_busy
 		.rt_cond_branch(ret_branch_inst.cond),			
 		.rt_direct_branch(ret_branch_inst.direct),		 
-		.rt_return_branch(ret_branch_inst.return),
+		.rt_return_branch(ret_branch_inst.ret),
 		.rt_pc(ret_branch_inst.pc),
 		.rt_branch_taken(ret_branch_inst.taken),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
@@ -538,7 +542,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	if_id_branch_inst.en 		<= `SD 1'b0;
 	if_id_branch_inst.cond 		<= `SD 1'b0;
 	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.return 	<= `SD 1'b0;
+	if_id_branch_inst.ret		<= `SD 1'b0;
 	if_id_branch_inst.pc 		<= `SD 64'h0;
 	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	if_id_branch_inst.prediction 	<= `SD 0;
@@ -568,7 +572,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	if_id_branch_inst.en 		<= `SD 1'b0;
 	if_id_branch_inst.cond 		<= `SD 1'b0;
 	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.return 	<= `SD 1'b0;
+	if_id_branch_inst.re	t 	<= `SD 1'b0;
 	if_id_branch_inst.pc 		<= `SD 64'h0;
 	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	if_id_branch_inst.prediction 	<= `SD 0;
@@ -723,7 +727,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
  	id_di_branch_inst.en 		<= `SD 1'b0;
 	id_di_branch_inst.cond 		<= `SD 1'b0;
 	id_di_branch_inst.direct 	<= `SD 1'b0;
-	id_di_branch_inst.return 	<= `SD 1'b0;
+	id_di_branch_inst.ret	 	<= `SD 1'b0;
 	id_di_branch_inst.pc 		<= `SD 64'h0;
 	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	id_di_branch_inst.prediction 	<= `SD 0;
@@ -761,7 +765,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	id_di_branch_inst.en 		<= `SD 1'b0;
 	id_di_branch_inst.cond 		<= `SD 1'b0;
 	id_di_branch_inst.direct 	<= `SD 1'b0;
-	id_di_branch_inst.return 	<= `SD 1'b0;
+	id_di_branch_inst.ret	 	<= `SD 1'b0;
 	id_di_branch_inst.pc 		<= `SD 64'h0;
 	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	id_di_branch_inst.prediction 	<= `SD 0;
@@ -1069,9 +1073,8 @@ end
        			ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
        			   //ex_co_rega         <= `SD is_ex_T1_value[2];        //only for the load-store alu
        			   // these are results of EX stage
-     		        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
-	
-	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
+     		        ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];
+			end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
           		ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
        			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
@@ -1081,7 +1084,7 @@ end
        			ex_co_illegal[3]      <= `SD ex_mult_reg[2].inst.illegal;
        			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
-     		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3];  
+     		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3]; 
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
     end // for loop end
@@ -1091,9 +1094,13 @@ end
     if (reset | branch_not_taken) begin
      // ex_co_done <= `SD 0;
       ex_co_take_branch  <= `SD 0;
+      ex_co_branch_index <= `SD {$clog2(`OBQ_ROW){0}};
+      ex_co_branch_target <= `SD 0;
     end else if(ex_co_enable[4]) begin
      
       ex_co_take_branch  <= `SD ex_take_branch_out;
+      ex_co_branch_index <= `SD issue_reg[4].br_idx;
+      ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end 
 		//ex_co_done <= `SD 0;
 
@@ -1202,10 +1209,18 @@ end
             co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
            // co_take_branch_selected       =    ex_co_take_branch[i];
             co_alu_result_selected        =    ex_co_alu_result[i];
-             if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
+             /*if(ex_co_IR[i] == 6'h18 )   co_branch_valid =    1;            // To check whether the inst is branch or not
              else                  co_branch_valid =    0;  
              if(i == 4)  co_take_branch_selected = ex_co_take_branch;
-             else        co_take_branch_selected = 0;  
+             else        co_take_branch_selected = 0;  */
+		if(i == 4) begin // For branch
+			co_branch_valid = ex_co_valid_inst[4];
+			co_take_branch_selected = ex_co_take_branch;
+			co_branch_index = ex_co_branch_index;
+			co_branch_target = ex_co_branch_target;
+		end else begin
+
+		end	
           end
         end         
       end else begin
@@ -1222,10 +1237,11 @@ end
     end
    
       
-    
-   
+  // For branch 
 
-  assign co_branch_prediction = (co_take_branch_selected  == bp_output) ? 1:0 ;// Branch prediction or misprediction
+   
+  //assign co_branch_prediction = (co_take_branch_selected  == bp_output) ? 1:0 ;// Branch prediction or misprediction
+  
   assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
   
   //Instantiated the CDB
@@ -1329,7 +1345,8 @@ end
   	.T_new_in(fr_free_reg_T), // Comes from Free List During Dispatch
   	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
-	.CDB_br_idx(), // ******Heewoo, comes from CDB during commit, branch index
+	.CDB_br_valid(co_branch_valid),// ****Heewoo, branch valid signal
+	.CDB_br_idx(co_branch_index), // ******Heewoo, comes from CDB during commit, branch index
   	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
 	  .halt_in(id_inst_out.inst.halt),
@@ -1379,6 +1396,16 @@ always_ff @ (posedge clock) begin
 		rob_retire_out_take_branch <= `SD 0;
 		rob_retire_out_T_new <= `SD `DUMMY_REG;
 		rob_retire_out_T_old <= `SD `DUMMY_REG;
+	
+	ret_branch_inst.en 		<= `SD 1'b0;
+	ret_branch_inst.cond 		<= `SD 1'b0;
+	ret_branch_inst.direct 	<= `SD 1'b0;
+	ret_branch_inst.ret 	<= `SD 1'b0;
+	ret_branch_inst.pc 		<= `SD 64'h0;
+	ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+	ret_branch_inst.prediction 	<= `SD 0;
+	ret_branch_inst.taken 	<= `SD 0;
+
 
 	end else begin 
 		retire_inst_busy <= rob_retire_out.busy;
@@ -1390,6 +1417,17 @@ always_ff @ (posedge clock) begin
     		rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
 		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
+		
+		if(rob_retire_out.branch_inst.en) begin // For branch retire
+			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
+			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;
+			ret_branch_inst.direct	<= `SD rob_retire_out.branch_inst.direct;
+			ret_branch_inst.ret	<= `SD rob_retire_out.branch_inst.ret;
+			ret_branch_inst.pc	<= `SD rob_retire_out.branch_inst.pc;
+			ret_branch_inst.br_idx	<= `SD rob_retire_out.branch_inst.br_idx;
+			ret_branch_inst.prediction <= `SD rob_retire_out.branch_inst.prediction;
+			ret_branch_inst.taken	<= `SD rob_retire_out.branch_inst.taken;
+ 		end
 	end
   end
 
