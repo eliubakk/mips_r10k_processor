@@ -183,6 +183,7 @@ module cachemem(
 						temp_idx += (acc / 2);
 					end else begin
 						next_bst_idx = (2 * next_bst_idx) + 1;
+						temp_idx -= (acc / 2);
 					end
 					acc /= 2;
 				end
