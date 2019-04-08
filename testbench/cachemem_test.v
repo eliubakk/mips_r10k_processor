@@ -14,7 +14,8 @@ module testbench;
 	// initialize wires
 
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_test;
-	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_test;
+	logic [(`NUM_SETS - 1):0] [( (`NUM_WAYS == 1) ? 0 : (`NUM_WAYS - 2)  ):0] bst_test;
+	// logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_test;
 	int index_to_write;
 	
 	// input wires
@@ -22,12 +23,12 @@ module testbench;
 	logic clock;
 	logic reset;
 	logic wr1_en;
-	logic [4:0] wr1_idx;
-	logic [7:0] wr1_tag;
+	logic [(`NUM_SET_BITS - 1):0] wr1_idx;
+	logic [(`NUM_TAG_BITS - 1):0] wr1_tag;
 	logic [63:0] wr1_data;
 	logic rd1_en;
-	logic [4:0] rd1_idx;
-	logic [7:0] rd1_tag;
+	logic [(`NUM_SET_BITS - 1):0] rd1_idx;
+	logic [(`NUM_TAG_BITS - 1):0] rd1_tag;
 	
 	// output wires
 
@@ -35,8 +36,8 @@ module testbench;
 	logic rd1_valid;
 	
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_out;
-	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out;
-
+	// logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out;
+	logic [(`NUM_SETS - 1):0] [( (`NUM_WAYS == 1) ? 0 : (`NUM_WAYS - 2)  ):0] bst_out;
 	// initialize module
 
 	`DUT(cachemem) c0(
@@ -329,6 +330,9 @@ module testbench;
 		$display("Testing Single Write...");
 
 		@(negedge clock);
+		$display("before");
+		display_cache;
+		display_cache_test;
 		reset = 0;
 		wr1_en = 1;
 		wr1_idx = (`NUM_SETS - 1);
@@ -341,6 +345,7 @@ module testbench;
 
 		@(posedge clock);
 		`DELAY;
+		$display("after");
 		check_correct_test;
 
 		$display("Single Write Passed");

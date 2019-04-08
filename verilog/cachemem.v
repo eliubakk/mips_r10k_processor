@@ -11,7 +11,8 @@ module cachemem(
 
 	`ifdef DEBUG
 		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
-		output logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out,
+		output logic [(`NUM_SETS - 1):0] [( (`NUM_WAYS == 1) ? 0 : (`NUM_WAYS - 2)  ):0] bst_out,
+		// output logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out,
 	`endif
 
 	// victim cache outputs
@@ -39,9 +40,13 @@ module cachemem(
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets;
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_next;
 
+	logic [(`NUM_SETS - 1):0] [( (`NUM_WAYS == 1) ? 0 : (`NUM_WAYS - 2)  ):0] bst;
+	logic [(`NUM_SETS - 1):0] [( (`NUM_WAYS == 1) ? 0 : (`NUM_WAYS - 2)  ):0] bst_next;
+
+	/*
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst; 
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_next;
-
+	*/ 
 	logic [($clog2(`NUM_WAYS - 1) - 1):0] next_bst_idx;
 	logic [($clog2(`NUM_WAYS) - 1):0] acc; 
 
