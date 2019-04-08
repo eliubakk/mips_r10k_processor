@@ -7,7 +7,8 @@ module cachemem(
         input clock, reset, wr1_en, rd1_en,
         input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx,
         input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag,
-        input [63:0] wr1_data, 
+        input [63:0] wr1_data,
+	input wr1_dirty, 
 
 	`ifdef DEBUG
 		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
@@ -167,7 +168,7 @@ module cachemem(
 					acc /= 2;
 				end
 			end
-			sets_next[wr1_idx].cache_lines[tag_idx_write].dirty = 1;
+			sets_next[wr1_idx].cache_lines[tag_idx_write].dirty = wr1_dirty;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;

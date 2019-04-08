@@ -25,6 +25,7 @@ module testbench;
 	logic [4:0] wr1_idx;
 	logic [7:0] wr1_tag;
 	logic [63:0] wr1_data;
+	logic wr1_dirty;
 	logic rd1_en;
 	logic [4:0] rd1_idx;
 	logic [7:0] rd1_tag;
@@ -46,6 +47,7 @@ module testbench;
 		.wr1_idx(wr1_idx),
 		.wr1_tag(wr1_tag),
 		.wr1_data(wr1_data),
+		.wr1_dirty(wr1_dirty),
 		.rd1_en(rd1_en),
 		.rd1_idx(rd1_idx),
 		.rd1_tag(rd1_tag),
@@ -280,7 +282,7 @@ module testbench;
 				end
 			end
 
-			sets_test[wr1_idx].cache_lines[idx_write].dirty = 1;
+			sets_test[wr1_idx].cache_lines[idx_write].dirty = wr1_dirty;
 			sets_test[wr1_idx].cache_lines[idx_write].valid = 1;
 			sets_test[wr1_idx].cache_lines[idx_write].data = wr1_data;
 			sets_test[wr1_idx].cache_lines[idx_write].tag = wr1_tag;
@@ -296,7 +298,7 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, rd1_idx, rd1_tag, rd1_data, rd1_valid);
+		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid);
 		
 		// intial values
 		clock = 0;
@@ -305,6 +307,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -317,6 +320,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -337,6 +341,7 @@ module testbench;
 		wr1_idx = (`NUM_SETS - 1);
 		wr1_tag = 4;
 		wr1_data = 69;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -356,6 +361,7 @@ module testbench;
 		wr1_idx = (`NUM_SETS - 1);
 		wr1_tag = 5;
 		wr1_data = 100;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -375,6 +381,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -393,6 +400,7 @@ module testbench;
 				wr1_idx = i;
 				wr1_tag = j;
 				wr1_data = i*j;
+				wr1_dirty = 0;
 				rd1_en = 0;
 				rd1_idx = 0;
 				rd1_tag = 0;
@@ -414,6 +422,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		wr1_dirty = 0;
 		rd1_en = 1;
 		rd1_idx = (`NUM_SETS - 1);
 		rd1_tag = 1;
@@ -437,6 +446,7 @@ module testbench;
 				wr1_idx = 0;
 				wr1_tag = 0;
 				wr1_data = 0;
+				wr1_dirty = 0;
 				rd1_en = 1;
 				rd1_idx = i;
 				rd1_tag = j;
@@ -460,6 +470,7 @@ module testbench;
 		wr1_idx = (`NUM_SETS - 1);
 		wr1_tag = 1;
 		wr1_data = 999;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -479,6 +490,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 0;
+		wr1_dirty = 0;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
@@ -498,6 +510,7 @@ module testbench;
 					wr1_idx = j;
 					wr1_tag = k;
 					wr1_data = $urandom_range(999, 0);
+					wr1_dirty = $urandom_range(1, 0);
 					rd1_en = 0;
 					rd1_idx = 0;
 					rd1_tag = 0;
@@ -520,6 +533,7 @@ module testbench;
 		wr1_idx = 0;
 		wr1_tag = 0;
 		wr1_data = 6969;
+		wr1_dirty = 0;
 		rd1_en = 1;
 		rd1_idx = 0;
 		rd1_tag = 0;
