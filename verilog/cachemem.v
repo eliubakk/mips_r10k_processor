@@ -107,9 +107,6 @@ module cachemem(
 	assign rd1_valid = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? 1'b1 : 
 				(|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
 
-//	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
-//	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
-
 	assign vic_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
 	assign victim = sets[wr1_idx].cache_lines[tag_idx_write];
 
@@ -170,6 +167,7 @@ module cachemem(
 					acc /= 2;
 				end
 			end
+			sets_next[wr1_idx].cache_lines[tag_idx_write].dirty = 1;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;
@@ -205,6 +203,7 @@ module cachemem(
 					sets[i].cache_lines[j].data <= `SD 0;
 					sets[i].cache_lines[j].tag <= `SD 0;
 					sets[i].cache_lines[j].valid <= `SD 0;
+					sets[i].cache_lines[j].dirty <= `SD 0;
 				end
 				bst[i] <= `SD 0;
 			end

@@ -120,6 +120,7 @@ module testbench;
 			for (int i = 0; i < `NUM_SETS; ++i) begin
 				for (int j = 0; j < `NUM_WAYS; ++j) begin
 					assert(sets_out[i].cache_lines[j].valid == 0) else #1 exit_on_error;
+					assert(sets_out[i].cache_lines[j].dirty == 0) else #1 exit_on_error;
 				end
 				assert(bst_out[i] == 0) else #1 exit_on_error;
 			end
@@ -136,6 +137,7 @@ module testbench;
 				if (set.cache_lines[i].valid) begin
 					if (line.tag == set.cache_lines[i].tag) begin
 						assert(line.data == set.cache_lines[i].data) else #1 exit_on_error;
+						assert(line.dirty == set.cache_lines[i].dirty) else #1 exit_on_error;
 					found = 1;
 					end
 				end
@@ -278,6 +280,7 @@ module testbench;
 				end
 			end
 
+			sets_test[wr1_idx].cache_lines[idx_write].dirty = 1;
 			sets_test[wr1_idx].cache_lines[idx_write].valid = 1;
 			sets_test[wr1_idx].cache_lines[idx_write].data = wr1_data;
 			sets_test[wr1_idx].cache_lines[idx_write].tag = wr1_tag;
