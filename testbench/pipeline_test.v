@@ -96,6 +96,10 @@ module testbench;
   logic [`NUM_FU_TOTAL-1:0][63:0] issue_next_npc;
   logic [`NUM_FU_TOTAL-1:0][31:0] issue_next_inst_opcode;
   logic [`NUM_FU_TOTAL-1:0]       issue_next_valid_inst;
+  logic mem_co_valid_inst;   
+  logic [63:0] mem_co_NPC ;        
+  logic [31:0] mem_co_IR ;         
+ 
   int pipe_counter; 
   int copy_pipe_counter;
   // Instantiate the Pipeline
@@ -539,7 +543,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 1000) begin
+			 if (clock_count == 100) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
