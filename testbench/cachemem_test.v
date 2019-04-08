@@ -509,30 +509,29 @@ module testbench;
 
 		$display("Multiple Over-Write Passed");
 
-		$display("Testing Single Pseudo-LRU Write...");
+		$display("Testing Reading and Writing Same Data...");
 
 		@(negedge clock);
-		reset = 1;
-		wr1_en = 0;
+		reset = 0;
+		wr1_en = 1;
 		wr1_idx = 0;
 		wr1_tag = 0;
-		wr1_data = 0;
-		rd1_en = 0;
+		wr1_data = 6969;
+		rd1_en = 1;
 		rd1_idx = 0;
 		rd1_tag = 0;
+		write_to_test;
+		read_from_test;
 
 		@(posedge clock);
+		assert(rd1_data == 6969) else #1 exit_on_error;
+		assert(rd1_valid == 1) else #1 exit_on_error;
 		`DELAY;
-		check_correct_reset;
-		sets_test = sets_out;
-		bst_test = bst_out;
+		check_correct_test;
+		assert(rd1_data == 6969) else #1 exit_on_error;
+		assert(rd1_valid == 1) else #1 exit_on_error;
 
-		@(negedge clock);
-
-		@(posedge clock);
-		`DELAY;
-
-		$display("Single Pseudo-LRU Write Passed");
+		$display("Reading and Writing Same Data Passed");
 
 		$display("@@@Passed");
 		$finish;

@@ -102,8 +102,13 @@ module cachemem(
 	// assign statements
 	assign sets_out = sets;
 	assign bst_out = bst;
-	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
-	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
+
+	assign rd1_data = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? wr1_data : sets[rd1_idx].cache_lines[tag_idx_read].data;
+	assign rd1_valid = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? 1'b1 : 
+				(|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
+
+//	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
+//	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
 
 	assign vic_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
 	assign victim = sets[wr1_idx].cache_lines[tag_idx_write];
