@@ -15,6 +15,9 @@ module testbench;
 
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_test;
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_test;
+	logic miss_valid_rd_test;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd_test;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd_test;
 	int index_to_write;
 	
 	// input wires
@@ -31,6 +34,10 @@ module testbench;
 	logic [7:0] rd1_tag;
 	
 	// output wires
+
+	logic miss_valid_rd;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd;
 
 	logic [63:0] rd1_data;
 	logic rd1_valid;
@@ -54,6 +61,10 @@ module testbench;
 
 		.sets_out(sets_out),
 		.bst_out(bst_out),
+
+		.miss_valid_rd(miss_valid_rd),
+		.miss_idx_rd(miss_idx_rd),
+		.miss_tag_rd(miss_tag_rd),
 
 		.rd1_data(rd1_data),
 		.rd1_valid(rd1_valid)
@@ -241,7 +252,22 @@ module testbench;
 			end
 
 			if (found_read) begin
+				miss_valid_rd_test = 0;
 				update_bst_test(rd1_idx, idx_read);
+			end else begin
+				miss_valid_rd_test = 1;
+				miss_idx_rd_test = rd1_idx;
+				miss_tag_rd_test = rd1_tag;
+			end
+		end
+	endtask
+
+	task check_correct_read_miss;
+		begin
+			assert(miss_valid_rd_test == miss_valid_rd) else #1 exit_on_error;
+			if (miss_valid_rd) begin
+				assert(miss_idx_rd_test == rd1_idx) else #1 exit_on_error;
+				assert(miss_tag_rd_test == rd1_tag) else #1 exit_on_error;
 			end
 		end
 	endtask
@@ -298,7 +324,7 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid);
+		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd: %b miss_idx_rd: %d miss_tag_rd: %d", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd, miss_idx_rd, miss_tag_rd);
 		
 		// intial values
 		clock = 0;
@@ -433,6 +459,7 @@ module testbench;
 		assert(rd1_data == (rd1_tag * rd1_idx)) else #1 exit_on_error;
 		assert(rd1_valid == 1) else #1 exit_on_error;
 		check_correct_test;
+		check_correct_read_miss;
 
 		$display("Single Read Passed");
 
@@ -457,6 +484,7 @@ module testbench;
 				assert(rd1_data == i*j) else #1 exit_on_error;
 				assert(rd1_valid == 1) else #1 exit_on_error;
 				check_correct_test;
+				check_correct_read_miss;
 			end
 		end
 
@@ -545,10 +573,93 @@ module testbench;
 		assert(rd1_valid == 1) else #1 exit_on_error;
 		`DELAY;
 		check_correct_test;
+		check_correct_read_miss;
 		assert(rd1_data == 6969) else #1 exit_on_error;
 		assert(rd1_valid == 1) else #1 exit_on_error;
 
 		$display("Reading and Writing Same Data Passed");
+
+		$display("Testing Single Read Miss...");
+
+		@(negedge clock);
+		reset = 1;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		wr1_dirty = 0;
+		rd1_en = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		`DELAY;
+		reset = 0;
+		check_correct_reset;
+		sets_test = sets_out;
+		bst_test = bst_out;
+
+		for (int i = 0; i < `NUM_SETS; ++i) begin
+			for (int j = 0; j < `NUM_WAYS; ++j) begin
+				@(negedge clock); 
+				reset = 0;
+				wr1_en = 1;
+				wr1_idx = i;
+				wr1_tag = j;
+				wr1_data = i * j;
+				wr1_dirty = 0;
+				rd1_en = 0;
+				rd1_idx = 0;
+				rd1_tag = 0;
+				write_to_test;
+
+				@(posedge clock);
+				`DELAY;
+				check_correct_test;
+			end
+		end
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		wr1_dirty = 0;
+		rd1_en = 1;
+		rd1_idx = (`NUM_SETS - 1);
+		rd1_tag = `NUM_WAYS;
+		read_from_test;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_test;
+		check_correct_read_miss;
+
+		$display("Single Read Miss Passed");
+
+		$display("Testing Multiple Read Miss...");
+
+		for (int i = 0; i < 100; ++i) begin
+			@(negedge clock);
+			reset = 0;
+			wr1_en = 0;
+			wr1_idx = 0;
+			wr1_tag = 0;
+			wr1_data = 0;
+			wr1_dirty = 0;
+			rd1_en = 1;
+			rd1_idx = $urandom_range((`NUM_SETS - 1), 0);
+			rd1_tag = $urandom_range(999, 0);
+			read_from_test;
+	
+			@(posedge clock);
+			`DELAY;
+			check_correct_test;
+			check_correct_read_miss;
+		end
+
+		$display("Multiple Read Miss Passed");
 
 		$display("@@@Passed");
 		$finish;
