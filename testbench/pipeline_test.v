@@ -394,26 +394,38 @@ module testbench;
 
 	task display_cache;
 		begin
+			/*
 			$display("\nCache memory---------------------------------------------------------------------");
 			$display("inputs");
 			$display("wr1_en: %b wr1_idx: %h wr1_tag: %h wr1_data %h rd1_idx: %h rd1_tag: %h", pipeline_0.Icache_wr_en, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.mem2proc_data, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag);
 			$display("outputs");
 			$display("rd1_data: %d rd1_valid: %b", pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
 			$display("----------------------------------Cache Memory------------------------------------");
-			for (int p = 0; p < 32; ++p) begin
+			*/
+/*			for (int p = 0; p < 32; ++p) begin
 				$display("data[%d] = %h tags[%d] = %h valids[%d] = %b", p, pipeline_0.cachememory.data[p], p, pipeline_0.cachememory.tags[p], p, pipeline_0.cachememory.valids[p]);
 			end
+*//*
+			for (int i = 0 ; i < `NUM_SETS; ++i) begin
+				$display("Set: %d", i);
+				for (int j = 0; j < `NUM_WAYS; ++j) begin
+					$display("idx: %d data: %d tag: %d valid: %b dirty: %b", i, pipeline_0.cachememory.sets[i].cache_lines[j].data, pipeline_0.cachememory.sets[i].cache_lines[j].tag, pipeline_0.cachememory.sets[i].cache_lines[j].valid, pipeline_0.cachememory.sets[i].cache_lines[j].dirty);
+				end
+			end
 			$display("----------------------------------------------------------------------------------");
+*/
 		end
 	endtask
 
 	task display_icache;
 		begin
+/*
 			$display("\nicache--------------------------------------------------------------------------");
 			$display("inputs:");
 			$display("Imem2proc_response: %h, Imem2_proc_data: %h, Imem2proc_tag: %h, proc2Icache_addr: %h, cachemem_data: %h, cachemem_valid: %b", pipeline_0.Imem2proc_response, pipeline_0.mem2proc_data, pipeline_0.mem2proc_tag, pipeline_0.proc2Icache_addr, pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
 			$display("outputs:");
 			$display("proc2Imem_command: %d proc2Imem_addr: %h Icache_data_out: %h Icache_valid_out: %d current_index: %d current_tag: %d last_index: %d last_tag: %d data_write_enable: %b", pipeline_0.proc2Imem_command, pipeline_0.proc2Imem_addr, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.Icache_wr_en);
+*/
 		end
 	endtask
 
@@ -547,10 +559,10 @@ module testbench;
 			$display("Pipeline Assigns");
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
-			//display_cache;
-			//display_icache;
-			//display_if_stage;
-			// display_if_id;
+			display_cache;
+			display_icache;
+			display_if_stage;
+			display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
@@ -558,7 +570,7 @@ module testbench;
 			
 			//display_di_issue;
 			//display_RS_table;
-		display_ROB_table;
+		// display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
@@ -573,8 +585,8 @@ module testbench;
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 		//	display_co_re_registers;
 			//display_arch_table;
-			display_free_list_table;
-			display_arch_table;
+		//	display_free_list_table;
+		//	display_arch_table;
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;
