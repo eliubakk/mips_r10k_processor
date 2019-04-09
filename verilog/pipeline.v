@@ -707,9 +707,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   // if (fr_read_en) assign id_inst_out.T = fr_free_reg_T;
   // else            assign id_inst_out.T = `DUMMY_REG;
   
-  
+  //For ROB
   assign id_inst_out.inst_opcode = if_id_IR;
   assign id_inst_out.npc = if_id_NPC; 
+  assign di_branch_inst = id_di_branch_inst;	
 
   //////////////////////////////////////////////////
   //                                              //
@@ -1360,7 +1361,7 @@ end
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
     //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
-    .di_branch_inst(id_di_branch_inst.en), // ***Heewoo added 
+    .di_branch_inst(di_branch_inst), // ***Heewoo added 
     .wr_idx(id_rdest_idx),
     .npc(id_inst_out.npc),
     .co_alu_result(co_alu_result_selected),
