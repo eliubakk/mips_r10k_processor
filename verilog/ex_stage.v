@@ -379,7 +379,7 @@ module ex_stage(
 
    // ultimate "take branch" signal:
    //    unconditional, or conditional and the condition is true
-  assign ex_take_branch_out = issue_reg[4].inst.uncond_branch
-                              | (issue_reg[4].inst.cond_branch & brcond_result);
+  assign ex_take_branch_out = issue_reg[4].busy & (issue_reg[4].inst.uncond_branch
+                              | (issue_reg[4].inst.cond_branch & brcond_result));
 
 endmodule // module ex_stage

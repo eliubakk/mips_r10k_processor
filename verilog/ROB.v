@@ -133,9 +133,13 @@ module ROB(
 
 		// update tag ready bits from CBD 
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
-			ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
-			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROB_table[i].branch_inst.br_idx)) ? 1 : ROB_table[i].take_branch; // **** Heewoo changed for multiple branches
-			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_idx == ROB_table[i].branch_inst.br_idx)) ? co_alu_result : ROB_table[i].npc; // **** Heewoo changed for multiple branches
+			if(ROB_table[i].branch_inst.en) begin// When branch is retiring
+				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid;
+			end else begin
+				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
+			end
+			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx))) ? 1'b1 : ROB_table[i].take_branch; // **** Heewoo changed for multiple branches
+			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx))) ? co_alu_result : ROB_table[i].npc; // **** Heewoo changed for multiple branches
 		end
 
 	// if(take_branch)	begin
