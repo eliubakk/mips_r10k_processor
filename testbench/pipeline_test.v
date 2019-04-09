@@ -87,7 +87,7 @@ module testbench;
   logic dispatch_en;
   logic [4:0] is_ex_enable;
   logic [4:0]   ex_co_enable;
-  logic branch_not_taken;
+  logic ret_pred_incorrect;
   RS_ROW_T	[(`RS_SIZE-1):0]		rs_table_out;
   PHYS_REG		[`NUM_GEN_REG-1:0]	arch_table;
   ROB_ROW_T [`ROB_SIZE:1]		ROB_table_out;
@@ -169,7 +169,7 @@ module testbench;
     .dispatch_en(dispatch_en),
     .is_ex_enable(is_ex_enable),
     .ex_co_enable(ex_co_enable), 
-    .branch_not_taken(branch_not_taken)
+    .ret_pred_incorrect(ret_pred_incorrect)
   );
 
   // assign pipeline_commit_NPC = 64'h10;
@@ -316,7 +316,7 @@ module testbench;
 				$display("------------------------ROB TABLE----------------------------\n");
 
 			$display("INPUTS");
-			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b branch_not_taken: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.branch_not_taken);
+			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b ret_pred_incorrect: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.ret_pred_incorrect);
 			$display("OUTPUTS");
 			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
 			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
@@ -464,9 +464,9 @@ module testbench;
 	task display_di_issue;
 		begin
 			$display("\n di_issue stage---------------------------------------------------------");
-			$display("issue_stall: %b dispatch_en: %b branch_not_taken: %b RS_enable: %b", pipeline_0.issue_stall, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.RS_enable);
+			$display("issue_stall: %b dispatch_en: %b ret_pred_incorrect: %b RS_enable: %b", pipeline_0.issue_stall, pipeline_0.dispatch_en, pipeline_0.ret_pred_incorrect, pipeline_0.RS_enable);
 			$display("\n RESERVATION STATION INPUT WIRES---------------------------------------");
-			//$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
+			//$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b ret_pred_incorrect: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.ret_pred_incorrect, pipeline_0.issue_stall);
 			$display("\n INST GOING INTO RS");
 			display_inst(pipeline_0.id_di_inst_in);
 		end

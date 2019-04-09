@@ -101,7 +101,7 @@ typedef struct packed{
   logic [63:0] pc;	// Current pc, NOT NEXT PC!
   logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  
   logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
-  logic taken;		// 1: branch actual taken, 0: branch actual not taken
+  //logic taken;		// 1: branch actual taken, 0: branch actual not taken
   
 } BR_SIG;
 

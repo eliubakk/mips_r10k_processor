@@ -127,7 +127,7 @@ module ROB(
 			retire_out[i].branch_inst.pc 		= 64'h0;
 			retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
 			retire_out[i].branch_inst.prediction 	= 0;
-			retire_out[i].branch_inst.taken 	= 0;
+			//retire_out[i].branch_inst.taken 	= 0;
 
 		end
 
@@ -183,7 +183,7 @@ module ROB(
 				retire_out[i].branch_inst.pc 		= 64'h0;
 				retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
 				retire_out[i].branch_inst.prediction 	= 0;
-				retire_out[i].branch_inst.taken 	= 0;
+				//retire_out[i].branch_inst.taken 	= 0;
 
 
 			end
@@ -253,7 +253,7 @@ module ROB(
 				ROB_table[i].branch_inst.pc 		<= `SD 64'h0;
 				ROB_table[i].branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 				ROB_table[i].branch_inst.prediction 	<= `SD 0;
-				ROB_table[i].branch_inst.taken 		<= `SD 0;
+				//ROB_table[i].branch_inst.taken 		<= `SD 0;
 
 
 
