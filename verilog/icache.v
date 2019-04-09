@@ -2,7 +2,7 @@
 module icache(
     input   clock,
     input   reset,
-    input   [3:0] Imem2proc_response1,
+    input   [3:0] Imem2proc_response1,//what is this
     input   [3:0] Imem2proc_response ,
     input  [63:0] Imem2proc_data1,
     input  [63:0] Imem2proc_data,
