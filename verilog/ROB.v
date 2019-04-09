@@ -17,8 +17,8 @@ module ROB(
 		input [`SS_SIZE-1:0][31:0] opcode,
 		input			take_branch,
 		//input 			branch_valid,    //***Heewoo
-		//: Replaced with di_branch_inst
-		input BR_SIG		di_branch_inst,		//***Heewoo
+		//: Replaced with id_branch_inst
+		input BR_SIG		id_branch_inst,		//***Heewoo
 		input [`SS_SIZE][4:0]	wr_idx,
 		input [`SS_SIZE][31:0]	npc,
 		input [63:0] co_alu_result,
@@ -133,8 +133,8 @@ module ROB(
 
 		// update tag ready bits from CBD 
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
-			if(ROB_table[i].branch_inst.en) begin// When branch is retiring
-				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid;
+			if(ROB_table[i].branch_inst.en) begin// When branch is broadcasting
+				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i])/*& CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx)*/;
 			end else begin
 				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
 			end
@@ -217,7 +217,7 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].opcode = opcode[i];
 				ROB_table_next[dispatch_idx[i]].take_branch = take_branch;
 				//ROB_table_next[dispatch_idx[i]].branch_valid = branch_valid;
-				ROB_table_next[dispatch_idx[i]].branch_inst = di_branch_inst; // What Heewoo Added 
+				ROB_table_next[dispatch_idx[i]].branch_inst = id_branch_inst; // What Heewoo Added 
 				ROB_table_next[dispatch_idx[i]].wr_idx = wr_idx[i];
 				ROB_table_next[dispatch_idx[i]].npc = npc[i];
 				dispatched[i] = 1'b1;

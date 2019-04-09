@@ -710,7 +710,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //For ROB
   assign id_inst_out.inst_opcode = if_id_IR;
   assign id_inst_out.npc = if_id_NPC; 
-  assign di_branch_inst = id_di_branch_inst;	
+  assign id_branch_inst = if_id_branch_inst;	
 
   //////////////////////////////////////////////////
   //                                              //
@@ -1250,7 +1250,8 @@ end
    
   //assign co_branch_prediction = (co_take_branch_selected  == bp_output) ? 1:0 ;// Branch prediction or misprediction
   
-  assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
+  assign CDB_enable = psel_enable; 
+  //assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
   
   //Instantiated the CDB
   CDB CDB_0(
@@ -1361,7 +1362,7 @@ end
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
     //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
-    .di_branch_inst(di_branch_inst), // ***Heewoo added 
+    .id_branch_inst(id_branch_inst), // ***Heewoo added 
     .wr_idx(id_rdest_idx),
     .npc(id_inst_out.npc),
     .co_alu_result(co_alu_result_selected),
