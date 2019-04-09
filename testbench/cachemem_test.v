@@ -18,22 +18,37 @@ module testbench;
 	logic miss_valid_rd_test;
 	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd_test;
 	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd_test;
+	logic miss_valid_wr_test;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr_test;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr_test;
 	int index_to_write;
+
+	logic victim_valid_test;
+	CACHE_LINE_T victim_test;
+	logic [(`NUM_SET_BITS - 1):0] vic_idx_test;
 	
 	// input wires
 
 	logic clock;
 	logic reset;
 	logic wr1_en;
-	logic [4:0] wr1_idx;
-	logic [7:0] wr1_tag;
+	logic [(`NUM_SET_BITS - 1):0] wr1_idx;
+	logic [(`NUM_TAG_BITS - 1):0] wr1_tag;
 	logic [63:0] wr1_data;
 	logic wr1_dirty;
 	logic rd1_en;
-	logic [4:0] rd1_idx;
-	logic [7:0] rd1_tag;
+	logic [(`NUM_SET_BITS - 1):0] rd1_idx;
+	logic [(`NUM_TAG_BITS - 1):0] rd1_tag;
 	
 	// output wires
+
+	logic victim_valid;
+	CACHE_LINE_T victim;
+	logic [(`NUM_SET_BITS - 1):0] vic_idx;
+
+	logic miss_valid_wr;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr;
 
 	logic miss_valid_rd;
 	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd;
@@ -61,6 +76,14 @@ module testbench;
 
 		.sets_out(sets_out),
 		.bst_out(bst_out),
+
+		.victim_valid(victim_valid),
+		.victim(victim),
+		.vic_idx(vic_idx),
+
+		.miss_valid_wr(miss_valid_wr),
+		.miss_idx_wr(miss_idx_wr),
+		.miss_tag_wr(miss_tag_wr),
 
 		.miss_valid_rd(miss_valid_rd),
 		.miss_idx_rd(miss_idx_rd),
@@ -195,12 +218,33 @@ module testbench;
 		end
 	endtask
 
+	task check_correct_write_miss;
+		begin
+			assert(miss_valid_wr_test == miss_valid_wr) else #1 exit_on_error;
+			if (miss_valid_wr) begin
+				assert(miss_idx_wr_test == wr1_idx) else #1 exit_on_error;
+				assert(miss_tag_wr_test == wr1_tag) else #1 exit_on_error;
+			end
+		end
+	endtask
+
+	task check_correct_victim;
+		begin
+			assert(victim_valid == victim_valid_test) else #1 exit_on_error;
+			if (victim_valid) begin
+				assert(victim == victim_test) else #1 exit_on_error;
+				assert(vic_idx == vic_idx_test) else #1 exit_on_error;
+			end
+		end
+	endtask
+
 	task check_correct_test;
 		begin
 			for (int i = 0; i < `NUM_SETS; ++i) begin
 				check_equal_set(sets_out[i], sets_test[i]);
 				assert(bst_out[i] == bst_test[i]) else #1 exit_on_error;
 			end
+			check_correct_victim;
 		end
 	endtask
 
@@ -283,6 +327,12 @@ module testbench;
 			int depth_write = $clog2(`NUM_WAYS);
 			acc_write  = `NUM_WAYS;
 
+			victim_valid_test = 0;
+
+			miss_valid_wr_test = 0;
+			miss_idx_wr_test = 0;
+			miss_tag_wr_test = 0;
+
 			found_write = 0;
 			idx_write = 0;
 			next_idx = 0;
@@ -296,6 +346,10 @@ module testbench;
 			end
 
 			if (!found_write) begin
+				miss_valid_wr_test = 1;
+				miss_idx_wr_test = wr1_idx;
+				miss_tag_wr_test = wr1_tag;
+
 				idx_write = 0;
 				for (int i = 0; i < depth_write; ++i) begin
 					if (bst_test[wr1_idx][next_idx] == 1) begin
@@ -306,6 +360,10 @@ module testbench;
 					end
 					acc_write /= 2;
 				end
+
+				victim_valid_test = sets_test[wr1_idx].cache_lines[idx_write].valid;
+				victim_test = sets_test[wr1_idx].cache_lines[idx_write];
+				vic_idx_test = wr1_idx;
 			end
 
 			sets_test[wr1_idx].cache_lines[idx_write].dirty = wr1_dirty;
@@ -324,7 +382,7 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd: %b miss_idx_rd: %d miss_tag_rd: %d", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd, miss_idx_rd, miss_tag_rd);
+		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd: %b miss_idx_rd: %d miss_tag_rd: %d miss_valid_wr: %b miss_idx_wr: %d miss_tag_wr: %d victim_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd, miss_idx_rd, miss_tag_rd, miss_valid_wr, miss_idx_wr, miss_tag_wr, victim_valid);
 		
 		// intial values
 		clock = 0;
@@ -374,6 +432,7 @@ module testbench;
 		write_to_test;
 
 		@(posedge clock);
+		check_correct_write_miss;
 		`DELAY;
 		check_correct_test;
 
@@ -394,6 +453,7 @@ module testbench;
 		write_to_test;
 
 		@(posedge clock);
+		check_correct_write_miss;
 		`DELAY;
 		check_correct_test;
 
@@ -433,6 +493,7 @@ module testbench;
 				write_to_test;
 
 				@(posedge clock);
+				check_correct_write_miss;
 				`DELAY
 				check_correct_test;
 			end
@@ -505,6 +566,7 @@ module testbench;
 		write_to_test;
 
 		@(posedge clock);
+		check_correct_write_miss;
 		`DELAY;
 		check_correct_test;
 
@@ -545,6 +607,7 @@ module testbench;
 					write_to_test;
 
 					@(posedge clock);
+					check_correct_write_miss;
 					`DELAY;
 					check_correct_test;
 				end
@@ -569,6 +632,7 @@ module testbench;
 		read_from_test;
 
 		@(posedge clock);
+		check_correct_write_miss;
 		assert(rd1_data == 6969) else #1 exit_on_error;
 		assert(rd1_valid == 1) else #1 exit_on_error;
 		`DELAY;
@@ -614,6 +678,7 @@ module testbench;
 				write_to_test;
 
 				@(posedge clock);
+				check_correct_write_miss;
 				`DELAY;
 				check_correct_test;
 			end

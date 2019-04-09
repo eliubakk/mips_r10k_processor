@@ -30,7 +30,7 @@ module cachemem(
 
         output logic [63:0] rd1_data,
         output logic rd1_valid 
-      );
+);
 
 	// given addr, find set index
 	// cam through the tags in that set for match
@@ -108,8 +108,9 @@ module cachemem(
 	assign rd1_valid = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? 1'b1 : 
 				(|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
 
-	assign vic_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
+	assign victim_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
 	assign victim = sets[wr1_idx].cache_lines[tag_idx_write];
+	assign vic_idx = wr1_idx;
 
 	assign miss_idx_rd = rd1_idx;
 	assign miss_tag_rd = rd1_tag;
