@@ -387,7 +387,7 @@ logic ret_pred_correct;
 logic if_bp_NPC_valid;
 logic [63:0] if_bp_NPC;
 
-logic if_fetch_NPC_out;
+logic [63:0] if_fetch_NPC_out;
 
 logic [$clog2(`OBQ_SIZE)-1 : 0] ex_co_branch_index, co_branch_index;
 logic [63:0]	ex_co_branch_target, co_branch_target;

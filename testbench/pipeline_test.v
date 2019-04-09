@@ -550,13 +550,13 @@ module testbench;
 			//display_cache;
 			//display_icache;
 			//display_if_stage;
-			// display_if_id;
+			 display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-		//display_id_di;
+		display_id_di;
 			
-			//display_di_issue;
+			display_di_issue;
 			//display_RS_table;
 		display_ROB_table;
 		//	display_map_table;
@@ -565,9 +565,9 @@ module testbench;
 		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
 		//	display_issue_ex;
-		//	display_is_ex_registers;
+			display_is_ex_registers;
 		//	display_ex;
-		//	display_ex_co_registers;
+			display_ex_co_registers;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
