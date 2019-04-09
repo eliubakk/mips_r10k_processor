@@ -792,7 +792,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign issue_stall = ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
-   assign branch_not_taken = rob_retire_out_take_branch;
+   assign branch_not_taken = !(rob_retire_out_take_branch == ret_branch_inst.prediction); // If the branch is taken but the prediction is not taken, or when the branch is not taken but the prediction is taken
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
   assign RS_enable = dispatch_en & id_di_valid_inst;
