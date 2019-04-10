@@ -428,7 +428,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 		//if_branch_inst.prediction = 0;
 		//if_branch_inst.taken = 0;
 
-		if(if_valid_inst_out & dispatch_no_hazard & ret_pred_correct) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
+		if(if_valid_inst_out & dispatch_no_hazard & !branch_not_taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
 			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
@@ -472,7 +472,11 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 	end
 
 
-// Branch predictor
+// Branch predictor prediction evaluation
+//1. Direct Cond : target PC incorrect or Prediction incorrect
+//2. Direct Uncond : target PC incorrect
+//3. Direct cond : target PC incorrect
+ 
 	always_comb begin 
 		ret_pred_correct = 1'b0;
 		if(ret_branch_inst.en) begin
@@ -488,11 +492,8 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 		end
 	end
 
-//Flushing condition : When the prediction is incorrect
-//1. Direct Cond : target PC incorrect or Prediction incorrect
-//2. Direct Uncond : target PC incorrect
-//3. Direct cond : target PC incorrect
- assign branch_not_taken = ~ret_pred_correct; 
+//Flushing condition : During the branch retirement, When the prediction is incorrect
+assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); 
  
  
 	BP bp0(
@@ -540,7 +541,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 
 
   // Determine the next pc (from Fetch unit or from BP)
-	assign if_NPC_out =  if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
+	assign if_NPC_out =  if_fetch_NPC_out;
 	assign if_branch_inst.pred_pc = if_bp_NPC_valid ? if_bp_NPC : 64'h0 ;
 	/*always_comb begin
 		if_NPC_out = if_fetch_NPC_out;
