@@ -392,6 +392,30 @@ module testbench;
 		end
 	endtask
 
+	task display_inst_cache;
+		begin
+			$display("\n\n\n-----------------------------------------------------Instruction Cache (Start)----------------------------------------------");
+
+			$display("\n-------------------------------------------------------Icache Controller (Start)----------------------------------------");
+
+			$display("Inputs");
+			$display("Imem2proc_response: %d mem2proc_data: %d mem2proc_tag: %d proc2Icache_addr: %d cachemem_data: %d cachemem_valid: %b proc2Imem_command: %d proc2Imem_addr: %d", pipeline_0.inst_memory.Imem2proc_response, pipeline_0.inst_memory.mem2proc_data, pipeline_0.inst_memory.mem2proc_tag, pipeline_0.inst_memory.proc2Icache_addr, pipeline_0.inst_memory.rd1_data, pipeline_0.inst_memory.rd1_valid, pipeline_0.inst_memory.proc2Imem_command, pipeline_0.inst_memory.proc2Imem_addr);
+			$display("Outputs");
+			$display("Icache_data_out: %d Icache_valid_out: %b current_index: %d current_tag: %d last_index: %d last_tag: %d data_write_enable: %b", pipeline_0.inst_memory.Icache_data_out, pipeline_0.inst_memory.Icache_valid_out, pipeline_0.inst_memory.rd1_idx, pipeline_0.inst_memory.rd1_tag, pipeline_0.inst_memory.wr1_idx, pipeline_0.inst_memory.wr1_tag, pipeline_0.inst_memory.wr1_en);
+
+			$display("\n-------------------------------------------------------Icache Controller (End)----------------------------------");
+
+			for (int i = 0; i < `NUM_SETS; ++i) begin
+				$display("SET: %d", i);
+				for (int j = 0; j < `NUM_WAYS; ++j) begin
+					$display("\t\t\tidx: %d data: %d tag: %d valid: %b dirty: %b", j, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].data, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].tag, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].valid, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].dirty);
+				end
+			end
+
+			$display("\n\n\n-----------------------------------------------------Instruction Cache (End)----------------------------------------------");
+		end
+	endtask
+
 	task display_cache;
 		begin
 			/*
@@ -551,24 +575,25 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 1000) begin
+			 if (clock_count == 100) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
+			display_inst_cache;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
 			//display_icache;
 			//display_if_stage;
-			display_if_id;
+			//display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-			display_id_di;
+			//display_id_di;
 			
-			display_di_issue;
+			//display_di_issue;
 			//display_RS_table;
 		// display_ROB_table;
 		//	display_map_table;
@@ -577,13 +602,13 @@ module testbench;
 		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
 		//	display_issue_ex;
-			display_is_ex_registers;
+			//display_is_ex_registers;
 		//	display_ex;
-			display_ex_co_registers;
+			//display_ex_co_registers;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
-			display_co_re_registers;
+			//display_co_re_registers;
 			//display_arch_table;
 		//	display_free_list_table;
 		//	display_arch_table;
