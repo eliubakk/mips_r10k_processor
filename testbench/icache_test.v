@@ -26,6 +26,11 @@ module testbench;
     logic [63:0] proc2Imem_addr1;
     logic [63:0] proc2Imem_addr;
 
+    logic [3:0] current_mem_tag1;
+    logic [3:0] current_mem_tag;
+    logic miss_outstanding1;
+    logic miss_outstanding; 
+
     logic [63:0] Icache_data_out1; // value is memory[proc2Icache_addr]
     logic [63:0] Icache_data_out; // value is memory[proc2Icache_addr]
     logic  Icache_valid_out1;      // when this is high
@@ -63,6 +68,10 @@ module testbench;
     .proc2Imem_command(proc2Imem_command),
     .proc2Imem_addr1(proc2Imem_addr1),
     .proc2Imem_addr(proc2Imem_addr),
+    .current_mem_tag1(current_mem_tag1),
+    .current_mem_tag(current_mem_tag),
+    .miss_outstanding1(miss_outstanding1),
+    .miss_outstanding(miss_outstanding),
     .Icache_data_out1(Icache_data_out1),
     .Icache_data_out(Icache_data_out),
     .Icache_valid_out1(Icache_valid_out1),
@@ -79,6 +88,17 @@ module testbench;
     .data_write_enable(data_write_enable)
     );
 
+    //internal signals
+    // logic icache0_current_mem_tag1;
+    // logic icache0_current_mem_tag;
+    // logic icache0_miss_outstanding1;
+    // logic icache0_miss_outstanding;
+
+    // assign icache0_current_mem_tag1 = icache0.current_mem_tag1;
+    // assign icache0_current_mem_tag = icache0.current_mem_tag;
+    // assign icache0_miss_outstanding1 = icache0.miss_outstanding1;
+    // assign icache0_miss_outstanding = icache0.miss_outstanding;
+
     task exit_on_error;
 		begin
 			#1;
@@ -92,8 +112,8 @@ module testbench;
             //$display("@@@@@here@@@@");
  			assert((last_index1 == {`NUM_SET_BITS{1'b1}}) & (last_index == {`NUM_SET_BITS{1'b1}})) else #1 exit_on_error;
             assert((last_tag1 == {`NUM_TAG_BITS{1'b1}}) & (last_tag == {`NUM_TAG_BITS{1'b1}})) else #1 exit_on_error;
-            assert((icache0.current_mem_tag1 == 0) & (icache0.current_mem_tag == 0)) else #1 exit_on_error;
-            assert((icache0.miss_outstanding1 == 0) & (icache0.miss_outstanding == 0)) else #1 exit_on_error; 
+            assert((current_mem_tag1 == 0) & (current_mem_tag == 0)) else #1 exit_on_error;
+            assert((miss_outstanding1 == 0) & (miss_outstanding == 0)) else #1 exit_on_error; 
  		end
  	endtask
 
