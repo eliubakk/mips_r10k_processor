@@ -429,25 +429,8 @@ module testbench;
 
 	task display_if_id;
 		begin
-
-			$display("\n\n\n-----------------------------------------------------------------IFID REGISTERS-------------------------------------------------------");
-
-			$display("\t\t\tif_id_NPC: %d", pipeline_0.if_id_NPC);
-			$display("\t\t\tif_id_IR: %h", pipeline_0.if_id_IR);
-			$display("\t\t\tif_id_valid_inst: %b", pipeline_0.if_id_valid_inst);
-			$display("\t\t\tif_id_branch_inst.en: %b", pipeline_0.if_id_branch_inst.en);
-			$display("\t\t\tif_id_branch_inst.cond: %b", pipeline_0.if_id_branch_inst.cond);
-			$display("\t\t\tif_id_branch_inst.direct: %b", pipeline_0.if_id_branch_inst.direct);
-			$display("\t\t\tif_id_branch_inst.ret: %b", pipeline_0.if_id_branch_inst.ret);
-			$display("\t\t\tif_id_branch_inst.pc: %d", pipeline_0.if_id_branch_inst.pc);
-			$display("\t\t\tif_id_branch_inst.br_idx: %d", pipeline_0.if_id_branch_inst.br_idx);
-			$display("\t\t\tif_id_branch_inst.prediction: %b", pipeline_0.if_id_branch_inst.prediction);
-
-			$display("\n\n\n--------------------------------------------------------------------------------------------------------------------------------------");
-		
-
-			//$display("\nif_id pipeline registers---------------------------------------------------");
-			//$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_id_NPC, pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
+			$display("\nif_id pipeline registers---------------------------------------------------");
+			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_id_NPC, pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
 		end
 	endtask
 
@@ -554,20 +537,6 @@ module testbench;
 		end
 	endtask
 
-	task display_bp;
-		begin
-			$display("\n\n\n--------------------------------------------------------Branch Predictor (Start)--------------------------------------------------");
-
-			$display("Inputs:");
-			$display("\t\t\tif_en_branch: %b if_cond_branch: %b if_direct_branch: %b if_return_branch: %b if_pc_in: %d rt_en_branch: %b rt_cond_brach: %b rt_direct_branch: %b rt_return_branch: %b rt_pc: %d rt_branch_taken: %b rt_prediction_correct: %b rt_calculated_pc: %d rt_branch_index: %d", pipeline_0.if_branch_inst.en, pipeline_0.if_branch_inst.cond, pipeline_0.if_branch_inst.direct, pipeline_0.if_branch_inst.ret, pipeline_0.if_PC_reg, pipeline_0.ret_branch_inst.en, pipeline_0.ret_branch_inst.cond, pipeline_0.ret_branch_inst.direct, pipeline_0.ret_branch_inst.ret, pipeline_0.ret_branch_inst.pc, pipeline_0.rob_retire_out_take_branch, pipeline_0.ret_pred_correct, pipeline_0.retire_reg_NPC, pipeline_0.ret_branch_inst.br_idx);
-
-			$display("Outputs:");
-			$display("\t\t\tnext_pc_valid: %b next_pc_index: %d next_pc: %d next_pc_prediction: %d", pipeline_0.if_bp_NPC_valid, pipeline_0.if_branch_inst.br_idx, pipeline_0.if_bp_NPC, pipeline_0.if_branch_inst.prediction);
-
-			$display("\n\n\n--------------------------------------------------------Branch Predictor (End)---------------------------------------------------");
-		end
-	endtask
-
 	task display_stages;
 		begin
 			 if (clock_count == 1000) begin
@@ -576,38 +545,36 @@ module testbench;
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
-			display_bp;
-			display_if_id;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
 			//display_icache;
 			//display_if_stage;
-		//	 display_if_id;
+			 display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-		//display_id_di;
+		display_id_di;
 			
-		//	display_di_issue;
+			display_di_issue;
 			//display_RS_table;
-		//display_ROB_table;
+		display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
 		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
 		//	display_issue_ex;
-		//	display_is_ex_registers;
+			display_is_ex_registers;
 		//	display_ex;
-		//	display_ex_co_registers;
+			display_ex_co_registers;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 		//	display_co_re_registers;
 			//display_arch_table;
-		//	display_free_list_table;
-		//	display_arch_table;
+			display_free_list_table;
+			display_arch_table;
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;

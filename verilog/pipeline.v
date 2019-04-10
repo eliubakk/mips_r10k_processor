@@ -493,7 +493,9 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 	end
 
 //Flushing condition : During the branch retirement, When the prediction is incorrect
-assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); 
+//assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
+//should change this, chk4
+assign branch_not_taken = ret_branch_inst.en & rob_retire_out_take_branch; 
  
  
 	BP bp0(
@@ -532,10 +534,10 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct);
 		.ras_head_out(ras_head_out),
 		.ras_tail_out(ras_tail_out),
 		`endif
-		.next_pc_valid(if_bp_NPC_valid),
+		.next_pc_valid(), // Should add this, chk1
 		.next_pc_index(if_branch_inst.br_idx),
 		.next_pc(if_bp_NPC),
-		.next_pc_prediction(if_branch_inst.prediction)
+		.next_pc_prediction()
 
 	);
 
@@ -543,14 +545,8 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct);
   // Determine the next pc (from Fetch unit or from BP)
 	assign if_NPC_out =  if_fetch_NPC_out;
 	assign if_branch_inst.pred_pc = if_bp_NPC_valid ? if_bp_NPC : 64'h0 ;
-	/*always_comb begin
-		if_NPC_out = if_fetch_NPC_out;
-		if(if_bp_NPC_valid) begin
-			if_NPC_out = if_bp_NPC;
-		end
-
-	end*/
-
+	assign if_bp_NPC_valid = 1'b0;// Should remove this, chk2
+	assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk3
   //////////////////////////////////////////////////
   //                                              //
   //            IF/ID Pipeline Register           //
@@ -997,8 +993,8 @@ genvar ik;
   for(ik = 0; ik < `NUM_FU_TOTAL; ++ik) begin
 	//assign is_ex_T1_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][0] : 0;
 	//assign is_ex_T2_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][1] : 0;  
-	assign is_ex_T1_value[ik] = reset? 0 : pr_tags_values[ik][0];
-	assign is_ex_T2_value[ik] = reset? 0 : pr_tags_values[ik][1];  
+	assign is_ex_T1_value[ik] = (reset | branch_not_taken) ? 0 : pr_tags_values[ik][0];
+	assign is_ex_T2_value[ik] = (reset | branch_not_taken) ? 0 : pr_tags_values[ik][1];  
 end
 
 ex_stage ex_stage_0 (
