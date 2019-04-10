@@ -695,10 +695,14 @@ module testbench;
             //print_stage("|", issue_reg_inst_opcode[0], issue_reg_npc[0][31:0], {0});
           if (pipe_counter==0) begin
             
-            print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
-          end else begin
+           // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
+          
+            print_stage("|", `NOOP_INST, pipeline_0.retire_reg_NPC[31:0], {31'b0,pipeline_0.retire_inst_busy});
+	end else begin
             //print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
-            print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
+           // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
+
+            print_stage("|", `NOOP_INST, pipeline_0.retire_reg_NPC[31:0], {0});
           end
           print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
                     {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});
