@@ -97,7 +97,7 @@ module pipeline (
     
     output logic co_ret_enable, 
     output logic dispatch_en, 
-    output logic ret_pred_incorrect,
+    output logic branch_not_taken,
     output logic [`NUM_FU_TOTAL-1:0]   is_ex_enable,
     output logic [`NUM_FU_TOTAL-1:0]   ex_co_enable
 );
@@ -106,7 +106,7 @@ module pipeline (
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 
   // Pipeline register enables
-  // logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, ret_pred_incorrect;
+  // logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
   // logic [4:0]   is_ex_enable, ex_co_enable;
   logic fr_read_en;
   logic [`NUM_FU_TOTAL-1:0] issue_stall;
@@ -403,7 +403,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_id_enable),
-    .co_ret_branch_valid(co_ret_branch_valid),
+    .co_ret_branch_valid(ret_branch_inst.en),
     .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
     .if_bp_NPC_valid(if_bp_NPC_valid),
 
@@ -428,7 +428,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 		//if_branch_inst.prediction = 0;
 		//if_branch_inst.taken = 0;
 
-		if(if_valid_inst_out & dispatch_no_hazard & ret_pred_incorrect) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
+		if(if_valid_inst_out & dispatch_no_hazard & ret_pred_correct) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
 			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
@@ -521,15 +521,15 @@ assign ret_pred_correct = (rob_retire_out_take_branch == ret_branch_inst.predict
 
 
   // Determine the next pc (from Fetch unit or from BP)
-	//assign if_NPC_out = if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
+	assign if_NPC_out =  if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
 
-	always_comb begin
+	/*always_comb begin
 		if_NPC_out = if_fetch_NPC_out;
 		if(if_bp_NPC_valid) begin
 			if_NPC_out = if_bp_NPC;
 		end
 
-	end
+	end*/
 
   //////////////////////////////////////////////////
   //                                              //
@@ -541,7 +541,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 //assign if_id_enable = (dispatch_no_hazard && Icache_valid_out); 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if(reset | ret_pred_incorrect) begin
+    if(reset | branch_not_taken) begin
       if_id_NPC        <= `SD 0;
       if_id_IR         <= `SD `NOOP_INST;
       if_id_valid_inst <= `SD `FALSE;
@@ -639,7 +639,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   	.CDB_tag_in(CDB_tag_out), 	// Comes from CDB durinmem2proc_data
   	.CDB_en(CDB_enable),     	// Comes from CDB during Commitmem2proc_data
   	.map_check_point(arch_table),
-  	.branch_incorrect(ret_pred_incorrect),
+  	.branch_incorrect(branch_not_taken),
   	
     .map_table_out(map_table_out),
   	.T1(id_inst_out.T1), 		// Output for Dispatch and goes to RS
@@ -666,7 +666,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
     .id_branch(id_branch), // enabled when dispatched instruction is branch
     // inputs for branch misprediction
-    .branch_incorrect(ret_pred_incorrect),
+    .branch_incorrect(branch_not_taken),
     //.free_check_point(free_list_check),
     //.tail_check_point(tail_check),
 
@@ -724,7 +724,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //assign id_di_enable = if_valid_inst_out;
 	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-      if (reset | ret_pred_incorrect) begin
+      if (reset | branch_not_taken) begin
         id_di_rega    <= `SD 0;
         id_di_regb    <= `SD 0;
         id_di_inst_in <= `SD EMPTY_ROW;
@@ -792,7 +792,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign issue_stall = ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
-   assign ret_pred_incorrect = (rob_retire_out_take_branch != ret_branch_inst.prediction); // If the branch is taken but the prediction is not taken, or when the branch is not taken but the prediction is taken
+   assign branch_not_taken = (rob_retire_out_take_branch); // This is the flushing signal
   //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
   assign RS_enable = dispatch_en & id_di_valid_inst;
@@ -807,7 +807,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .CDB_in(CDB_tag_out), 
     .dispatch_valid(RS_enable),
     .inst_in(id_di_inst_in), 
-    .branch_not_taken(ret_pred_incorrect), 
+    .branch_not_taken(branch_not_taken), 
     .issue_stall(issue_stall),
     .di_branch_inst_idx(id_di_branch_inst.br_idx),//*** Heewoo added to store branch index in RS
     
@@ -877,7 +877,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-      if (reset | ret_pred_incorrect) begin
+      if (reset | branch_not_taken) begin
         // id_di_NPC           <= `SD 0;//don't change this    // already have a slot in issue table
         // id_di_IR            <= `SD `NOOP_INST;
         
@@ -1006,7 +1006,7 @@ ex_stage ex_stage_0 (
 // a register.
 
 always_ff @(posedge clock) begin
-	if(reset | ret_pred_incorrect) begin
+	if(reset | branch_not_taken) begin
 		for(integer i=0 ; i<3; ++i) begin
 			ex_mult_reg[i].npc <= `SD 0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
@@ -1057,7 +1057,7 @@ end
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin//Initialize all registers once
     for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-      if (reset | ret_pred_incorrect) begin
+      if (reset | branch_not_taken) begin
           ex_co_NPC[i]          <= `SD 0;
           ex_co_IR[i]           <= `SD `NOOP_INST;
           ex_co_dest_reg_idx[i] <= `SD `ZERO_REG;
@@ -1099,7 +1099,7 @@ end
   end // always
 
   always_ff @(posedge clock) begin
-    if (reset | ret_pred_incorrect) begin
+    if (reset | branch_not_taken) begin
      // ex_co_done <= `SD 0;
       ex_co_take_branch  <= `SD 0;
       ex_co_branch_index <= `SD {$clog2(`OBQ_SIZE){0}};
@@ -1305,7 +1305,7 @@ end
   assign co_ret_enable = 1'b1; // always enabled
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if (reset | ret_pred_incorrect) begin
+    if (reset | branch_not_taken) begin
       co_ret_NPC          <= `SD 0;
       co_ret_IR           <= `SD `NOOP_INST;
       co_ret_halt         <= `SD 0;
@@ -1357,7 +1357,7 @@ end
 	.CDB_br_valid(co_branch_valid),// ****Heewoo, branch valid signal
 	.CDB_br_idx(co_branch_index), // ******Heewoo, comes from CDB during commit, branch index
   	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
-  	.branch_not_taken(ret_pred_incorrect),
+  	.branch_not_taken(branch_not_taken),
 	  .halt_in(id_inst_out.inst.halt),
     .opcode(id_inst_out.inst_opcode),
     .take_branch(co_take_branch_selected),
@@ -1395,7 +1395,7 @@ end
 // FF between complete and retire
 
 always_ff @ (posedge clock) begin
-	if(reset | ret_pred_incorrect) begin
+	if(reset | branch_not_taken) begin
 		retire_inst_busy <= `SD 0;
 		retire_reg_wr_idx <= `SD `ZERO_REG;
 		retire_reg_wr_en <= `SD 0;
@@ -1436,7 +1436,16 @@ always_ff @ (posedge clock) begin
 			ret_branch_inst.br_idx	<= `SD rob_retire_out.branch_inst.br_idx;
 			ret_branch_inst.prediction <= `SD rob_retire_out.branch_inst.prediction;
 			//ret_branch_inst.taken	<= `SD rob_retire_out.branch_inst.taken;
- 		end
+ 		end else begin
+			ret_branch_inst.en 		<= `SD 1'b0;
+			ret_branch_inst.cond 		<= `SD 1'b0;
+			ret_branch_inst.direct 	<= `SD 1'b0;
+			ret_branch_inst.ret 	<= `SD 1'b0;
+			ret_branch_inst.pc 		<= `SD 64'h0;
+			ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+			ret_branch_inst.prediction 	<= `SD 0;
+	
+		end
 	end
   end
 

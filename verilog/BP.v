@@ -260,7 +260,7 @@ module  BP(
 		// value initialization
 		next_pc_valid_calc			= 1'b0;
 		next_pc_index_calc			= {($clog2(`OBQ_SIZE+1)){0}}; 		
-		next_pc_calc				= 32'h0;			
+		next_pc_calc				= if_pc_in + 4;			
 		next_pc_prediction_calc			= 1'b0;
 
 		if(enable) begin
@@ -335,7 +335,7 @@ module  BP(
 					end
 
 				end else begin
-					next_pc_valid_calc	= 1'b0;
+					next_pc_valid_calc	= if_pc_in + 4;
 				end
 			end
 		end
