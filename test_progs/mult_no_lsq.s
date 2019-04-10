@@ -38,7 +38,8 @@ start:  lda     $r2,0x27bb	#4	4
         bis     $r3,$r0,$r3	#80	50
         lda     $r4,0		#84	54
 loop:   addq    $r4,1,$r4	#88	58
-        cmple   $r4,0xf,$r5	#92	5c
+        lda	$r21,100
+	cmple   $r4,0xf,$r5	#92	5c
         mulq    $r1,$r2,$r10	#96	60
         addq    $r10,$r3,$r10	#100	64
         mulq    $r10,$r2,$r11	#104	68
