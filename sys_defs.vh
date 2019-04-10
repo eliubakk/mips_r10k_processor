@@ -99,6 +99,7 @@ typedef struct packed{
   logic direct;
   logic ret;
   logic [63:0] pc;	// Current pc, NOT NEXT PC!
+  logic [63:0] pred_pc; // Predicted pc, used to check the flushing condition
   logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  
   logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
   //logic taken;		// 1: branch actual taken, 0: branch actual not taken
