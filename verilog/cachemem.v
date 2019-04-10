@@ -7,7 +7,8 @@ module cachemem(
         input clock, reset, wr1_en, rd1_en,
         input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx,
         input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag,
-        input [63:0] wr1_data, 
+        input [63:0] wr1_data,
+	input wr1_dirty, 
 
 	`ifdef DEBUG
 		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
@@ -29,7 +30,7 @@ module cachemem(
 
         output logic [63:0] rd1_data,
         output logic rd1_valid 
-      );
+);
 
 	// given addr, find set index
 	// cam through the tags in that set for match
@@ -102,11 +103,14 @@ module cachemem(
 	// assign statements
 	assign sets_out = sets;
 	assign bst_out = bst;
-	assign rd1_data = sets[rd1_idx].cache_lines[tag_idx_read].data;
-	assign rd1_valid = (|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
 
-	assign vic_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
+	assign rd1_data = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? wr1_data : sets[rd1_idx].cache_lines[tag_idx_read].data;
+	assign rd1_valid = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? 1'b1 : 
+				(|tag_hits_read) ? sets[rd1_idx].cache_lines[tag_idx_read].valid : 0;
+
+	assign victim_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
 	assign victim = sets[wr1_idx].cache_lines[tag_idx_write];
+	assign vic_idx = wr1_idx;
 
 	assign miss_idx_rd = rd1_idx;
 	assign miss_tag_rd = rd1_tag;
@@ -165,6 +169,7 @@ module cachemem(
 					acc /= 2;
 				end
 			end
+			sets_next[wr1_idx].cache_lines[tag_idx_write].dirty = wr1_dirty;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
 			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;
@@ -183,6 +188,7 @@ module cachemem(
 						temp_idx += (acc / 2);
 					end else begin
 						next_bst_idx = (2 * next_bst_idx) + 1;
+						temp_idx -= (acc / 2);
 					end
 					acc /= 2;
 				end
@@ -199,6 +205,7 @@ module cachemem(
 					sets[i].cache_lines[j].data <= `SD 0;
 					sets[i].cache_lines[j].tag <= `SD 0;
 					sets[i].cache_lines[j].valid <= `SD 0;
+					sets[i].cache_lines[j].dirty <= `SD 0;
 				end
 				bst[i] <= `SD 0;
 			end

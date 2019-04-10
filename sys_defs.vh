@@ -50,6 +50,7 @@ typedef struct packed {
 	logic [63:0] data;
 	logic [(`NUM_TAG_BITS - 1):0] tag;
 	logic valid;
+	logic dirty;
 } CACHE_LINE_T;
 
 typedef struct packed {

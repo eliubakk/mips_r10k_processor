@@ -299,15 +299,18 @@ logic rob_retire_out_T_old;
       (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
 
 
+/*
   // Actual cache (data and tag RAMs)
-  cache cachememory (// inputs
+  cachemem cachememory (// inputs
     .clock(clock),
     .reset(reset),
     .wr1_en(Icache_wr_en),
     .wr1_idx(Icache_wr_idx),
     .wr1_tag(Icache_wr_tag),
     .wr1_data(mem2proc_data),
+    .wr1_dirty(1'b0),
 
+    .rd1_en(1'b1),
     .rd1_idx(Icache_rd_idx),
     .rd1_tag(Icache_rd_tag),
 
@@ -341,7 +344,20 @@ logic rob_retire_out_T_old;
     .last_tag(Icache_wr_tag),
     .data_write_enable(Icache_wr_en)
   );
+*/
 
+	inst_cache inst_memory(
+				.clock(clock),
+				.reset(reset),
+				.Imem2proc_response(Imem2proc_response),
+				.mem2proc_data(mem2proc_data),
+				.mem2proc_tag(mem2proc_tag),
+				.proc2Icache_addr(proc2Icache_addr),
+				.proc2Imem_command(proc2Imem_command),
+				.proc2Imem_addr(proc2Imem_addr),
+				.Icache_data_out(Icache_data_out),
+				.Icache_valid_out(Icache_valid_out)
+	);
 
 
   //////////////////////////////////////////////////
