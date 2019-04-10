@@ -128,14 +128,19 @@ module  BP(
 
 	//----------Value evaluation
 
-	assign roll_back	= rt_en_branch & rt_cond_branch & ~rt_prediction_correct; 
+	assign roll_back	= rt_en_branch & ~rt_prediction_correct; 
+
+	// Prediction is incorrect when
+	// 1. Direct Cond : target PC incorrect or prediction incorrect
+	// 2. Direct Uncond : target PC incorrect
+	// 3. Direct Cond : target PC incorrect
 
 	//---------For Gshare and OBQ
 	
 	// During Fetch		/ cond
 	assign read_en   	= (!roll_back)& (if_en_branch & if_cond_branch); 
 	// During retire	/ cond / the branch prediction is wrong   
-	assign clear_en		= roll_back;
+	assign clear_en		= roll_back & rt_cond_branch;
 	// During retire	/ cond / the branch prediction is correct   
 	assign shift_en		= rt_en_branch & rt_cond_branch & rt_prediction_correct; 
 	

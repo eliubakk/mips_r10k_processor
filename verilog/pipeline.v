@@ -428,7 +428,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 		//if_branch_inst.prediction = 0;
 		//if_branch_inst.taken = 0;
 
-		if(if_valid_inst_out & dispatch_no_hazard & ret_pred_correct) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
+		if(if_valid_inst_out & dispatch_no_hazard & !branch_not_taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
 			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
@@ -472,9 +472,29 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 	end
 
 
-// Branch predictor
-assign ret_pred_correct = (rob_retire_out_take_branch == ret_branch_inst.prediction);
+// Branch predictor prediction evaluation
+//1. Direct Cond : target PC incorrect or Prediction incorrect
+//2. Direct Uncond : target PC incorrect
+//3. Direct cond : target PC incorrect
+ 
+	always_comb begin 
+		ret_pred_correct = 1'b0;
+		if(ret_branch_inst.en) begin
+			if(ret_branch_inst.cond & ret_branch_inst.direct) begin
+				ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC) & (ret_branch_inst.prediction == rob_retire_out_take_branch);
+			end else if ( !ret_branch_inst.cond) begin
+				if(!ret_branch_inst.ret) begin
+					ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC);
+				end else begin
+					ret_pred_correct = 1'b1;// No need to flush when the instructon is return
+				end
+			end
+		end
+	end
 
+//Flushing condition : During the branch retirement, When the prediction is incorrect
+assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); 
+ 
  
 	BP bp0(
 		// inputs
@@ -521,8 +541,8 @@ assign ret_pred_correct = (rob_retire_out_take_branch == ret_branch_inst.predict
 
 
   // Determine the next pc (from Fetch unit or from BP)
-	assign if_NPC_out =  if_bp_NPC_valid ? if_bp_NPC : if_fetch_NPC_out;
-
+	assign if_NPC_out =  if_fetch_NPC_out;
+	assign if_branch_inst.pred_pc = if_bp_NPC_valid ? if_bp_NPC : 64'h0 ;
 	/*always_comb begin
 		if_NPC_out = if_fetch_NPC_out;
 		if(if_bp_NPC_valid) begin
@@ -551,6 +571,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	if_id_branch_inst.direct 	<= `SD 1'b0;
 	if_id_branch_inst.ret		<= `SD 1'b0;
 	if_id_branch_inst.pc 		<= `SD 64'h0;
+	if_id_branch_inst.pred_pc	<= `SD 64'h0;
 	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	if_id_branch_inst.prediction 	<= `SD 0;
 	//if_id_branch_inst.taken 	<= `SD 0;
@@ -581,6 +602,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	if_id_branch_inst.direct 	<= `SD 1'b0;
 	if_id_branch_inst.ret	 	<= `SD 1'b0;
 	if_id_branch_inst.pc 		<= `SD 64'h0;
+	if_id_branch_inst.pred_pc	<= `SD 64'h0;
 	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	if_id_branch_inst.prediction 	<= `SD 0;
 	//if_id_branch_inst.taken 	<= `SD 0;
@@ -737,6 +759,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	id_di_branch_inst.direct 	<= `SD 1'b0;
 	id_di_branch_inst.ret	 	<= `SD 1'b0;
 	id_di_branch_inst.pc 		<= `SD 64'h0;
+	id_di_branch_inst.pred_pc	<= `SD 64'h0;
 	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	id_di_branch_inst.prediction 	<= `SD 0;
 	//id_di_branch_inst.taken 	<= `SD 0;
@@ -775,6 +798,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	id_di_branch_inst.direct 	<= `SD 1'b0;
 	id_di_branch_inst.ret	 	<= `SD 1'b0;
 	id_di_branch_inst.pc 		<= `SD 64'h0;
+	id_di_branch_inst.pred_pc	<= `SD 64'h0;
 	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	id_di_branch_inst.prediction 	<= `SD 0;
 	//id_di_branch_inst.taken 	<= `SD 0;
@@ -792,8 +816,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign issue_stall = ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
-   assign branch_not_taken = (rob_retire_out_take_branch); // This is the flushing signal
-  //assign RS_enable= (dispatch_en && if_id_valid_inst);
+   //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
   assign RS_enable = dispatch_en & id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
@@ -1411,6 +1434,7 @@ always_ff @ (posedge clock) begin
 	ret_branch_inst.direct 	<= `SD 1'b0;
 	ret_branch_inst.ret 	<= `SD 1'b0;
 	ret_branch_inst.pc 		<= `SD 64'h0;
+	ret_branch_inst.pred_pc	<= `SD 64'h0;
 	ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	ret_branch_inst.prediction 	<= `SD 0;
 	//ret_branch_inst.taken 	<= `SD 0;
@@ -1433,6 +1457,7 @@ always_ff @ (posedge clock) begin
 			ret_branch_inst.direct	<= `SD rob_retire_out.branch_inst.direct;
 			ret_branch_inst.ret	<= `SD rob_retire_out.branch_inst.ret;
 			ret_branch_inst.pc	<= `SD rob_retire_out.branch_inst.pc;
+			ret_branch_inst.pred_pc	<= `SD rob_retire_out.branch_inst.pred_pc;
 			ret_branch_inst.br_idx	<= `SD rob_retire_out.branch_inst.br_idx;
 			ret_branch_inst.prediction <= `SD rob_retire_out.branch_inst.prediction;
 			//ret_branch_inst.taken	<= `SD rob_retire_out.branch_inst.taken;
@@ -1442,12 +1467,16 @@ always_ff @ (posedge clock) begin
 			ret_branch_inst.direct 	<= `SD 1'b0;
 			ret_branch_inst.ret 	<= `SD 1'b0;
 			ret_branch_inst.pc 		<= `SD 64'h0;
+			ret_branch_inst.pred_pc	<= `SD 64'h0;
 			ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 			ret_branch_inst.prediction 	<= `SD 0;
 	
 		end
 	end
   end
+
+
+
 
 logic arch_enable;
 assign arch_enable = rob_retire_out.busy & !rob_retire_out.take_branch;
