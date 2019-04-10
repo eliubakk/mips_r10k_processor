@@ -16,10 +16,10 @@ module icache(
     output logic [63:0] Icache_data_out, // value is memory[proc2Icache_addr]
     output logic  Icache_valid_out,      // when this is high
 
-    output logic  [4:0] current_index,
-    output logic  [7:0] current_tag,
-    output logic  [4:0] last_index,
-    output logic  [7:0] last_tag,
+    output logic  [(`NUM_SET_BITS - 1):0] current_index,
+    output logic  [(`NUM_TAG_BITS - 1):0] current_tag,
+    output logic  [(`NUM_SET_BITS - 1):0] last_index,
+    output logic  [(`NUM_TAG_BITS - 1):0] last_tag,
     output logic  data_write_enable
   
   );
