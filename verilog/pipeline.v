@@ -672,8 +672,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	assign fr_read_en = id_inst_out.inst.valid_inst;
 	assign fr_wr_en = (rob_retire_out.T_old == `DUMMY_REG) ? 0 : 1; 
 	
-	logic id_branch;
-	assign id_branch = id_inst_out.inst.cond_branch | id_inst_out.inst.uncond_branch;
+	logic id_no_dest_reg;
+	assign id_no_dest_reg = id_inst_out.inst.cond_branch | id_inst_out.inst.uncond_branch;
 
   Free_List f0(
     // INPUTS

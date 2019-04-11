@@ -12,7 +12,8 @@ module Free_List(
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
 	input PHYS_REG T_new, //****Comes from ROB during retires stage to update checkpoint
 	input dispatch_en, // Structural Hazard detection during Dispatch
-	input id_branch, // Enabled when instruction is branch
+	input id_no_dest_reg, //Enabled when the instruction does not have dest reg(ST, direct branch)
+
 	// inputs for branch misprediction
 	input branch_incorrect,
 	//input PHYS_REG [`FL_SIZE-1:0] free_check_point,
