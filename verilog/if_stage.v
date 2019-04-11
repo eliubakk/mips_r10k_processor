@@ -21,7 +21,7 @@ module if_stage(
     input         Imem_valid,
     input dispatch_en,                   /// dispatch enable signal
     input co_ret_branch_valid,                  // whether the inst is branch or not
-
+    input Imem2proc_response,
     output logic [63:0] proc2Imem_addr,    // Address sent to Instruction memory
     output logic [63:0] if_NPC_out,        // PC of instruction after fetched (PC+4).
     output logic [31:0] if_IR_out,        // fetched instruction out
@@ -37,7 +37,7 @@ module if_stage(
   logic           PC_enable;
   logic           next_ready_for_valid;
 
-	assign PC_enable = (dispatch_en & Imem_valid) | (co_ret_take_branch);
+	assign PC_enable = ((dispatch_en & Imem_valid) | (co_ret_take_branch)) ;
 
  
   assign proc2Imem_addr = {PC_reg[63:3], 3'b0};

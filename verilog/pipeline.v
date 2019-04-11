@@ -342,7 +342,7 @@ logic rob_retire_out_T_old;
 
     .proc2Icache_addr(proc2Icache_addr),
     .cachemem_data(cachemem_data),
-    .cachemem_valid(cachemem_valid & ~stall_struc ),
+    .cachemem_valid(cachemem_valid),
 
     // outputs
     .proc2Imem_command(proc2Imem_command),
@@ -375,6 +375,7 @@ logic rob_retire_out_T_old;
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_id_enable),
     .co_ret_branch_valid(co_ret_branch_valid),
+    .Imem2proc_response(Imem2proc_response),
 
     // Outputs
     .if_NPC_out(if_NPC_out), 
@@ -923,7 +924,7 @@ end
      .clock(clock),
      .reset(reset),
      .ex_mem_rega(ex_co_rega),
-     .ex_mem_alu_result(ex_alu_result_out[2]), 
+     .ex_mem_alu_result(ex_co_alu_result[2]), 
      .ex_mem_rd_mem(ex_co_rd_mem[2]),
      .ex_mem_wr_mem(ex_co_wr_mem[2]),
      .Dmem2proc_data(mem2proc_data),
@@ -938,8 +939,8 @@ end
      .proc2Dmem_data(proc2mem_data)
             );
 
-  wire [4:0] mem_dest_reg_idx_out =
-             mem_stall_out ? `DUMMY_REG : issue_reg[2].T;
+  wire [5:0] mem_dest_reg_idx_out =
+             mem_stall_out ? `DUMMY_REG : ex_co_dest_reg_idx[2];
   wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_stall_out;
 
 assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & ex_co_wr_mem[2])) & (ex_co_valid_inst[2]) ;
@@ -953,7 +954,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //           mem/co stage                   //
   //                                              //
   //////////////////////////////////////////////////
-  assign mem_co_enable= mem_valid_inst_out;
+  
+  assign mem_co_enable= (~mem_co_valid_inst) | (mem_co_valid_inst & co_selected[2]);
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken ) begin
       mem_co_valid_inst   <= `SD 0;
@@ -972,13 +974,13 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
       mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
       mem_co_alu_result   <= `SD mem_result_out;
     end else begin
-      mem_co_valid_inst   <= `SD 0;
-      mem_co_NPC          <= `SD 0;
-      mem_co_IR          <= `SD `NOOP_INST;
-      mem_co_halt         <= `SD 0;
-      mem_co_illegal      <= `SD 0;
-      mem_co_dest_reg_idx <= `SD `DUMMY_REG;
-      mem_co_alu_result   <= `SD 64'b0;     
+      mem_co_valid_inst   <= `SD mem_valid_inst_out;
+      mem_co_NPC          <= `SD ex_co_NPC[2];
+      mem_co_IR          <= `SD ex_co_IR[2];
+      mem_co_halt         <= `SD ex_co_halt[2];
+      mem_co_illegal      <= `SD ex_co_illegal[2];
+      mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
+      mem_co_alu_result   <= `SD mem_result_out;   
     end
   end
   
@@ -1017,6 +1019,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               co_reg_wr_idx_out             =    mem_co_dest_reg_idx;
               co_take_branch_selected       =    1'b0;
               co_alu_result_selected        =    mem_co_alu_result;
+              co_branch_valid               =    1'b0;
             end else begin
               co_NPC_selected               =    ex_co_NPC[i];
               co_IR_selected                =    ex_co_IR[i];
@@ -1030,6 +1033,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               else                  co_branch_valid =    0;  
               if(i == 4)  co_take_branch_selected = ex_co_take_branch;
               else        co_take_branch_selected = 0;  
+              break;
             end
           end         
         end 
