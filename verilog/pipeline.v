@@ -1478,8 +1478,8 @@ always_ff @ (posedge clock) begin
 
 logic arch_enable;
 //assign arch_enable = rob_retire_out.busy & !rob_retire_out.take_branch;
-//assign arch_enable = rob_retire_out.busy & !branch_not_taken; 
- assign arch_enable = rob_retire_out.busy;
+assign arch_enable = rob_retire_out.busy & !branch_not_taken; 
+// assign arch_enable = rob_retire_out.busy;
   //Intsantiating the arch map
   Arch_Map_Table a0(
   	.clock(clock),
