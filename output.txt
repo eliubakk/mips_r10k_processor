@@ -3,7 +3,7 @@ mkdir -p pipeline && cd pipeline && \
 SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps  +define+PIPELINE=1 ../../verilog/pipeline.v ../../verilog/misc/CAM.v ../../verilog/misc/encoder.v ../../verilog/misc/psel_generic.v ../../verilog/misc/psel_single.v ../../verilog/PHT_TWO_SC.v ../../verilog/phys_reg.v ../../verilog/id_stage.v ../../verilog/ex_stage.v ../../verilog/cachemem.v ../../verilog/Free_List.v ../../verilog/RS.v ../../verilog/wb_stage.v ../../verilog/pipe_mult.v ../../verilog/BP.v ../../verilog/cdb.v ../../verilog/BTB.v ../../verilog/ROB.v ../../verilog/Free_List_Check.v ../../verilog/OBQ.v ../../verilog/if_stage.v ../../verilog/RAS.v ../../verilog/Arch_Map_Table.v ../../verilog/mult_stage.v ../../verilog/SQ.v ../../verilog/GSHARE.v ../../verilog/Map_Table.v ../../verilog/icache.v ../../verilog/regfile.v ../../verilog/mem_stage.v ../../testbench/pipe_print.c ../../testbench/mem.v ../../testbench/pipeline_test.v -o simv_pipeline &&\
 ./simv_pipeline | tee pipeline_simv_program.out
                          Chronologic VCS (TM)
-      Version N-2017.12-SP2-1_Full64 -- Wed Apr 10 18:47:35 2019
+      Version N-2017.12-SP2-1_Full64 -- Wed Apr 10 21:47:34 2019
                Copyright (c) 1991-2017 by Synopsys Inc.
                          ALL RIGHTS RESERVED
 
@@ -486,18 +486,19 @@ recompiling module mem_stage
 recompiling module mem
 recompiling module testbench
 All of 19 modules done
-make[1]: Entering directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
-make[1]: Leaving directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
-make[1]: Entering directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
+make[1]: Entering directory `/home/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
+make[1]: Leaving directory `/home/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
+make[1]: Entering directory `/home/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
 rm -f _csrc*.so pre_vcsobj_*.so share_vcsobj_*.so
+gcc -w  -pipe -fPIC -O -I/usr/caen/vcs-2017.12-SP2-1/include    -c ../../../testbench/pipe_print.c
 if [ -x ../simv_pipeline ]; then chmod -x ../simv_pipeline; fi
-g++  -o ../simv_pipeline    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir/ -Wl,-rpath=./simv_pipeline.daidir/ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg  pipe_print.o   objs/amcQw_d.o   _8513_archive_1.so  SIM_l.o      rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
+g++  -o ../simv_pipeline    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir/ -Wl,-rpath=./simv_pipeline.daidir/ -Wl,-rpath='$ORIGIN'/simv_pipeline.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg  pipe_print.o   objs/amcQw_d.o   _12457_archive_1.so  SIM_l.o      rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
 ../simv_pipeline up to date
-make[1]: Leaving directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
-CPU time: .817 seconds to compile + .362 seconds to elab + .228 seconds to link
+make[1]: Leaving directory `/home/heewoo/Desktop/eecs470/FINAL/group10w19/synth/pipeline/csrc'
+CPU time: 1.229 seconds to compile + .427 seconds to elab + .289 seconds to link
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 10 18:47 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 10 21:47 2019
 @@
 @@
 @@                     0  Asserting System reset......
@@ -518,7 +519,7 @@ id_di_rega:  x, id_di_regb:  x, id_di_inst_in: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 id_di_NPC:                    x, id_di_IR: xxxxxxxx, id_di_valid_inst: x
 
  di_issue stage---------------------------------------------------------
-issue_stall: xxxxx dispatch_en: x branch_not_taken: x RS_enable: x
+issue_stall: xxxxx dispatch_en: x branch_not_taken: 0 RS_enable: x
 
  RESERVATION STATION INPUT WIRES---------------------------------------
 
@@ -530,7 +531,7 @@ issue_stall: xxxxx dispatch_en: x branch_not_taken: x RS_enable: x
 ------------------------ROB TABLE----------------------------
 
 INPUTS
-T_old_in:   x T_new_in:                                                                                                      x CDB_tag_in: 127 CAM_en: x dispatch_en: x branch_not_taken: x
+T_old_in:   x T_new_in:                                                                                                      x CDB_tag_in: 127 CAM_en: x dispatch_en: x branch_not_taken: 0
 OUTPUTS
 rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next:  x rob_full: x tail:  x head:  x
 ROB_Row =           0,  busy = x, halt = x, branch : x, T_new = xxxxxxx T_old = xxxxxxx 
@@ -10399,7 +10400,7 @@ issue_stall: 00000 dispatch_en: 1 branch_not_taken: 1 RS_enable: 1
 ------------------------ROB TABLE----------------------------
 
 INPUTS
-T_old_in: 104 T_new_in:                                                                                                      X CDB_tag_in:  42 CAM_en: 1 dispatch_en: 1 branch_not_taken: 1
+T_old_in:  44 T_new_in:                                                                                                      X CDB_tag_in:  42 CAM_en: 1 dispatch_en: 1 branch_not_taken: 1
 OUTPUTS
 rob_retire.T_old: 127 rob_retire.T_new: 127 rob_retire.busy: 0 rob_free_rows_next:  5 rob_full: 0 tail:  8 head:  1
 ROB_Row =           0,  busy = 1, halt = 1, branch : 0, T_new = 1101001 T_old = 1111111 
@@ -23507,5 +23508,5 @@ $finish called from file "../../testbench/pipeline_test.v", line 787.
 $finish at simulation time                18610
            V C S   S i m u l a t i o n   R e p o r t 
 Time: 1861000 ps
-CPU Time:      0.290 seconds;       Data structure size:   0.3Mb
-Wed Apr 10 18:47:37 2019
+CPU Time:      0.400 seconds;       Data structure size:   0.3Mb
+Wed Apr 10 21:47:37 2019

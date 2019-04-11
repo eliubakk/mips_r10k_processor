@@ -478,7 +478,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 //3. Direct cond : target PC incorrect
  
 	always_comb begin 
-		ret_pred_correct = 1'b0;
+		ret_pred_correct = 1'b1;
 		if(ret_branch_inst.en) begin
 			if(ret_branch_inst.cond & ret_branch_inst.direct) begin
 				ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC) & (ret_branch_inst.prediction == rob_retire_out_take_branch);
