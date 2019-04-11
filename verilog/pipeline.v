@@ -27,11 +27,12 @@ module pipeline (
 
     output logic [3:0]  pipeline_completed_insts,
     output ERROR_CODE   pipeline_error_status,
-    output logic [`NUM_FU_TOTAL-1:0]  pipeline_commit_wr_idx,
+    output logic [4:0]  pipeline_commit_wr_idx,
     output logic [63:0] pipeline_commit_wr_data,
     output logic        pipeline_commit_wr_en,
     output logic [63:0] pipeline_commit_NPC,
     output logic [5:0]  pipeline_commit_phys_reg,
+    output logic [5:0]  pipeline_commit_phys_from_arch,
 
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
@@ -993,8 +994,8 @@ genvar ik;
   for(ik = 0; ik < `NUM_FU_TOTAL; ++ik) begin
 	//assign is_ex_T1_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][0] : 0;
 	//assign is_ex_T2_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][1] : 0;  
-	assign is_ex_T1_value[ik] = (reset | branch_not_taken) ? 0 : pr_tags_values[ik][0];
-	assign is_ex_T2_value[ik] = (reset | branch_not_taken) ? 0 : pr_tags_values[ik][1];  
+	assign is_ex_T1_value[ik] = (reset) ? 0 : pr_tags_values[ik][0];
+	assign is_ex_T2_value[ik] = (reset) ? 0 : pr_tags_values[ik][1];  
 end
 
 ex_stage ex_stage_0 (
@@ -1405,7 +1406,8 @@ end
   assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
   assign pipeline_commit_wr_en = retire_reg_wr_en & (retire_reg_wr_idx != `ZERO_REG) ;
   assign pipeline_commit_NPC = retire_reg_NPC;
-  assign pipeline_commit_phys_reg = retire_reg_phys; 
+  assign pipeline_commit_phys_reg = retire_reg_phys;
+  assign pipeline_commit_phys_from_arch = arch_table[retire_reg_wr_idx][5:0]; 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
   //assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
   //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
