@@ -40,7 +40,7 @@
 // float to integer conversion is rounding to nearest
 
 // cache parameters/defines
-
+`define INST_BUFFER_LEN 4
 `define NUM_WAYS 4
 `define NUM_SETS (32 / `NUM_WAYS)
 `define NUM_SET_BITS $clog2(`NUM_SETS)
@@ -52,6 +52,20 @@ typedef struct packed {
 	logic valid;
 	logic dirty;
 } CACHE_LINE_T;
+
+typedef struct packed {
+  logic [63:0] address;
+  logic [3:0] Imem_tag;
+  logic valid;
+} ICACHE_BUFFER_T;
+
+const ICACHE_BUFFER_T EMPTY_ICACHE = 
+{
+  64'b0,
+  4'b0,
+  1'b0
+};
+
 
 typedef struct packed {
 	CACHE_LINE_T [(`NUM_WAYS - 1):0] cache_lines;

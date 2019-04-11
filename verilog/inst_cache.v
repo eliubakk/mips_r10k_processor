@@ -18,11 +18,19 @@ module inst_cache(
 );
 
 	// internal data
+	logic miss_valid_rd;
+ 	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd;
+ 	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd;
+  	logic miss_valid_wr;
+  	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr;
+  	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr;
+
 	wire wr1_en;
 	wire [(`NUM_SET_BITS - 1):0] wr1_idx;
 	wire [(`NUM_TAG_BITS - 1):0] wr1_tag;
+	wire [63:0] wr1_data;
 
-	wire rd1_en = 1'b1;
+	wire rd1_en;
 	wire [(`NUM_SET_BITS - 1):0] rd1_idx;
 	wire [(`NUM_TAG_BITS - 1):0] rd1_tag;
 
@@ -37,7 +45,7 @@ module inst_cache(
 		.wr1_en(wr1_en),
 		.wr1_idx(wr1_idx),
 		.wr1_tag(wr1_tag),
-		.wr1_data(mem2proc_data),
+		.wr1_data(wr1_data),
 		.wr1_dirty(1'b0),
 
 		.rd1_en(rd1_en),
@@ -48,13 +56,13 @@ module inst_cache(
 		.victim(),
 		.vic_idx(),
 
-		.miss_valid_rd(),
-		.miss_idx_rd(),
-		.miss_tag_rd(),
+		.miss_valid_rd(miss_valid_rd),
+		.miss_idx_rd(miss_idx_rd),
+		.miss_tag_rd(miss_tag_rd),
 
-		.miss_valid_wr(),
-		.miss_idx_wr(),
-		.miss_tag_wr(),
+		.miss_valid_wr(miss_valid_wr),
+		.miss_idx_wr(miss_idx_wr),
+		.miss_tag_wr(miss_tag_wr),
 
 		.rd1_data(rd1_data),
 		.rd1_valid(rd1_valid)
@@ -64,36 +72,36 @@ module inst_cache(
 		.clock(clock),
 		.reset(reset),
 
+		//inputs
+		.proc2Icache_addr(proc2Icache_addr),
+
 		.Imem2proc_response(Imem2proc_response),
 		.Imem2proc_data(mem2proc_data),
 		.Imem2proc_tag(mem2proc_tag),
 
-		.proc2Icache_addr(proc2Icache_addr),
-		.cachemem_data(rd1_data),
-		.cachemem_valid(rd1_valid),
+		.cache_miss_valid_rd(miss_valid_rd),
+		.cache_miss_idx_rd(miss_idx_rd),
+		.cache_miss_tag_rd(miss_tag_rd),
+		.cache_miss_valid_wr(miss_valid_wr),
+		.cache_miss_idx_wr(miss_idx_wr),
+		.cache_miss_tag_wr(miss_tag_wr),
+		.cache_rd_data(rd1_data),
+		.cache_rd_valid(rd1_valid),
+
+		//outputs
+		.Icache_data_out(Icache_data_out),
+		.Icache_valid_out(Icache_valid_out),
 
 		.proc2Imem_command(proc2Imem_command),
 		.proc2Imem_addr(proc2Imem_addr),
 
-		.Icache_data_out(Icache_data_out),
-		.Icache_valid_out(Icache_valid_out),
-
-		.current_index(rd1_idx),
-		.current_tag(rd1_tag),
-		.last_index(wr1_idx),
-		.last_tag(wr1_tag),
-		.data_write_enable(wr1_en)
+		.cache_wr_en(wr1_en),
+		.cache_wr_idx(wr1_idx),
+		.cache_wr_tag(wr1_tag),
+		.cache_wr_data(wr1_data),
+		.cache_rd_en(rd1_en),
+		.cache_rd_idx(rd1_idx),
+		.cache_rd_tag(rd1_tag)
 	);
-
-	// assign statements
-
-
-	// combinational logic
-	always_comb begin
-	end
-
-	// sequential logic
-	always_ff @(posedge clock) begin
-	end
 
 endmodule
