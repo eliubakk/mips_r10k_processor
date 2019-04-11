@@ -50,7 +50,7 @@ module Free_List(
 
 
 	assign empty = (tail == 0);
-	assign free_reg = free_list[0];
+	assign free_reg = id_no_dest_reg? {1'b0, {$clog2(`NUM_PHYS_REG){1'b1}}} : free_list[0]; // What heewoo added
 	assign num_free_entries = tail;
 	`ifdef DEBUG
 	assign free_list_out = free_list;
@@ -86,7 +86,25 @@ module Free_List(
 
 			next_free_list = free_check_point;
 			next_tail = tail_check_point;
+		end else if (!branch_incorrect & id_no_dest_reg) begin // When the dest reg is zero reg
+			if (enable) begin
+			// Register is getting retired
+				if (tail == `FL_SIZE) begin
+					next_free_list = free_list;
+					next_tail = tail;
+				end else begin
+					next_free_list = free_list;
+					next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+					// next_free_list[tail] = T_old;
+					next_tail = tail + 1;
+				end
+			end else begin
+				next_free_list = free_list;
+				next_tail = tail;
+			end			
+
 		end else begin
+
 			if (dispatch_en & enable) begin // For updating freelist
 			// Reg is getting retired AND getting sent out
 				for (int i = 0; i < `FL_SIZE; ++i) begin

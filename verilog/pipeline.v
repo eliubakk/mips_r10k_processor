@@ -672,8 +672,8 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	assign fr_read_en = id_inst_out.inst.valid_inst;
 	assign fr_wr_en = (rob_retire_out.T_old == `DUMMY_REG) ? 0 : 1; 
 	
-	logic id_no_dest_reg;
-	assign id_no_dest_reg = id_inst_out.inst.cond_branch | id_inst_out.inst.uncond_branch;
+	logic id_no_dest_reg;// Instructions that does not have destination register
+	assign id_no_dest_reg = (id_rdest_idx == `ZERO_REG );
 
   Free_List f0(
     // INPUTS
@@ -683,7 +683,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .T_old(rob_retire_out.T_old), // Comes from ROB during Retire Stage
     .T_new(rob_retire_out.T_new),
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
-    .id_branch(id_branch), // enabled when dispatched instruction is branch
+    .id_no_dest_reg(id_no_dest_reg), // enabled when dispatched instruction is branch
     // inputs for branch misprediction
     .branch_incorrect(branch_not_taken),
     //.free_check_point(free_list_check),
