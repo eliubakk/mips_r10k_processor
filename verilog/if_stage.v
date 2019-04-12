@@ -72,8 +72,9 @@ module if_stage(
   //assign if_valid_inst_out = ready_for_valid && Imem_valid;
 
 
-assign if_valid_inst_out = Imem_valid;
-  // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
+//assign if_valid_inst_out = Imem_valid;
+assign if_valid_inst_out = PC_enable;  
+// assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
   //                               !if_valid_inst_out;
 
   // This register holds the PC value

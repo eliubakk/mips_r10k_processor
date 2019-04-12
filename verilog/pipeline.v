@@ -403,7 +403,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
     .co_ret_target_pc(retire_reg_NPC),			// 
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(if_id_enable),
+    .dispatch_en(dispatch_no_hazard),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
     .co_ret_branch_valid(ret_branch_inst.en),
     .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
     .if_bp_NPC_valid(if_bp_NPC_valid),
@@ -738,11 +738,13 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //////////////////////////////////////////////////
 
 logic dispatch_no_hazard_comb;
+logic dispatch_no_hazard_RS;
+
   assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
 always_ff @(posedge clock) begin
 
 	dispatch_no_hazard <= `SD  dispatch_no_hazard_comb;  
-
+	//dispatch_no_hazard_RS <= `SD dispatch_no_hazard;
 	end
 
 	assign id_di_enable = (dispatch_no_hazard && if_id_valid_inst); 
@@ -822,7 +824,7 @@ always_ff @(posedge clock) begin
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
    //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
-  assign RS_enable = dispatch_en & id_di_valid_inst;
+  assign RS_enable = dispatch_no_hazard & id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
