@@ -15,9 +15,9 @@ module testbench;
 
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_test;
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_test;
-	logic miss_valid_rd_test;
-	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd_test;
-	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd_test;
+	logic miss_valid_rd1_test = 0, miss_valid_rd2_test = 0;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd1_test, miss_idx_rd2_test;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd1_test, miss_tag_rd2_test;
 	logic miss_valid_wr_test;
 	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr_test;
 	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr_test;
@@ -36,9 +36,9 @@ module testbench;
 	logic [(`NUM_TAG_BITS - 1):0] wr1_tag;
 	logic [63:0] wr1_data;
 	logic wr1_dirty;
-	logic rd1_en;
-	logic [(`NUM_SET_BITS - 1):0] rd1_idx;
-	logic [(`NUM_TAG_BITS - 1):0] rd1_tag;
+	logic rd1_en, rd2_en;
+	logic [(`NUM_SET_BITS - 1):0] rd1_idx, rd2_idx;
+	logic [(`NUM_TAG_BITS - 1):0] rd1_tag, rd2_tag;
 	
 	// output wires
 
@@ -50,12 +50,12 @@ module testbench;
 	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr;
 	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr;
 
-	logic miss_valid_rd;
-	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd;
-	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd;
+	logic miss_valid_rd1, miss_valid_rd2;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd1, miss_idx_rd2;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd1, miss_tag_rd2;
 
-	logic [63:0] rd1_data;
-	logic rd1_valid;
+	logic [63:0] rd1_data, rd2_data;
+	logic rd1_valid, rd2_valid;
 	
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_out;
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out;
@@ -74,6 +74,10 @@ module testbench;
 		.rd1_idx(rd1_idx),
 		.rd1_tag(rd1_tag),
 
+		.rd2_en(rd2_en),
+		.rd2_idx(rd2_idx),
+		.rd2_tag(rd2_tag),
+
 		.sets_out(sets_out),
 		.bst_out(bst_out),
 
@@ -85,12 +89,18 @@ module testbench;
 		.miss_idx_wr(miss_idx_wr),
 		.miss_tag_wr(miss_tag_wr),
 
-		.miss_valid_rd(miss_valid_rd),
-		.miss_idx_rd(miss_idx_rd),
-		.miss_tag_rd(miss_tag_rd),
+		.miss_valid_rd1(miss_valid_rd1),
+		.miss_idx_rd1(miss_idx_rd1),
+		.miss_tag_rd1(miss_tag_rd1),
+
+		.miss_valid_rd2(miss_valid_rd2),
+		.miss_idx_rd2(miss_idx_rd2),
+		.miss_tag_rd2(miss_tag_rd2),
 
 		.rd1_data(rd1_data),
-		.rd1_valid(rd1_valid)
+		.rd1_valid(rd1_valid),
+		.rd2_data(rd2_data),
+		.rd2_valid(rd2_valid)
 	);
 
 	// TASKS
@@ -99,6 +109,20 @@ module testbench;
 			#1;
 			$display("@@@Failed at time %f", $time);
 			$finish;
+		end
+	endtask
+
+	task print_cam_inputs;
+		begin
+			$display("CAM STUFF-----------------------------------------------------------------------------");
+			for (int i = 0; i < `NUM_WAYS; ++i) begin
+				for (int j = 0; j < 1; ++j) begin
+					for (int k = 0; k < 2; ++k) begin
+						$display("table_in[%d][%d][%d] = %b", i, j, k, c0.read_cam.table_in[i][j]);
+					end
+				end
+			end
+			$display("--------------------------------------------------------------------------------------");
 		end
 	endtask
 
@@ -276,6 +300,8 @@ module testbench;
 	endtask
 
 	task read_from_test;
+		input int set_idx;
+		input int tag_idx;
 		begin
 			int found_read;
 			int idx_read;
@@ -288,8 +314,8 @@ module testbench;
 			next_idx_read = 0;
 
 			for (int i = 0; i < `NUM_WAYS; ++i) begin
-				if (sets_test[rd1_idx].cache_lines[i].valid === 1'b1) begin
-					if (sets_test[rd1_idx].cache_lines[i].tag == rd1_tag) begin
+				if (sets_test[set_idx].cache_lines[i].valid === 1'b1) begin
+					if (sets_test[set_idx].cache_lines[i].tag == tag_idx) begin
 						found_read = 1;
 						idx_read = i;
 						break;
@@ -298,22 +324,42 @@ module testbench;
 			end
 
 			if (found_read === 1) begin
-				miss_valid_rd_test = 0;
-				update_bst_test(rd1_idx, idx_read);
+				if (rd1_en && (rd1_idx == set_idx) && (rd1_tag == tag_idx)) begin
+					miss_valid_rd1_test = 0;
+					update_bst_test(set_idx, idx_read);
+				end
+
+				if (rd2_en && (rd2_idx == set_idx) && (rd2_tag == tag_idx)) begin
+					miss_valid_rd2_test = 0;
+					update_bst_test(set_idx, idx_read);
+				end
 			end else begin
-				miss_valid_rd_test = 1;
-				miss_idx_rd_test = rd1_idx;
-				miss_tag_rd_test = rd1_tag;
+				if (rd1_en && (rd1_idx == set_idx) && (rd1_tag == tag_idx)) begin
+					miss_valid_rd1_test = 1;
+					miss_idx_rd1_test = set_idx;
+					miss_tag_rd1_test = tag_idx;
+				end
+
+				if (rd2_en && (rd2_idx == set_idx) && (rd2_tag == tag_idx)) begin
+					miss_valid_rd2_test = 1;
+					miss_idx_rd2_test = set_idx;
+					miss_tag_rd2_test = tag_idx;
+				end
 			end
 		end
 	endtask
 
 	task check_correct_read_miss;
 		begin
-			assert(miss_valid_rd_test == miss_valid_rd) else #1 exit_on_error;
-			if (miss_valid_rd) begin
-				assert(miss_idx_rd_test == rd1_idx) else #1 exit_on_error;
-				assert(miss_tag_rd_test == rd1_tag) else #1 exit_on_error;
+			assert(miss_valid_rd1_test == miss_valid_rd1) else #1 exit_on_error;
+			assert(miss_valid_rd2_test == miss_valid_rd2) else #1 exit_on_error;
+			if (miss_valid_rd1) begin
+				assert(miss_idx_rd1_test == rd1_idx) else #1 exit_on_error;
+				assert(miss_tag_rd1_test == rd1_tag) else #1 exit_on_error;
+			end
+			if (miss_valid_rd2) begin
+				assert(miss_idx_rd2_test == rd2_idx) else #1 exit_on_error;
+				assert(miss_tag_rd2_test == rd2_tag) else #1 exit_on_error;
 			end
 		end
 	endtask
@@ -384,7 +430,7 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd: %b miss_idx_rd: %d miss_tag_rd: %d miss_valid_wr: %b miss_idx_wr: %d miss_tag_wr: %d victim_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd, miss_idx_rd, miss_tag_rd, miss_valid_wr, miss_idx_wr, miss_tag_wr, victim_valid);
+		// $monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd1: %b miss_idx_rd1: %d miss_tag_rd1: %d miss_valid_wr: %b miss_idx_wr: %d miss_tag_wr: %d victim_valid: %b rd2_en: %b rd2_idx: %d rd2_tag: %d rd2_data: %d rd2_valid: %b miss_valid_rd2: %b miss_idx_rd2: %d miss_tag_rd2: %d", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd1, miss_idx_rd1, miss_tag_rd1, miss_valid_wr, miss_idx_wr, miss_tag_wr, victim_valid, rd2_en, rd2_idx, rd2_tag, rd2_data, rd2_valid, miss_valid_rd2, miss_idx_rd2, miss_tag_rd2);
 		
 		// intial values
 		clock = 0;
@@ -397,6 +443,9 @@ module testbench;
 		rd1_en = 0;
 		rd1_idx = 0;
 		rd1_tag = 0;
+		rd2_en = 0;
+		rd2_idx = 0;
+		rd2_tag = 0;
 
 		$display("Testing Reset...");
 
@@ -515,7 +564,7 @@ module testbench;
 		rd1_en = 1;
 		rd1_idx = (`NUM_SETS - 1);
 		rd1_tag = 1;
-		read_from_test;
+		read_from_test(rd1_idx, rd1_tag);
 
 		@(posedge clock);
 		`DELAY;
@@ -540,7 +589,7 @@ module testbench;
 				rd1_en = 1;
 				rd1_idx = i;
 				rd1_tag = j;
-				read_from_test;
+				read_from_test(rd1_idx, rd1_tag);
 
 				@(posedge clock);
 				`DELAY;
@@ -631,7 +680,7 @@ module testbench;
 		rd1_idx = 0;
 		rd1_tag = 0;
 		write_to_test;
-		read_from_test;
+		read_from_test(rd1_idx, rd1_tag);
 
 		@(posedge clock);
 		check_correct_write_miss;
@@ -696,7 +745,7 @@ module testbench;
 		rd1_en = 1;
 		rd1_idx = (`NUM_SETS - 1);
 		rd1_tag = `NUM_WAYS;
-		read_from_test;
+		read_from_test(rd1_idx, rd1_tag);
 
 		@(posedge clock);
 		`DELAY;
@@ -718,7 +767,7 @@ module testbench;
 			rd1_en = 1;
 			rd1_idx = $urandom_range((`NUM_SETS - 1), 0);
 			rd1_tag = $urandom_range(999, 0);
-			read_from_test;
+			read_from_test(rd1_idx, rd1_tag);
 	
 			@(posedge clock);
 			`DELAY;
@@ -757,12 +806,84 @@ module testbench;
 		rd1_en = 1;
 		rd1_idx = 0;
 		rd1_tag = 0;
-		read_from_test;
+		read_from_test(rd1_idx, rd1_tag);
 
 		@(posedge clock);
-		assert(miss_valid_rd == 1) else #1 exit_on_error;
+		assert(miss_valid_rd1 == 1) else #1 exit_on_error;
 
 		$display("Read Miss Passed");
+
+		$display("Testing Single Read Miss Port 2...");
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		wr1_dirty = 0;
+		rd1_en = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+		rd2_en = 1;
+		rd2_idx = 0;
+		rd2_tag = 0;
+		read_from_test(rd2_idx, rd2_tag);
+
+		@(posedge clock);
+		`DELAY;
+		assert(miss_valid_rd2 == 1) else #1 exit_on_error;
+		assert(miss_idx_rd2 == rd2_idx) else #1 exit_on_error;
+		assert(miss_tag_rd2 == rd2_tag) else #1 exit_on_error;
+		assert(rd2_valid == 0) else #1 exit_on_error;
+		check_correct_test;
+
+		$display("Single Read Miss Port 2 Passed");
+
+		$display("Testing Single Read Port 2...");
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 1;
+		wr1_idx = (`NUM_SETS - 1);
+		wr1_tag = 4;
+		wr1_data = 69;
+		wr1_dirty = 0;
+		rd1_en = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+		rd2_en = 0;
+		rd2_idx = 0;
+		rd2_tag = 0;
+		write_to_test;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_test;
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		wr1_dirty = 0;
+		rd1_en = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+		rd2_en = 1;
+		rd2_idx = (`NUM_SETS - 1);
+		rd2_tag = 4;
+		read_from_test(rd2_idx, rd2_tag);
+
+		@(posedge clock);
+		`DELAY;
+		assert(miss_valid_rd2 == 0) else #1 exit_on_error;
+		assert(rd2_valid == 1) else #1 exit_on_error;
+		assert(rd2_data == 69) else #1 exit_on_error;
+		check_correct_test;
+
+		$display("Single Read Port 2 Passed");
 
 		$display("@@@Passed");
 		$finish;
