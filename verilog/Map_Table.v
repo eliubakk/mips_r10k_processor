@@ -72,6 +72,9 @@ module Map_Table(
 					
 					T1[i] =  (reg_a == `ZERO_REG)? `DUMMY_REG :next_map_table[reg_a[i]].phys_tag;
 					T2[i] = (reg_b == `ZERO_REG)? `DUMMY_REG : next_map_table[reg_b[i]].phys_tag;
+					//T1[i] =  next_map_table[reg_a[i]].phys_tag;
+					//T2[i] =  next_map_table[reg_b[i]].phys_tag;
+					
 					T_old[i] = next_map_table[reg_dest[i]].phys_tag;	
 					next_map_table[reg_dest[i]].phys_tag = free_reg[i];
 					

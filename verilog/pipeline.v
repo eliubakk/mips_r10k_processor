@@ -1271,7 +1271,15 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               co_take_branch_selected       =    1'b0;
               co_alu_result_selected        =    mem_co_alu_result;
               co_branch_valid               =    1'b0;
-            end else begin
+
+	 co_branch_valid = 1'b0;
+	 co_take_branch_selected = 1'b0;
+	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+	 co_branch_target = 32'h0;
+
+        
+    
+	end else begin
               co_NPC_selected               =    ex_co_NPC[i];
               co_IR_selected                =    ex_co_IR[i];
               co_halt_selected              =    ex_co_halt[i];
@@ -1285,7 +1293,15 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 			          co_take_branch_selected = ex_co_take_branch;
 			          co_branch_index = ex_co_branch_index;
 			          co_branch_target = ex_co_branch_target;
-	          	end
+	      end else begin
+		 co_branch_valid = 1'b0;
+		 co_take_branch_selected = 1'b0;
+		 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+		 co_branch_target = 32'h0;
+
+		 	  
+
+		end
             end
           end         
         end 
@@ -1299,6 +1315,13 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
           co_take_branch_selected     =    0;
           co_alu_result_selected      =    0;
           co_branch_valid             =    0; 
+
+
+	 co_branch_valid = 1'b0;
+	 co_take_branch_selected = 1'b0;
+	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+	 co_branch_target = 32'h0;
+
       end
     end
    

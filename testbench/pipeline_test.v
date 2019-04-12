@@ -756,12 +756,14 @@ module testbench;
        // print the writeback information to writeback.out
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)
-           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x",
+//, PHYS_REG=%d, PHYS_REG_FROM_ARCH=%d, Cycle : %d
+           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x, PHYS_REG=%d, PHYS_REG_FROM_ARCH=%d, Cycle : %d ",
                      pipeline_commit_NPC,
                      pipeline_commit_wr_idx,
-                     pipeline_commit_wr_data//,
-		    //pipeline_commit_phys_reg,
-		//	pipeline_commit_phys_from_arch 
+                     pipeline_commit_wr_data,
+		    pipeline_commit_phys_reg,
+			pipeline_commit_phys_from_arch,
+			clock_count
 		     );
         else
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC);
