@@ -137,8 +137,8 @@ module cachemem(
 		assign tag_table_in_read[i][1] = sets[rd1_idx].cache_lines[i].tag;
 		assign tag_table_in_read[i][0] = sets[rd2_idx].cache_lines[i].tag;
 		assign tag_table_in_write[i] = sets[wr1_idx].cache_lines[i].tag;
-		assign tag_hits_read1[i] = read_cam_hits_out[i][1][1];
-		assign tag_hits_read2[i] = read_cam_hits_out[i][0][0];
+		assign tag_hits_read1[i] = read_cam_hits_out[i][1][1] & sets[rd1_idx].cache_lines[i].valid;
+		assign tag_hits_read2[i] = read_cam_hits_out[i][0][0] & sets[rd2_idx].cache_lines[i].valid;
 	end
 
 	always_comb begin

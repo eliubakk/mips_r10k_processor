@@ -31,19 +31,19 @@ module icache(
   logic [(`NUM_SET_BITS - 1):0] cache_wr_idx;
   logic [(`NUM_TAG_BITS - 1):0] cache_wr_tag;
   logic [63:0]                  cache_wr_data;
-  logic cache_rd_en;
-  logic [(`NUM_SET_BITS - 1):0] cache_rd_idx;
-  logic [(`NUM_TAG_BITS - 1):0] cache_rd_tag;
+  logic cache_rd_PC_in_en, cache_rd_PC_queue_en;
+  logic [(`NUM_SET_BITS - 1):0] cache_rd_PC_in_idx, cache_rd_PC_queue_idx;
+  logic [(`NUM_TAG_BITS - 1):0] cache_rd_PC_in_tag, cache_rd_PC_queue_tag;
 
   //cache memory outputs
-  logic cache_miss_valid_rd;
-  logic [(`NUM_SET_BITS - 1):0] cache_miss_idx_rd;
-  logic [(`NUM_TAG_BITS - 1):0] cache_miss_tag_rd;
+  logic cache_miss_PC_in_valid_rd, cache_miss_PC_queue_valid_rd;
+  logic [(`NUM_SET_BITS - 1):0] cache_miss_PC_in_idx_rd, cache_miss_PC_queue_idx_rd;
+  logic [(`NUM_TAG_BITS - 1):0] cache_miss_PC_in_tag_rd, cache_miss_PC_queue_tag_rd;
   logic cache_miss_valid_wr;
   logic [(`NUM_SET_BITS - 1):0] cache_miss_idx_wr;
   logic [(`NUM_TAG_BITS - 1):0] cache_miss_tag_wr;
-  logic [63:0]                  cache_rd_data;
-  logic cache_rd_valid;
+  logic [63:0]                  cache_rd_PC_in_data, cache_rd_PC_queue_data;
+  logic cache_rd_PC_in_valid, cache_rd_PC_queue_valid;
 
   cachemem memory(
     .clock(clock),
@@ -55,24 +55,32 @@ module icache(
     .wr1_data(cache_wr_data),
     .wr1_dirty(1'b0),
 
-    .rd1_en(cache_rd_en),
-    .rd1_idx(cache_rd_idx),
-    .rd1_tag(cache_rd_tag),
+    .rd1_en(cache_rd_PC_in_en),
+    .rd1_idx(cache_rd_PC_in_idx),
+    .rd1_tag(cache_rd_PC_in_tag),
+    .rd2_en(cache_rd_PC_queue_en),
+    .rd2_idx(cache_rd_PC_queue_idx),
+    .rd2_tag(cache_rd_PC_queue_tag),
 
     .victim_valid(),
     .victim(),
     .vic_idx(),
 
-    .miss_valid_rd(cache_miss_valid_rd),
-    .miss_idx_rd(cache_miss_idx_rd),
-    .miss_tag_rd(cache_miss_tag_rd),
+    .miss_valid_rd1(cache_miss_PC_in_valid_rd),
+    .miss_idx_rd1(cache_miss_PC_in_idx_rd),
+    .miss_tag_rd1(cache_miss_PC_in_tag_rd),
+    .miss_valid_rd2(cache_miss_PC_queue_valid_rd),
+    .miss_idx_rd2(cache_miss_PC_queue_idx_rd),
+    .miss_tag_rd2(cache_miss_PC_queue_tag_rd),
 
     .miss_valid_wr(cache_miss_valid_wr),
     .miss_idx_wr(cache_miss_idx_wr),
     .miss_tag_wr(cache_miss_tag_wr),
 
-    .rd1_data(cache_rd_data),
-    .rd1_valid(cache_rd_valid)
+    .rd1_data(cache_rd_PC_in_data),
+    .rd1_valid(cache_rd_PC_in_valid),
+    .rd2_data(cache_rd_PC_queue_data),
+    .rd2_valid(cache_rd_PC_queue_valid)
   );
 
   ICACHE_BUFFER_T [`INST_BUFFER_LEN-1:0] PC_queue, PC_queue_next;
@@ -93,6 +101,8 @@ module icache(
   //control variables
   logic send_request;
   logic changed_addr;
+  logic unanswered_miss;
+  logic update_mem_tag;
 
   //Instantiate CAM to check for requested address in queue
   genvar ig;
@@ -118,13 +128,20 @@ module icache(
 
   assign changed_addr = (PC_in != last_PC_in);
 
-  assign Icache_data_out = cache_rd_data;
-  assign Icache_valid_out = cache_rd_valid;
+  assign cache_rd_PC_in_en = 1'b1;
+  assign {cache_rd_PC_in_tag, cache_rd_PC_in_idx} = PC_in[31:3];
+
+  assign Icache_data_out = cache_rd_PC_in_data;
+  assign Icache_valid_out = cache_rd_PC_in_valid;
+
+  assign unanswered_miss = send_request? (Imem2proc_response == 0) :
+                           (PC_queue_tail == 0) & changed_addr? cache_rd_PC_in_en & ~cache_rd_PC_in_valid : 
+                                                              cache_rd_PC_queue_en & ~cache_rd_PC_queue_valid;
 
   assign proc2Imem_addr = send_request? PC_queue[send_req_ptr].address :
                                         64'b0;
-  assign proc2Imem_command = send_request?  BUS_LOAD :
-                                            BUS_NONE;
+  assign proc2Imem_command = send_request? BUS_LOAD :
+                                           BUS_NONE;
 
   assign cache_wr_en = (PC_queue[0].Imem_tag == Imem2proc_tag) &&
                               (PC_queue[0].Imem_tag != 0);
@@ -132,18 +149,17 @@ module icache(
   assign cache_wr_tag = current_tag;
   assign cache_wr_data = Imem2proc_data;
 
-  wire update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
+  assign update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
 
-  wire unanswered_miss = send_request ? (Imem2proc_response == 0) :
-                                        cache_rd_en & ~cache_rd_valid;
+
 
   always_comb begin
     PC_queue_next = PC_queue;
     PC_queue_tail_next = PC_queue_tail;
     send_req_ptr_next = send_req_ptr;
-    cache_rd_en = 1'b0;
-    cache_rd_tag = 0;
-    cache_rd_idx = 0;
+    cache_rd_PC_queue_en = 1'b0;
+    cache_rd_PC_queue_tag = 0;
+    cache_rd_PC_queue_idx = 0;
 
     if(cache_wr_en) begin
       PC_queue_next[`INST_BUFFER_LEN-1:0] = {EMPTY_ICACHE, PC_queue[`INST_BUFFER_LEN-1:1]};
@@ -151,12 +167,9 @@ module icache(
       send_req_ptr_next -= 1;
     end
 
-    if(changed_addr) begin
-      cache_rd_en = 1'b1;
-      {cache_rd_tag, cache_rd_idx} = PC_in[31:3];
-    end else if(send_req_ptr < PC_queue_tail & ~send_request) begin
-      cache_rd_en = 1'b1;
-      {cache_rd_tag, cache_rd_idx} = PC_queue[send_req_ptr].address[31:3];
+    if(send_req_ptr < PC_queue_tail & ~send_request) begin
+      cache_rd_PC_queue_en = 1'b1;
+      {cache_rd_PC_queue_tag, cache_rd_PC_queue_idx} = PC_queue[send_req_ptr].address[31:3];
     end
 
     if(update_mem_tag) begin
@@ -164,13 +177,15 @@ module icache(
       send_req_ptr_next += 1;
     end
 
-    if(~(|PC_in_hits) & changed_addr & unanswered_miss & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
+    if(~(|PC_in_hits) & changed_addr & ~cache_rd_PC_in_valid & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
       PC_queue_next[PC_queue_tail_next].address = {PC_in[63:3], 3'b0};
+      PC_queue_next[PC_queue_tail_next].cache_checked = 1'b1;
       PC_queue_next[PC_queue_tail_next].valid = 1'b1;
       PC_queue_tail_next += 1;
     end
-    if(~(|PC_in_Plus8_hits) & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
+    if(~(|PC_in_Plus8_hits) & changed_addr & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
       PC_queue_next[PC_queue_tail_next].address = PC_in_Plus8;
+      PC_queue_next[PC_queue_tail_next].cache_checked = 1'b0;
       PC_queue_next[PC_queue_tail_next].valid = 1'b1;
       PC_queue_tail_next += 1;
     end    

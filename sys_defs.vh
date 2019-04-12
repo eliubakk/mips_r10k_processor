@@ -60,6 +60,7 @@ typedef struct packed {
 
 typedef struct packed {
   logic [63:0] address;
+  logic cache_checked;
   logic [3:0] Imem_tag;
   logic valid;
 } ICACHE_BUFFER_T;
@@ -67,6 +68,7 @@ typedef struct packed {
 const ICACHE_BUFFER_T EMPTY_ICACHE = 
 {
   64'b0,
+  1'b1,
   4'b0,
   1'b0
 };
