@@ -18,16 +18,16 @@ module inst_cache(
 );
 
 	// internal data
-	logic wr1_en;
-	logic [(`NUM_SET_BITS - 1):0] wr1_idx;
-	logic [(`NUM_TAG_BITS - 1):0] wr1_tag;
+	wire wr1_en;
+	wire [(`NUM_SET_BITS - 1):0] wr1_idx;
+	wire [(`NUM_TAG_BITS - 1):0] wr1_tag;
 
-	logic rd1_en = 1'b1;
-	logic [(`NUM_SET_BITS - 1):0] rd1_idx;
-	logic [(`NUM_TAG_BITS - 1):0] rd1_tag;
+	wire rd1_en = 1'b1;
+	wire [(`NUM_SET_BITS - 1):0] rd1_idx;
+	wire [(`NUM_TAG_BITS - 1):0] rd1_tag;
 
-	logic [63:0] rd1_data;
-	logic rd1_valid;
+	wire [63:0] rd1_data;
+	wire rd1_valid;
 
 	// modules
 	cachemem memory(
