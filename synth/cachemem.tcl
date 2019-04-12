@@ -21,7 +21,7 @@ elaborate cachemem
 set design_name cachemem
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 3.75
+set CLK_PERIOD 4.05
 #set CLK_PERIOD 10
 
 

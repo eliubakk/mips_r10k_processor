@@ -112,6 +112,7 @@ module testbench;
 		end
 	endtask
 
+	/*
 	task print_cam_inputs;
 		begin
 			$display("CAM STUFF-----------------------------------------------------------------------------");
@@ -125,6 +126,7 @@ module testbench;
 			$display("--------------------------------------------------------------------------------------");
 		end
 	endtask
+	*/
 
 	task print_bst;
 		begin
