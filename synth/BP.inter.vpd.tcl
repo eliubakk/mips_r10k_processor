@@ -1,16 +1,16 @@
 # Begin_DVE_Session_Save_Info
 # DVE full session
-# Saved on Thu Apr 11 21:39:02 2019
+# Saved on Thu Apr 11 23:20:27 2019
 # Designs open: 1
 #   Sim: dve
 # Toplevel windows open: 2
 # 	TopLevel.1
 # 	TopLevel.2
 #   Source.1: _vcs_unit__1714782935
-#   Wave.1: 28 signals
-#   Group count = 2
-#   Group Group1 signal count = 6
-#   Group if_stage_0 signal count = 22
+#   Wave.1: 73 signals
+#   Group count = 4
+#   Group Group1 signal count = 35
+#   Group if_stage_0 signal count = 21
 # End_DVE_Session_Save_Info
 
 # DVE version: N-2017.12-SP2-1_Full64
@@ -69,7 +69,7 @@ if {![gui_exist_window -window TopLevel.1]} {
 } else { 
     set TopLevel.1 TopLevel.1
 }
-gui_show_window -window ${TopLevel.1} -show_state maximized -rect {{1 38} {3440 1378}}
+gui_show_window -window ${TopLevel.1} -show_state normal -rect {{0 139} {3072 1329}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -116,23 +116,28 @@ gui_show_toolbar -toolbar {Testbench}
 # End ToolBar settings
 
 # Docked window settings
-set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 202]
+set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 198]
 catch { set Hier.1 [gui_share_window -id ${HSPane.1} -type Hier] }
-gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 202
+gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 198
 gui_set_window_pref_key -window ${HSPane.1} -key dock_height -value_type integer -value -1
 gui_set_window_pref_key -window ${HSPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 201} {height 1093} {dock_state left} {dock_on_new_line true} {child_hier_colhier 184} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
-set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 249]
+gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 197} {height 936} {dock_state left} {dock_on_new_line true} {child_hier_colhier 184} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
+set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 245]
 catch { set Data.1 [gui_share_window -id ${DLPane.1} -type Data] }
-gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 249
-gui_set_window_pref_key -window ${DLPane.1} -key dock_height -value_type integer -value 1092
+gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 245
+gui_set_window_pref_key -window ${DLPane.1} -key dock_height -value_type integer -value 947
 gui_set_window_pref_key -window ${DLPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 248} {height 1093} {dock_state left} {dock_on_new_line true} {child_data_colvariable 228} {child_data_colvalue 109} {child_data_coltype 53} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
-set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 173]
-gui_set_window_pref_key -window ${Console.1} -key dock_width -value_type integer -value 3380
-gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 173
+gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 244} {height 936} {dock_state left} {dock_on_new_line true} {child_data_colvariable 228} {child_data_colvalue 109} {child_data_coltype 53} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
+set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 169]
+gui_set_window_pref_key -window ${Console.1} -key dock_width -value_type integer -value -1
+gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 169
 gui_set_window_pref_key -window ${Console.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 3439} {height 172} {dock_state bottom} {dock_on_new_line true}}
+gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 271} {height 179} {dock_state bottom} {dock_on_new_line true}}
+set DriverLoad.1 [gui_create_window -type DriverLoad -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line false -dock_extent 180]
+gui_set_window_pref_key -window ${DriverLoad.1} -key dock_width -value_type integer -value 150
+gui_set_window_pref_key -window ${DriverLoad.1} -key dock_height -value_type integer -value 180
+gui_set_window_pref_key -window ${DriverLoad.1} -key dock_offset -value_type integer -value 0
+gui_update_layout -id ${DriverLoad.1} {{left 0} {top 0} {width 2800} {height 179} {dock_state bottom} {dock_on_new_line false}}
 #### Start - Readjusting docked view's offset / size
 set dockAreaList { top left right bottom }
 foreach dockArea $dockAreaList {
@@ -169,7 +174,7 @@ if {![gui_exist_window -window TopLevel.2]} {
 } else { 
     set TopLevel.2 TopLevel.2
 }
-gui_show_window -window ${TopLevel.2} -show_state maximized -rect {{60 66} {3499 1406}}
+gui_show_window -window ${TopLevel.2} -show_state maximized -rect {{60 103} {3499 1443}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -268,23 +273,43 @@ gui_set_time_units 100ps
 # Global: Signal Compare
 
 # Global: Signal Groups
+gui_load_child_values {testbench.pipeline_0.ex_stage_0.brcond}
 gui_load_child_values {testbench}
+gui_load_child_values {testbench.pipeline_0.ex_stage_0}
 gui_load_child_values {testbench.pipeline_0.if_stage_0}
 
 
-set _session_group_5 Group1
-gui_sg_create "$_session_group_5"
-set Group1 "$_session_group_5"
+set _session_group_30 Group1
+gui_sg_create "$_session_group_30"
+set Group1 "$_session_group_30"
 
-gui_sg_addsignal -group "$_session_group_5" { testbench.clock_count testbench.if_NPC_out testbench.if_IR_out testbench.if_valid_inst_out testbench.pipeline_0.if_stage_0.PC_enable testbench.pipeline_0.dispatch_no_hazard }
+gui_sg_addsignal -group "$_session_group_30" { testbench.clock_count testbench.pipeline_0.if_NPC_out testbench.pipeline_0.if_IR_out testbench.pipeline_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.co_ret_take_branch testbench.pipeline_0.dispatch_no_hazard testbench.pipeline_0.branch_not_taken testbench.pipeline_0.ret_pred_correct testbench.pipeline_0.if_branch_inst testbench.pipeline_0.if_id_branch_inst testbench.pipeline_0.rob_retire_out testbench.pipeline_0.if_stage_0.PC_enable testbench.pipeline_0.if_id_NPC testbench.pipeline_0.if_id_IR testbench.pipeline_0.if_id_valid_inst testbench.pipeline_0.ex_take_branch_out testbench.pipeline_0.ex_co_take_branch testbench.pipeline_0.co_NPC_selected testbench.pipeline_0.co_valid_inst_selected testbench.pipeline_0.co_branch_valid testbench.pipeline_0.co_IR_selected testbench.pipeline_0.co_alu_result_selected {testbench.pipeline_0.issue_reg[4]} {testbench.pipeline_0.is_ex_T1_value[4]} {testbench.pipeline_0.ex_stage_0.opa_mux_out[4]} {testbench.pipeline_0.ex_stage_0.opb_mux_out[4]} {testbench.pipeline_0.is_ex_T2_value[4]} {testbench.pipeline_0.ex_alu_result_out[4]} testbench.pipeline_0.ex_take_branch_out testbench.pipeline_0.issue_reg testbench.pipeline_0.is_ex_T1_value testbench.pipeline_0.is_ex_T2_value testbench.pipeline_0.ex_alu_result_out }
 gui_set_radix -radix {decimal} -signals {Sim:testbench.clock_count}
 gui_set_radix -radix {unsigned} -signals {Sim:testbench.clock_count}
 
-set _session_group_6 if_stage_0
-gui_sg_create "$_session_group_6"
-set if_stage_0 "$_session_group_6"
+set _session_group_31 $_session_group_30|
+append _session_group_31 ex_stage_0
+gui_sg_create "$_session_group_31"
+set Group1|ex_stage_0 "$_session_group_31"
 
-gui_sg_addsignal -group "$_session_group_6" { testbench.pipeline_0.if_stage_0.Imem_valid testbench.pipeline_0.if_stage_0.next_ready_for_valid testbench.pipeline_0.if_stage_0.if_IR_out testbench.pipeline_0.if_stage_0.clock testbench.pipeline_0.if_stage_0.reset testbench.pipeline_0.if_stage_0.next_PC testbench.pipeline_0.if_stage_0.PC_reg testbench.pipeline_0.if_stage_0.PC_plus_4 testbench.pipeline_0.if_stage_0.if_bp_NPC testbench.pipeline_0.if_stage_0.co_ret_take_branch testbench.pipeline_0.if_stage_0.co_ret_valid_inst testbench.pipeline_0.if_stage_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.if_PC_reg testbench.pipeline_0.if_stage_0.if_NPC_out testbench.pipeline_0.if_stage_0.co_ret_branch_valid testbench.pipeline_0.if_stage_0.Imem2proc_data testbench.pipeline_0.if_stage_0.proc2Imem_addr testbench.pipeline_0.if_stage_0.if_bp_NPC_valid {testbench.pipeline_0.if_stage_0.$unit} testbench.pipeline_0.if_stage_0.ready_for_valid testbench.pipeline_0.if_stage_0.dispatch_en testbench.pipeline_0.if_stage_0.co_ret_target_pc }
+gui_sg_addsignal -group "$_session_group_31" { testbench.pipeline_0.ex_stage_0.brcond_result testbench.pipeline_0.ex_stage_0.clock testbench.pipeline_0.ex_stage_0.opa_mux_out testbench.pipeline_0.ex_stage_0.opb_mux_out testbench.pipeline_0.ex_stage_0.br_disp testbench.pipeline_0.ex_stage_0.reset testbench.pipeline_0.ex_stage_0.mem_disp testbench.pipeline_0.ex_stage_0.issue_reg testbench.pipeline_0.ex_stage_0.T2_value testbench.pipeline_0.ex_stage_0.ex_take_branch_out testbench.pipeline_0.ex_stage_0.alu_imm testbench.pipeline_0.ex_stage_0.done testbench.pipeline_0.ex_stage_0.T1_value {testbench.pipeline_0.ex_stage_0.$unit} testbench.pipeline_0.ex_stage_0.ex_alu_result_out }
+
+gui_sg_move "$_session_group_31" -after "$_session_group_30" -pos 27 
+
+set _session_group_32 $_session_group_30|
+append _session_group_32 brcond
+gui_sg_create "$_session_group_32"
+set Group1|brcond "$_session_group_32"
+
+gui_sg_addsignal -group "$_session_group_32" { testbench.pipeline_0.ex_stage_0.brcond.opa testbench.pipeline_0.ex_stage_0.brcond.cond testbench.pipeline_0.ex_stage_0.brcond.func {testbench.pipeline_0.ex_stage_0.brcond.$unit} }
+
+gui_sg_move "$_session_group_32" -after "$_session_group_30" -pos 26 
+
+set _session_group_33 if_stage_0
+gui_sg_create "$_session_group_33"
+set if_stage_0 "$_session_group_33"
+
+gui_sg_addsignal -group "$_session_group_33" { testbench.pipeline_0.if_stage_0.Imem_valid testbench.pipeline_0.if_stage_0.next_ready_for_valid testbench.pipeline_0.if_stage_0.if_IR_out testbench.pipeline_0.if_stage_0.clock testbench.pipeline_0.if_stage_0.reset testbench.pipeline_0.if_stage_0.next_PC testbench.pipeline_0.if_stage_0.PC_reg testbench.pipeline_0.if_stage_0.PC_plus_4 testbench.pipeline_0.if_stage_0.if_bp_NPC testbench.pipeline_0.if_stage_0.co_ret_valid_inst testbench.pipeline_0.if_stage_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.if_PC_reg testbench.pipeline_0.if_stage_0.if_NPC_out testbench.pipeline_0.if_stage_0.co_ret_branch_valid testbench.pipeline_0.if_stage_0.Imem2proc_data testbench.pipeline_0.if_stage_0.proc2Imem_addr testbench.pipeline_0.if_stage_0.if_bp_NPC_valid {testbench.pipeline_0.if_stage_0.$unit} testbench.pipeline_0.if_stage_0.ready_for_valid testbench.pipeline_0.if_stage_0.dispatch_en testbench.pipeline_0.if_stage_0.co_ret_target_pc }
 
 # Global: Highlighting
 
@@ -294,7 +319,7 @@ gui_change_stack_mode -mode list
 # Post database loading setting...
 
 # Restore C1 time
-gui_set_time -C1_only 114610
+gui_set_time -C1_only 83241
 
 
 
@@ -326,7 +351,7 @@ gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Data 'Data.1'
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
-gui_list_set_filter -id ${Data.1} -text {*dispatch_no_hazard}
+gui_list_set_filter -id ${Data.1} -text {dispatch_no_hazard}
 gui_list_show_data -id ${Data.1} {testbench.pipeline_0}
 gui_show_window -window ${Data.1}
 catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.dispatch_no_hazard }}
@@ -353,10 +378,15 @@ gui_list_set_height -id Wave -height 25
 set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
 gui_marker_set_ref -id ${Wave.1}  C1
-gui_wv_zoom_timerange -id ${Wave.1} 585 3805
+gui_wv_zoom_timerange -id ${Wave.1} 120719 123260
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group1}
+gui_list_add_group -id ${Wave.1}  -after {testbench.pipeline_0.ex_stage_0.opb_mux_out[4][63:0]} {Group1|brcond}
+gui_list_add_group -id ${Wave.1} -after Group1|brcond {Group1|ex_stage_0}
 gui_list_add_group -id ${Wave.1} -after {New Group} {if_stage_0}
-gui_list_select -id ${Wave.1} {testbench.pipeline_0.if_stage_0.PC_enable }
+gui_list_collapse -id ${Wave.1} Group1|brcond
+gui_list_collapse -id ${Wave.1} Group1|ex_stage_0
+gui_list_expand -id ${Wave.1} testbench.pipeline_0.rob_retire_out
+gui_list_select -id ${Wave.1} {testbench.pipeline_0.dispatch_no_hazard testbench.pipeline_0.rob_retire_out.opcode testbench.pipeline_0.rob_retire_out.npc }
 gui_seek_criteria -id ${Wave.1} {Any Edge}
 
 
@@ -374,9 +404,12 @@ gui_list_set_filter -id ${Wave.1} -list { {Buffer 1} {Input 1} {Others 1} {Linka
 gui_list_set_filter -id ${Wave.1} -text {*}
 gui_list_set_insertion_bar  -id ${Wave.1} -group Group1  -item testbench.pipeline_0.dispatch_no_hazard -position below
 
-gui_marker_move -id ${Wave.1} {C1} 114610
+gui_marker_move -id ${Wave.1} {C1} 83241
 gui_view_scroll -id ${Wave.1} -vertical -set 0
 gui_show_grid -id ${Wave.1} -enable false
+
+# DriverLoad 'DriverLoad.1'
+gui_get_drivers -session -id ${DriverLoad.1} -signal testbench.pipeline_0.rob_retire_out.branch_inst.prediction -time 121510 -starttime 127042
 # Restore toplevel window zorder
 # The toplevel window could be closed if it has no view/pane
 if {[gui_exist_window -window ${TopLevel.1}]} {

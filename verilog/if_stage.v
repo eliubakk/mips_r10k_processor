@@ -73,7 +73,8 @@ module if_stage(
 
 
 //assign if_valid_inst_out = Imem_valid;
-assign if_valid_inst_out = PC_enable;  
+//assign if_valid_inst_out = PC_enable; 
+assign if_valid_inst_out = PC_enable;
 // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
   //                               !if_valid_inst_out;
 
@@ -82,9 +83,9 @@ assign if_valid_inst_out = PC_enable;
   always_ff @(posedge clock) begin
     if(reset)
       PC_reg <= `SD 0;       // initial PC value is 0
-    else if (co_ret_take_branch) 
+   else if (co_ret_take_branch) 
       PC_reg <= `SD co_ret_target_pc;
-    else if(PC_enable)
+   else if(PC_enable)
       PC_reg <= `SD next_PC; // transition to next PC
   end  // always
 
