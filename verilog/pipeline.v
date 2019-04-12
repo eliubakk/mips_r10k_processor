@@ -790,11 +790,11 @@ end
   //////////////////////////////////////////////////
   // not sure whether it can be directly assigned
   always_comb begin
-    for (integer i=0; i<3; i=i+1) begin
+    for (integer i=0; i<2; i=i+1) begin
       ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
- 
+  assign ex_co_enable[2]= (~ex_co_valid_inst[2])| (ex_co_valid_inst[2] & co_selected[2]) & (~mem_stall_out);
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
   assign ex_co_enable[3] = 1 ;
@@ -955,7 +955,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //                                              //
   //////////////////////////////////////////////////
   
-  assign mem_co_enable= (~mem_co_valid_inst) | (mem_co_valid_inst & co_selected[2]);
+  assign mem_co_enable= ((~mem_co_valid_inst) | (mem_co_valid_inst & co_selected[2]));
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken ) begin
       mem_co_valid_inst   <= `SD 0;
@@ -973,15 +973,15 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
       mem_co_illegal      <= `SD ex_co_illegal[2];
       mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
       mem_co_alu_result   <= `SD mem_result_out;
-    end else begin
-      mem_co_valid_inst   <= `SD mem_valid_inst_out;
-      mem_co_NPC          <= `SD ex_co_NPC[2];
-      mem_co_IR          <= `SD ex_co_IR[2];
-      mem_co_halt         <= `SD ex_co_halt[2];
-      mem_co_illegal      <= `SD ex_co_illegal[2];
-      mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
-      mem_co_alu_result   <= `SD mem_result_out;   
-    end
+    // end else begin
+    //   mem_co_valid_inst   <= `SD mem_valid_inst_out;
+    //   mem_co_NPC          <= `SD ex_co_NPC[2];
+    //   mem_co_IR          <= `SD ex_co_IR[2];
+    //   mem_co_halt         <= `SD ex_co_halt[2];
+    //   mem_co_illegal      <= `SD ex_co_illegal[2];
+    //   mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
+    //   mem_co_alu_result   <= `SD mem_result_out;   
+     end
   end
   
  

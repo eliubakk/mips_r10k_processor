@@ -175,7 +175,7 @@ module decoder(
           case (inst[31:26])
             `LDA_INST:  /* defaults are OK */
             begin
-             fu_name = FU_LD;
+             fu_name = FU_ALU;
             end
             `LDQ_INST:
             begin
