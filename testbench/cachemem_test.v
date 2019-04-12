@@ -15,9 +15,9 @@ module testbench;
 
 	CACHE_SET_T [(`NUM_SETS - 1):0] sets_test;
 	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_test;
-	logic miss_valid_rd_test;
-	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd_test;
-	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd_test;
+	logic miss_valid_rd1_test;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd1_test;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd1_test;
 	logic miss_valid_wr_test;
 	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr_test;
 	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr_test;
@@ -50,9 +50,9 @@ module testbench;
 	logic [(`NUM_SET_BITS - 1):0] miss_idx_wr;
 	logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr;
 
-	logic miss_valid_rd;
-	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd;
-	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd;
+	logic miss_valid_rd1;
+	logic [(`NUM_SET_BITS - 1):0] miss_idx_rd1;
+	logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd1;
 
 	logic [63:0] rd1_data;
 	logic rd1_valid;
@@ -85,9 +85,9 @@ module testbench;
 		.miss_idx_wr(miss_idx_wr),
 		.miss_tag_wr(miss_tag_wr),
 
-		.miss_valid_rd(miss_valid_rd),
-		.miss_idx_rd(miss_idx_rd),
-		.miss_tag_rd(miss_tag_rd),
+		.miss_valid_rd1(miss_valid_rd1),
+		.miss_idx_rd1(miss_idx_rd1),
+		.miss_tag_rd1(miss_tag_rd1),
 
 		.rd1_data(rd1_data),
 		.rd1_valid(rd1_valid)
@@ -298,22 +298,22 @@ module testbench;
 			end
 
 			if (found_read === 1) begin
-				miss_valid_rd_test = 0;
+				miss_valid_rd1_test = 0;
 				update_bst_test(rd1_idx, idx_read);
 			end else begin
-				miss_valid_rd_test = 1;
-				miss_idx_rd_test = rd1_idx;
-				miss_tag_rd_test = rd1_tag;
+				miss_valid_rd1_test = 1;
+				miss_idx_rd1_test = rd1_idx;
+				miss_tag_rd1_test = rd1_tag;
 			end
 		end
 	endtask
 
 	task check_correct_read_miss;
 		begin
-			assert(miss_valid_rd_test == miss_valid_rd) else #1 exit_on_error;
-			if (miss_valid_rd) begin
-				assert(miss_idx_rd_test == rd1_idx) else #1 exit_on_error;
-				assert(miss_tag_rd_test == rd1_tag) else #1 exit_on_error;
+			assert(miss_valid_rd1_test == miss_valid_rd1) else #1 exit_on_error;
+			if (miss_valid_rd1) begin
+				assert(miss_idx_rd1_test == rd1_idx) else #1 exit_on_error;
+				assert(miss_tag_rd1_test == rd1_tag) else #1 exit_on_error;
 			end
 		end
 	endtask
@@ -384,7 +384,7 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd: %b miss_idx_rd: %d miss_tag_rd: %d miss_valid_wr: %b miss_idx_wr: %d miss_tag_wr: %d victim_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd, miss_idx_rd, miss_tag_rd, miss_valid_wr, miss_idx_wr, miss_tag_wr, victim_valid);
+		$monitor("clock: %b reset: %b wr1_en: %b wr1_idx: %d wr1_tag: %d wr1_data: %d wr1_dirty: %b rd1_en: %b rd1_idx: %d rd1_tag: %d rd1_data: %d rd1_valid: %b miss_valid_rd1: %b miss_idx_rd1: %d miss_tag_rd1: %d miss_valid_wr: %b miss_idx_wr: %d miss_tag_wr: %d victim_valid: %b", clock, reset, wr1_en, wr1_idx, wr1_tag, wr1_data, wr1_dirty, rd1_en, rd1_idx, rd1_tag, rd1_data, rd1_valid, miss_valid_rd1, miss_idx_rd1, miss_tag_rd1, miss_valid_wr, miss_idx_wr, miss_tag_wr, victim_valid);
 		
 		// intial values
 		clock = 0;
@@ -760,7 +760,7 @@ module testbench;
 		read_from_test;
 
 		@(posedge clock);
-		assert(miss_valid_rd == 1) else #1 exit_on_error;
+		assert(miss_valid_rd1 == 1) else #1 exit_on_error;
 
 		$display("Read Miss Passed");
 
