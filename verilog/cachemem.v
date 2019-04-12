@@ -51,9 +51,12 @@ module cachemem(
 	logic [(`NUM_WAYS - 1):0] tag_hits_read;
 	logic [(`NUM_WAYS - 1):0] tag_hits_write;
 	logic [(`NUM_WAYS - 1):0] tag_hits_write_found;
-	logic [(`NUM_WAYS - 1):0] has_invalid;
+	logic [(`NUM_WAYS - 1):0] tag_hits_read_found;
+	logic [(`NUM_WAYS - 1):0] has_invalid_write;
+	logic [(`NUM_WAYS - 1):0] has_invalid_read;
 	logic [(`NUM_WAYS - 1):0] invalid_sel;
 	logic [(`NUM_WAYS - 1):0] enc_in_write;
+	logic [(`NUM_WAYS - 1):0] enc_in_read;
 	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_read;
 	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write;
 	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write_out;
@@ -66,7 +69,7 @@ module cachemem(
 		.NUM_TAGS(1),
 		.TAG_SIZE(`NUM_TAG_BITS))
 	read_cam(
-		.enable(1'b1),
+		.enable(rd1_en),
 		.tags(rd1_tag),
 		.table_in(tag_table_in_read),
 		.hits(tag_hits_read));
@@ -80,7 +83,7 @@ module cachemem(
 			.WIDTH(`NUM_WAYS),
 			.NUM_REQS(1))
 	idx_psel(
-		.req(has_invalid),
+		.req(has_invalid_write),
 		.en(wr1_en),
 		.gnt(invalid_sel));
 
@@ -114,12 +117,14 @@ module cachemem(
 
 	assign miss_idx_rd = rd1_idx;
 	assign miss_tag_rd = rd1_tag;
+	assign miss_valid_rd = (rd1_en) & ~(|tag_hits_read_found);
 
 	assign miss_idx_wr = wr1_idx;
 	assign miss_tag_wr = wr1_tag;
 
 	for (genvar i = 0; i < `NUM_WAYS; ++i) begin
-		assign has_invalid[i] = ~sets[wr1_idx].cache_lines[i].valid;
+		assign has_invalid_write[i] = ~sets[wr1_idx].cache_lines[i].valid;
+		assign has_invalid_read[i] = ~sets[rd1_idx].cache_lines[i].valid;
 		assign tag_table_in_read[i] = sets[rd1_idx].cache_lines[i].tag;
 		assign tag_table_in_write[i] = sets[wr1_idx].cache_lines[i].tag;
 	end
@@ -128,9 +133,10 @@ module cachemem(
 		sets_next = sets;
 		bst_next = bst;
 		enc_in_write = tag_hits_write;
+		enc_in_read = tag_hits_read;
 		tag_idx_write = tag_idx_write_out;
-		tag_hits_write_found = tag_hits_write & ~has_invalid;
-		miss_valid_rd = 0;
+		tag_hits_write_found = tag_hits_write & ~has_invalid_write;
+		tag_hits_read_found = tag_hits_read & ~has_invalid_read;
 		miss_valid_wr = 0;
 
 		if (wr1_en) begin
@@ -176,7 +182,7 @@ module cachemem(
 		end
 
 		if (rd1_en) begin
-			if (|tag_hits_read) begin
+			if (|tag_hits_read_found) begin
 				next_bst_idx = 0;
 				acc = `NUM_WAYS / 2;
 				temp_idx = `NUM_WAYS / 2;
@@ -192,8 +198,6 @@ module cachemem(
 					end
 					acc /= 2;
 				end
-			end else begin
-				miss_valid_rd = 1;
 			end
 		end
 	end

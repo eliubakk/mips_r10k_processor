@@ -46,6 +46,11 @@
 `define NUM_SET_BITS $clog2(`NUM_SETS)
 `define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
+`define NUM_FIFO 8
+`define FIFO_SIZE `NUM_SETS
+`define NUM_FIFO_BITS $clog2(`NUM_FIFO)
+`define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
+
 typedef struct packed {
 	logic [63:0] data;
 	logic [(`NUM_TAG_BITS - 1):0] tag;

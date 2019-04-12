@@ -288,14 +288,16 @@ module testbench;
 			next_idx_read = 0;
 
 			for (int i = 0; i < `NUM_WAYS; ++i) begin
-				if (sets_test[rd1_idx].cache_lines[i].valid && sets_test[rd1_idx].cache_lines[i].tag == rd1_tag) begin
-					found_read = 1;
-					idx_read = i;
-					break;
+				if (sets_test[rd1_idx].cache_lines[i].valid === 1'b1) begin
+					if (sets_test[rd1_idx].cache_lines[i].tag == rd1_tag) begin
+						found_read = 1;
+						idx_read = i;
+						break;
+					end
 				end
 			end
 
-			if (found_read) begin
+			if (found_read === 1) begin
 				miss_valid_rd_test = 0;
 				update_bst_test(rd1_idx, idx_read);
 			end else begin
@@ -725,6 +727,42 @@ module testbench;
 		end
 
 		$display("Multiple Read Miss Passed");
+
+		$display("Testing Read Miss...");
+
+		@(negedge clock);
+		reset = 1;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		wr1_dirty = 0;
+		rd1_en = 0;
+		rd1_idx = 0;
+		rd1_tag = 0;
+
+		@(posedge clock);
+		`DELAY;
+		check_correct_reset;
+		sets_test = sets_out;
+		bst_test = bst_out;
+
+		@(negedge clock);
+		reset = 0;
+		wr1_en = 0;
+		wr1_idx = 0;
+		wr1_tag = 0;
+		wr1_data = 0;
+		wr1_dirty = 0;
+		rd1_en = 1;
+		rd1_idx = 0;
+		rd1_tag = 0;
+		read_from_test;
+
+		@(posedge clock);
+		assert(miss_valid_rd == 1) else #1 exit_on_error;
+
+		$display("Read Miss Passed");
 
 		$display("@@@Passed");
 		$finish;
