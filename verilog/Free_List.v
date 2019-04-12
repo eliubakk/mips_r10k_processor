@@ -12,7 +12,8 @@ module Free_List(
 	input PHYS_REG T_old, // Comes from ROB during Retire Stage
 	input PHYS_REG T_new, //****Comes from ROB during retires stage to update checkpoint
 	input dispatch_en, // Structural Hazard detection during Dispatch
-	input id_branch, // Enabled when instruction is branch
+	input id_no_dest_reg, //Enabled when the instruction does not have dest reg(ST, direct branch)
+
 	// inputs for branch misprediction
 	input branch_incorrect,
 	//input PHYS_REG [`FL_SIZE-1:0] free_check_point,
@@ -49,7 +50,7 @@ module Free_List(
 
 
 	assign empty = (tail == 0);
-	assign free_reg = free_list[0];
+	assign free_reg = id_no_dest_reg? {1'b0, {$clog2(`NUM_PHYS_REG){1'b1}}} : free_list[0]; // What heewoo added
 	assign num_free_entries = tail;
 	`ifdef DEBUG
 	assign free_list_out = free_list;
@@ -86,43 +87,64 @@ module Free_List(
 			next_free_list = free_check_point;
 			next_tail = tail_check_point;
 		end else begin
-			if (dispatch_en & enable) begin // For updating freelist
-			// Reg is getting retired AND getting sent out
-				for (int i = 0; i < `FL_SIZE; ++i) begin
-					next_free_list[i] = free_list[i+1];
-				end
-				next_free_list[tail - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
-			// next_free_list[tail - 1] = T_old;
-				next_tail = tail;
-			end else if (enable) begin
-			// Register is getting retired
-				if (tail == `FL_SIZE) begin
-					next_free_list = free_list;
-					next_tail = tail;
+
+			if (id_no_dest_reg) begin // When the dest reg is zero reg
+				if (enable) begin
+				// Register is getting retired
+					if (tail == `FL_SIZE) begin
+						next_free_list = free_list;
+						next_tail = tail;
+					end else begin
+						next_free_list = free_list;
+						next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+						// next_free_list[tail] = T_old;
+						next_tail = tail + 1;
+					end
 				end else begin
 					next_free_list = free_list;
-					next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
-					// next_free_list[tail] = T_old;
-					next_tail = tail + 1;
-				end
+					next_tail = tail;
+				end			
+
+			end else begin
+
+				if (dispatch_en & enable) begin // For updating freelist
+				// Reg is getting retired AND getting sent out
+					for (int i = 0; i < `FL_SIZE; ++i) begin
+						next_free_list[i] = free_list[i+1];
+					end
+					next_free_list[tail - 1] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+				// next_free_list[tail - 1] = T_old;
+					next_tail = tail;
+				end else if (!dispatch_en & enable) begin
+				// Register is getting retired
+					if (tail == `FL_SIZE) begin
+						next_free_list = free_list;
+						next_tail = tail;
+					end else begin
+						next_free_list = free_list;
+						next_free_list[tail] = {1'b0, T_old[$clog2(`NUM_PHYS_REG) - 1:0]};
+						// next_free_list[tail] = T_old;
+						next_tail = tail + 1;
+					end
 			
-			end else if (dispatch_en) begin
-			// Register is getting dispatched
-				if (tail == 0) begin
+				end else if (dispatch_en & !enable) begin
+				// Register is getting dispatched
+					if (tail == 0) begin
+						next_free_list = free_list;
+						next_tail = tail;
+					end else begin 
+						for (int i = 0; i < `FL_SIZE; ++i) begin
+							next_free_list[i] = free_list[i + 1];
+						end
+						next_tail = tail - 1;
+					end
+
+				 end else begin
+				// Remain the same state
+				// nothing getting pushed or popped off
 					next_free_list = free_list;
 					next_tail = tail;
-				end else begin 
-					for (int i = 0; i < `FL_SIZE; ++i) begin
-						next_free_list[i] = free_list[i + 1];
-					end
-					next_tail = tail - 1;
 				end
-
-			 end else begin
-			// Remain the same state
-			// nothing getting pushed or popped off
-				next_free_list = free_list;
-				next_tail = tail;
 			end
 		end
 	end

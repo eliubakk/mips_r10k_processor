@@ -16,6 +16,7 @@ module RS
 	input 		   [(`NUM_FU_TOTAL-1):0] issue_stall, // Don't issue to functional unit
 	input RS_ROW_T [(`SS_SIZE-1):0]	inst_in,
 	input							branch_not_taken, // signal to mention the status of the branch
+	input	[$clog2(`OBQ_SIZE) -1 :0]	di_branch_inst_idx, // To store branch index in RS
 	
 	// OUTPUTS
 	`ifdef DEBUG 
@@ -206,6 +207,7 @@ module RS
 		for(i = 0; i < `SS_SIZE; i = i + 1) begin
 			if(dispatch_valid[i] & inst_in[i].inst.valid_inst & dispatch_idx_valid[i]) begin
 				rs_table_next[dispatch_idx[i]] = inst_in[i];
+				rs_table_next[dispatch_idx[i]].br_idx = di_branch_inst_idx;// **** Heewoo added for branch
 				rs_table_next[dispatch_idx[i]].busy = 1'b1;
 			// Update the cdb value, since it comes from
 			// Map table(during decode stage)

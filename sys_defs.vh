@@ -92,6 +92,23 @@ typedef struct packed {
 // RAS
 `define RAS_SIZE 2**6
 
+// Branch signals
+typedef struct packed{
+  logic en;
+  logic cond;
+  logic direct;
+  logic ret;
+  logic [63:0] pc;	// Current pc, NOT NEXT PC!
+  logic [63:0] pred_pc; // Predicted pc, used to check the flushing condition
+  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  
+  logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
+  //logic taken;		// 1: branch actual taken, 0: branch actual not taken
+  
+} BR_SIG;
+
+
+
+
 //////////////////////////////////////////////
 //
 // Error codes
@@ -203,10 +220,11 @@ typedef struct packed{
   logic busy;
   logic halt;
   logic [31:0] opcode;
-  logic take_branch;
-  logic branch_valid;
+  logic take_branch;      
+  //logic branch_valid;     //  Same as branch_inst.valid
   logic [4:0] wr_idx;
   logic [31:0] npc;
+  BR_SIG branch_inst;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 
@@ -467,6 +485,7 @@ typedef struct packed{
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
   logic [$clog2(`SQ_SIZE) - 1:0] ld_pos;
+  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  //*****Heewoo :  Added for branch instruction
 } RS_ROW_T;
 
 const RS_ROW_T EMPTY_ROW = 
@@ -478,7 +497,9 @@ const RS_ROW_T EMPTY_ROW =
   1'b0,
   `NOOP_INST,
   64'b0,
-  `NULL_LD_POS
+  `NULL_LD_POS,
+  {$clog2(`OBQ_SIZE){0}}
+  
 };
 
 `endif

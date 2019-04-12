@@ -42,11 +42,12 @@ module testbench;
 
   logic  [3:0] pipeline_completed_insts;
   ERROR_CODE   pipeline_error_status;
-  logic  [5:0] pipeline_commit_wr_idx;
+  logic  [4:0] pipeline_commit_wr_idx;
   logic [63:0] pipeline_commit_wr_data;
   logic        pipeline_commit_wr_en;
   logic [63:0] pipeline_commit_NPC;
   logic	[5:0]  pipeline_commit_phys_reg;
+  logic [5:0]  pipeline_commit_phys_from_arch;
 
   logic [63:0] if_NPC_out;
   logic [31:0] if_IR_out;
@@ -127,6 +128,7 @@ module testbench;
     .pipeline_commit_wr_en(pipeline_commit_wr_en),
     .pipeline_commit_NPC(pipeline_commit_NPC),
     .pipeline_commit_phys_reg(pipeline_commit_phys_reg),
+    .pipeline_commit_phys_from_arch(pipeline_commit_phys_from_arch),
 
     .if_NPC_out(if_NPC_out),
     .if_IR_out(if_IR_out),
@@ -324,7 +326,7 @@ module testbench;
 			$display("OUTPUTS");
 			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
 			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, halt = %d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt,  pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
+				$display("ROB_Row = %d,  busy = %d, halt = %d, branch : %b, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt, pipeline_0.ROB_table_out[i].branch_inst.en, pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
 			$display("*******************************************************************\n");
@@ -543,7 +545,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 100) begin
+			 if (clock_count == 1000) begin
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
@@ -554,14 +556,14 @@ module testbench;
 			//display_cache;
 			//display_icache;
 			//display_if_stage;
-			// display_if_id;
+			 display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-		//display_id_di;
+		display_id_di;
 			
-			//display_di_issue;
-			//display_RS_table;
+			display_di_issue;
+			display_RS_table;
 		display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
@@ -569,9 +571,9 @@ module testbench;
 		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
 		//	display_issue_ex;
-		//	display_is_ex_registers;
+			//display_is_ex_registers;
 		//	display_ex;
-		//	display_ex_co_registers;
+			//display_ex_co_registers;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
@@ -582,10 +584,11 @@ module testbench;
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;
-			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
+			$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
-			// display_RS;
+			
+			$display("branch_not_taken : %d, pred_incorrect : %d", pipeline_0.branch_not_taken, !pipeline_0.ret_pred_correct);
 			
 			//$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
@@ -699,10 +702,14 @@ module testbench;
             //print_stage("|", issue_reg_inst_opcode[0], issue_reg_npc[0][31:0], {0});
           if (pipe_counter==0) begin
             
-            print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
-          end else begin
+           // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
+          
+            print_stage("|", `NOOP_INST, pipeline_0.retire_reg_NPC[31:0], {31'b0,pipeline_0.retire_inst_busy});
+	end else begin
             //print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
-            print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
+           // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
+
+            print_stage("|", `NOOP_INST, pipeline_0.retire_reg_NPC[31:0], {0});
           end
           print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
                     {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});
@@ -750,13 +757,14 @@ module testbench;
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)
            $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x",
-                     pipeline_commit_NPC-4,
+                     pipeline_commit_NPC,
                      pipeline_commit_wr_idx,
                      pipeline_commit_wr_data//,
-		    //pipeline_commit_phys_reg, 
+		    //pipeline_commit_phys_reg,
+		//	pipeline_commit_phys_from_arch 
 		     );
         else
-          $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC-4);
+          $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC);
       end
 
       // deal with any halting conditions
