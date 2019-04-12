@@ -297,6 +297,7 @@ module testbench;
   task display_arch_table;
 		begin
 			$display("-----------Archtecture Map Table-----------");
+			$display("T_old : %d, T_new : %d, T_new is updated Arch value", pipeline_0.rob_retire_out.T_old[5:0], pipeline_0.rob_retire_out.T_new[5:0]); 
 			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
 				$display("Reg:%d, busy: %b, Phys Reg : %d", k, arch_table[k][6], arch_table[k][5:0]); 
 			end
@@ -306,6 +307,7 @@ module testbench;
   task display_map_table;
 		begin
 			$display("-----------Map Table-----------");
+			$display("T_old : %d, T1 : %d, T2 : %d",pipeline_0.T_old, pipeline_0.id_inst_out.T1, pipeline_0.id_inst_out.T2);
 			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
 				$display("Reg:%d, pluas: %b, Phys Reg : %d", k, pipeline_0.map_table_out[k][6],pipeline_0.map_table_out[k][5:0]); 
 			end
@@ -326,7 +328,7 @@ module testbench;
 			$display("OUTPUTS");
 			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
 			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, halt = %d, branch : %b, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt, pipeline_0.ROB_table_out[i].branch_inst.en, pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
+				$display("ROB_Row = %d,  busy = %d, halt = %d, branch : %b, NPC = %h, wr_idx:%d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt, pipeline_0.ROB_table_out[i].branch_inst.en, pipeline_0.ROB_table_out[i].npc, pipeline_0.ROB_table_out[i].wr_idx, pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
 			end
 				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
 			$display("*******************************************************************\n");
@@ -351,7 +353,7 @@ module testbench;
  	task display_free_list_table;
 		begin
 			$display("\n----------------------------Freelist Table----------------------------\n");
-			$display("Free_list_size : %d, Free_list_tail : %d",`FL_SIZE, pipeline_0.fr_tail_out);
+			$display("Free_list_out : %d, Free_list_size : %d, Free_list_tail : %d", pipeline_0.fr_free_reg_T, `FL_SIZE, pipeline_0.fr_tail_out);
 			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
 				$display("%dth line : %d", i, pipeline_0.fr_rs_rob_T[i]);
 			end
@@ -556,14 +558,14 @@ module testbench;
 			//display_cache;
 			//display_icache;
 			//display_if_stage;
-			 display_if_id;
+		//	 display_if_id;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
 		display_id_di;
 			
-			display_di_issue;
-			display_RS_table;
+		//	display_di_issue;
+		//	display_RS_table;
 		display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
@@ -757,13 +759,13 @@ module testbench;
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)
 //, PHYS_REG=%d, PHYS_REG_FROM_ARCH=%d, Cycle : %d
-           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x, PHYS_REG=%d, PHYS_REG_FROM_ARCH=%d, Cycle : %d ",
+           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x",
                      pipeline_commit_NPC,
                      pipeline_commit_wr_idx,
-                     pipeline_commit_wr_data,
+                     pipeline_commit_wr_data/*,
 		    pipeline_commit_phys_reg,
 			pipeline_commit_phys_from_arch,
-			clock_count
+			clock_count*/
 		     );
         else
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC);

@@ -685,7 +685,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   
   // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
 	assign fr_read_en = id_inst_out.inst.valid_inst & dispatch_no_hazard; // Should not read during stalling for structural hazard
-	assign fr_wr_en = (rob_retire_out.T_old == `DUMMY_REG) ? 0 : 1; 
+	assign fr_wr_en = (rob_retire_out.T_old[5:0] == 6'b111111) ? 0 : 1; 
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
 	assign id_no_dest_reg = (id_rdest_idx == `ZERO_REG );
