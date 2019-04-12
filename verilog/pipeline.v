@@ -408,6 +408,7 @@ logic [63:0] if_fetch_NPC_out;
 logic [$clog2(`OBQ_SIZE)-1 : 0] ex_co_branch_index, co_branch_index;
 logic [63:0]	ex_co_branch_target, co_branch_target;
 
+logic if_fetch_valid_inst_out;
 
  if_stage if_stage_0 (
     // Inputs
@@ -432,7 +433,7 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
   );
 
 // Small decoder for branch predictor
-
+// We may divide the branch predictor and fetch stage
 	always_comb begin
 		// Initial value
 		if_branch_inst.en = 1'b0;
@@ -563,6 +564,22 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 	assign if_branch_inst.pred_pc = if_bp_NPC_valid ? if_bp_NPC : 64'h0 ;
 //	assign if_bp_NPC_valid = 1'b0;// Should remove this, chk4
 //	assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk5
+
+  //////////////////////////////////////////////////////////////////////////////
+  //									      //
+  //	Instruction queue to decouple Structural hazard stalling and Fetch    //
+  // 									      //
+  //////////////////////////////////////////////////////////////////////////////
+// if_branch_inst, if_valid_inst_out, if_NPC_out, if_IR_out 
+// 0. Normal instruction
+// 1. Structural hazard
+// 2. Branch misprediction
+// 3. When the queue is full  
+
+
+
+
+
   //////////////////////////////////////////////////
   //                                              //
   //            IF/ID Pipeline Register           //
