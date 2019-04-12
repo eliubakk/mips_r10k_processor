@@ -27,3 +27,4 @@ synth/*
 diff_outputs
 test_output_files
 output.txt
+!correct_outputs/*

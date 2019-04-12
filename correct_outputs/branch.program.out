@@ -1,0 +1,46 @@
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr  9 16:19 2019
+VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
+@@
+@@
+@@                     0  Asserting System reset......
+@@
+@@                     0 : System STILL at reset, can't show anything
+@@
+@@
+@@                   100 : System STILL at reset, can't show anything
+@@
+@@
+@@                   200 : System STILL at reset, can't show anything
+@@
+@@
+@@                   300 : System STILL at reset, can't show anything
+@@
+@@                   360  Deasserting System reset......
+@@
+@@
+@@@ Unified Memory contents hex on left, decimal on right: 
+@@@
+@@@ mem[    0] = 205f0005203f000e : 2332583154017042446
+@@@ mem[    8] = 40430522207f0001 : 4630550485999222785
+@@@ mem[   16] = 40410405f45ffffe : 4629986315534860286
+@@@ mem[   24] = 0000000000000555 : 1365
+@@@
+@@@
+@@                  7820 : System halted
+@@
+@@@ System halted on HALT instruction
+@@@
+@@
+@@  75 cycles / 14 instrs = 5.357143 CPI
+@@
+@@  2220.00 ns total time to execute
+@@
+
+$finish called from file "testbench/testbench.v", line 257.
+$finish at simulation time                 8820
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 882000 ps
+CPU Time:      0.240 seconds;       Data structure size:   0.2Mb
+Tue Apr  9 16:19:47 2019
