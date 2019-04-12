@@ -559,7 +559,7 @@ module testbench;
 		display_id_di;
 			
 			display_di_issue;
-			//display_RS_table;
+			display_RS_table;
 		display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
@@ -580,12 +580,12 @@ module testbench;
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;
-			//$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
+			$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
-			// display_RS;
 			
 			$display("branch_not_taken : %d, pred_incorrect : %d", pipeline_0.branch_not_taken, !pipeline_0.ret_pred_correct);
+			
 			//$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
 
@@ -757,7 +757,7 @@ module testbench;
                      pipeline_commit_wr_idx,
                      pipeline_commit_wr_data//,
 		    //pipeline_commit_phys_reg,
-			//pipeline_commit_phys_from_arch 
+		//	pipeline_commit_phys_from_arch 
 		     );
         else
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC);

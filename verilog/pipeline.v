@@ -205,7 +205,7 @@ module pipeline (
   logic [63:0]  co_reg_wr_data_out;
   logic         co_reg_wr_en_out;
   logic         co_take_branch_selected;
-  logic         co_NPC_selected;
+  logic [63:0]  co_NPC_selected;
   logic         co_valid_inst_selected;
   FU_REG        co_selected; // alu which is granted the request from priority selector
   logic         co_branch_valid;
@@ -221,8 +221,8 @@ module pipeline (
   PHYS_REG      co_ret_dest_reg_idx;
   logic [63:0]  co_ret_result;
   logic         co_ret_take_branch;
-  logic         co_ret_NPC;
-  logic         co_ret_IR;
+  logic [63:0]  co_ret_NPC;
+  logic [31:0]  co_ret_IR;
   logic         co_ret_valid_inst;
   logic         co_ret_branch_valid;
   logic         co_ret_branch_prediction;
@@ -650,7 +650,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   Map_Table m1( //Inputs
     .clock(clock),
   	.reset(reset),
-  	.enable(id_inst_out.inst.valid_inst),
+  	.enable(fr_read_en),		// Should not read during stalling for structural hazard
   	.reg_a(id_ra_idx), 		// Comes from Decode duringmem2proc_data
   	.reg_b(id_rb_idx), 		// Comes from Decode duringmem2proc_data
   	.reg_dest(id_rdest_idx), 	// Comes from Dmem2proc_data
@@ -669,7 +669,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //Instantiating the freelist
   
   // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
-	assign fr_read_en = id_inst_out.inst.valid_inst;
+	assign fr_read_en = id_inst_out.inst.valid_inst & dispatch_no_hazard; // Should not read during stalling for structural hazard
 	assign fr_wr_en = (rob_retire_out.T_old == `DUMMY_REG) ? 0 : 1; 
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
@@ -737,10 +737,11 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //                                              //
   //////////////////////////////////////////////////
 
-  //assign dispatch_no_hazard =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
+logic dispatch_no_hazard_comb;
+  assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
 always_ff @(posedge clock) begin
 
-	dispatch_no_hazard <= `SD  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0));  
+	dispatch_no_hazard <= `SD  dispatch_no_hazard_comb;  
 
 	end
 
