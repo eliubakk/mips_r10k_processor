@@ -794,7 +794,7 @@ end
       ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
-  assign ex_co_enable[2]= (~ex_co_valid_inst[2])| (ex_co_valid_inst[2] & co_selected[2]) & (~mem_stall_out);
+  assign ex_co_enable[2]= (~ex_co_valid_inst[2])| (ex_co_valid_inst[2] & mem_co_enable);
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
   assign ex_co_enable[3] = 1 ;
@@ -926,7 +926,7 @@ end
      .ex_mem_rega(ex_co_rega),
      .ex_mem_alu_result(ex_co_alu_result[2]), 
      .ex_mem_rd_mem(ex_co_rd_mem[2]),
-     .ex_mem_wr_mem(ex_co_wr_mem[2]),
+     .ex_mem_wr_mem(ex_co_wr_mem[2] ),
      .Dmem2proc_data(mem2proc_data),
      .Dmem2proc_tag(mem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
