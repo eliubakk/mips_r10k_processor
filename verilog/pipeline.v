@@ -261,21 +261,16 @@ logic branch_valid_disp;  //branch_valid_disp
 	logic head_halt;
   logic rob_retire_out_halt;
   logic rob_retire_out_take_branch;
-logic rob_retire_out_T_new; 
-logic rob_retire_out_T_old; 	
+  logic rob_retire_out_T_new; 
+  logic rob_retire_out_T_old; 	
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
-  logic  [1:0] proc2Dmem_command, proc2Imem_command;
-  logic  [3:0] Imem2proc_response, Dmem2proc_response;
+  logic [1:0]  proc2Dmem_command, proc2Imem_command;
+  logic [3:0]  Dmem2proc_response, Imem2proc_response;
+  logic [63:0] Dmem2proc_data, Imem2proc_data;
+  logic [3:0]  Dmem2proc_tag, Imem2proc_tag;
 
   // Icache wires
-  logic [63:0] cachemem_data;
-  logic        cachemem_valid;
-  logic  [4:0] Icache_rd_idx;
-  logic  [7:0] Icache_rd_tag;
-  logic  [4:0] Icache_wr_idx;
-  logic  [7:0] Icache_wr_tag;
-  logic        Icache_wr_en;
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
 
@@ -289,76 +284,33 @@ logic rob_retire_out_T_old;
 	// FOR MEMORY INSTRUCTIONS
 	assign proc2Dmem_command = BUS_NONE;
 
-  assign proc2mem_command =
-      (proc2Dmem_command == BUS_NONE) ? proc2Imem_command:proc2Dmem_command;
-  assign proc2mem_addr =
-      (proc2Dmem_command == BUS_NONE) ? proc2Imem_addr:proc2Dmem_addr;
-  assign Dmem2proc_response = 
-      (proc2Dmem_command == BUS_NONE) ? 0 : mem2proc_response;
-  assign Imem2proc_response =
-      (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
+  assign proc2mem_command = (proc2Dmem_command == BUS_NONE) ? proc2Imem_command : proc2Dmem_command;
+  assign proc2mem_addr = (proc2Dmem_command == BUS_NONE) ? proc2Imem_addr : proc2Dmem_addr;
+  assign Dmem2proc_response = (proc2Dmem_command == BUS_NONE) ? 0 : mem2proc_response;
+  assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
+  assign Imem2proc_data = mem2proc_data;
+  assign Imem2proc_tag = mem2proc_tag;
 
-
-/*
-  // Actual cache (data and tag RAMs)
-  cachemem cachememory (// inputs
-    .clock(clock),
-    .reset(reset),
-    .wr1_en(Icache_wr_en),
-    .wr1_idx(Icache_wr_idx),
-    .wr1_tag(Icache_wr_tag),
-    .wr1_data(mem2proc_data),
-    .wr1_dirty(1'b0),
-
-    .rd1_en(1'b1),
-    .rd1_idx(Icache_rd_idx),
-    .rd1_tag(Icache_rd_tag),
-
-    // outputs
-    .rd1_data(cachemem_data),
-    .rd1_valid(cachemem_valid)
-  );
-
-  // Cache controller
-  icache icache_0(// inputs 
-    .clock(clock),
-    .reset(reset),
-
-    .Imem2proc_response(Imem2proc_response),
-    .Imem2proc_data(mem2proc_data),
-    .Imem2proc_tag(mem2proc_tag),
-
-    .proc2Icache_addr(proc2Icache_addr),
-    .cachemem_data(cachemem_data),
-    .cachemem_valid(cachemem_valid),
-
-    // outputs
-    .proc2Imem_command(proc2Imem_command),
-    .proc2Imem_addr(proc2Imem_addr),
-
-    .Icache_data_out(Icache_data_out),
-    .Icache_valid_out(Icache_valid_out),
-    .current_index(Icache_rd_idx),
-    .current_tag(Icache_rd_tag),
-    .last_index(Icache_wr_idx),
-    .last_tag(Icache_wr_tag),
-    .data_write_enable(Icache_wr_en)
-  );
-*/
-
-	inst_cache inst_memory(
+	icache inst_memory(
 				.clock(clock),
 				.reset(reset),
-				.mem2proc_response(mem2proc_response),
-				.mem2proc_data(mem2proc_data),
-				.mem2proc_tag(mem2proc_tag),
-				.proc2Icache_addr(proc2Icache_addr),
-				.proc2Imem_command(proc2Imem_command),
-				.proc2Imem_addr(proc2Imem_addr),
+        
+        //inputs
+        //from if_stage
+        .proc2Icache_addr(proc2Icache_addr),
+        //from main memory
+				.Imem2proc_response(Imem2proc_response),
+				.Imem2proc_data(Imem2proc_data),
+				.Imem2proc_tag(Imem2proc_tag),
+				
+        //outputs
+        //to if_stage
 				.Icache_data_out(Icache_data_out),
-				.Icache_valid_out(Icache_valid_out)
+				.Icache_valid_out(Icache_valid_out),
+        //to main memory
+        .proc2Imem_command(proc2Imem_command),
+        .proc2Imem_addr(proc2Imem_addr)
 	);
-
 
   //////////////////////////////////////////////////
   //                                              //

@@ -1,56 +1,86 @@
 `include "../../sys_defs.vh"
 module icache(
-    input   clock,
-    input   reset,
+  input   clock,
+  input   reset,
 
-    //////////////
-    //  INPUTS  //
-    //////////////
-    //from if_stage
-    input  [63:0] proc2Icache_addr,
+  //////////////
+  //  INPUTS  //
+  //////////////
+  //from if_stage
+  input [63:0] proc2Icache_addr,
 
-    //from main memory
-    input   [3:0] Imem2proc_response,
-    input  [63:0] Imem2proc_data,
-    input   [3:0] Imem2proc_tag,
+  //from main memory
+  input [3:0]  Imem2proc_response,
+  input [63:0] Imem2proc_data,
+  input [3:0]  Imem2proc_tag,
 
-    //from cache memory
-    input   cache_miss_valid_rd,
-    input   [(`NUM_SET_BITS - 1):0] cache_miss_idx_rd,
-    input   [(`NUM_TAG_BITS - 1):0] cache_miss_tag_rd,
-    input   cache_miss_valid_wr,
-    input   [(`NUM_SET_BITS - 1):0] cache_miss_idx_wr,
-    input   [(`NUM_TAG_BITS - 1):0] cache_miss_tag_wr,
-    input  [63:0] cache_rd_data,
-    input   cache_rd_valid,
+  ///////////////
+  //  OUTPUTS  //
+  ///////////////
+  //to if_stage
+  output logic [63:0] Icache_data_out, // value is memory[proc2Icache_PC]
+  output logic        Icache_valid_out,      // when this is high
 
-    ///////////////
-    //  OUTPUTS  //
-    ///////////////
-    //to if_stage
-    output logic [63:0] Icache_data_out, // value is memory[proc2Icache_PC]
-    output logic  Icache_valid_out,      // when this is high
+  //to main memory
+  output logic [1:0]  proc2Imem_command,
+  output logic [63:0] proc2Imem_addr  
+); 
+  //instantiate cachemem module
+  //cache memory inputs    
+  logic cache_wr_en;
+  logic [(`NUM_SET_BITS - 1):0] cache_wr_idx;
+  logic [(`NUM_TAG_BITS - 1):0] cache_wr_tag;
+  logic [63:0]                  cache_wr_data;
+  logic cache_rd_en;
+  logic [(`NUM_SET_BITS - 1):0] cache_rd_idx;
+  logic [(`NUM_TAG_BITS - 1):0] cache_rd_tag;
 
-    //to main memory
-    output logic  [1:0] proc2Imem_command,
-    output logic [63:0] proc2Imem_addr,
+  //cache memory outputs
+  logic cache_miss_valid_rd;
+  logic [(`NUM_SET_BITS - 1):0] cache_miss_idx_rd;
+  logic [(`NUM_TAG_BITS - 1):0] cache_miss_tag_rd;
+  logic cache_miss_valid_wr;
+  logic [(`NUM_SET_BITS - 1):0] cache_miss_idx_wr;
+  logic [(`NUM_TAG_BITS - 1):0] cache_miss_tag_wr;
+  logic [63:0]                  cache_rd_data;
+  logic cache_rd_valid;
 
-    //to cache memory    
-    output logic  cache_wr_en,
-    output logic  [(`NUM_SET_BITS - 1):0] cache_wr_idx,
-    output logic  [(`NUM_TAG_BITS - 1):0] cache_wr_tag,
-    output logic  [63:0]  cache_wr_data,
-    output logic  cache_rd_en,
-    output logic  [(`NUM_SET_BITS - 1):0] cache_rd_idx,
-    output logic  [(`NUM_TAG_BITS - 1):0] cache_rd_tag
-  );   
+  cachemem memory(
+    .clock(clock),
+    .reset(reset),
+
+    .wr1_en(cache_wr_en),
+    .wr1_idx(cache_wr_idx),
+    .wr1_tag(cache_wr_tag),
+    .wr1_data(cache_wr_data),
+    .wr1_dirty(1'b0),
+
+    .rd1_en(cache_rd_en),
+    .rd1_idx(cache_rd_idx),
+    .rd1_tag(cache_rd_tag),
+
+    .victim_valid(),
+    .victim(),
+    .vic_idx(),
+
+    .miss_valid_rd(cache_miss_valid_rd),
+    .miss_idx_rd(cache_miss_idx_rd),
+    .miss_tag_rd(cache_miss_tag_rd),
+
+    .miss_valid_wr(cache_miss_valid_wr),
+    .miss_idx_wr(cache_miss_idx_wr),
+    .miss_tag_wr(cache_miss_tag_wr),
+
+    .rd1_data(cache_rd_data),
+    .rd1_valid(cache_rd_valid)
+  );
 
   logic  [(`NUM_SET_BITS - 1):0] current_index;
   logic  [(`NUM_TAG_BITS - 1):0] current_tag;
   ICACHE_BUFFER_T [`INST_BUFFER_LEN-1:0] PC_queue, PC_queue_next;
   logic [2:0] PC_queue_tail, PC_queue_tail_next;
   logic [2:0] send_req_ptr, send_req_ptr_next;
-  logic [`INST_BUFFER_LEN-1:0][1:0] PC_cam_hits;
+  logic [`INST_BUFFER_LEN-1:0][0:0][1:0] PC_cam_hits;
   logic [63:0] PC_in, PC_in_Plus8;
   logic [63:0] last_PC_in;
   logic [`INST_BUFFER_LEN-1:0] PC_in_hits, PC_in_Plus8_hits;
@@ -74,8 +104,8 @@ module icache(
 
   genvar ig;
   for(ig = 0; ig < `INST_BUFFER_LEN; ig += 1) begin
-    assign PC_in_hits[ig] = PC_cam_hits[ig][1];
-    assign PC_in_Plus8_hits[ig] = PC_cam_hits[ig][0];
+    assign PC_in_hits[ig] = PC_cam_hits[ig][0][1];
+    assign PC_in_Plus8_hits[ig] = PC_cam_hits[ig][0][0];
   end
 
   wire send_request = miss_outstanding;

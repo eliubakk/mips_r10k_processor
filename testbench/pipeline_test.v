@@ -392,16 +392,14 @@ module testbench;
 		end
 	endtask
 
-	task display_inst_cache;
+	task display_icache;
 		begin
 			$display("\n\n\n-----------------------------------------------------Instruction Cache (Start)----------------------------------------------");
 
-			$display("\n-------------------------------------------------------Icache Controller (Start)----------------------------------------");
-
 			$display("Inputs");
-			$display("Imem2proc_response: %d mem2proc_data: %d mem2proc_tag: %d proc2Icache_addr: %d cachemem_data: %d cachemem_valid: %b proc2Imem_command: %d proc2Imem_addr: %d", pipeline_0.inst_memory.Imem2proc_response, pipeline_0.inst_memory.mem2proc_data, pipeline_0.inst_memory.mem2proc_tag, pipeline_0.inst_memory.proc2Icache_addr, pipeline_0.inst_memory.rd1_data, pipeline_0.inst_memory.rd1_valid, pipeline_0.inst_memory.proc2Imem_command, pipeline_0.inst_memory.proc2Imem_addr);
+			$display("proc2Icache_addr: %h Imem2proc_response: %d Imem2proc_data: %h Imem2proc_tag: %d", pipeline_0.inst_memory.proc2Icache_addr, pipeline_0.inst_memory.Imem2proc_response, pipeline_0.inst_memory.Imem2proc_data, pipeline_0.inst_memory.Imem2proc_tag);
 			$display("Outputs");
-			$display("Icache_data_out: %d Icache_valid_out: %b current_index: %d current_tag: %d last_index: %d last_tag: %d data_write_enable: %b", pipeline_0.inst_memory.Icache_data_out, pipeline_0.inst_memory.Icache_valid_out, pipeline_0.inst_memory.rd1_idx, pipeline_0.inst_memory.rd1_tag, pipeline_0.inst_memory.wr1_idx, pipeline_0.inst_memory.wr1_tag, pipeline_0.inst_memory.wr1_en);
+			$display("Icache_data_out: %h Icache_valid_out: %b proc2Imem_command: %d proc2Imem_addr: %h", pipeline_0.inst_memory.Icache_data_out, pipeline_0.inst_memory.Icache_valid_out, pipeline_0.inst_memory.proc2Imem_command, pipeline_0.inst_memory.proc2Imem_addr);
 
 			$display("\n-------------------------------------------------------Icache Controller (End)----------------------------------");
 
@@ -441,17 +439,6 @@ module testbench;
 		end
 	endtask
 
-	task display_icache;
-		begin
-/*
-			$display("\nicache--------------------------------------------------------------------------");
-			$display("inputs:");
-			$display("Imem2proc_response: %h, Imem2_proc_data: %h, Imem2proc_tag: %h, proc2Icache_addr: %h, cachemem_data: %h, cachemem_valid: %b", pipeline_0.Imem2proc_response, pipeline_0.mem2proc_data, pipeline_0.mem2proc_tag, pipeline_0.proc2Icache_addr, pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
-			$display("outputs:");
-			$display("proc2Imem_command: %d proc2Imem_addr: %h Icache_data_out: %h Icache_valid_out: %d current_index: %d current_tag: %d last_index: %d last_tag: %d data_write_enable: %b", pipeline_0.proc2Imem_command, pipeline_0.proc2Imem_addr, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.Icache_wr_en);
-*/
-		end
-	endtask
 
 	task display_if_stage;
 		begin
@@ -581,11 +568,10 @@ module testbench;
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
-			display_inst_cache;
+			display_icache;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
-			//display_icache;
 			//display_if_stage;
 			//display_if_id;
 			//display_id_stage;
