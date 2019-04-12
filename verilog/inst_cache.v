@@ -4,7 +4,7 @@ module inst_cache(
 	input clock,
 	input reset,
 
-	input [3:0] Imem2proc_response,
+	input [3:0] mem2proc_response,
 	input [63:0] mem2proc_data,
 	input [3:0] mem2proc_tag,
 
@@ -75,7 +75,7 @@ module inst_cache(
 		//inputs
 		.proc2Icache_addr(proc2Icache_addr),
 
-		.Imem2proc_response(Imem2proc_response),
+		.Imem2proc_response(mem2proc_response),
 		.Imem2proc_data(mem2proc_data),
 		.Imem2proc_tag(mem2proc_tag),
 

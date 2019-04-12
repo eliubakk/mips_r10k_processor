@@ -47,8 +47,6 @@ module icache(
 
   logic  [(`NUM_SET_BITS - 1):0] current_index;
   logic  [(`NUM_TAG_BITS - 1):0] current_tag;
-  logic  [(`NUM_SET_BITS - 1):0] last_index;
-  logic  [(`NUM_TAG_BITS - 1):0] last_tag;
   ICACHE_BUFFER_T [`INST_BUFFER_LEN-1:0] PC_queue, PC_queue_next;
   logic [2:0] PC_queue_tail, PC_queue_tail_next;
   logic [2:0] send_req_ptr, send_req_ptr_next;
@@ -82,8 +80,8 @@ module icache(
 
   wire send_request = miss_outstanding;
 
-  assign Icache_data_out = changed_addr ? cache_rd_data : Imem2proc_data;
-  assign Icache_valid_out = changed_addr ? cache_rd_valid : cache_wr_en;
+  assign Icache_data_out = cache_rd_data;
+  assign Icache_valid_out = cache_rd_valid;
 
   assign proc2Imem_addr = (PC_queue_tail == 0)? {PC_in[63:3], 3'b0} : 
                           (send_request)? PC_queue[send_req_ptr] : 64'b0;
@@ -98,7 +96,7 @@ module icache(
 
   wire update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
 
-  wire unanswered_miss = changed_addr ? cache_miss_valid_rd :
+  wire unanswered_miss = changed_addr ? ~cache_rd_valid :
                                         miss_outstanding && (Imem2proc_response == 0);
 
   always_comb begin
@@ -110,7 +108,7 @@ module icache(
     cache_rd_idx = 0;
 
     if(cache_wr_en) begin
-      PC_queue_next[`INST_BUFFER_LEN-1:0] = {PC_queue[`INST_BUFFER_LEN-1:1], EMPTY_ICACHE};
+      PC_queue_next[`INST_BUFFER_LEN-1:0] = {EMPTY_ICACHE, PC_queue[`INST_BUFFER_LEN-1:1]};
       PC_queue_tail_next -= 1;
       send_req_ptr_next -= 1;
     end
@@ -118,15 +116,14 @@ module icache(
     if(changed_addr) begin
       cache_rd_en = 1'b1;
       {cache_rd_tag, cache_rd_idx} = PC_in[31:3];
-      send_req_ptr_next += 1;
-    end else if(send_req_ptr < PC_queue_tail & !changed_addr) begin
+    end else if(send_req_ptr < PC_queue_tail & ~send_request) begin
       cache_rd_en = 1'b1;
       {cache_rd_tag, cache_rd_idx} = PC_queue[send_req_ptr].address[31:3];
-      send_req_ptr_next += 1;
     end
 
     if(update_mem_tag) begin
       PC_queue_next[send_req_ptr].Imem_tag = Imem2proc_response;
+      send_req_ptr_next += 1;
     end
     if(PC_queue_tail_next == 0 & changed_addr) begin
       PC_queue_next[0].address = {PC_in[63:3], 3'b0};
@@ -141,9 +138,7 @@ module icache(
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
-      last_PC_in       <= `SD -1;
-      last_index       <= `SD -1;   // These are -1 to get ball rolling when
-      last_tag         <= `SD -1;   // reset goes low because PC "changes"           
+      last_PC_in       <= `SD -1;     
       miss_outstanding <= `SD 0;
       for(int i = 0; i < `INST_BUFFER_LEN; i += 1) begin
         PC_queue[i] <= `SD EMPTY_ICACHE;

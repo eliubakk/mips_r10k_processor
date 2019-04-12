@@ -349,7 +349,7 @@ logic rob_retire_out_T_old;
 	inst_cache inst_memory(
 				.clock(clock),
 				.reset(reset),
-				.Imem2proc_response(Imem2proc_response),
+				.mem2proc_response(mem2proc_response),
 				.mem2proc_data(mem2proc_data),
 				.mem2proc_tag(mem2proc_tag),
 				.proc2Icache_addr(proc2Icache_addr),
