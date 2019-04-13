@@ -61,6 +61,8 @@ do
 		then
 			echo -e "\t$file \t\t\tFAILED"
 			wrong=`expr $wrong + 1`
+		else
+			echo -e "\t$file \t\t\tPASSED"
 		fi
 		total=`expr $total + 1`
 	fi
@@ -88,6 +90,8 @@ do
 		then
 			echo -e "\t$file \t\t\tFAILED"
 			wrong=`expr $wrong + 1`
+		else
+			echo -e "\t$file \t\t\tPASSED"
 		fi
 	fi
 	total=`expr $total + 1`
