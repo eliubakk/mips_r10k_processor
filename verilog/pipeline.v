@@ -569,8 +569,8 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
   // Determine the next pc (from Fetch unit or from BP)
 	assign if_NPC_out =  if_fetch_NPC_out;
 	assign if_branch_inst.pred_pc = if_bp_NPC_valid ? if_bp_NPC : 64'h0 ;
-//	assign if_bp_NPC_valid = 1'b0;// Should remove this, chk4
-//	assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk5
+	//assign if_bp_NPC_valid = 1'b0;// Should remove this, chk4
+	//assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk5
 
   //////////////////////////////////////////////////////////////////////////////
   //									      //

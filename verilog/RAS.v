@@ -73,14 +73,14 @@ module RAS(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `RAS_SIZE; ++i) begin
-				stack[i] <= 0;
+				stack[i] <=  `SD 0;
 			end
-			head <= 0;
-			tail <= 0;
+			head <= `SD 0;
+			tail <= `SD 0;
 		end else begin
-			stack <= stack_next;
-			head <= head_next;
-			tail <= tail_next;
+			stack <= `SD stack_next;
+			head <= `SD head_next;
+			tail <= `SD tail_next;
 		end
 	end
 

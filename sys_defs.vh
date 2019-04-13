@@ -74,7 +74,7 @@ typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 
 // GSHARE
 //GHT_BIT is BH_SIZE in OBQ row
-`define PC_SIZE 10
+`define PC_SIZE 4
 
 // BTB
 `define TAG_SIZE 10 		//Tag bit size
