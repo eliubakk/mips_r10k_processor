@@ -88,15 +88,17 @@ module icache(
   logic [2:0] send_req_ptr, send_req_ptr_next;
 
   //fetch address variables
-  logic [63:0] PC_in, PC_in_Plus8;
+  logic [63:0] PC_in;
+  logic [`NUM_INST_PREFETCH-1:0][63:0] PC_in_Plus;
   logic [63:0] last_PC_in;
   logic [(`NUM_SET_BITS - 1):0] current_index;
   logic [(`NUM_TAG_BITS - 1):0] current_tag;
 
   //CAM variables
   logic [`INST_BUFFER_LEN-1:0][0:0][63:0] cam_table_in;
-  logic [`INST_BUFFER_LEN-1:0][0:0][1:0] PC_cam_hits;
-  logic [`INST_BUFFER_LEN-1:0] PC_in_hits, PC_in_Plus8_hits;
+  logic [`INST_BUFFER_LEN-1:0][0:0][`NUM_INST_PREFETCH:0] PC_cam_hits;
+  logic [`INST_BUFFER_LEN-1:0] PC_in_hits;
+  logic [`NUM_INST_PREFETCH-1:0][`INST_BUFFER_LEN-1:0] PC_in_Plus_hits;
 
   //control variables
   logic send_request;
@@ -105,25 +107,29 @@ module icache(
   logic update_mem_tag;
 
   //Instantiate CAM to check for requested address in queue
-  genvar ig;
+  genvar ig, jg;
   for(ig = 0; ig < `INST_BUFFER_LEN; ig += 1) begin
     assign cam_table_in[ig][0] = PC_queue[ig].address;
-    assign PC_in_hits[ig] = PC_cam_hits[ig][0][1] & PC_queue[ig].valid;
-    assign PC_in_Plus8_hits[ig] = PC_cam_hits[ig][0][0] & PC_queue[ig].valid;
+    assign PC_in_hits[ig] = PC_cam_hits[ig][0][0] & PC_queue[ig].valid;
+    for(jg = 0; jg < `NUM_INST_PREFETCH; jg += 1) begin
+      assign PC_in_Plus_hits[jg][ig] = PC_cam_hits[ig][0][jg+1] & PC_queue[ig].valid;
+    end
   end
 
   CAM #(.LENGTH(`INST_BUFFER_LEN),
         .WIDTH(1),
-        .NUM_TAGS(2),
+        .NUM_TAGS(`NUM_INST_PREFETCH+1),
         .TAG_SIZE(64)) PC_queue_cam(
-    .enable(2'b11),
-    .tags({PC_in, PC_in_Plus8}),
+    .enable({(`NUM_INST_PREFETCH+1){1'b1}}),
+    .tags({PC_in_Plus, PC_in}),
     .table_in(cam_table_in),
     .hits(PC_cam_hits)
   );
 
   assign PC_in = proc2Icache_addr;
-  assign PC_in_Plus8 = {proc2Icache_addr[63:3],3'b0}+8;
+  for(ig = 0; ig < `NUM_INST_PREFETCH; ig += 1) begin
+    assign PC_in_Plus[ig] = {proc2Icache_addr[63:3],3'b0}+(8*(ig+1));
+  end
   assign {current_tag, current_index} = PC_queue[0].address[31:3];
 
   assign changed_addr = (PC_in != last_PC_in);
@@ -173,7 +179,7 @@ module icache(
     end
 
     if(update_mem_tag) begin
-      PC_queue_next[send_req_ptr].Imem_tag = Imem2proc_response;
+      PC_queue_next[send_req_ptr_next].Imem_tag = Imem2proc_response;
       send_req_ptr_next += 1;
     end
 
@@ -183,12 +189,14 @@ module icache(
       PC_queue_next[PC_queue_tail_next].valid = 1'b1;
       PC_queue_tail_next += 1;
     end
-    if(~(|PC_in_Plus8_hits) & changed_addr & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
-      PC_queue_next[PC_queue_tail_next].address = PC_in_Plus8;
-      PC_queue_next[PC_queue_tail_next].cache_checked = 1'b0;
-      PC_queue_next[PC_queue_tail_next].valid = 1'b1;
-      PC_queue_tail_next += 1;
-    end    
+    for(int i = 0; i < `NUM_INST_PREFETCH; i += 1) begin
+      if(~(|PC_in_Plus_hits[i]) & changed_addr & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
+        PC_queue_next[PC_queue_tail_next].address = PC_in_Plus[i];
+        PC_queue_next[PC_queue_tail_next].cache_checked = 1'b0;
+        PC_queue_next[PC_queue_tail_next].valid = 1'b1;
+        PC_queue_tail_next += 1;
+      end
+    end
   end
 
   // synopsys sync_set_reset "reset"
