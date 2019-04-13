@@ -120,7 +120,6 @@ module pipeline (
   // Output from the branch predictor
   logic   bp_output;
 
-`ifdef DEBUG
 	logic		[`BH_SIZE-1:0]				gshare_ght_out;
 	logic		[2**(`BH_SIZE)-1:0]			gshare_pht_out;
 	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				obq_out;
@@ -132,7 +131,12 @@ module pipeline (
 	logic 		[`RAS_SIZE - 1:0] [31:0] 		ras_stack_out;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_head_out;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_out;
-`endif
+
+ // Instruction queue
+ 	INST_Q	[`IQ_SIZE-1:0] 		inst_queue_out;
+	logic	[$clog2(`IQ_SIZE):0] 	inst_queue_entry;
+	logic				inst_queue_full;
+	INST_Q				if_inst_in, if_id_inst_out;
 
 
 
@@ -410,6 +414,9 @@ logic [63:0]	ex_co_branch_target, co_branch_target;
 
 logic if_fetch_valid_inst_out;
 
+logic if_stage_dispatch_en;
+assign if_stage_dispatch_en = !inst_queue_full;
+
  if_stage if_stage_0 (
     // Inputs
     .clock (clock),
@@ -419,7 +426,7 @@ logic if_fetch_valid_inst_out;
     .co_ret_target_pc(retire_reg_NPC),			// 
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
-    .dispatch_en(dispatch_no_hazard),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
+    .dispatch_en(if_stage_dispatch_en),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
     .co_ret_branch_valid(ret_branch_inst.en),
     .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
     .if_bp_NPC_valid(if_bp_NPC_valid),
@@ -445,7 +452,7 @@ logic if_fetch_valid_inst_out;
 		//if_branch_inst.prediction = 0;
 		//if_branch_inst.taken = 0;
 
-		if(if_valid_inst_out & dispatch_no_hazard & !branch_not_taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
+		if(if_valid_inst_out & if_stage_dispatch_en & !branch_not_taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
 			if_branch_inst.pc = if_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
@@ -567,15 +574,37 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 
   //////////////////////////////////////////////////////////////////////////////
   //									      //
-  //	Instruction queue to decouple Structural hazard stalling and Fetch    //
-  // 									      //
+  //	Instruction queue to decouple Structural hazard stalling and Fetch.   //
+  // 	Behaves like IF/ID pipeline register.				      //
+  // 							    		      //
   //////////////////////////////////////////////////////////////////////////////
-// if_branch_inst, if_valid_inst_out, if_NPC_out, if_IR_out 
-// 0. Normal instruction
-// 1. Structural hazard
-// 2. Branch misprediction
-// 3. When the queue is full  
+	assign if_inst_in.npc = if_NPC_out;
+	assign if_inst_in.ir = if_IR_out;
+	assign if_inst_in.valid_inst = if_valid_inst_out;
+	assign if_inst_in.branch_inst = if_branch_inst;
 
+	 IQ iq0(
+ 		// inputs
+		.clock(clock),
+		.reset(reset),
+		.fetch_valid(if_valid_inst_out),
+		.if_inst_in(if_inst_in),
+		.dispatch_no_hazard(dispatch_no_hazard),
+		.branch_incorrect(branch_not_taken),
+		
+		// outputs
+		`ifdef DEBUG
+		.inst_queue_out(inst_queue_out),
+		.inst_queue_entry(inst_queue_entry),
+		`endif
+		.inst_queue_full(inst_queue_full),
+		.if_inst_out(if_id_inst_out)
+	);
+
+ assign if_id_NPC = if_id_inst_out.npc;
+ assign if_id_IR = if_id_inst_out.ir;
+ assign if_id_valid_inst = if_id_inst_out.valid_inst;
+ assign if_id_branch_inst = if_id_inst_out.branch_inst;
 
 
 
@@ -585,7 +614,7 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
   //            IF/ID Pipeline Register           //
   //                                              //
   //////////////////////////////////////////////////
-  
+ /* 
 assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out); 
 //assign if_id_enable = (dispatch_no_hazard && Icache_valid_out); 
   // synopsys sync_set_reset "reset"
@@ -611,8 +640,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
       if_id_NPC        <= `SD if_NPC_out;
       if_id_IR         <= `SD if_IR_out;
       if_id_valid_inst <= `SD if_valid_inst_out;
-
-	if_id_branch_inst	<= `SD if_branch_inst;
+      if_id_branch_inst	<= `SD if_branch_inst;
 
     end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
       if_id_NPC        <= `SD if_id_NPC;
@@ -639,7 +667,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
     end
   end
-  
+  */
   //////////////////////////////////////////////////
   //                                              //
   //                  ID-Stage                    //

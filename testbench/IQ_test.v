@@ -45,7 +45,7 @@ module testbench;
 		.inst_queue_out(inst_queue_out),
 		.inst_queue_entry(inst_queue_entry),
 		`endif
-		.inst_queue_full,
+		.inst_queue_full(inst_queue_full),
 		.if_inst_out(if_inst_out)
 	);
 
@@ -370,7 +370,7 @@ module testbench;
 			print_IQ;
 			reset_test;
 			$display("@@@ Decode when the queue is empty Passed");
-				
+/*				
 		// Check the duplicate fetch when the queue is empty and
 		// fetch&decode at the same time
 			$display("Testing duplicate fetch &decode when the queue is empty");
@@ -455,7 +455,7 @@ module testbench;
 			end
 			$display("@@@ Duplicate fetch  when the queue is not empty Passed");
 	
-
+*/
 
 		// Synthesize
 

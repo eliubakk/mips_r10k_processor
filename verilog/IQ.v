@@ -45,8 +45,8 @@ module IQ(
 	`endif
 
 	assign inst_queue_full 	= (tail == `IQ_SIZE);
-	assign fetch_en		= fetch_valid & !duplicate_fetch; 
-	
+	//assign fetch_en		= fetch_valid & !duplicate_fetch; 
+	assign fetch_en		= fetch_valid;
 
 
 	always_comb begin
@@ -67,7 +67,7 @@ module IQ(
 
 		// For duplicate fetching - pc comparsion is
 		// expensive....leave for later use
-		duplicate_fetch = 1'b0;
+/*		duplicate_fetch = 1'b0;
 		if(tail == 0) begin
 			if( (if_inst_out.valid_inst) & (if_inst_in.valid_inst) & (if_inst_out.npc == if_inst_in.npc) & (if_inst_out.ir == if_inst_in.ir)) begin
 				duplicate_fetch = 1'b1;
@@ -77,7 +77,7 @@ module IQ(
 				duplicate_fetch = 1'b1;
 			end
 		end
-
+*/
 		if(branch_incorrect) begin // During flushing
 			for(int i=0; i<`IQ_SIZE; ++i) begin
 				next_inst_queue[i].valid_inst 			= 1'b0;
