@@ -15,7 +15,7 @@ module testbench;
 	// input wires
 	logic	clock;
 	logic	reset;
-	logic	fetch_en;
+	logic	fetch_valid;
 	INST_Q	if_inst_in;
 	logic	dispatch_no_hazard;
 	logic	branch_incorrect;
@@ -35,7 +35,7 @@ module testbench;
 		// inputs
 		.clock(clock),
 		.reset(reset),
-		.fetch_en(fetch_en),
+		.fetch_valid(fetch_valid),
 		.if_inst_in(if_inst_in),
 		.dispatch_no_hazard(dispatch_no_hazard),
 		.branch_incorrect(branch_incorrect),
@@ -90,12 +90,12 @@ module testbench;
 	initial begin
 
 		// monitor wires
-		$monitor("clock: %b, reset: %b, fetch_en: %b, if_inst_in.valid_inst :%b, if_inst_in.npc :%h, if_inst_in.ir : %h, dispatch_no_hazard : %b, branch_incorrect : %b", clock, reset, fetch_en, if_inst_in.valid_inst, if_inst_in.npc, if_inst_in.ir, dispatch_no_hazard, branch_incorrect);
+		$monitor("clock: %b, reset: %b, fetch_valid: %b, if_inst_in.valid_inst :%b, if_inst_in.npc :%h, if_inst_in.ir : %h, dispatch_no_hazard : %b, branch_incorrect : %b", clock, reset, fetch_valid, if_inst_in.valid_inst, if_inst_in.npc, if_inst_in.ir, dispatch_no_hazard, branch_incorrect);
 
 		// intial values
 		clock = ZERO;
 		reset = ZERO;
-		fetch_en = ZERO;
+		fetch_valid = ZERO;
 		dispatch_no_hazard = ZERO;
 		branch_incorrect = ZERO;
 		if_inst_in.valid_inst 			= 1'b0;
@@ -127,7 +127,7 @@ module testbench;
 		$display("Testing Fetch and Decode sametime when queue is empty");
 		@(negedge clock);
 		reset 			= ZERO;
-		fetch_en 		= ONE;
+		fetch_valid 		= ONE;
 		dispatch_no_hazard 	= ONE;
 		branch_incorrect 	= ZERO;
 		if_inst_in.valid_inst 	= ONE;
@@ -150,7 +150,7 @@ module testbench;
 		$display("Testing Fetch five times");
 		for(i=0; i<5; ++i) begin
 			@(negedge clock);
-			fetch_en 		= ONE;
+			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ZERO;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -174,7 +174,7 @@ module testbench;
 		$display("Testing Decode three times");
 		for(i=0; i<3; ++i) begin
 			@(negedge clock);
-			fetch_en 		= ZERO;
+			fetch_valid 		= ZERO;
 			dispatch_no_hazard 	= ONE;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -200,7 +200,7 @@ module testbench;
 		
 		$display("Testing Fetch and Decode sametime when queue is not empty");
 		@(negedge clock);
-		fetch_en 		= ONE;
+		fetch_valid 		= ONE;
 		dispatch_no_hazard 	= ONE;
 		branch_incorrect 	= ZERO;
 		if_inst_in.valid_inst 	= ONE;
@@ -221,7 +221,7 @@ module testbench;
 
 		$display("Testing do nothing");
 		@(negedge clock);
-		fetch_en 		= ZERO;
+		fetch_valid 		= ZERO;
 		dispatch_no_hazard 	= ZERO;
 		branch_incorrect 	= ZERO;
 		if_inst_in.valid_inst 	= ONE;
@@ -242,7 +242,7 @@ module testbench;
 
 		$display("Testing FLUSH");
 		@(negedge clock);
-		fetch_en 		= ONE;
+		fetch_valid 		= ONE;
 		dispatch_no_hazard 	= ONE;
 		branch_incorrect 	= ONE;
 		if_inst_in.valid_inst 	= ONE;
@@ -261,7 +261,7 @@ module testbench;
 		$display("Testing Fetch when the queue is full");
 		for(i=0; i<`IQ_SIZE-1; ++i) begin
 			@(negedge clock);
-			fetch_en 		= ONE;
+			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ZERO;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -280,7 +280,7 @@ module testbench;
 		end
 		
 			@(negedge clock);
-			fetch_en 		= ONE;
+			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ZERO;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -296,7 +296,7 @@ module testbench;
 			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
 
 			@(negedge clock);
-			fetch_en 		= ONE;
+			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ZERO;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -320,7 +320,7 @@ module testbench;
 
 			$display("Testing Fetch and Decode sametime when queue is full");
 			@(negedge clock);
-			fetch_en 		= ONE;
+			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ONE;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -341,7 +341,7 @@ module testbench;
 		// Flush when branch_prediction is incorrect
 			$display("Testing FLUSH");
 			@(negedge clock);
-			fetch_en 		= ONE;
+			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ONE;
 			branch_incorrect 	= ONE;
 			if_inst_in.valid_inst 	= ONE;
@@ -358,7 +358,7 @@ module testbench;
 		// Decode when the queue is empty
 			$display("Testing decode when the queue is empty");
 			@(negedge clock);
-			fetch_en 		= ZERO;
+			fetch_valid 		= ZERO;
 			dispatch_no_hazard 	= ONE;
 			branch_incorrect 	= ZERO;
 			if_inst_in.valid_inst 	= ONE;
@@ -371,6 +371,91 @@ module testbench;
 			reset_test;
 			$display("@@@ Decode when the queue is empty Passed");
 				
+		// Check the duplicate fetch when the queue is empty and
+		// fetch&decode at the same time
+			$display("Testing duplicate fetch &decode when the queue is empty");
+		
+			@(negedge clock);
+			fetch_valid 		= ONE;
+			dispatch_no_hazard 	= ONE;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'h11;
+			if_inst_in.ir		= 32'h111;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 0) & (inst_queue_entry==0)) else #1 exit_on_error;
+			assert((inst_queue_out[0].valid_inst == 0) & (inst_queue_out[0].npc == 64'h0) & (inst_queue_out[i].ir == `NOOP_INST)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 1) & (if_inst_out.npc == 64'h11) & (if_inst_out.ir == 32'h111))else #1 exit_on_error;
+		
+			@(negedge clock);
+			fetch_valid 		= ONE;
+			dispatch_no_hazard 	= ONE;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'h11;
+			if_inst_in.ir		= 32'h111;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 0) & (inst_queue_entry==0)) else #1 exit_on_error;
+			assert((inst_queue_out[0].valid_inst == 0) & (inst_queue_out[0].npc == 64'h0) & (inst_queue_out[i].ir == `NOOP_INST)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+			$display("@@@ Duplicate fetch & decode when the queue is empty Passed");
+	
+
+
+
+		// Check the duplicate fetch when the queue is not empty
+			$display("Testing duplicate fetch  when the queue is not empty");
+			@(negedge clock);
+			fetch_valid 		= ONE;
+			dispatch_no_hazard 	= ZERO;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'h110;
+			if_inst_in.ir		= 32'h1010;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 0) & (inst_queue_entry==1)) else #1 exit_on_error;
+			assert((inst_queue_out[0].valid_inst == 1) & (inst_queue_out[0].npc == 64'h110) & (inst_queue_out[0].ir == 32'h1010)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+
+
+			for(i=0; i<10; ++i) begin
+			@(negedge clock);
+			fetch_valid 		= ONE;
+			dispatch_no_hazard 	= ZERO;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'h110;
+			if_inst_in.ir		= 32'h1010;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 0) & (inst_queue_entry==1)) else #1 exit_on_error;
+		
+			assert((inst_queue_out[0].valid_inst == 1) & (inst_queue_out[0].npc == 64'h110) & (inst_queue_out[0].ir == 32'h1010)) else #1 exit_on_error;
+			assert((inst_queue_out[1].valid_inst == 0) & (inst_queue_out[1].npc == 64'h0) & (inst_queue_out[1].ir == `NOOP_INST)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+
+			end
+			$display("@@@ Duplicate fetch  when the queue is not empty Passed");
+	
+
 
 		// Synthesize
 
