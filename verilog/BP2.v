@@ -3,9 +3,7 @@
 `include "../../sys_defs.vh"
 `ifndef PIPELINE
 `include "../../verilog/BTB.v"
-`include "../../verilog/OBQ.v"
-`include "../../verilog/GSHARE.v"
-`include "../../verilog/RAS.v"
+`include "../../verilog/PHT_TWO_SC.v"
 `endif
 `define	DEBUG
 
@@ -17,8 +15,8 @@
 //Target address : 	pc[TARGET_SIZE+1:2]
 
 //-------------------------------Module behavior---------------------------
-//1. Conditional and direct 	: Fetch : READ BTB, GSHARE/OBQ
-//				  Retire : Update BTB, GSHARE/OBQ
+//1. Conditional and direct 	: Fetch : READ BTB, PHT_TWO_SC
+//				  Retire : Update BTB, PHT_TWO_SC
 //2. Conditional and indirect 	: Fetch : READ BTB, GSHARE/OBQ
 //				  Retire : Update BTB, GSHARE/OBQ
 //

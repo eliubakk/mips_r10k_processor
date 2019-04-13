@@ -1,28 +1,23 @@
 // multiple row - 2 bit saturation counter - Pattern history table
 //
 `define DEBUG
+`incldue "../../sys_defs.vh"
 `define PHT_ROW 8
 module PHT_TWO_SC(
 		input				clock,
 		input				reset,
 		input				enable,
-		input				if_branch,
-		input		[31:0]		if_pc_in,
-		input				if_cond_branch,
-		input				if_direct_branch,
-		input				if_return_branch,
-		input				rt_branch,
-		input		[31:0]		rt_pc_in,
-		input				rt_cond_branch,
-		input				rt_direct_branch,
-		input				rt_return_branch,
+		input				if_branch, // Branch is fetched and conditional
+		input		[63:0]		if_pc_in,
+		input				rt_branch, // Branch is retired and conditional
+		input		[63:0]		rt_pc_in,
 		input				rt_branch_taken, // Calculated branch result, 0 is not taken, 1 is taken
 
 		`ifdef DEBUG
 		output	[`PHT_ROW-1:0][1:0]	pht_out,
 		`endif
-		output				if_prediction,
-		output				if_prediction_valid
+		output				if_prediction_valid,    // Check whether the prediction is valid or not
+		output				if_prediction		// Predicted to be taken or not
 		
 	);
 	// 00 : strongly not taken, 01 : weakly not taken, 10 : weakly taken,
@@ -39,7 +34,7 @@ module PHT_TWO_SC(
 	`endif	
 
 	assign if_pc_partial	=  if_pc_in [$clog2(`PHT_ROW)+1:2]; // do not consider the byte offset
-	assign if_prediction_valid = if_branch & if_cond_branch & !if_return_branch; 
+	assign if_prediction_valid = if_branch; 
 	assign if_prediction	=  if_prediction_valid? next_pht[if_pc_partial][1]: 0;
 				
 
@@ -52,7 +47,7 @@ module PHT_TWO_SC(
 
 		if(enable) begin
 			// During retire, update the prediction table first
-			if(rt_branch & rt_cond_branch & !rt_return_branch) begin
+			if(rt_branch) begin
 
 				case(pht[rt_pc_partial][1:0])
 					2'b00: begin
@@ -93,9 +88,9 @@ module PHT_TWO_SC(
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			pht	<=  {(2*`PHT_ROW){0}}; // Initialized to strongly not taken
+			pht	<= `SD {(2*`PHT_ROW){0}}; // Initialized to strongly not taken
 		end else begin
-			pht	<= #1 next_pht;
+			pht	<= `SD  next_pht;
 		end
 
 	end

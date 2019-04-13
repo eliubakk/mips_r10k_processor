@@ -74,7 +74,7 @@ typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 
 // GSHARE
 //GHT_BIT is BH_SIZE in OBQ row
-`define PC_SIZE 4
+`define PC_SIZE 10
 
 // BTB
 `define TAG_SIZE 10 		//Tag bit size
@@ -105,6 +105,12 @@ typedef struct packed{
   //logic taken;		// 1: branch actual taken, 0: branch actual not taken
   
 } BR_SIG;
+
+// PHT_TWO_SC
+
+`define PHT_ROW 8
+
+
 
 //////////////////////////////////////////////////
 //
