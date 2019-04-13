@@ -797,8 +797,6 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //                                              //
   //////////////////////////////////////////////////
 
-logic dispatch_no_hazard_comb;
-logic dispatch_no_hazard_RS;
 
   assign dispatch_no_hazard =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
 /*always_ff @(posedge clock) begin
