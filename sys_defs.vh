@@ -106,7 +106,18 @@ typedef struct packed{
   
 } BR_SIG;
 
-
+//////////////////////////////////////////////////
+//
+//	Instruction Queue
+//
+//////////////////////////////////////////////////
+`define IQ_SIZE 10
+typedef struct packed{
+	logic 		valid_inst;
+	logic 	[63:0]	npc; 
+	logic	[31:0]	ir;
+	BR_SIG		if_branch_inst;
+} INST_Q;
 
 
 //////////////////////////////////////////////
@@ -223,7 +234,7 @@ typedef struct packed{
   logic take_branch;      
   //logic branch_valid;     //  Same as branch_inst.valid
   logic [4:0] wr_idx;
-  logic [31:0] npc;
+  logic [63:0] npc;
   BR_SIG branch_inst;
 } ROB_ROW_T;
 
