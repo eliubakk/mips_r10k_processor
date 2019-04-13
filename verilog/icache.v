@@ -18,12 +18,12 @@ module icache(
   //  OUTPUTS  //
   ///////////////
   //to if_stage
-  output logic [63:0] Icache_data_out, // value is memory[proc2Icache_PC]
-  output logic        Icache_valid_out,      // when this is high
+  output logic [63:0] Icache_data_out, // value is memory[proc2Icache_addr]
+  output logic        Icache_valid_out, // when this is high
 
   //to main memory
   output logic [1:0]  proc2Imem_command,
-  output logic [63:0] proc2Imem_addr  
+  output logic [63:0] proc2Imem_addr
 ); 
   //instantiate cachemem module
   //cache memory inputs    
@@ -86,6 +86,7 @@ module icache(
   ICACHE_BUFFER_T [`INST_BUFFER_LEN-1:0] PC_queue, PC_queue_next;
   logic [2:0] PC_queue_tail, PC_queue_tail_next;
   logic [2:0] send_req_ptr, send_req_ptr_next;
+  logic [2:0] mem_waiting_ptr, mem_waiting_ptr_next;
 
   //fetch address variables
   logic [63:0] PC_in;
@@ -105,6 +106,7 @@ module icache(
   logic changed_addr;
   logic unanswered_miss;
   logic update_mem_tag;
+  logic mem_done;
 
   //Instantiate CAM to check for requested address in queue
   genvar ig, jg;
@@ -149,11 +151,11 @@ module icache(
   assign proc2Imem_command = send_request? BUS_LOAD :
                                            BUS_NONE;
 
-  assign cache_wr_en = (PC_queue[0].Imem_tag == Imem2proc_tag) &&
-                              (PC_queue[0].Imem_tag != 0);
+  assign mem_done = (PC_queue[mem_waiting_ptr].Imem_tag == Imem2proc_tag) &&
+                              (PC_queue[mem_waiting_ptr].Imem_tag != 0);
+
   assign cache_wr_idx = current_index;
   assign cache_wr_tag = current_tag;
-  assign cache_wr_data = Imem2proc_data;
 
   assign update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
 
@@ -163,14 +165,20 @@ module icache(
     PC_queue_next = PC_queue;
     PC_queue_tail_next = PC_queue_tail;
     send_req_ptr_next = send_req_ptr;
+    mem_waiting_ptr_next = mem_waiting_ptr;
     cache_rd_PC_queue_en = 1'b0;
     cache_rd_PC_queue_tag = 0;
     cache_rd_PC_queue_idx = 0;
+
+    if(mem_done) begin
+      mem_waiting_ptr_next += 1;
+    end
 
     if(cache_wr_en) begin
       PC_queue_next[`INST_BUFFER_LEN-1:0] = {EMPTY_ICACHE, PC_queue[`INST_BUFFER_LEN-1:1]};
       PC_queue_tail_next -= 1;
       send_req_ptr_next -= 1;
+      mem_waiting_ptr_next -= 1;
     end
 
     if(send_req_ptr < PC_queue_tail & ~send_request) begin
@@ -203,18 +211,29 @@ module icache(
   always_ff @(posedge clock) begin
     if(reset) begin
       last_PC_in   <= `SD -1;     
-      send_request <= `SD 0;
+      send_request <= `SD 1'b0;
       for(int i = 0; i < `INST_BUFFER_LEN; i += 1) begin
         PC_queue[i] <= `SD EMPTY_ICACHE;
       end
-      PC_queue_tail <= `SD 0;
-      send_req_ptr  <= `SD 0;
+      PC_queue_tail   <= `SD 0;
+      send_req_ptr    <= `SD 0;
+      mem_waiting_ptr <= `SD 0;
+      cache_wr_en     <= `SD 1'b0;
+      cache_wr_data   <= `SD 64'b0;
     end else begin
-      last_PC_in    <= `SD PC_in;
-      send_request  <= `SD unanswered_miss;
-      PC_queue      <= `SD PC_queue_next;
-      PC_queue_tail <= `SD PC_queue_tail_next;
-      send_req_ptr  <= `SD send_req_ptr_next;
+      last_PC_in      <= `SD PC_in;
+      send_request    <= `SD unanswered_miss;
+      PC_queue        <= `SD PC_queue_next;
+      PC_queue_tail   <= `SD PC_queue_tail_next;
+      send_req_ptr    <= `SD send_req_ptr_next;
+      mem_waiting_ptr <= `SD mem_waiting_ptr_next;
+      if(mem_done) begin
+        cache_wr_en   <= `SD 1'b1;
+        cache_wr_data <= `SD Imem2proc_data;
+      end else begin
+        cache_wr_en   <= `SD 1'b0;
+        cache_wr_data <= `SD 64'b0;
+      end
     end
   end
 

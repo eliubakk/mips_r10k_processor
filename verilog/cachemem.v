@@ -4,10 +4,10 @@
 `define DEBUG
 
 module cachemem(
-        input clock, reset, wr1_en, rd1_en, rd2_en,
-        input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx, rd2_idx,
-        input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag, rd2_tag,
-        input [63:0] wr1_data,
+    input clock, reset, wr1_en, rd1_en, rd2_en,
+    input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx, rd2_idx,
+    input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag, rd2_tag,
+    input [63:0] wr1_data,
 	input wr1_dirty, 
 
 	`ifdef DEBUG
@@ -28,8 +28,8 @@ module cachemem(
 	output logic [(`NUM_SET_BITS - 1):0] miss_idx_wr,
 	output logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr,
 
-        output logic [63:0] rd1_data, rd2_data,
-        output logic rd1_valid, rd2_valid
+    output logic [63:0] rd1_data, rd2_data,
+    output logic rd1_valid, rd2_valid
 );
 
 	// given addr, find set index
@@ -201,11 +201,12 @@ module cachemem(
 				temp_idx = `NUM_WAYS / 2;
 
 				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					bst_next[rd1_idx][next_bst_idx] = ~bst_next[rd1_idx][next_bst_idx];
 					if (tag_idx_read1 >= temp_idx) begin
+						bst_next[rd1_idx][next_bst_idx] = 1'b0;
 						next_bst_idx = (2 * next_bst_idx) + 2;
 						temp_idx += (acc / 2);
 					end else begin
+						bst_next[rd1_idx][next_bst_idx] = 1'b1;
 						next_bst_idx = (2 * next_bst_idx) + 1;
 						temp_idx -= (acc / 2);
 					end
@@ -221,11 +222,12 @@ module cachemem(
 				temp_idx = `NUM_WAYS / 2;
 
 				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					bst_next[rd2_idx][next_bst_idx] = ~bst_next[rd2_idx][next_bst_idx];
 					if (tag_idx_read2 >= temp_idx) begin
+						bst_next[rd2_idx][next_bst_idx] = 1'b0;
 						next_bst_idx = (2 * next_bst_idx) + 2;
 						temp_idx += (acc / 2);
 					end else begin
+						bst_next[rd2_idx][next_bst_idx] = 1'b1;
 						next_bst_idx = (2 * next_bst_idx) + 1;
 						temp_idx -= (acc / 2);
 					end
