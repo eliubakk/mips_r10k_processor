@@ -42,6 +42,10 @@ module SQ(
 	output logic [63:0] data_rd, // the data that is being read by the load
 	output logic rd_valid, // whether the data that is being read is ready
 
+	output logic [63:0] store_head_data,
+	output logic [63:0] store_head_addr,
+	output logic store_data_stall,
+
 	// general outputs
 	output logic [`index_t:0] tail_out, // the index of the store being dispatched
 	output logic full
@@ -68,6 +72,8 @@ module SQ(
 
 	
 	logic addr_rd_ready;
+
+	logic [`SQ_SIZE - 1:0] stall_req;
 
 	logic [`SQ_SIZE - 1:0] load_req;
 	logic [`SQ_SIZE - 1:0] load_gnt;
@@ -102,6 +108,14 @@ module SQ(
 	assign data_out = data;
 	assign data_ready_out = data_ready;
 	assign head_out = head;
+
+	assign store_head_data = data[head];
+	assign store_head_addr = addr[head];
+
+	for (genvar i = 0; i < `SQ_SIZE; ++i) begin
+	  assign stall_req[i] = (addr_ready[i]) | ~((i <= ld_pos) & (head <= tail ? (head <= i & i < tail) : (head <= i | i < tail)));
+	end
+	assign store_data_stall = ~(&stall_req);
 	
 	always_comb begin
 		// default case

@@ -84,8 +84,8 @@ typedef struct packed {
 // Pipeline Parameters
 //
 //////////////////////////////////////////////
-`define NUM_FU_TOTAL 5 // total number of functional units
-`define NUM_TYPE_FU 4 // number of different types of functional units
+`define NUM_FU_TOTAL 6 // total number of functional units
+`define NUM_TYPE_FU 5 // number of different types of functional units
 `define NUM_LD 1
 `define RS_SIZE 16
 `define MAX_RS_SIZE 16
@@ -233,9 +233,9 @@ const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b
 typedef enum logic [2:0]{
   FU_ALU,
   FU_LD,
-  FU_ST,
   FU_MULT,
-  FU_BR
+  FU_BR,
+  FU_ST
 } FU_NAME;
 
 const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
@@ -244,7 +244,8 @@ typedef enum logic [3:0]{
   FU_ALU_IDX = 0,
   FU_LD_IDX = 2,
   FU_MULT_IDX = 3,
-  FU_BR_IDX = 4
+  FU_BR_IDX = 4,
+  FU_ST_IDX = 5
 } FU_IDX;
 
 const FU_IDX [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
