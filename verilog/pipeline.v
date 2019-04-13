@@ -1143,7 +1143,7 @@ end
        		ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
        		ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
      		  ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];
-          ex_co_sq_idx          <= `SD issue_reg[i].inst.sq_idx;  
+          ex_co_sq_idx          <= `SD issue_reg[i].sq_idx;  
 	
 	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
@@ -1156,7 +1156,7 @@ end
        			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
      		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3]; 
-                ex_co_sq_idx      <= `SD issue_reg[i].inst.sq_idx;
+                ex_co_sq_idx      <= `SD issue_reg[i].sq_idx;
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
     end // for loop end
