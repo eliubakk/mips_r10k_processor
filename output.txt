@@ -3,7 +3,7 @@ mkdir -p IQ && cd IQ && \
 SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps  ../../verilog/IQ.v ../../verilog/misc/CAM.v ../../verilog/misc/encoder.v ../../verilog/misc/psel_generic.v ../../verilog/misc/psel_single.v ../../testbench/IQ_test.v -o simv_IQ &&\
 ./simv_IQ | tee IQ_simv_program.out
                          Chronologic VCS (TM)
-      Version N-2017.12-SP2-1_Full64 -- Fri Apr 12 22:31:23 2019
+      Version N-2017.12-SP2-1_Full64 -- Fri Apr 12 23:38:29 2019
                Copyright (c) 1991-2017 by Synopsys Inc.
                          ALL RIGHTS RESERVED
 
@@ -58,21 +58,21 @@ Warning-[CWUC] Concatenations with unsized constants
 
 
 Warning-[CWUC] Concatenations with unsized constants
-../../verilog/IQ.v, 120
+../../verilog/IQ.v, 123
 "0"
   An unsized constant '0' is used in the concatenation. The unsized constant 
   will be used as a 32-bit constant.
 
 
 Warning-[CWUC] Concatenations with unsized constants
-../../verilog/IQ.v, 134
+../../verilog/IQ.v, 137
 "0"
   An unsized constant '0' is used in the concatenation. The unsized constant 
   will be used as a 32-bit constant.
 
 
 Warning-[CWUC] Concatenations with unsized constants
-../../testbench/IQ_test.v, 96
+../../testbench/IQ_test.v, 110
 "0"
   An unsized constant '0' is used in the concatenation. The unsized constant 
   will be used as a 32-bit constant.
@@ -86,18 +86,19 @@ rm -f _csrc*.so pre_vcsobj_*.so share_vcsobj_*.so
 ld -shared  -o .//../simv_IQ.daidir//_csrc0.so objs/amcQw_d.o 
 rm -f _csrc0.so
 if [ -x ../simv_IQ ]; then chmod -x ../simv_IQ; fi
-g++  -o ../simv_IQ    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv_IQ.daidir/ -Wl,-rpath=./simv_IQ.daidir/ -Wl,-rpath='$ORIGIN'/simv_IQ.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg     _29422_archive_1.so _prev_archive_1.so _csrc0.so  SIM_l.o  _csrc0.so     rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
+g++  -o ../simv_IQ    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv_IQ.daidir/ -Wl,-rpath=./simv_IQ.daidir/ -Wl,-rpath='$ORIGIN'/simv_IQ.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg     _16880_archive_1.so _prev_archive_1.so _csrc0.so  SIM_l.o  _csrc0.so     rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
 ../simv_IQ up to date
 make[1]: Leaving directory `/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/IQ/csrc'
-CPU time: .366 seconds to compile + .030 seconds to elab + .159 seconds to link
+CPU time: .419 seconds to compile + .029 seconds to elab + .162 seconds to link
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 12 22:31 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 12 23:38 2019
 Testing Reset...
-clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : x, branch_incorrect : x
-clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : x, branch_incorrect : x
-clock: 0, reset: 1, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : x, branch_incorrect : x
-clock: 1, reset: 1, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : x, branch_incorrect : x
+clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 0, reset: 1, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 1, fetch_en: 0, if_inst_in.valid_inst :0, if_inst_in.npc :0000000000000000, if_inst_in.ir : 47ff041f, dispatch_no_hazard : 0, branch_incorrect : 0
+
 --------Print Instruction Queue--------
 Inst_queue_full? : 0, inst_queue_entry :  0
 Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
@@ -112,11 +113,473 @@ Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
 Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
 Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
 Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
-Reset Test Passed
-ALL TESTS Passed
-$finish called from file "../../testbench/IQ_test.v", line 113.
-$finish at simulation time                  320
+@@@ Reset Test Passed
+Testing Fetch and Decode sametime when queue is empty
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :00000000000000ff, if_inst_in.ir : 00000fff, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :00000000000000ff, if_inst_in.ir : 00000fff, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  0
+Decoded instruction valid : 1,npc : 00000000000000ff, IR : 00000fff
+--------Queue------
+Index :           0, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           1, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ Fetch and Decode sametime when queue is empty Passed
+Testing Fetch five times
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000004, if_inst_in.ir : 00000400, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000004, if_inst_in.ir : 00000400, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  1
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000008, if_inst_in.ir : 00000800, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000008, if_inst_in.ir : 00000800, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  2
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000000c, if_inst_in.ir : 00000c00, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000000c, if_inst_in.ir : 00000c00, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  3
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000010, if_inst_in.ir : 00001000, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000010, if_inst_in.ir : 00001000, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  4
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000014, if_inst_in.ir : 00001400, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000014, if_inst_in.ir : 00001400, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  5
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ Fetch five times Passed
+Testing Decode three times
+clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000004, if_inst_in.ir : 00000400, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000004, if_inst_in.ir : 00000400, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  4
+Decoded instruction valid : 1,npc : 0000000000000004, IR : 00000400
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           1, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           2, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           3, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000008, if_inst_in.ir : 00000800, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000008, if_inst_in.ir : 00000800, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  3
+Decoded instruction valid : 1,npc : 0000000000000008, IR : 00000800
+--------Queue------
+Index :           0, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           1, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           2, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000000c, if_inst_in.ir : 00000c00, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000000c, if_inst_in.ir : 00000c00, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  2
+Decoded instruction valid : 1,npc : 000000000000000c, IR : 00000c00
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           1, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ Decode three times Passed
+Testing Fetch and Decode sametime when queue is not empty
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000fff, if_inst_in.ir : 0000ffff, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000fff, if_inst_in.ir : 0000ffff, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  2
+Decoded instruction valid : 1,npc : 0000000000000010, IR : 00001000
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           1, valid : 1, npc : 0000000000000fff, IR : 0000ffff
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ Fetch and Decode sametime when queue is not empty Passed
+Testing do nothing
+clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000fff, if_inst_in.ir : 0000ffff, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000fff, if_inst_in.ir : 0000ffff, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  2
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           1, valid : 1, npc : 0000000000000fff, IR : 0000ffff
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ Do nothing Passed
+Testing FLUSH
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000ffff, if_inst_in.ir : 000fffff, dispatch_no_hazard : 1, branch_incorrect : 1
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000ffff, if_inst_in.ir : 000fffff, dispatch_no_hazard : 1, branch_incorrect : 1
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  0
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           1, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ FLUSH Passed
+Testing Fetch when the queue is full
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000004, if_inst_in.ir : 00000400, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000004, if_inst_in.ir : 00000400, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  1
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000008, if_inst_in.ir : 00000800, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000008, if_inst_in.ir : 00000800, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  2
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000000c, if_inst_in.ir : 00000c00, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000000c, if_inst_in.ir : 00000c00, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  3
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000010, if_inst_in.ir : 00001000, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000010, if_inst_in.ir : 00001000, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  4
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000014, if_inst_in.ir : 00001400, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000014, if_inst_in.ir : 00001400, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  5
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000018, if_inst_in.ir : 00001800, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000018, if_inst_in.ir : 00001800, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  6
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000001c, if_inst_in.ir : 00001c00, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000001c, if_inst_in.ir : 00001c00, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  7
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           6, valid : 1, npc : 000000000000001c, IR : 00001c00
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000020, if_inst_in.ir : 00002000, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000020, if_inst_in.ir : 00002000, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  8
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           6, valid : 1, npc : 000000000000001c, IR : 00001c00
+Index :           7, valid : 1, npc : 0000000000000020, IR : 00002000
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000024, if_inst_in.ir : 00002400, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000024, if_inst_in.ir : 00002400, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  9
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           6, valid : 1, npc : 000000000000001c, IR : 00001c00
+Index :           7, valid : 1, npc : 0000000000000020, IR : 00002000
+Index :           8, valid : 1, npc : 0000000000000024, IR : 00002400
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000028, if_inst_in.ir : 00002800, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000028, if_inst_in.ir : 00002800, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 1, inst_queue_entry : 10
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           6, valid : 1, npc : 000000000000001c, IR : 00001c00
+Index :           7, valid : 1, npc : 0000000000000020, IR : 00002000
+Index :           8, valid : 1, npc : 0000000000000024, IR : 00002400
+Index :           9, valid : 1, npc : 0000000000000028, IR : 00002800
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000030, if_inst_in.ir : 00003000, dispatch_no_hazard : 0, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000030, if_inst_in.ir : 00003000, dispatch_no_hazard : 0, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 1, inst_queue_entry : 10
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000004, IR : 00000400
+Index :           1, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           2, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           3, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           4, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           5, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           6, valid : 1, npc : 000000000000001c, IR : 00001c00
+Index :           7, valid : 1, npc : 0000000000000020, IR : 00002000
+Index :           8, valid : 1, npc : 0000000000000024, IR : 00002400
+Index :           9, valid : 1, npc : 0000000000000028, IR : 00002800
+@@@ Fetch when the queue is full Passed
+Testing Fetch and Decode sametime when queue is full
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000f00, if_inst_in.ir : 0000f000, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :0000000000000f00, if_inst_in.ir : 0000f000, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 1, inst_queue_entry : 10
+Decoded instruction valid : 1,npc : 0000000000000004, IR : 00000400
+--------Queue------
+Index :           0, valid : 1, npc : 0000000000000008, IR : 00000800
+Index :           1, valid : 1, npc : 000000000000000c, IR : 00000c00
+Index :           2, valid : 1, npc : 0000000000000010, IR : 00001000
+Index :           3, valid : 1, npc : 0000000000000014, IR : 00001400
+Index :           4, valid : 1, npc : 0000000000000018, IR : 00001800
+Index :           5, valid : 1, npc : 000000000000001c, IR : 00001c00
+Index :           6, valid : 1, npc : 0000000000000020, IR : 00002000
+Index :           7, valid : 1, npc : 0000000000000024, IR : 00002400
+Index :           8, valid : 1, npc : 0000000000000028, IR : 00002800
+Index :           9, valid : 1, npc : 0000000000000f00, IR : 0000f000
+@@@ Fetch and Decode sametime when queue is full Passed
+Testing FLUSH
+clock: 0, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000ffff, if_inst_in.ir : 000fffff, dispatch_no_hazard : 1, branch_incorrect : 1
+clock: 1, reset: 0, fetch_en: 1, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000ffff, if_inst_in.ir : 000fffff, dispatch_no_hazard : 1, branch_incorrect : 1
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  0
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           1, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ FLUSH Passed
+Testing decode when the queue is empty
+clock: 0, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000ffff, if_inst_in.ir : 000fffff, dispatch_no_hazard : 1, branch_incorrect : 0
+clock: 1, reset: 0, fetch_en: 0, if_inst_in.valid_inst :1, if_inst_in.npc :000000000000ffff, if_inst_in.ir : 000fffff, dispatch_no_hazard : 1, branch_incorrect : 0
+
+--------Print Instruction Queue--------
+Inst_queue_full? : 0, inst_queue_entry :  0
+Decoded instruction valid : 0,npc : 0000000000000000, IR : 47ff041f
+--------Queue------
+Index :           0, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           1, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           2, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           3, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           4, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           5, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           6, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           7, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           8, valid : 0, npc : 0000000000000000, IR : 47ff041f
+Index :           9, valid : 0, npc : 0000000000000000, IR : 47ff041f
+@@@ Decode when the queue is empty Passed
+@@@ ALL TESTS Passed
+$finish called from file "../../testbench/IQ_test.v", line 378.
+$finish at simulation time                 5520
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 32000 ps
-CPU Time:      0.270 seconds;       Data structure size:   0.0Mb
-Fri Apr 12 22:31:24 2019
+Time: 552000 ps
+CPU Time:      0.280 seconds;       Data structure size:   0.0Mb
+Fri Apr 12 23:38:30 2019

@@ -26,6 +26,8 @@ module testbench;
 	logic				inst_queue_full;
 	INST_Q				if_inst_out;
 
+
+	integer i,j,k,l;
 	
 	// initialize module
 
@@ -61,13 +63,23 @@ module testbench;
 	task print_IQ;
 		begin
 		
-			$display("--------Print Instruction Queue--------");
+			$display("\n--------Print Instruction Queue--------");
 			$display("Inst_queue_full? : %b, inst_queue_entry : %d", inst_queue_full, inst_queue_entry);
 			$display("Decoded instruction valid : %b,npc : %h, IR : %h", if_inst_out.valid_inst, if_inst_out.npc, if_inst_out.ir);
 			$display("--------Queue------");
 			for (int i = 0; i < `IQ_SIZE; ++i) begin
 				$display("Index : %d, valid : %b, npc : %h, IR : %h", i, inst_queue_out[i].valid_inst, inst_queue_out[i].npc, inst_queue_out[i].ir);
 			end	
+		end
+	endtask
+
+	task reset_test;
+		begin
+			assert((inst_queue_full == 0) & (inst_queue_entry==0)) else #1 exit_on_error;
+			assert((inst_queue_out[0].valid_inst == 0) & (inst_queue_out[0].npc == 64'h0) & (inst_queue_out[0].ir == `NOOP_INST)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+
 		end
 	endtask
 
@@ -84,6 +96,8 @@ module testbench;
 		clock = ZERO;
 		reset = ZERO;
 		fetch_en = ZERO;
+		dispatch_no_hazard = ZERO;
+		branch_incorrect = ZERO;
 		if_inst_in.valid_inst 			= 1'b0;
 		if_inst_in.npc				= 64'h0;
 		if_inst_in.ir				= `NOOP_INST;
@@ -102,33 +116,265 @@ module testbench;
 		$display("Testing Reset...");
 		@(negedge clock);
 		reset = ONE;
-
 		@(posedge clock);
 		`DELAY;
 		print_IQ;
-		assert((inst_queue_full == 0) & (inst_queue_entry==0)) else #1 exit_on_error;
-
-		$display("Reset Test Passed");
+		reset_test;
+		$display("@@@ Reset Test Passed");
 
 		// Fetch and Decode at the same time when queue is empty
 
+		$display("Testing Fetch and Decode sametime when queue is empty");
+		@(negedge clock);
+		reset 			= ZERO;
+		fetch_en 		= ONE;
+		dispatch_no_hazard 	= ONE;
+		branch_incorrect 	= ZERO;
+		if_inst_in.valid_inst 	= ONE;
+		if_inst_in.npc		= 64'hff;
+		if_inst_in.ir		= 64'hfff;
+		
+		@(posedge clock);
+		`DELAY;
+		print_IQ;
+			assert((inst_queue_full == 0) & (inst_queue_entry==0) ) else #1 exit_on_error;
+			assert((inst_queue_out[0].valid_inst == 0) & (inst_queue_out[0].npc == 64'h0) & (inst_queue_out[0].ir == `NOOP_INST)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 1) & (if_inst_out.npc == 64'hff) & (if_inst_out.ir == 64'hfff))else #1 exit_on_error;
+
+
+		$display("@@@ Fetch and Decode sametime when queue is empty Passed");
+	
 
 		// Fetch X 5
+
+		$display("Testing Fetch five times");
+		for(i=0; i<5; ++i) begin
+			@(negedge clock);
+			fetch_en 		= ONE;
+			dispatch_no_hazard 	= ZERO;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 4*(i+1);
+			if_inst_in.ir		= 4*256*(i+1);
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 0) & (inst_queue_entry==(i+1))) else #1 exit_on_error;
+			assert((inst_queue_out[i].valid_inst == 1) & (inst_queue_out[i].npc == 4*(i+1)) & (inst_queue_out[i].ir == 4*256*(i+1))) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+
+		end
+		$display("@@@ Fetch five times Passed");
 	
 		// Decode X 3
 
+		$display("Testing Decode three times");
+		for(i=0; i<3; ++i) begin
+			@(negedge clock);
+			fetch_en 		= ZERO;
+			dispatch_no_hazard 	= ONE;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 4*(i+1);
+			if_inst_in.ir		= 4*256*(i+1);
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+		
+		assert((inst_queue_full == 0) & (inst_queue_entry==(4-i))) else #1 exit_on_error;
+		assert((inst_queue_out[3-i].valid_inst == 1) & (inst_queue_out[3-i].npc == 20) & (inst_queue_out[3-i].ir == 20*256)) else #1 exit_on_error;
+		assert((if_inst_out.valid_inst == 1) & (if_inst_out.npc == 4*(i+1)) & (if_inst_out.ir == 4*256*(i+1))) else #1 exit_on_error;
+
+
+
+		end
+		$display("@@@ Decode three times Passed");
+	
+
+
 		// Fetch and Decode
+		
+		$display("Testing Fetch and Decode sametime when queue is not empty");
+		@(negedge clock);
+		fetch_en 		= ONE;
+		dispatch_no_hazard 	= ONE;
+		branch_incorrect 	= ZERO;
+		if_inst_in.valid_inst 	= ONE;
+		if_inst_in.npc		= 64'hfff;
+		if_inst_in.ir		= 64'hffff;
+		
+		@(posedge clock);
+		`DELAY;
+		print_IQ;
+		assert((inst_queue_full == 0) & (inst_queue_entry==2)) else #1 exit_on_error;
+		assert((inst_queue_out[1].valid_inst == 1) & (inst_queue_out[1].npc == 64'hfff) & (inst_queue_out[1].ir == 64'hffff)) else #1 exit_on_error;
+		assert((if_inst_out.valid_inst == 1) & (if_inst_out.npc == 16) & (if_inst_out.ir == 16*256)) else #1 exit_on_error;
+
+		$display("@@@ Fetch and Decode sametime when queue is not empty Passed");
+	
 
 		// Do nothing	
-	
-		// Fetch when the queue is full
-		
-		// Flush when branch_prediction is incorrect
-		
-		// Decode when the queue is empty
-		
 
-		$display("ALL TESTS Passed");
+		$display("Testing do nothing");
+		@(negedge clock);
+		fetch_en 		= ZERO;
+		dispatch_no_hazard 	= ZERO;
+		branch_incorrect 	= ZERO;
+		if_inst_in.valid_inst 	= ONE;
+		if_inst_in.npc		= 64'hfff;
+		if_inst_in.ir		= 64'hffff;
+		
+		@(posedge clock);
+		`DELAY;
+		print_IQ;
+		assert((inst_queue_full == 0) & (inst_queue_entry==2)) else #1 exit_on_error;
+		assert((inst_queue_out[1].valid_inst == 1) & (inst_queue_out[1].npc == 64'hfff) & (inst_queue_out[1].ir == 64'hffff)) else #1 exit_on_error;
+		assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST)) else #1 exit_on_error;
+
+		$display("@@@ Do nothing Passed");
+	
+
+		// Flush when branch_prediction is incorrect
+
+		$display("Testing FLUSH");
+		@(negedge clock);
+		fetch_en 		= ONE;
+		dispatch_no_hazard 	= ONE;
+		branch_incorrect 	= ONE;
+		if_inst_in.valid_inst 	= ONE;
+		if_inst_in.npc		= 64'hffff;
+		if_inst_in.ir		= 64'hfffff;
+		
+		@(posedge clock);
+		`DELAY;
+		print_IQ;
+		reset_test;		
+		$display("@@@ FLUSH Passed");
+	
+
+		// Fetch when the queue is full
+	
+		$display("Testing Fetch when the queue is full");
+		for(i=0; i<`IQ_SIZE-1; ++i) begin
+			@(negedge clock);
+			fetch_en 		= ONE;
+			dispatch_no_hazard 	= ZERO;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 4*(i+1);
+			if_inst_in.ir		= 4*256*(i+1);
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 0) & (inst_queue_entry==(i+1))) else #1 exit_on_error;
+			assert((inst_queue_out[i].valid_inst == 1) & (inst_queue_out[i].npc == 4*(i+1)) & (inst_queue_out[i].ir == 4*256*(i+1))) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+
+		end
+		
+			@(negedge clock);
+			fetch_en 		= ONE;
+			dispatch_no_hazard 	= ZERO;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 4*(`IQ_SIZE);
+			if_inst_in.ir		= 4*256*(`IQ_SIZE);
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 1) & (inst_queue_entry==(`IQ_SIZE))) else #1 exit_on_error;
+			assert((inst_queue_out[i].valid_inst == 1) & (inst_queue_out[i].npc == 4*(`IQ_SIZE)) & (inst_queue_out[i].ir == 4*256*(`IQ_SIZE))) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+			@(negedge clock);
+			fetch_en 		= ONE;
+			dispatch_no_hazard 	= ZERO;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 4*(`IQ_SIZE+2);
+			if_inst_in.ir		= 4*256*(`IQ_SIZE+2);
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			
+			assert((inst_queue_full == 1) & (inst_queue_entry==(`IQ_SIZE))) else #1 exit_on_error;
+			assert((inst_queue_out[i].valid_inst == 1) & (inst_queue_out[i].npc == 4*(`IQ_SIZE)) & (inst_queue_out[i].ir == 4*256*(`IQ_SIZE))) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 0) & (if_inst_out.npc == 64'h0) & (if_inst_out.ir == `NOOP_INST))else #1 exit_on_error;
+
+
+			
+
+		$display("@@@ Fetch when the queue is full Passed");
+	
+		// Fetch and Decode at the same time when the queue is full
+
+			$display("Testing Fetch and Decode sametime when queue is full");
+			@(negedge clock);
+			fetch_en 		= ONE;
+			dispatch_no_hazard 	= ONE;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'hf00;
+			if_inst_in.ir		= 64'hf000;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			assert((inst_queue_full == 1) & (inst_queue_entry==`IQ_SIZE)) else #1 exit_on_error;
+			assert((inst_queue_out[`IQ_SIZE-1].valid_inst == 1) & (inst_queue_out[`IQ_SIZE-1].npc == 64'hf00) & (inst_queue_out[`IQ_SIZE-1].ir == 64'hf000)) else #1 exit_on_error;
+			assert((if_inst_out.valid_inst == 1) & (if_inst_out.npc == 4) & (if_inst_out.ir == 4*256)) else #1 exit_on_error;
+
+		$display("@@@ Fetch and Decode sametime when queue is full Passed");
+	
+	
+			
+		// Flush when branch_prediction is incorrect
+			$display("Testing FLUSH");
+			@(negedge clock);
+			fetch_en 		= ONE;
+			dispatch_no_hazard 	= ONE;
+			branch_incorrect 	= ONE;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'hffff;
+			if_inst_in.ir		= 64'hfffff;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			reset_test;		
+			$display("@@@ FLUSH Passed");
+	
+
+		// Decode when the queue is empty
+			$display("Testing decode when the queue is empty");
+			@(negedge clock);
+			fetch_en 		= ZERO;
+			dispatch_no_hazard 	= ONE;
+			branch_incorrect 	= ZERO;
+			if_inst_in.valid_inst 	= ONE;
+			if_inst_in.npc		= 64'hffff;
+			if_inst_in.ir		= 64'hfffff;
+			
+			@(posedge clock);
+			`DELAY;
+			print_IQ;
+			reset_test;
+			$display("@@@ Decode when the queue is empty Passed");
+				
+
+		// Synthesize
+
+		$display("@@@ ALL TESTS Passed");
 		$finish;
 	end
 
