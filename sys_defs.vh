@@ -116,7 +116,7 @@ typedef struct packed{
 	logic 		valid_inst;
 	logic 	[63:0]	npc; 
 	logic	[31:0]	ir;
-	BR_SIG		if_branch_inst;
+	BR_SIG		branch_inst;
 } INST_Q;
 
 

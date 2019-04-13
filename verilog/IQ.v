@@ -43,34 +43,34 @@ module IQ(
 	always_comb begin
 		next_inst_queue = inst_queue;
 		next_tail = tail;
-		if_inst[i].valid_inst 			= 1'b0;
-		if_inst[i].npc				= 64'h0;
-		if_inst[i].ir				= `NOOP_INST;
-		if_inst[i].branch_inst.en		= 1'b0; 
-		if_inst[i].branch_inst.cond		= 1'b0;    		
-		if_inst[i].branch_inst.direct		= 1'b0;
-		if_inst[i].branch_inst.ret		= 1'b0;
-		if_inst[i].branch_inst.pc		= 64'h0;
-		if_inst[i].branch_inst.pred_pc		= 64'h0;
-		if_inst[i].branch_inst.br_idx		= {($clog2(`OBQ_SIZE)){0}};
-		if_inst[i].branch_inst.prediction	= 1'b0;
+		if_inst.valid_inst 			= 1'b0;
+		if_inst.npc				= 64'h0;
+		if_inst.ir				= `NOOP_INST;
+		if_inst.branch_inst.en		= 1'b0; 
+		if_inst.branch_inst.cond		= 1'b0;    		
+		if_inst.branch_inst.direct		= 1'b0;
+		if_inst.branch_inst.ret		= 1'b0;
+		if_inst.branch_inst.pc		= 64'h0;
+		if_inst.branch_inst.pred_pc		= 64'h0;
+		if_inst.branch_inst.br_idx		= {($clog2(`OBQ_SIZE)){0}};
+		if_inst.branch_inst.prediction	= 1'b0;
 
 
 
 		if(branch_incorrect) begin // During flushing
-
-			next_inst_queue[i].valid_inst 			= 1'b0;
-			next_inst_queue[i].npc				= 64'h0;
-			next_inst_queue[i].ir				= `NOOP_INST;
-			next_inst_queue[i].branch_inst.en		= 1'b0; 
-			next_inst_queue[i].branch_inst.cond		= 1'b0;    		
-			next_inst_queue[i].branch_inst.direct		= 1'b0;
-			next_inst_queue[i].branch_inst.ret		= 1'b0;
-			next_inst_queue[i].branch_inst.pc		= 64'h0;
-			next_inst_queue[i].branch_inst.pred_pc		= 64'h0;
-			next_inst_queue[i].branch_inst.br_idx		= {($clog2(`OBQ_SIZE)){0}};
-			next_inst_queue[i].branch_inst.prediction	= 1'b0;
-
+			for(int i=0; i<`IQ_SIZE; ++i) begin
+				next_inst_queue[i].valid_inst 			= 1'b0;
+				next_inst_queue[i].npc				= 64'h0;
+				next_inst_queue[i].ir				= `NOOP_INST;
+				next_inst_queue[i].branch_inst.en		= 1'b0; 
+				next_inst_queue[i].branch_inst.cond		= 1'b0;    		
+				next_inst_queue[i].branch_inst.direct		= 1'b0;
+				next_inst_queue[i].branch_inst.ret		= 1'b0;
+				next_inst_queue[i].branch_inst.pc		= 64'h0;
+				next_inst_queue[i].branch_inst.pred_pc		= 64'h0;
+				next_inst_queue[i].branch_inst.br_idx		= {($clog2(`OBQ_SIZE)){0}};
+				next_inst_queue[i].branch_inst.prediction	= 1'b0;
+			end
 			next_tail = 0;		
 		end else begin
 			if( fetch_en & dispatch_no_hazard) begin // Fetch and decode
@@ -96,7 +96,7 @@ module IQ(
 					
 				end
 			end else begin // Do nothing
-				inst_queue_next = inst_queue;
+				next_inst_queue = inst_queue;
 				next_tail = tail;
 			end
 
@@ -122,17 +122,17 @@ module IQ(
 			end	
 				tail 						<= `SD 0;
 
-				if_inst_out[i].valid_inst 		<= `SD 1'b0;
-				if_inst_out[i].npc			<= `SD 64'h0;
-				if_inst_out[i].ir			<= `SD `NOOP_INST;
-				if_inst_out[i].branch_inst.en		<= `SD 1'b0; 
-				if_inst_out[i].branch_inst.cond		<= `SD 1'b0;    		
-				if_inst_out[i].branch_inst.direct	<= `SD 1'b0;
-				if_inst_out[i].branch_inst.ret		<= `SD 1'b0;
-				if_inst_out[i].branch_inst.pc		<= `SD 64'h0;
-				if_inst_out[i].branch_inst.pred_pc	<= `SD 64'h0;
-				if_inst_out[i].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
-				if_inst_out[i].branch_inst.prediction	<= `SD 1'b0;
+				if_inst_out.valid_inst 		<= `SD 1'b0;
+				if_inst_out.npc			<= `SD 64'h0;
+				if_inst_out.ir			<= `SD `NOOP_INST;
+				if_inst_out.branch_inst.en		<= `SD 1'b0; 
+				if_inst_out.branch_inst.cond		<= `SD 1'b0;    		
+				if_inst_out.branch_inst.direct	<= `SD 1'b0;
+				if_inst_out.branch_inst.ret		<= `SD 1'b0;
+				if_inst_out.branch_inst.pc		<= `SD 64'h0;
+				if_inst_out.branch_inst.pred_pc	<= `SD 64'h0;
+				if_inst_out.branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 
 		end else begin
 
