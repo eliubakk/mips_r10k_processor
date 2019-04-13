@@ -194,14 +194,14 @@ module decoder(
             begin
               wr_mem = `TRUE;
               dest_reg = DEST_NONE;
-              fu_name = FU_LD;
+              fu_name = FU_ST;
             end // case: `STQ_INST
             `STQ_C_INST:
             begin
               wr_mem = `TRUE;
               stc_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
-              fu_name = FU_LD;
+              fu_name = FU_ST;
             end // case: `STQ_INST
             default:       illegal = `TRUE;
           endcase // case(inst[31:26])

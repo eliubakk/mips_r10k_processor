@@ -233,6 +233,7 @@ const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b
 typedef enum logic [2:0]{
   FU_ALU,
   FU_LD,
+  FU_ST,
   FU_MULT,
   FU_BR
 } FU_NAME;
@@ -524,7 +525,7 @@ typedef struct packed{
   logic        busy;
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
-  logic [$clog2(`SQ_SIZE) - 1:0] ld_pos;
+  logic [$clog2(`SQ_SIZE) - 1:0] sq_idx; // ld_pos;
   logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  //*****Heewoo :  Added for branch instruction
 } RS_ROW_T;
 

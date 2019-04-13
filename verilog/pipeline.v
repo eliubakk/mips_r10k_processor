@@ -203,7 +203,8 @@ module pipeline (
   logic               ex_co_done;
   FU_REG              ex_co_wr_mem;  
   FU_REG              ex_co_rd_mem;
-  logic [63:0] ex_co_rega;
+  logic [63:0] ex_co_rega, ex_co_rega_st;
+  logic [$clog2(`SQ_SIZE) - 1:0] ex_co_sq_idx;
 
 // Outputs from MEM/COM Pipeline Register
   logic  mem_co_halt;
@@ -296,6 +297,7 @@ logic branch_valid_disp;  //branch_valid_disp
   logic rob_retire_out_take_branch;
   logic rob_retire_out_T_new; 
   logic rob_retire_out_T_old; 	
+  logic [31:0] rob_retire_opcode;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
   logic [1:0]  proc2Dmem_command, proc2Imem_command;
@@ -344,6 +346,69 @@ logic branch_valid_disp;  //branch_valid_disp
         .proc2Imem_command(proc2Imem_command),
         .proc2Imem_addr(proc2Imem_addr)
 	);
+
+  // store to load forwarding signals from memory stage
+  logic load_wants_store;
+  logic [31:0] load_rd_addr;
+  logic [$clog2(`SQ_SIZE) - 1:0] load_spos_tail;
+
+  // store dispatch signals
+  logic dispatch_is_store;
+  logic [31:0] dispatch_store_addr;
+  logic dispatch_store_addr_ready;
+  logic [63:0] dispatch_store_data;
+  logic dispatch_store_data_ready;
+
+  // store execute signals
+  logic execute_is_store;
+  logic [$clog2(`SQ_SIZE) - 1:0] store_spos_tail;
+  logic [31:0] ex_store_addr;
+  logic ex_store_addr_valid;
+  logic [63:0] ex_store_data;
+  logic ex_store_data_valid;
+
+  // store retire signals
+  logic retire_is_store;
+
+  // store queue output signals
+  logic [63:0] sq_data_out;
+  logic sq_data_valid;
+  logic [$clog2(`SQ_SIZE) - 1:0] sq_tail;
+  logic sq_full;
+
+  // general wires for store queue
+  logic sq_hazard;
+
+  // Store Queue Module
+  SQ store_queue(
+    .clock(clock),
+    .reset(reset),
+
+    .rd_en(load_wants_store),
+    .addr_rd(load_rd_addr),
+    .ld_pos(load_spos_tail),
+
+    .dispatch_en(dispatch_is_store),
+    .dispatch_addr(dispatch_store_addr),
+    .dispatch_addr_ready(dispatch_store_addr_ready),
+    .dispatch_data(dispatch_store_data),
+    .dispatch_data_ready(dispatch_store_data_ready),
+
+    .ex_en(execute_is_store),
+    .ex_index(store_spos_tail),
+    .ex_addr(ex_store_addr),
+    .ex_addr_en(ex_store_addr_valid),
+    .ex_data(ex_store_data),
+    .ex_data_en(ex_store_data_valid),
+
+    .rt_en(retire_is_store),
+
+    .data_rd(sq_data_out),
+    .rd_valid(sq_data_valid),
+
+    .tail_out(sq_tail),
+    .full(sq_full)
+  );
 
   //////////////////////////////////////////////////
   //                                              //
@@ -712,7 +777,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //For ROB
   assign id_inst_out.inst_opcode = if_id_IR;
   assign id_inst_out.npc = if_id_NPC; 
-  assign id_branch_inst = if_id_branch_inst;	
+  assign id_branch_inst = if_id_branch_inst;
+
+  // store queue tail assignment
+  assign id_inst_out.sq_idx = sq_tail;
 
   //////////////////////////////////////////////////
   //                                              //
@@ -723,7 +791,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 logic dispatch_no_hazard_comb;
 logic dispatch_no_hazard_RS;
 
-  assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
+  assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0) | (sq_hazard)); 
 always_ff @(posedge clock) begin
 
 	dispatch_no_hazard <= `SD  dispatch_no_hazard_comb;  
@@ -801,6 +869,15 @@ always_ff @(posedge clock) begin
   //                  DI/ISSUE-stages             //
   //                                              //
   //////////////////////////////////////////////////
+
+
+  // signals to communicate with SQ
+  assign dispatch_is_store = id_di_inst_in.inst.fu_name == FU_ST;
+  assign dispatch_store_addr = {64{1'b0}};
+  assign dispatch_store_addr_ready = 1'b0;
+  assign dispatch_store_data = {64{1'b0}};
+  assign dispatch_store_data_ready = 1'b0;
+  assign sq_hazard = (dispatch_is_store & sq_full);
 
   assign issue_stall = ~is_ex_enable;
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
@@ -1017,6 +1094,16 @@ end
   //assign ex_co_alu_result[3] = ex_alu_result_out[3];// Multiplication output is in during complete stage
 
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
+
+  // SQ execute signals
+  assign execute_is_store = ex_co_valid_inst[5]; // store is in 5th ex_co reg
+  assign store_spos_tail = ex_co_sq_idx;
+  assign ex_store_addr = ex_co_alu_result[5];
+  assign ex_store_addr_valid = 1'b1;
+  assign ex_store_data = ex_co_rega_st;
+  assign ex_store_data_valid = 1'b1;
+
+
   /*
    always_comb begin
 	for (integer i=0; i<3; i=i+1) begin
@@ -1043,6 +1130,7 @@ end
           ex_co_valid_inst[i]   <= `SD 0;
           //ex_co_rega[i]         <= `SD 0;
           ex_co_alu_result[i]   <= `SD 0;
+          ex_co_sq_idx <= `SD 0;
 	  //ex_co_done		<= `SD 1'b0;
       end else if (ex_co_enable[i] && i!=3) begin
 		     // these are forwarded directly from ID/EX latches
@@ -1054,7 +1142,8 @@ end
       		ex_co_halt[i]         <= `SD issue_reg[i].inst.halt;
        		ex_co_illegal[i]      <= `SD issue_reg[i].inst.illegal;
        		ex_co_valid_inst[i]   <= `SD issue_reg[i].inst.valid_inst;
-     		  ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];  
+     		  ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];
+          ex_co_sq_idx          <= `SD issue_reg[i].inst.sq_idx;  
 	
 	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
@@ -1067,6 +1156,7 @@ end
        			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
      		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3]; 
+                ex_co_sq_idx      <= `SD issue_reg[i].inst.sq_idx;
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
     end // for loop end
@@ -1076,19 +1166,24 @@ end
     if (reset | branch_not_taken) begin
      // ex_co_done <= `SD 0;
      ex_co_rega <= `SD 64'b0;
+     ex_co_rega_st <= `SD 64'b0;
      // ex_co_rd_mem <= `SD 0;
      // ex_c0_wr_mem <= `SD 0;
       ex_co_take_branch  <= `SD 0;
       ex_co_branch_index <= `SD {$clog2(`OBQ_SIZE){0}};
       ex_co_branch_target <= `SD 0;
-    end else if(ex_co_enable[4]) begin
+    end
+    if(ex_co_enable[4]) begin
       ex_co_rega <= `SD is_ex_T1_value[2];
       //ex_co_rd_mem <= `SD issue_reg[2].inst;
       //ex_co_wr_mem <= `SD 0;
       ex_co_take_branch  <= `SD ex_take_branch_out;
       ex_co_branch_index <= `SD issue_reg[4].br_idx;
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
-    end 
+    end
+    if (ex_co_enable[5]) begin
+      ex_co_rega_st <= `SD is_ex_T1_value[5];
+    end
 		//ex_co_done <= `SD 0;
 
   end
@@ -1392,7 +1487,9 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //       take_branch_reg = ex_co_take_branch;
   //       break;
   //     end
-    
+  assign retire_is_store = (rob_retire_opcode[31:26] == `STQ_INST) ||
+                            (rob_retire_opcode[31:26] == `STQ_C_INST);
+
    
   ROB R0(
     // INPUTS
@@ -1455,6 +1552,7 @@ always_ff @ (posedge clock) begin
 		rob_retire_out_take_branch <= `SD 0;
 		rob_retire_out_T_new <= `SD `DUMMY_REG;
 		rob_retire_out_T_old <= `SD `DUMMY_REG;
+    rob_retire_opcode <= `SD {32{0}};
 	
 	ret_branch_inst.en 		<= `SD 1'b0;
 	ret_branch_inst.cond 		<= `SD 1'b0;
@@ -1468,6 +1566,7 @@ always_ff @ (posedge clock) begin
 
 
 	end else begin 
+    rob_retire_opcode <= `SD rob_retire_out.opcode;
 		retire_inst_busy <= rob_retire_out.busy;
 		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
 		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG) & !rob_retire_out.halt);
