@@ -1,20 +1,14 @@
 `define DEBUG
 
-`define PHT_ROW 8
 `include "../../sys_defs.vh"
 
+`define DELAY #2
 module testbench;
 	logic clock, reset, enable;
 	logic			if_branch;
-	logic 	[31:0]		if_pc_in;
-	logic			if_cond_branch;
-	logic			if_direct_branch;
-	logic			if_return_branch;
+	logic 	[63:0]		if_pc_in;
 	logic			rt_branch;
-	logic	[31:0]		rt_pc_in;
-	logic			rt_cond_branch;
-	logic			rt_direct_branch;
-	logic			rt_return_branch;
+	logic	[63:0]		rt_pc_in;
 	logic			rt_branch_taken;	
 
 
@@ -26,13 +20,6 @@ module testbench;
 
 	integer i,j,k,l;	
 
-	// for accuracy calculation
-	//
-	//integer total_count_for, hit_count_for;
-	//integer total_count_random, hit_count_random;
-
-
-
 
 	PHT_TWO_SC pht_0(
 		// inputs
@@ -41,14 +28,8 @@ module testbench;
 		.enable(enable), 
 		.if_branch(if_branch),
 		.if_pc_in(if_pc_in),
-		.if_cond_branch(if_cond_branch),
-		.if_direct_branch(if_direct_branch),
-		.if_return_branch(if_return_branch),
 		.rt_branch(rt_branch),
 		.rt_pc_in(rt_pc_in),
-		.rt_cond_branch(rt_cond_branch),
-		.rt_direct_branch(rt_direct_branch),
-		.rt_return_branch(rt_return_branch),
 		.rt_branch_taken(rt_branch_taken),
 		
 		// outputs 
@@ -69,6 +50,7 @@ module testbench;
 	// TASKS
 	task exit_on_error;
 		begin
+			#1;
 			$display("@@@Failed at time %f", $time);
 			$finish;
 		end
@@ -76,40 +58,32 @@ module testbench;
 
 	task display_pht;
 		begin
+			
+			$display("\n----------Display PHT--------------------");
+			$display(" Fetch : if_branch %d, if_pc_in : %h", if_branch, if_pc_in);
+			$display(" Fetch prediction valid : %b, Fetch prediction : %b", if_prediction_valid, if_prediction);
+			$display(" Retire : rt_branch %d, rt_pc_in : %h", rt_branch, rt_pc_in);
+			$display(" 	    rt_branch_taken %d", rt_branch_taken);
 			$display("\n----------Prediction History Table--------");
 			for(j=0;j<`PHT_ROW;j=j+1) begin
-				$display("Idx %1.0d : Prediction %b", j, pht_out[j][1:0]);	
+				$display("Idx %1.0d : Prediction %2.0b", j, pht_out[j][1:0]);	
 			end
 			$display("-------------------------------------------\n");
 		end
 	endtask
 
-/*	task accuracy_check_for;
+	task reset_test;
 		begin
-			total_count_for = total_count_for + 1;
-			if(prediction == branch_taken) begin
-				hit_count_for	=  hit_count_for + 1 ;	
-			end 
+			assert((!if_prediction_valid) && (!if_prediction)) else #1 exit_on_error;
+			for(i=0;i<`PHT_ROW;++i) begin
+				assert( pht_out[i] == 2'b0 ) else #1 exit_on_error;
+			end
 		end
 	endtask
-
-	task accuracy_check_random;
-		begin
-			total_count_random = total_count_random + 1;
-			if(prediction == branch_taken) begin
-				hit_count_random	= hit_count_random + 1;	
-			end 
-		end
-	endtask
-*/
-
-
-
-
 	
 	initial begin
 		
-		$monitor("Clock: %4.0f, reset: %b, enable: %b, if_branch: %b, if_pc_in: %d, if_prediction: %b, if_prediction_valid: %b, rt_branch: %b, rt_pc_in: %d, rt_branch_taken: %b",clock, reset, enable, if_branch, if_pc_in, if_prediction, if_prediction_valid, rt_branch, rt_pc_in, rt_branch_taken);	
+		$monitor("Clock: %4.0f, reset: %b, enable: %b",clock, reset, enable);	
 
 		// Initial value
 		clock = 1'b0;
@@ -117,32 +91,113 @@ module testbench;
 		enable = 1'b0;
 
 		if_branch = 1'b0;	
-		if_pc_in = 32'h0;
-		if_cond_branch = 1'b0;;
-		if_direct_branch = 1'b0;
-		if_return_branch = 1'b0;
+		if_pc_in = 64'h0;
 		rt_branch = 1'b0;
-		rt_pc_in = 32'h0;
-		rt_cond_branch = 1'b0;;
-		rt_direct_branch = 1'b0;
-		rt_return_branch = 1'b0;
+		rt_pc_in = 64'h0;
 		rt_branch_taken = 1'b0;	
 		
 		// Reset
+		
+		$display("\n RESET test"); 
 		@(negedge clock);
-		$display("--------------------------------RESET----------------------------------"); 
 		reset = 1'b1;
-		enable = 1'b0;
 
+		@(posedge clock);
+		`DELAY;
+		display_pht;
+	  	reset_test;	
+
+		$display("@@@ RESET test passed\n ");
+
+
+		
+		// Retirement test
+		//
+		$display("\n Retire test");
 		@(negedge clock);
 		reset = 1'b0;
-		enable = 1'b1;
+		enable =1'b1;
+	
+		rt_branch = 1'b1;
+		rt_pc_in = 4*(3+`PHT_ROW*5);
+		rt_branch_taken = 1'b1;
+
 		@(posedge clock);
-		`SD;
+		`DELAY
+		assert ( (!if_prediction) && (!if_prediction_valid) ) else #1 exit_on_error;
+		assert( pht_out[3] == 2'b01 ) else #1 exit_on_error;
+
+
+		@(negedge clock);
+		@(posedge clock);
+		`DELAY
+		assert ( (!if_prediction) && (!if_prediction_valid) ) else #1 exit_on_error;
+		assert( pht_out[3] == 2'b10 ) else #1 exit_on_error;
+
+
+		@(negedge clock);
+		@(posedge clock);
+		`DELAY;
 		display_pht;
+		
+		assert ( (!if_prediction) && (!if_prediction_valid) ) else #1 exit_on_error;
+		assert( pht_out[3] == 2'b11 ) else #1 exit_on_error;
+
+		@(negedge clock);
+		@(posedge clock);
+		`DELAY;
+		display_pht;
+		
+		assert ( (!if_prediction) && (!if_prediction_valid) ) else #1 exit_on_error;
+		assert( pht_out[3] == 2'b11 ) else #1 exit_on_error;
+
+
+				
+
+		$display("@@@ Retire test passed\n");
 
 		
 
+		$display("\n Fetch test");
+
+		@(negedge clock);
+		reset = 1'b0;
+		enable =1'b1;
+	
+		if_branch = 1'b1;
+		if_pc_in = 12;
+
+		rt_branch = 1'b0;
+		rt_pc_in = 16;
+		rt_branch_taken = 1'b1;
+
+		@(posedge clock);
+		`DELAY
+		display_pht;
+		assert ( (if_prediction) && (if_prediction_valid) ) else #1 exit_on_error;
+		assert( pht_out[3] == 2'b11 ) else #1 exit_on_error;
+		assert( pht_out[4] == 2'b00 ) else #1 exit_on_error;
+
+		@(negedge clock);
+		reset = 1'b0;
+		enable =1'b1;
+	
+		if_branch = 1'b1;
+		if_pc_in = 20;
+
+
+		@(posedge clock);
+		`DELAY
+		display_pht;
+		assert ( (!if_prediction) && (if_prediction_valid) ) else #1 exit_on_error;
+		assert( pht_out[5] == 2'b00 ) else #1 exit_on_error;
+		assert( pht_out[4] == 2'b00 ) else #1 exit_on_error;
+
+
+
+		$display("@@@ Fetch test passed\n");
+		
+/*
 		//Update each row to weakly not-taken
 		//
 		$display("------------------------Every row to weakly not taken-------------------------------");
@@ -156,8 +211,7 @@ module testbench;
 			@(posedge clock);
 			`SD;
 			display_pht;
-			assert(!if_prediction_valid & (pht_out[i]==2'b01)) else #1 exit_on_error;		
-			
+			reset_test;	
 
 		end
 
@@ -213,66 +267,7 @@ module testbench;
 			assert(!if_prediction_valid & (pht_out[i]==2'b11)) else #1 exit_on_error;		
 			
 
-		end
-		
-
-		// Random testing and prediction accuracy
-		// PC is random, Taken and not taken are random
-/*		
-
-		$display("------------------------------RESET----------------------------------");
-		@(negedge clock);
-		reset = 1'b1;
-		pc_in = 0;
-		@(negedge clock);
-		reset = 1'b0;
-		enable = 1'b1;
-
-
-
-		$display("-----------------------for loop testing (9T 1N)--------------------");
-
-		for(k=0;k<100;k=k+1) begin
-			for(l=0;l<9;l=l+1) begin
-				@(negedge clock);
-				branch_taken = 1'b1;
-				pc_in = pc_in + 4;
-				@(posedge clock);
-				`SD;
-				display_pht;
-				accuracy_check_for;				
-			end
-				@(negedge clock);
-				branch_taken = 1'b0;
-				pc_in = pc_in + 4;
-				@(posedge clock);
-				`SD;
-				display_pht;
-				accuracy_check_for;
-
-
-		end	
-
-	
-
-
-		$display("------------------------RANDOM testing and check accuracy----------------");
-			for(k=0;k<1000;k=k+1) begin
-				@(negedge clock);
-				branch_taken = $urandom()%2;
-				pc_in	     = $urandom();
-				@(posedge clock);
-				`SD;
-				display_pht;
-				accuracy_check_random;
-			end				
-				
-		
-
-		$display("-----------------------------------------------------------------");
-		$display("For loop accuracy 	: %f percent", 100*hit_count_for/total_count_for);
-		$display("Random test accuracy  : %f percent", 100*hit_count_random/total_count_random);
-*/
+		end*/
 		$display("@@@passed");
 		$finish;		
 

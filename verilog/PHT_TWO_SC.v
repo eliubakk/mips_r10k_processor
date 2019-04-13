@@ -1,8 +1,7 @@
 // multiple row - 2 bit saturation counter - Pattern history table
 //
 `define DEBUG
-`incldue "../../sys_defs.vh"
-`define PHT_ROW 8
+`include "../../sys_defs.vh"
 module PHT_TWO_SC(
 		input				clock,
 		input				reset,
@@ -29,13 +28,14 @@ module PHT_TWO_SC(
 	logic	[$clog2(`PHT_ROW)-1:0]   if_pc_partial;
 	logic	[$clog2(`PHT_ROW)-1:0]   rt_pc_partial;
 
+	integer i;
 	`ifdef DEBUG
 	assign pht_out 	= pht;
 	`endif	
 
 	assign if_pc_partial	=  if_pc_in [$clog2(`PHT_ROW)+1:2]; // do not consider the byte offset
 	assign if_prediction_valid = if_branch; 
-	assign if_prediction	=  if_prediction_valid? next_pht[if_pc_partial][1]: 0;
+	assign if_prediction	=  if_prediction_valid ? next_pht[if_pc_partial][1]: 0;
 				
 
 
@@ -88,7 +88,9 @@ module PHT_TWO_SC(
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			pht	<= `SD {(2*`PHT_ROW){0}}; // Initialized to strongly not taken
+			for(i=0; i<`PHT_ROW;++i) begin
+				pht	<= `SD {(`PHT_ROW){2'b00}}; // Initialized to strongly not taken
+			end
 		end else begin
 			pht	<= `SD  next_pht;
 		end

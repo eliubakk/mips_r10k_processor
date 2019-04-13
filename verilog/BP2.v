@@ -46,7 +46,7 @@ module  BP(
 	input					if_cond_branch,		// enabled when the branch is conditional
 	input					if_direct_branch,	// enabled when the branch is direct
 	input					if_return_branch,	// enabled when the branch is return(Uncond Direct)		
-	input		[31:0]			if_pc_in,		// input PC
+	input		[63:0]			if_pc_in,		// input PC
 	// Comes after execute state(after branch calculation)
 	input					rt_en_branch,		// enabled when the instruction is branch  
 	input					rt_cond_branch,		// enabled when it is conditional branch
@@ -54,8 +54,8 @@ module  BP(
 	input					rt_return_branch,
 	input					rt_branch_taken,	// enabled when the branch is actullly taken
 	input					rt_prediction_correct,  // enabled when the branch prediction is correct 
-	input		[31:0]			rt_pc,			// PC of the executed branch instruction
-	input		[31:0]			rt_calculated_pc,  	// Calculated target PC
+	input		[63:0]			rt_pc,			// PC of the executed branch instruction
+	input		[63:0]			rt_calculated_pc,  	// Calculated target PC
 	input	[$clog2(`OBQ_SIZE) - 1:0]		rt_branch_index,	// Executed branch's OBQ index 
 		
 	
@@ -121,7 +121,7 @@ module  BP(
 	// BP module output, should be combinational 
 		assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
 		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
-		assign next_pc			= reset ? 32'h0 : next_pc_calc;
+		assign next_pc			= reset ? 64'h0 : next_pc_calc;
 		assign next_pc_prediction	= reset ? 1'b0 : next_pc_prediction_calc;	    
 
 	//----------Value evaluation
