@@ -6,9 +6,9 @@
 module testbench;
 	logic clock, reset, enable;
 	logic			if_branch;
-	logic 	[63:0]		if_pc_in;
+	logic 	[31:0]		if_pc_in;
 	logic			rt_branch;
-	logic	[63:0]		rt_pc_in;
+	logic	[31:0]		rt_pc_in;
 	logic			rt_branch_taken;	
 
 
@@ -91,9 +91,9 @@ module testbench;
 		enable = 1'b0;
 
 		if_branch = 1'b0;	
-		if_pc_in = 64'h0;
+		if_pc_in = 32'h0;
 		rt_branch = 1'b0;
-		rt_pc_in = 64'h0;
+		rt_pc_in = 32'h0;
 		rt_branch_taken = 1'b0;	
 		
 		// Reset

@@ -522,7 +522,7 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 //assign branch_not_taken = ret_branch_inst.en & rob_retire_out_take_branch; 
  
  
-	BP bp0(
+	BP2 bp0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 
@@ -546,11 +546,11 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 
 		// outputs 
 		`ifdef DEBUG
-		.gshare_ght_out(gshare_ght_out),
+	/*	.gshare_ght_out(gshare_ght_out),
 		.gshare_pht_out(gshare_pht_out),		
 		.obq_out(obq_out),
 		.obq_head_out(obq_head_out),
-		.obq_tail_out(obq_tail_out),
+		.obq_tail_out(obq_tail_out),*/
 		.btb_valid_out(btb_valid_out),
 		.btb_tag_out(btb_tag_out),
 		.btb_target_address_out(btb_target_address_out),

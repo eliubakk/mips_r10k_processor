@@ -7,9 +7,9 @@ module PHT_TWO_SC(
 		input				reset,
 		input				enable,
 		input				if_branch, // Branch is fetched and conditional
-		input		[63:0]		if_pc_in,
+		input		[31:0]		if_pc_in,
 		input				rt_branch, // Branch is retired and conditional
-		input		[63:0]		rt_pc_in,
+		input		[31:0]		rt_pc_in,
 		input				rt_branch_taken, // Calculated branch result, 0 is not taken, 1 is taken
 
 		`ifdef DEBUG
@@ -89,7 +89,7 @@ module PHT_TWO_SC(
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			for(i=0; i<`PHT_ROW;++i) begin
-				pht	<= `SD {(`PHT_ROW){2'b00}}; // Initialized to strongly not taken
+				pht[i]	<= `SD 2'b0; // Initialized to strongly not taken
 			end
 		end else begin
 			pht	<= `SD  next_pht;
