@@ -729,7 +729,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //Instantiating the freelist
   
   // assign fr_read_en= if_id_enable & id_inst_out.inst.valid_inst ;
-	assign fr_read_en = id_inst_out.inst.valid_inst & dispatch_no_hazard; // Should not read during stalling for structural hazard
+	assign fr_read_en = id_inst_out.inst.valid_inst; // Should not read during stalling for structural hazard
 	assign fr_wr_en = (rob_retire_out.T_old[5:0] == 6'b111111) ? 0 : 1; 
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
@@ -800,14 +800,14 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 logic dispatch_no_hazard_comb;
 logic dispatch_no_hazard_RS;
 
-  assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
-always_ff @(posedge clock) begin
+  assign dispatch_no_hazard =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
+/*always_ff @(posedge clock) begin
 
 	dispatch_no_hazard <= `SD  dispatch_no_hazard_comb;  
 	//dispatch_no_hazard_RS <= `SD dispatch_no_hazard;
 	end
-
-	assign id_di_enable = (dispatch_no_hazard && if_id_valid_inst); 
+*/
+	assign id_di_enable = (if_id_valid_inst); 
   //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
   //assign id_di_enable = if_valid_inst_out;
 	// synopsys sync_set_reset "reset"
@@ -841,7 +841,7 @@ always_ff @(posedge clock) begin
 
 	id_di_branch_inst <= `SD if_id_branch_inst;
 
-      end else if(!dispatch_no_hazard) begin // Freeze current value
+    /* end else if(!dispatch_no_hazard) begin // Freeze current value
         id_di_rega    <= `SD id_di_rega;
         id_di_regb    <= `SD id_di_regb;
         id_di_inst_in <= `SD id_di_inst_in;
@@ -850,7 +850,7 @@ always_ff @(posedge clock) begin
         id_di_valid_inst  <=`SD id_di_valid_inst;
 
 	id_di_branch_inst <= `SD if_id_branch_inst;
-
+*/
      end else  begin
         id_di_rega    <= `SD 0;
         id_di_regb    <= `SD 0;
@@ -883,8 +883,8 @@ always_ff @(posedge clock) begin
   //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
    //assign RS_enable= (dispatch_en && if_id_valid_inst);
-  assign ROB_enable = dispatch_no_hazard & id_inst_out.inst.valid_inst;
-  assign RS_enable = dispatch_no_hazard & id_di_valid_inst;
+  assign ROB_enable = id_inst_out.inst.valid_inst;
+  assign RS_enable = id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
        .FU_BASE_IDX(FU_BASE_IDX),
        .NUM_OF_FU_TYPE(NUM_OF_FU_TYPE)) RS0(
