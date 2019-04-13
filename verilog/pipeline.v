@@ -108,9 +108,9 @@ module pipeline (
     output logic [`NUM_FU_TOTAL-1:0]   is_ex_enable,
     output logic [`NUM_FU_TOTAL-1:0]   ex_co_enable
 );
-  parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
-  parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
-  parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
+  parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST};
+  parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX, FU_ST_IDX};
+  parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
   // Pipeline register enables
   // logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
@@ -229,6 +229,8 @@ module pipeline (
   logic [63:0]  co_alu_result_selected;
   logic         psel_enable;
   FU_REG        gnt_bus;
+  logic co_ret_branch_valid;
+  logic co_ret_branch_prediction;
 
   // Outputs from COM/RETIRE Pipeline Register    //
   logic         co_ret_halt;
@@ -238,10 +240,6 @@ module pipeline (
   logic         co_ret_take_branch;
   logic [63:0]  co_ret_NPC;
   logic [31:0]  co_ret_IR;
-  logic         co_ret_valid_inst;
-  logic         co_ret_branch_valid;
-  logic         co_ret_branch_prediction;
-
 
 logic branch_valid_disp;  //branch_valid_disp
   //outputs from the ROB
@@ -370,11 +368,13 @@ logic branch_valid_disp;  //branch_valid_disp
   // store retire signals
   logic retire_is_store;
 
-  // store queue output signals
+  // store queue output 
   logic [63:0] sq_data_out;
   logic sq_data_valid;
   logic [$clog2(`SQ_SIZE) - 1:0] sq_tail;
   logic sq_full;
+  logic sq_data_not_found; // define logic
+  logic [63:0] sq_head_address, sq_head_data; // define logic
 
   // general wires for store queue
   logic sq_hazard;
@@ -864,18 +864,18 @@ always_ff @(posedge clock) begin
 	end
   end
 
-  //////////////////////////////////////////////////
-  //                                              //
-  //                  DI/ISSUE-stages             //
-  //                                              //
-  //////////////////////////////////////////////////
+  ////////////////////////////////////////{FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}////
+  //                                      {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}  //
+  //                  DI/ISSUE-stages     {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}  //
+  //                                      {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}  //
+  ////////////////////////////////////////{FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}////
 
 
   // signals to communicate with SQ
   assign dispatch_is_store = id_di_inst_in.inst.fu_name == FU_ST;
-  assign dispatch_store_addr = {64{1'b0}};
-  assign dispatch_store_addr_ready = 1'b0;
-  assign dispatch_store_data = {64{1'b0}};
+  assign dispatch_store_addr = {64{1'b0}}; 
+  assign dispatch_store_addr_ready = 1'b0; 
+  assign dispatch_store_data = {64{1'b0}}; 
   assign dispatch_store_data_ready = 1'b0;
   assign sq_hazard = (dispatch_is_store & sq_full);
 
@@ -1016,9 +1016,9 @@ end*/
    	.phys_registers_out(phys_reg),
     `endif
     .wr_clk(clock),
-    .wr_en(ex_co_valid_inst),
-    .wr_idx(ex_co_dest_reg_idx),
-    .wr_data({ex_co_alu_result[4], ex_alu_result_out[3], ex_co_alu_result[2:0]})
+    .wr_en({1'b0, ex_co_valid_inst}),
+    .wr_idx({`DUMMY_REG, ex_co_dest_reg_idx}),
+    .wr_data({64'b0, ex_co_alu_result[4], ex_alu_result_out[3], ex_co_alu_result[2:0]})
   );
 
  
@@ -1086,7 +1086,7 @@ end
       ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
-  assign ex_co_enable[2]= (~ex_co_valid_inst[2])| (ex_co_valid_inst[2] & mem_co_enable);
+  assign ex_co_enable[2]= (~ex_co_valid_inst[2])| (ex_co_valid_inst[2] & mem_co_enable); // add stall from store queue
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
   assign ex_co_enable[3] = 1 ;
@@ -1096,12 +1096,14 @@ end
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
 
   // SQ execute signals
-  assign execute_is_store = ex_co_valid_inst[5]; // store is in 5th ex_co reg
+  assign execute_is_store = ex_co_valid_inst[FU_ST_IDX]; // store is in 5th ex_co reg
   assign store_spos_tail = ex_co_sq_idx;
-  assign ex_store_addr = ex_co_alu_result[5];
+  assign ex_store_addr = ex_co_alu_result[FU_ST_IDX];
   assign ex_store_addr_valid = 1'b1;
   assign ex_store_data = ex_co_rega_st;
   assign ex_store_data_valid = 1'b1;
+
+  assign load_wants_store = ex_co_valid_inst[FU_LD_IDX];
 
 
   /*
@@ -1234,13 +1236,23 @@ end
 //   //                 MEM-Stage                    //
 //   //                                              //
 //   //////////////////////////////////////////////////
+  
+ logic [63:0] mem_addr, mem_data;
+ 
+  // accessing priorities for the memory
+  assign mem_addr=  (proc2Dmem_command == BUS_STORE) ? sq_head_address : ex_co_alu_result[FU_LD_IDX];
+  assign mem_data=  (proc2Dmem_command == BUS_STORE) ? sq_head_data : 0;
+  
+  
+  
+  
   mem_stage mem_stage_0 (// Inputs
      .clock(clock),
      .reset(reset),
-     .ex_mem_rega(ex_co_rega),
-     .ex_mem_alu_result(ex_co_alu_result[2]), 
-     .ex_mem_rd_mem(ex_co_rd_mem[2]),
-     .ex_mem_wr_mem(ex_co_wr_mem[2] ),
+     .ex_mem_rega(mem_data),
+     .ex_mem_alu_result(mem_addr), 
+     .ex_mem_rd_mem(ex_co_rd_mem[FU_LD_IDX]),
+     .ex_mem_wr_mem(retire_is_store ),
      .Dmem2proc_data(mem2proc_data),
      .Dmem2proc_tag(mem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),

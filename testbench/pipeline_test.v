@@ -104,9 +104,9 @@ module testbench;
   int pipe_counter; 
   int copy_pipe_counter;
   // Instantiate the Pipeline
-  pipeline #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_MULT, FU_BR}),
-  .FU_BASE_IDX({FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX}),
-  .NUM_OF_FU_TYPE({2'b10,2'b01,2'b01,2'b01})) pipeline_0(
+  pipeline #(.FU_NAME_VAL({FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}),
+  .FU_BASE_IDX({FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX, FU_ST_IDX}),
+  .NUM_OF_FU_TYPE({2'b10,2'b01,2'b01,2'b01, 2'b01})) pipeline_0(
     // Inputs
     .clock             (clock),
     .reset             (reset),
@@ -576,7 +576,7 @@ module testbench;
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
-			display_icache;
+			// display_icache;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
@@ -587,22 +587,22 @@ module testbench;
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
 		display_id_di;
 			
-		//	display_di_issue;
+			display_di_issue;
 		//	display_RS_table;
-		display_ROB_table;
+			//display_ROB_table;
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
 		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
 		//	display_issue_ex;
-			//display_is_ex_registers;
+			display_is_ex_registers;
 		//	display_ex;
-			//display_ex_co_registers;
+			display_ex_co_registers;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
-			//display_co_re_registers;
+			display_co_re_registers;
 			//display_arch_table;
 		//	display_free_list_table;
 		//	display_arch_table;
