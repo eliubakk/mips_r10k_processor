@@ -392,27 +392,27 @@ module testbench;
 		end
 	endtask
 
-	task display_icache;
-		begin
-			$display("\n\n\n-----------------------------------------------------Instruction Cache (Start)----------------------------------------------");
+	// task display_icache;
+	// 	begin
+	// 		$display("\n\n\n-----------------------------------------------------Instruction Cache (Start)----------------------------------------------");
 
-			$display("Inputs");
-			$display("proc2Icache_addr: %h Imem2proc_response: %d Imem2proc_data: %h Imem2proc_tag: %d", pipeline_0.inst_memory.proc2Icache_addr, pipeline_0.inst_memory.Imem2proc_response, pipeline_0.inst_memory.Imem2proc_data, pipeline_0.inst_memory.Imem2proc_tag);
-			$display("Outputs");
-			$display("Icache_data_out: %h Icache_valid_out: %b proc2Imem_command: %d proc2Imem_addr: %h", pipeline_0.inst_memory.Icache_data_out, pipeline_0.inst_memory.Icache_valid_out, pipeline_0.inst_memory.proc2Imem_command, pipeline_0.inst_memory.proc2Imem_addr);
+	// 		$display("Inputs");
+	// 		$display("proc2Icache_addr: %h Imem2proc_response: %d Imem2proc_data: %h Imem2proc_tag: %d", pipeline_0.inst_memory.proc2Icache_addr, pipeline_0.inst_memory.Imem2proc_response, pipeline_0.inst_memory.Imem2proc_data, pipeline_0.inst_memory.Imem2proc_tag);
+	// 		$display("Outputs");
+	// 		$display("Icache_data_out: %h Icache_valid_out: %b proc2Imem_command: %d proc2Imem_addr: %h", pipeline_0.inst_memory.Icache_data_out, pipeline_0.inst_memory.Icache_valid_out, pipeline_0.inst_memory.proc2Imem_command, pipeline_0.inst_memory.proc2Imem_addr);
 
-			$display("\n-------------------------------------------------------Icache Controller (End)----------------------------------");
+	// 		$display("\n-------------------------------------------------------Icache Controller (End)----------------------------------");
 
-			for (int i = 0; i < `NUM_SETS; ++i) begin
-				$display("SET: %d", i);
-				for (int j = 0; j < `NUM_WAYS; ++j) begin
-					$display("\t\t\tidx: %d data: %d tag: %d valid: %b dirty: %b", j, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].data, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].tag, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].valid, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].dirty);
-				end
-			end
+	// 		for (int i = 0; i < `NUM_SETS; ++i) begin
+	// 			$display("SET: %d", i);
+	// 			for (int j = 0; j < `NUM_WAYS; ++j) begin
+	// 				$display("\t\t\tidx: %d data: %d tag: %d valid: %b dirty: %b", j, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].data, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].tag, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].valid, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].dirty);
+	// 			end
+	// 		end
 
-			$display("\n\n\n-----------------------------------------------------Instruction Cache (End)----------------------------------------------");
-		end
-	endtask
+	// 		$display("\n\n\n-----------------------------------------------------Instruction Cache (End)----------------------------------------------");
+	// 	end
+	// endtask
 
 	task display_cache;
 		begin
@@ -568,7 +568,7 @@ module testbench;
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
-			display_icache;
+			//display_icache;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
