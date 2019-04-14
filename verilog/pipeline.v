@@ -211,6 +211,15 @@ module pipeline (
   logic  mem_co_illegal;
   PHYS_REG  mem_co_dest_reg_idx;
   logic [63:0] mem_co_alu_result;
+  
+  
+  logic  mem_co_halt_comb;
+  logic  mem_co_illegal_comb;
+  PHYS_REG  mem_co_dest_reg_idx_comb;
+  logic [63:0] mem_co_alu_result_comb;
+  logic mem_co_valid_inst_comb;   
+  logic [63:0] mem_co_NPC_comb;        
+  logic [31:0] mem_co_IR_comb;    
 
 
   //Outputs from the complete stage
@@ -404,10 +413,40 @@ logic branch_valid_disp;  //branch_valid_disp
     .rt_en(retire_is_store),
 
     .data_rd(sq_data_out),
-    .rd_valid(sq_data_valid),
+    .rd_valid(sq_data_valid), // checks for if data that exists is valid
+
+    .store_head_data(),
+    .store_head_addr(),
+    .store_data_stall(),
 
     .tail_out(sq_tail),
     .full(sq_full)
+  );
+
+  // Load queue signals
+  LQ_ROW_T lq_load_in;
+  logic lq_write_en;
+  logic lq_pop_en;
+
+  logic [3:0] lq_mem_tag;
+
+  LQ_ROW_T lq_load_out;
+  logic lq_read_valid;
+  logic lq_full;
+
+  LQ load_queue(
+    .clock(clock),
+    .reset(reset),
+
+    .load_in(lq_load_in),
+    .write_en(lq_write_en),
+    .pop_en(lq_pop_en),
+
+    .mem_tag(lq_mem_tag),
+
+    .load_out(lq_load_out),
+    .read_valid(lq_read_valid),
+    .full(lq_full)
   );
 
   //////////////////////////////////////////////////
@@ -864,11 +903,11 @@ always_ff @(posedge clock) begin
 	end
   end
 
-  ////////////////////////////////////////{FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}////
-  //                                      {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}  //
-  //                  DI/ISSUE-stages     {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}  //
-  //                                      {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}  //
-  ////////////////////////////////////////{FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST}////
+  ////////////////////////////////////////////
+  //                                        //
+  //                  DI/ISSUE-stages       //
+  //                                        //
+  ////////////////////////////////////////////
 
 
   // signals to communicate with SQ
@@ -1095,6 +1134,9 @@ end
 
   assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
 
+  // @@@TODO MUST DETERMINE EX_CO_ENABLE FOR STORE INSTRUCTIONS
+  assign ex_co_enable[FU_ST_IDX] = (~ex_co_valid_inst[FU_ST_IDX] | (ex_co_valid_inst[FU_ST_IDX] & co_selected[FU_ST_IDX]));
+
   // SQ execute signals
   assign execute_is_store = ex_co_valid_inst[FU_ST_IDX]; // store is in 5th ex_co reg
   assign store_spos_tail = ex_co_sq_idx;
@@ -1189,8 +1231,23 @@ end
 		//ex_co_done <= `SD 0;
 
   end
-  
-   
+
+
+  LQ_ROW_T lq_load_out;
+  logic lq_read_valid;
+  logic lq_full;
+
+  assign lq_load_in.valid_inst = ex_co_valid_inst[FU_LD_IDX];
+  assign lq_load_in.NPC = ex_co_NPC[FU_LD_IDX];
+  assign lq_load_in.IR = ex_co_IR[FU_LD_IDX];
+  assign lq_load_in.halt = ex_co_halt[FU_LD_IDX];
+  assign lq_load_in.illegal = ex_co_illegal[FU_LD_IDX];
+  assign lq_load_in.dest_reg = ex_co_dest_reg_idx[FU_LD_IDX];
+  assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
+
+  assign lq_write_en;
+  assign lq_pop_en;
+  assign lq_mem_tag;
 
 
 // //////////////////////////////////////////////////
@@ -1280,8 +1337,21 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //           mem/co stage                   //
   //                                              //
   //////////////////////////////////////////////////
+  assign mem_co_valid_inst_comb= sq_data_valid ? ex_co_valid_inst[FU_LD_IDX] : ld_queue.valid_inst; 
+  assign mem_co_NPC_comb = sq_data_valid ? ex_co_NPC[FU_LD_IDX]  : ld_queue.npc;
+  assign mem_co_IR_comb = sq_data_valid ? ex_co_IR[FU_LD_IDX]  : ld_queue.opcode;
+  assign mem_co_halt_comb = sq_data_valid ? ex_co_halt[FU_LD_IDX]  : ld_queue.halt;
+  assign mem_co_illegal_comb = sq_data_valid ? ex_co_illegal[FU_LD_IDX]  : ld_queue.illegal;
+  assign mem_co_dest_reg_idx_comb= sq_data_valid ? ex_co_dest_reg_idx[FU_LD_IDX]  : ld_queue.dest_reg_idx;
+  assign mem_co_alu_result_comb = sq_data_valid ? sq_data_out : ld_queue.result;
   
-  assign mem_co_enable= ((~mem_co_valid_inst) | (mem_co_valid_inst & co_selected[2]));
+
+  
+  
+  
+  
+  
+  assign mem_co_enable= ((~mem_co_valid_inst) | (mem_co_valid_inst & sq_data_valid & co_selected[FU_LD_IDX]));
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken ) begin
       mem_co_valid_inst   <= `SD 0;
@@ -1292,13 +1362,13 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
       mem_co_dest_reg_idx <= `SD `DUMMY_REG;
       mem_co_alu_result   <= `SD 64'b0;
     end else if (mem_co_enable) begin
-      mem_co_valid_inst   <= `SD mem_valid_inst_out ;
-      mem_co_NPC          <= `SD ex_co_NPC[2];
-      mem_co_IR           <= `SD ex_co_IR[2];
-      mem_co_halt         <= `SD ex_co_halt[2];
-      mem_co_illegal      <= `SD ex_co_illegal[2];
-      mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
-      mem_co_alu_result   <= `SD mem_result_out;
+      mem_co_valid_inst   <= `SD mem_co_valid_inst_comb ;
+      mem_co_NPC          <= `SD mem_co_NPC_comb;
+      mem_co_IR           <= `SD mem_co_IR_comb;
+      mem_co_halt         <= `SD mem_co_halt_comb;
+      mem_co_illegal      <= `SD mem_co_illegal_comb;
+      mem_co_dest_reg_idx <= `SD mem_co_dest_reg_idx_comb;
+      mem_co_alu_result   <= `SD mem_co_alu_result_comb;
     // end else begin
     //   mem_co_valid_inst   <= `SD mem_valid_inst_out;
     //   mem_co_NPC          <= `SD ex_co_NPC[2];
@@ -1322,14 +1392,14 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   
   
   
-  assign psel_enable = ex_co_valid_inst[0] | ex_co_valid_inst[1] | mem_co_valid_inst | done | ex_co_valid_inst[4]; // ask the use of wor
+  assign psel_enable = ex_co_valid_inst[0] | ex_co_valid_inst[1] | mem_co_valid_inst | done | ex_co_valid_inst[4]  | ex_co_valid_inst[FU_ST_IDX]; // ask the use of wor
   //priority encoder to select the results of the execution stage to put in cdb
   //Mult has the priority
   psel_generic #(`NUM_FU_TOTAL, 1) psel(
-		.req({ ex_co_done, ex_co_valid_inst[4], mem_co_valid_inst, ex_co_valid_inst[1:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+		.req({ ex_co_done, ex_co_valid_inst[FU_ST_IDX], ex_co_valid_inst[4], mem_co_valid_inst, ex_co_valid_inst[1:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
-		.gnt({co_selected[3], co_selected[4], co_selected[2:0]}),
-    .gnt_bus({gnt_bus[3], gnt_bus[4], gnt_bus[2:0]})
+		.gnt({co_selected[3], co_selected[FU_ST_IDX], co_selected[4], co_selected[2:0]}),
+    .gnt_bus({gnt_bus[3], gnt_bus[FU_ST_IDX], gnt_bus[4], gnt_bus[2:0]})
 	);
   
     always_comb begin

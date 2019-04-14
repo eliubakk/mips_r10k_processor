@@ -282,6 +282,18 @@ const ROB_ROW_T EMPTY_ROB_ROW =
 // Store Queue
 `define SQ_SIZE 16
 
+// Load Queue
+`define LQ_SIZE 15
+typedef struct packed {
+  logic valid_inst;
+  logic [31:0] NPC;
+  logic [31:0] IR;
+  logic halt;
+  logic illegal;
+  PHYS_REG dest_reg;
+  logic [63:0] alu_result;
+} LQ_ROW_T;
+
 //////////////////////////////////////////////
 //
 // Assorted things it is not wise to change
