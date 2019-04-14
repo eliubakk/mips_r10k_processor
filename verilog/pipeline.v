@@ -376,6 +376,7 @@ logic branch_valid_disp;  //branch_valid_disp
 
   // store retire signals
   logic retire_is_store;
+  logic retire_is_store_next;
 
   // store queue output 
   logic [63:0] sq_data_out;
@@ -387,6 +388,8 @@ logic branch_valid_disp;  //branch_valid_disp
 
   // general wires for store queue
   logic sq_hazard;
+
+  assign sq_data_not_found = sq_data_valid;
 
   // Store Queue Module
   SQ store_queue(
@@ -410,13 +413,13 @@ logic branch_valid_disp;  //branch_valid_disp
     .ex_data(ex_store_data),
     .ex_data_en(ex_store_data_valid),
 
-    .rt_en(retire_is_store),
+    .rt_en(retire_is_store_next),
 
     .data_rd(sq_data_out),
     .rd_valid(sq_data_valid), // checks for if data that exists is valid
 
-    .store_head_data(),
-    .store_head_addr(),
+    .store_head_data(sq_head_data),
+    .store_head_addr(sq_head_address),
     .store_data_stall(),
 
     .tail_out(sq_tail),
@@ -1146,6 +1149,8 @@ end
   assign ex_store_data_valid = 1'b1;
 
   assign load_wants_store = ex_co_valid_inst[FU_LD_IDX];
+  assign load_spos_tail = ex_co_sq_idx;
+  assign load_rd_addr = ex_co_alu_result[FU_LD_IDX];
 
 
   /*
@@ -1232,10 +1237,7 @@ end
 
   end
 
-
-  LQ_ROW_T lq_load_out;
-  logic lq_read_valid;
-  logic lq_full;
+  // add stall logic for ex_co registers with LQ   logic lq_full;
 
   assign lq_load_in.valid_inst = ex_co_valid_inst[FU_LD_IDX];
   assign lq_load_in.NPC = ex_co_NPC[FU_LD_IDX];
@@ -1245,9 +1247,9 @@ end
   assign lq_load_in.dest_reg = ex_co_dest_reg_idx[FU_LD_IDX];
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
 
-  assign lq_write_en;
-  assign lq_pop_en;
-  assign lq_mem_tag;
+  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & sq_data_not_found;
+  assign lq_pop_en = |Dmem2proc_tag;
+  assign lq_mem_tag = Dmem2proc_response;
 
 
 // //////////////////////////////////////////////////
@@ -1309,7 +1311,7 @@ end
      .ex_mem_rega(mem_data),
      .ex_mem_alu_result(mem_addr), 
      .ex_mem_rd_mem(ex_co_rd_mem[FU_LD_IDX]),
-     .ex_mem_wr_mem(retire_is_store ),
+     .ex_mem_wr_mem(retire_is_store_next ),
      .Dmem2proc_data(mem2proc_data),
      .Dmem2proc_tag(mem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
@@ -1332,18 +1334,20 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 //     if ()
 //   end
 
+
+
   //////////////////////////////////////////////////
   //                                              //
   //           mem/co stage                   //
   //                                              //
   //////////////////////////////////////////////////
-  assign mem_co_valid_inst_comb= sq_data_valid ? ex_co_valid_inst[FU_LD_IDX] : ld_queue.valid_inst; 
-  assign mem_co_NPC_comb = sq_data_valid ? ex_co_NPC[FU_LD_IDX]  : ld_queue.npc;
-  assign mem_co_IR_comb = sq_data_valid ? ex_co_IR[FU_LD_IDX]  : ld_queue.opcode;
-  assign mem_co_halt_comb = sq_data_valid ? ex_co_halt[FU_LD_IDX]  : ld_queue.halt;
-  assign mem_co_illegal_comb = sq_data_valid ? ex_co_illegal[FU_LD_IDX]  : ld_queue.illegal;
-  assign mem_co_dest_reg_idx_comb= sq_data_valid ? ex_co_dest_reg_idx[FU_LD_IDX]  : ld_queue.dest_reg_idx;
-  assign mem_co_alu_result_comb = sq_data_valid ? sq_data_out : ld_queue.result;
+  assign mem_co_valid_inst_comb= (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst; 
+  assign mem_co_NPC_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
+  assign mem_co_IR_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
+  assign mem_co_halt_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
+  assign mem_co_illegal_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
+  assign mem_co_dest_reg_idx_comb= (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
+  assign mem_co_alu_result_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? sq_data_out : lq_load_out.alu_result;
   
 
   
@@ -1569,6 +1573,14 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //       take_branch_reg = ex_co_take_branch;
   //       break;
   //     end
+  always_ff @(posedge clock) begin
+    if(reset | branch_not_taken) begin
+      retire_is_store_next <= 0;
+    end else begin
+      retire_is_store_next <= retire_is_store;
+    end
+  end
+  
   assign retire_is_store = (rob_retire_opcode[31:26] == `STQ_INST) ||
                             (rob_retire_opcode[31:26] == `STQ_C_INST);
 

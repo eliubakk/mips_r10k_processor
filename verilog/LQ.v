@@ -1,6 +1,6 @@
 `include "../../sys_defs.vh"
 
-`define $clog2(`LQ_SIZE) index_t
+`define lq_index_t $clog2(`LQ_SIZE) 
 
 module LQ(
     input clock,
@@ -19,8 +19,8 @@ module LQ(
 
     // internal data
     LQ_ROW_T [`LQ_SIZE - 1:0] load_queue, load_queue_next;
-    logic [`index_t - 1:0] head, head_next;
-    logic [`index_t - 1:0] tail, tail_next;
+    logic [`lq_index_t - 1:0] head, head_next;
+    logic [`lq_index_t - 1:0] tail, tail_next;
 
     // assign statements
     assign load_out = load_queue[head];
@@ -55,8 +55,8 @@ module LQ(
             load_queue[i].illegal <= `SD 1'b0;
             load_queue[i].dest_reg <= `SD `DUMMY_REG;
             load_queue[i].alu_result <= `SD 64'b0;
-            head <= {index_t`{0}};
-            tail <= {index_t`{0}};
+            head <= {`lq_index_t{0}};
+            tail <= {`lq_index_t{0}};
         end 
       end else begin
         load_queue <= `SD load_queue_next;

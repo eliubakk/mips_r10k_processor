@@ -156,7 +156,7 @@ module ex_stage(
    // ALU0 opA mux
   
   always_comb begin
-    for (integer i=0; i<5; i=i+1) begin
+    for (integer i=0; i<`NUM_FU_TOTAL; i=i+1) begin
       case (issue_reg[i].inst.opa_select)
         ALU_OPA_IS_REGA:     opa_mux_out[i] = T1_value[i];
         ALU_OPA_IS_MEM_DISP:  opa_mux_out[i] = mem_disp[i];

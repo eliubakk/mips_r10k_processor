@@ -42,7 +42,7 @@ module decoder(
   
   assign valid_inst = valid_inst_in && !illegal;
 
-   assign ra_idx= ((opa_select == ALU_OPA_IS_REGA)| (fu_name== FU_BR)) ? inst[25:21] : `ZERO_REG;
+   assign ra_idx= ((opa_select == ALU_OPA_IS_REGA)| (fu_name== FU_BR)| (fu_name== FU_ST)) ? inst[25:21] : `ZERO_REG;
   assign rb_idx= (opb_select == ALU_OPB_IS_REGB) ? inst[20:16] : `ZERO_REG;
   // assign rdest_idx= (dest_reg == DEST_IS_REGC) ? inst[4:0] :
   //                   (dest_reg == DEST_IS_REGA) ? inst[25:21]  : `ZERO_REG;

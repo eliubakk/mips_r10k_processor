@@ -1,6 +1,6 @@
 `include "../../sys_defs.vh"
 `define DEBUG
-`define index_t ($clog2(`SQ_SIZE) - 1)
+`define sq_index_t ($clog2(`SQ_SIZE) - 1)
 
 module SQ(
 	input clock,
@@ -9,7 +9,7 @@ module SQ(
 	// read signals
 	input rd_en, // load queue wants to read data at an address in SQ
 	input [31:0] addr_rd, // the address the load queue wants to read
-	input [`index_t:0] ld_pos, // the tail of the sq at the time the load was dispatched
+	input [`sq_index_t:0] ld_pos, // the tail of the sq at the time the load was dispatched
 
 	// dispatch signals
 	input dispatch_en, // 1 when a store is getting dispatched
@@ -20,7 +20,7 @@ module SQ(
 	
 	// execute signals
 	input ex_en, // 1 when a store is being executed
-	input [`index_t:0] ex_index, // the index/tag of the store that is being executed
+	input [`sq_index_t:0] ex_index, // the index/tag of the store that is being executed
 	input [31:0] ex_addr, // the address calculated during execute
 	input ex_addr_en, // 1 if want to use ex_addr for the address (direct vs indirect store)
 	input [63:0] ex_data, // the data calculated during execute
@@ -35,7 +35,7 @@ module SQ(
 	output logic [`SQ_SIZE - 1:0] addr_ready_out,
 	output logic [`SQ_SIZE - 1:0] [63:0] data_out,
 	output logic [`SQ_SIZE - 1:0] data_ready_out,
-	output logic [`index_t:0] head_out,
+	output logic [`sq_index_t:0] head_out,
 	`endif
 
 	// read outputs
@@ -47,7 +47,7 @@ module SQ(
 	output logic store_data_stall,
 
 	// general outputs
-	output logic [`index_t:0] tail_out, // the index of the store being dispatched
+	output logic [`sq_index_t:0] tail_out, // the index of the store being dispatched
 	output logic full
 );
 
@@ -64,11 +64,11 @@ module SQ(
 	logic [`SQ_SIZE - 1:0] data_ready;
 	logic [`SQ_SIZE - 1:0] data_ready_next;
 
-	logic [`index_t:0] head;
-	logic [`index_t:0] head_next;
+	logic [`sq_index_t:0] head;
+	logic [`sq_index_t:0] head_next;
 
-	logic [`index_t:0] tail;
-	logic [`index_t:0] tail_next;
+	logic [`sq_index_t:0] tail;
+	logic [`sq_index_t:0] tail_next;
 
 	
 	logic addr_rd_ready;
@@ -77,7 +77,7 @@ module SQ(
 
 	logic [`SQ_SIZE - 1:0] load_req;
 	logic [`SQ_SIZE - 1:0] load_gnt;
-	logic [`index_t:0] data_rd_idx;
+	logic [`sq_index_t:0] data_rd_idx;
 
 	psel_generic #(
 		.WIDTH(`SQ_SIZE),
@@ -100,7 +100,7 @@ module SQ(
 	// assigns
 	assign data_rd = data_next[data_rd_idx];
 	assign rd_valid = &load_req;
-	assign tail_out = tail;
+	assign tail_out = tail_next;
 	assign full = (tail + 1'b1 == head);
 
 	assign addr_out = addr;
