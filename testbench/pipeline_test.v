@@ -48,6 +48,11 @@ module testbench;
   logic [63:0] pipeline_commit_NPC;
   logic	[5:0]  pipeline_commit_phys_reg;
   logic [5:0]  pipeline_commit_phys_from_arch;
+  
+  logic		pipeline_branch_en;
+  logic		pipeline_branch_pred_correct;
+  logic	[31:0]	branch_inst_count;
+  logic [31:0]  branch_pred_count;
 
   logic [63:0] if_NPC_out;
   logic [31:0] if_IR_out;
@@ -129,6 +134,8 @@ module testbench;
     .pipeline_commit_NPC(pipeline_commit_NPC),
     .pipeline_commit_phys_reg(pipeline_commit_phys_reg),
     .pipeline_commit_phys_from_arch(pipeline_commit_phys_from_arch),
+    .pipeline_branch_en(pipeline_branch_en),
+    .pipeline_branch_pred_correct(pipeline_branch_pred_correct),
 
     .if_NPC_out(if_NPC_out),
     .if_IR_out(if_IR_out),
@@ -243,7 +250,15 @@ module testbench;
       $display("@@  %4.2f ns total time to execute\n@@\n",
                 clock_count*`VIRTUAL_CLOCK_PERIOD);
     end
-  endtask  // task show_clk_count 
+  endtask  // task show_clk_count
+
+  task show_br_pred_accuracy;
+     real br_accuracy;
+	begin
+		br_accuracy = 100.0*(branch_pred_count)/(branch_inst_count);
+		$display("\n-------------Branch prediction accuracy : %0d correct / %0d branch instrs = %.4f percent",branch_pred_count,branch_inst_count, br_accuracy);
+	end
+  endtask 
 
   // Show contents of a range of Unified Memory, in both hex and decimal
   task show_mem_with_decimal;
@@ -664,7 +679,23 @@ module testbench;
     end
 	`SD;
 	 display_stages;
-  end  
+  end 
+
+  // Count the number of branch instructions and correctly predicted branches
+  always @(posedge clock) begin
+	if(reset) begin
+		branch_inst_count <= `SD 0;
+		branch_pred_count <= `SD 0;
+	end else begin
+		if(pipeline_branch_en) begin
+			branch_inst_count <= `SD branch_inst_count +1;
+		end
+		if(pipeline_branch_en & pipeline_branch_pred_correct) begin
+			branch_pred_count <= `SD branch_pred_count +1;
+		end
+	end
+  end
+ 
 
   
   always @(negedge clock) begin
@@ -806,6 +837,7 @@ module testbench;
         endcase
         $display("@@@\n@@");
         show_clk_count;
+	show_br_pred_accuracy;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
 	@(posedge clock);

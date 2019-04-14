@@ -34,6 +34,12 @@ module pipeline (
     output logic [5:0]  pipeline_commit_phys_reg,
     output logic [5:0]  pipeline_commit_phys_from_arch,
 
+// To record the branch prediction accuracy
+
+    output logic	pipeline_branch_en,
+    output logic	pipeline_branch_pred_correct,
+    
+
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
     // the final values in memory
@@ -383,7 +389,7 @@ logic rob_retire_out_T_old;
 
   //////////////////////////////////////////////////
   //                                              //
-  //                  IF-Stage                    //
+  //                  IF-Stage (Fetch 1)          //
   //                                              //
   //////////////////////////////////////////////////
  
@@ -521,6 +527,71 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 //should change this, chk1
 //assign branch_not_taken = ret_branch_inst.en & rob_retire_out_take_branch; 
  
+
+
+/////////////////////////////////////////////////////////////////////////
+//
+//		Fetch1 /Fetch2 pipelne register
+//
+////////////////////////////////////////////////////////////////////////
+/*
+always_ff @(posedge clock) begin
+    if(reset | branch_not_taken) begin
+      if_id_NPC        <= `SD 0;
+      if_id_IR         <= `SD `NOOP_INST;
+      if_id_valid_inst <= `SD `FALSE;
+     
+	if_id_branch_inst.en 		<= `SD 1'b0;
+	if_id_branch_inst.cond 		<= `SD 1'b0;
+	if_id_branch_inst.direct 	<= `SD 1'b0;
+	if_id_branch_inst.ret		<= `SD 1'b0;
+	if_id_branch_inst.pc 		<= `SD 64'h0;
+	if_id_branch_inst.pred_pc	<= `SD 64'h0;
+	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+	if_id_branch_inst.prediction 	<= `SD 0;
+	//if_id_branch_inst.taken 	<= `SD 0;
+
+
+ 
+    end else if(if_id_enable) begin
+      if_id_NPC        <= `SD if_NPC_out;
+      if_id_IR         <= `SD if_IR_out;
+      if_id_valid_inst <= `SD if_valid_inst_out;
+      if_id_branch_inst	<= `SD if_branch_inst;
+
+    end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
+      if_id_NPC        <= `SD if_id_NPC;
+      if_id_IR         <= `SD if_id_IR;
+      if_id_valid_inst <= `SD if_id_valid_inst;
+	
+	if_id_branch_inst	<= `SD if_id_branch_inst;
+
+    end else begin
+      if_id_NPC        <= `SD 0;
+      if_id_IR         <= `SD `NOOP_INST;
+      if_id_valid_inst <= `SD `FALSE;
+
+	if_id_branch_inst.en 		<= `SD 1'b0;
+	if_id_branch_inst.cond 		<= `SD 1'b0;
+	if_id_branch_inst.direct 	<= `SD 1'b0;
+	if_id_branch_inst.ret	 	<= `SD 1'b0;
+	if_id_branch_inst.pc 		<= `SD 64'h0;
+	if_id_branch_inst.pred_pc	<= `SD 64'h0;
+	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+	if_id_branch_inst.prediction 	<= `SD 0;
+	//if_id_branch_inst.taken 	<= `SD 0;
+
+
+    end
+  end
+*/
+
+///////////////////////////////////////////////////////////////////////////////////
+//										//
+//		 Branch predictor stage (Fetch 2)
+//
+////////////////////////////////////////////////////////////////////////////////
+
  
 	BP2 bp0(
 		// inputs
@@ -1515,6 +1586,12 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
   //assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
   //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
+
+// For branch prediction accuracy check
+
+  assign pipeline_branch_en = ret_branch_inst.en; 
+  assign pipeline_branch_pred_correct =  ret_branch_inst.en & ret_pred_correct;
+
 
   
 // FF between complete and retire
