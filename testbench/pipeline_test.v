@@ -577,10 +577,10 @@ module testbench;
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
 	//	display_id_di;
 	//	$display(" if_stage_dispatch_en : %b, if_valid_inst_out : %b,_ if_fetch_NPC_out : %h, if_IR_out : %h, if_PC_reg : %h", pipeline_0.if_stage_dispatch_en, pipeline_0.if_valid_inst_out, pipeline_0.if_fetch_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_PC_reg);
-	//	display_IQ;	
+		display_IQ;	
 		//	display_di_issue;
-			display_RS_table;
-		display_ROB_table; //  *********************************
+			//display_RS_table;
+		//display_ROB_table; //  *********************************
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
@@ -595,8 +595,8 @@ module testbench;
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 		//	display_co_re_registers;
 			//display_arch_table;
-			display_free_list_table;// *****************************
-			display_arch_table;  // *****************************
+		//	display_free_list_table;// *****************************
+		//	display_arch_table;  // *****************************
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;

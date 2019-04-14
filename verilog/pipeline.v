@@ -422,7 +422,7 @@ assign if_stage_dispatch_en = !inst_queue_full;
     .clock (clock),
     .reset (reset),
     .co_ret_valid_inst(retire_inst_busy),		// ret_branch_inst.en
-    .co_ret_take_branch(rob_retire_out_take_branch),	// ret_branch_inst.taken
+    .co_ret_take_branch(branch_not_taken),	// ret_branch_inst.taken
     .co_ret_target_pc(retire_reg_NPC),			// 
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),

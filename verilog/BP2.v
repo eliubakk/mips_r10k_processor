@@ -84,7 +84,7 @@ module  BP2(
 );
 	// Do not fetch during rollback
 	
-		logic rt_roll_back;	
+		logic roll_back;	
 
 	// Branch index without OBQ
 	logic	[$clog2(`OBQ_SIZE)-1 :0]	br_idx, next_br_idx;	
@@ -125,7 +125,7 @@ module  BP2(
 	// BP module output, should be combinational 
 		assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
 		//assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
-		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE)-1){0}} : next_br_idx;
+		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE)-1){0}} : br_idx;
 		assign next_pc			= reset ? 32'h0 : next_pc_calc;
 		assign next_pc_prediction	= reset ? 1'b0 : next_pc_prediction_calc;	    
 
@@ -176,7 +176,7 @@ module  BP2(
 		.if_branch(bp_read_en),
 		.if_pc_in(if_pc_in),
 		.rt_branch(bp_write_en),
-		.rt_pc_in(rt_pc_in),
+		.rt_pc_in(rt_pc),
 		.rt_branch_taken(rt_branch_taken),
 		
 		// outputs 
