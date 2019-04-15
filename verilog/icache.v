@@ -5,9 +5,10 @@ module icache(clock, reset,
               Icache_data_out, Icache_valid_out,
               proc2Imem_command, proc2Imem_addr);
   parameter NUM_WAYS = 4;
+  parameter NUM_SETS = (32/NUM_WAYS);
   parameter RD_PORTS = 1;
 
-  `define NUM_SET_BITS $clog2(32/NUM_WAYS)
+  `define NUM_SET_BITS $clog2(NUM_SETS)
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
   typedef struct packed {
@@ -45,13 +46,6 @@ module icache(clock, reset,
   output logic [1:0]  proc2Imem_command;
   output logic [63:0] proc2Imem_addr;
 
-  ///////////////////////////////////////////////////
-  //***********************************************//
-  ///////////////////////////////////////////////////
-
-  //////////////
-  //  MODULE  //
-  //////////////
   //instantiate cachemem module
   //cache memory inputs    
   logic [(RD_PORTS+1):0] cache_rd_en;
@@ -75,7 +69,8 @@ module icache(clock, reset,
   logic cache_wr_miss_valid;
 
   cachemem #(
-    .NUM_WAYS(NUM_WAYS),
+    .NUM_WAYS(4),
+    .NUM_SETS((32/NUM_WAYS)),
     .RD_PORTS(RD_PORTS+2),
     .WR_PORTS(1)) 
   memory(

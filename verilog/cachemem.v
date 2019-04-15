@@ -14,11 +14,11 @@ module cachemem(clock, reset,
                 wr_miss_idx, wr_miss_tag, wr_miss_valid,
                 vic_idx, victim, victim_valid);
   parameter NUM_WAYS = 4;
+  parameter NUM_SETS = (32/NUM_WAYS);
   parameter RD_PORTS = 2;
   parameter WR_PORTS = 2;
 
-  `define NUM_SETS (32/NUM_WAYS)
-  `define NUM_SET_BITS $clog2(`NUM_SETS)
+  `define NUM_SET_BITS $clog2(NUM_SETS)
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
   typedef struct packed {
@@ -47,8 +47,8 @@ module cachemem(clock, reset,
   input [(WR_PORTS-1):0] wr_dirty;
 
 	`ifdef DEBUG
-		output CACHE_SET_T [(`NUM_SETS-1):0] sets_out;
-		output logic [(`NUM_SETS-1):0][(NUM_WAYS-2):0] bst_out;
+		output CACHE_SET_T [(NUM_SETS-1):0] sets_out;
+		output logic [(NUM_SETS-1):0][(NUM_WAYS-2):0] bst_out;
 	`endif
 
   //read outputs
@@ -73,8 +73,8 @@ module cachemem(clock, reset,
 	// output data at index of match
 
 	//internal data
-	CACHE_SET_T [(`NUM_SETS-1):0] sets, sets_next;
-  logic [(`NUM_SETS-1):0][(NUM_WAYS-2):0] bst, bst_next;
+	CACHE_SET_T [(NUM_SETS-1):0] sets, sets_next;
+  logic [(NUM_SETS-1):0][(NUM_WAYS-2):0] bst, bst_next;
 
   //LRU search/update variables
 	logic [($clog2(NUM_WAYS-1)-1):0] next_bst_idx;
@@ -277,7 +277,7 @@ module cachemem(clock, reset,
   //sequential logic
 	always_ff @(posedge clock) begin
 		if (reset) begin
-			for (int i = 0; i < `NUM_SETS; i += 1) begin
+			for (int i = 0; i < NUM_SETS; i += 1) begin
 				for (int j = 0; j < NUM_WAYS; j += 1) begin
 					sets[i].cache_lines[j].data <= `SD 0;
 					sets[i].cache_lines[j].tag <= `SD 0;

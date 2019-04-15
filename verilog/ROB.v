@@ -93,7 +93,16 @@ module ROB(
 	);
 
 	for(ig = 0; ig < `ROB_SIZE; ig += 1) begin
-		assign ready_to_retire[ig] = (ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig]));
+		// assign ready_to_retire[ig] = (ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig]));
+
+		assign ready_to_retire[ig] = (ROB_table[ig].branch_inst.en) ? ((ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | ((| cam_hits[ig]) & CDB_br_valid & (CDB_br_idx == ROB_table[ig].branch_inst.br_idx)))) : 
+																	 ((ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig])));
+
+		// if(ROB_table[i].branch_inst.en) begin// When branch is broadcasting
+		// 	ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx);
+		// end else begin
+		// 	ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
+		// end
 	end
 
 	for(ig = `SS_SIZE-1; ig >= 0 ; ig -= 1) begin
