@@ -1,181 +1,219 @@
 `include "../../sys_defs.vh"
-module icache(
-  input   clock,
-  input   reset,
+module icache(clock, reset,
+              proc2Icache_addr,
+              Imem2proc_response, Imem2proc_data, Imem2proc_tag,
+              Icache_data_out, Icache_valid_out,
+              proc2Imem_command, proc2Imem_addr);
+  parameter NUM_WAYS = 4;
+  parameter NUM_SETS = (32/NUM_WAYS);
+  parameter RD_PORTS = 1;
+
+  `define NUM_SET_BITS $clog2(NUM_SETS)
+  `define NUM_TAG_BITS (13-`NUM_SET_BITS)
+
+  typedef struct packed {
+  logic [63:0] data;
+  logic [(`NUM_TAG_BITS-1):0] tag;
+  logic valid;
+  logic dirty;
+  } CACHE_LINE_T;
+
+  typedef struct packed {
+    CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
+  } CACHE_SET_T;
+
+  input clock, reset;
 
   //////////////
   //  INPUTS  //
   //////////////
   //from if_stage
-  input [63:0] proc2Icache_addr,
+  input [(RD_PORTS-1):0][63:0] proc2Icache_addr;
 
   //from main memory
-  input [3:0]  Imem2proc_response,
-  input [63:0] Imem2proc_data,
-  input [3:0]  Imem2proc_tag,
+  input [3:0]  Imem2proc_response;
+  input [63:0] Imem2proc_data;
+  input [3:0]  Imem2proc_tag;
 
   ///////////////
   //  OUTPUTS  //
   ///////////////
   //to if_stage
-  output logic [63:0] Icache_data_out, // value is memory[proc2Icache_PC]
-  output logic        Icache_valid_out,      // when this is high
+  output logic [(RD_PORTS-1):0][63:0] Icache_data_out; // value is memory[proc2Icache_addr]
+  output logic [(RD_PORTS-1):0] Icache_valid_out; // when this is high
 
   //to main memory
-  output logic [1:0]  proc2Imem_command,
-  output logic [63:0] proc2Imem_addr  
-); 
+  output logic [1:0]  proc2Imem_command;
+  output logic [63:0] proc2Imem_addr;
+
   //instantiate cachemem module
   //cache memory inputs    
+  logic [RD_PORTS:0] cache_rd_en;
+  logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_idx;
+  logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
+
   logic cache_wr_en;
-  logic [(`NUM_SET_BITS - 1):0] cache_wr_idx;
-  logic [(`NUM_TAG_BITS - 1):0] cache_wr_tag;
+  logic [(`NUM_SET_BITS-1):0] cache_wr_idx;
+  logic [(`NUM_TAG_BITS-1):0] cache_wr_tag;
   logic [63:0]                  cache_wr_data;
-  logic cache_rd_PC_in_en, cache_rd_PC_queue_en;
-  logic [(`NUM_SET_BITS - 1):0] cache_rd_PC_in_idx, cache_rd_PC_queue_idx;
-  logic [(`NUM_TAG_BITS - 1):0] cache_rd_PC_in_tag, cache_rd_PC_queue_tag;
-
+  
   //cache memory outputs
-  logic cache_miss_PC_in_valid_rd, cache_miss_PC_queue_valid_rd;
-  logic [(`NUM_SET_BITS - 1):0] cache_miss_PC_in_idx_rd, cache_miss_PC_queue_idx_rd;
-  logic [(`NUM_TAG_BITS - 1):0] cache_miss_PC_in_tag_rd, cache_miss_PC_queue_tag_rd;
-  logic cache_miss_valid_wr;
-  logic [(`NUM_SET_BITS - 1):0] cache_miss_idx_wr;
-  logic [(`NUM_TAG_BITS - 1):0] cache_miss_tag_wr;
-  logic [63:0]                  cache_rd_PC_in_data, cache_rd_PC_queue_data;
-  logic cache_rd_PC_in_valid, cache_rd_PC_queue_valid;
+  logic [RD_PORTS:0][63:0] cache_rd_data;
+  logic [RD_PORTS:0] cache_rd_valid;
+  logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_miss_idx;
+  logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
+  logic [RD_PORTS:0] cache_rd_miss_valid;
 
-  cachemem memory(
+  logic [(`NUM_SET_BITS-1):0] cache_wr_miss_idx;
+  logic [(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
+  logic cache_wr_miss_valid;
+
+  cachemem #(
+    .NUM_WAYS(4),
+    .NUM_SETS((32/NUM_WAYS)),
+    .RD_PORTS(RD_PORTS+1),
+    .WR_PORTS(1)) 
+  memory(
     .clock(clock),
     .reset(reset),
 
-    .wr1_en(cache_wr_en),
-    .wr1_idx(cache_wr_idx),
-    .wr1_tag(cache_wr_tag),
-    .wr1_data(cache_wr_data),
-    .wr1_dirty(1'b0),
+    //inputs
+    .rd_en(cache_rd_en),
+    .rd_idx(cache_rd_idx),
+    .rd_tag(cache_rd_tag),
 
-    .rd1_en(cache_rd_PC_in_en),
-    .rd1_idx(cache_rd_PC_in_idx),
-    .rd1_tag(cache_rd_PC_in_tag),
-    .rd2_en(cache_rd_PC_queue_en),
-    .rd2_idx(cache_rd_PC_queue_idx),
-    .rd2_tag(cache_rd_PC_queue_tag),
+    .wr_en(cache_wr_en),
+    .wr_idx(cache_wr_idx),
+    .wr_tag(cache_wr_tag),
+    .wr_data(cache_wr_data),
 
-    .victim_valid(),
-    .victim(),
+    //outputs
+    .rd_data(cache_rd_data),
+    .rd_valid(cache_rd_valid),
+    .rd_miss_idx(cache_rd_miss_idx),
+    .rd_miss_tag(cache_rd_miss_tag),
+    .rd_miss_valid(cache_miss_PC_in_valid_rd),
+
+    .wr_miss_idx(cache_wr_miss_idx),
+    .wr_miss_tag(cache_wr_miss_tag),
+    .wr_miss_valid(cache_wr_miss_valid),
+
     .vic_idx(),
-
-    .miss_valid_rd1(cache_miss_PC_in_valid_rd),
-    .miss_idx_rd1(cache_miss_PC_in_idx_rd),
-    .miss_tag_rd1(cache_miss_PC_in_tag_rd),
-    .miss_valid_rd2(cache_miss_PC_queue_valid_rd),
-    .miss_idx_rd2(cache_miss_PC_queue_idx_rd),
-    .miss_tag_rd2(cache_miss_PC_queue_tag_rd),
-
-    .miss_valid_wr(cache_miss_valid_wr),
-    .miss_idx_wr(cache_miss_idx_wr),
-    .miss_tag_wr(cache_miss_tag_wr),
-
-    .rd1_data(cache_rd_PC_in_data),
-    .rd1_valid(cache_rd_PC_in_valid),
-    .rd2_data(cache_rd_PC_queue_data),
-    .rd2_valid(cache_rd_PC_queue_valid)
+    .victim(),
+    .victim_valid()
   );
 
-  ICACHE_BUFFER_T [`INST_BUFFER_LEN-1:0] PC_queue, PC_queue_next;
-  logic [2:0] PC_queue_tail, PC_queue_tail_next;
-  logic [2:0] send_req_ptr, send_req_ptr_next;
+  ICACHE_BUFFER_T [(`INST_BUFFER_LEN-1):0] PC_queue, PC_queue_next;
+  logic [($clog2(`INST_BUFFER_LEN)-1):0] PC_queue_tail, PC_queue_tail_next;
+  logic [($clog2(`INST_BUFFER_LEN)-1):0] send_req_ptr, send_req_ptr_next;
+  logic [($clog2(`INST_BUFFER_LEN)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
 
   //fetch address variables
-  logic [63:0] PC_in;
-  logic [`NUM_INST_PREFETCH-1:0][63:0] PC_in_Plus;
-  logic [63:0] last_PC_in;
-  logic [(`NUM_SET_BITS - 1):0] current_index;
-  logic [(`NUM_TAG_BITS - 1):0] current_tag;
+  logic [(RD_PORTS-1):0][63:0] PC_in;
+  logic [(`NUM_INST_PREFETCH-1):0][63:0] PC_in_Plus;
+  logic [(RD_PORTS-1):0][63:0] last_PC_in;
+  logic [(`NUM_SET_BITS-1):0] current_index;
+  logic [(`NUM_TAG_BITS-1):0] current_tag;
 
   //CAM variables
-  logic [`INST_BUFFER_LEN-1:0][0:0][63:0] cam_table_in;
-  logic [`INST_BUFFER_LEN-1:0][0:0][`NUM_INST_PREFETCH:0] PC_cam_hits;
-  logic [`INST_BUFFER_LEN-1:0] PC_in_hits;
-  logic [`NUM_INST_PREFETCH-1:0][`INST_BUFFER_LEN-1:0] PC_in_Plus_hits;
+  logic [(RD_PORTS+`NUM_INST_PREFETCH-1):0][63:0] cam_tags_in;
+  logic [(`INST_BUFFER_LEN-1):0][0:0][63:0] cam_table_in;
+  logic [(`INST_BUFFER_LEN-1):0][0:0][(RD_PORTS+`NUM_INST_PREFETCH-1):0] PC_cam_hits;
+  logic [(RD_PORTS-1):0][(`INST_BUFFER_LEN-1):0] PC_in_hits;
+  logic [(`NUM_INST_PREFETCH-1):0][(`INST_BUFFER_LEN-1):0] PC_in_Plus_hits;
 
   //control variables
   logic send_request;
   logic changed_addr;
   logic unanswered_miss;
   logic update_mem_tag;
+  logic mem_done;
 
   //Instantiate CAM to check for requested address in queue
   genvar ig, jg;
+  for(ig = 0; ig < RD_PORTS; ig += 1) begin
+    assign cam_tags_in[ig] = PC_in[ig];
+  end
+  for(ig = RD_PORTS; ig < (RD_PORTS+`NUM_INST_PREFETCH); ig += 1) begin
+    assign cam_tags_in[ig] = PC_in_Plus[ig-RD_PORTS];
+  end
+
   for(ig = 0; ig < `INST_BUFFER_LEN; ig += 1) begin
     assign cam_table_in[ig][0] = PC_queue[ig].address;
-    assign PC_in_hits[ig] = PC_cam_hits[ig][0][0] & PC_queue[ig].valid;
+    for(jg = 0; jg < RD_PORTS; jg += 1) begin
+      assign PC_in_hits[jg][ig] = PC_cam_hits[ig][0][jg] & PC_queue[ig].valid;
+    end
     for(jg = 0; jg < `NUM_INST_PREFETCH; jg += 1) begin
-      assign PC_in_Plus_hits[jg][ig] = PC_cam_hits[ig][0][jg+1] & PC_queue[ig].valid;
+      assign PC_in_Plus_hits[jg][ig] = PC_cam_hits[ig][0][jg+RD_PORTS] & PC_queue[ig].valid;
     end
   end
 
   CAM #(.LENGTH(`INST_BUFFER_LEN),
         .WIDTH(1),
-        .NUM_TAGS(`NUM_INST_PREFETCH+1),
+        .NUM_TAGS(RD_PORTS+`NUM_INST_PREFETCH),
         .TAG_SIZE(64)) PC_queue_cam(
-    .enable({(`NUM_INST_PREFETCH+1){1'b1}}),
-    .tags({PC_in_Plus, PC_in}),
+    .enable({(RD_PORTS + `NUM_INST_PREFETCH){1'b1}}),
+    .tags(cam_tags_in),
     .table_in(cam_table_in),
     .hits(PC_cam_hits)
   );
 
   assign PC_in = proc2Icache_addr;
   for(ig = 0; ig < `NUM_INST_PREFETCH; ig += 1) begin
-    assign PC_in_Plus[ig] = {proc2Icache_addr[63:3],3'b0}+(8*(ig+1));
+    assign PC_in_Plus[ig] = {proc2Icache_addr[RD_PORTS-1][63:3],3'b0}+(8*(ig+1));
   end
   assign {current_tag, current_index} = PC_queue[0].address[31:3];
 
   assign changed_addr = (PC_in != last_PC_in);
 
-  assign cache_rd_PC_in_en = 1'b1;
-  assign {cache_rd_PC_in_tag, cache_rd_PC_in_idx} = PC_in[31:3];
+  for(ig = 0; ig < RD_PORTS; ig += 1) begin
+    assign cache_rd_en[ig] = 1'b1;
+    assign {cache_rd_tag[ig], cache_rd_idx[ig]} = PC_in[ig][31:3];
+  end
 
-  assign Icache_data_out = cache_rd_PC_in_data;
-  assign Icache_valid_out = cache_rd_PC_in_valid;
+  assign Icache_data_out = cache_rd_data;
+  assign Icache_valid_out = cache_rd_valid;
 
   assign unanswered_miss = send_request? (Imem2proc_response == 0) :
-                           (PC_queue_tail == 0) & changed_addr? cache_rd_PC_in_en & ~cache_rd_PC_in_valid : 
-                                                              cache_rd_PC_queue_en & ~cache_rd_PC_queue_valid;
+                           (PC_queue_tail == 0) & changed_addr? cache_rd_en[0] & ~cache_rd_valid[0] : 
+                                                              cache_rd_en[RD_PORTS] & ~cache_rd_valid[RD_PORTS];
 
   assign proc2Imem_addr = send_request? PC_queue[send_req_ptr].address :
                                         64'b0;
   assign proc2Imem_command = send_request? BUS_LOAD :
                                            BUS_NONE;
 
-  assign cache_wr_en = (PC_queue[0].Imem_tag == Imem2proc_tag) &&
-                              (PC_queue[0].Imem_tag != 0);
+  assign mem_done = (PC_queue[mem_waiting_ptr].Imem_tag == Imem2proc_tag) &&
+                              (PC_queue[mem_waiting_ptr].Imem_tag != 0);
+
   assign cache_wr_idx = current_index;
   assign cache_wr_tag = current_tag;
-  assign cache_wr_data = Imem2proc_data;
 
   assign update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
-
-
 
   always_comb begin
     PC_queue_next = PC_queue;
     PC_queue_tail_next = PC_queue_tail;
     send_req_ptr_next = send_req_ptr;
-    cache_rd_PC_queue_en = 1'b0;
-    cache_rd_PC_queue_tag = 0;
-    cache_rd_PC_queue_idx = 0;
+    mem_waiting_ptr_next = mem_waiting_ptr;
+    cache_rd_en[RD_PORTS] = 1'b0;
+    cache_rd_tag[RD_PORTS] = 0;
+    cache_rd_idx[RD_PORTS] = 0;
+
+    if(mem_done) begin
+      mem_waiting_ptr_next += 1;
+    end
 
     if(cache_wr_en) begin
       PC_queue_next[`INST_BUFFER_LEN-1:0] = {EMPTY_ICACHE, PC_queue[`INST_BUFFER_LEN-1:1]};
       PC_queue_tail_next -= 1;
       send_req_ptr_next -= 1;
+      mem_waiting_ptr_next -= 1;
     end
 
     if(send_req_ptr < PC_queue_tail & ~send_request) begin
-      cache_rd_PC_queue_en = 1'b1;
-      {cache_rd_PC_queue_tag, cache_rd_PC_queue_idx} = PC_queue[send_req_ptr].address[31:3];
+      cache_rd_en[RD_PORTS] = 1'b1;
+      {cache_rd_tag[RD_PORTS], cache_rd_idx[RD_PORTS]} = PC_queue[send_req_ptr].address[31:3];
     end
 
     if(update_mem_tag) begin
@@ -183,11 +221,13 @@ module icache(
       send_req_ptr_next += 1;
     end
 
-    if(~(|PC_in_hits) & changed_addr & ~cache_rd_PC_in_valid & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
-      PC_queue_next[PC_queue_tail_next].address = {PC_in[63:3], 3'b0};
-      PC_queue_next[PC_queue_tail_next].cache_checked = 1'b1;
-      PC_queue_next[PC_queue_tail_next].valid = 1'b1;
-      PC_queue_tail_next += 1;
+    for(int i = 0; i < RD_PORTS; i += 1) begin
+      if(~(|PC_in_hits[i]) & changed_addr & ~cache_rd_valid[i] & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
+        PC_queue_next[PC_queue_tail_next].address = {PC_in[i][63:3], 3'b0};
+        PC_queue_next[PC_queue_tail_next].cache_checked = 1'b1;
+        PC_queue_next[PC_queue_tail_next].valid = 1'b1;
+        PC_queue_tail_next += 1;
+      end
     end
     for(int i = 0; i < `NUM_INST_PREFETCH; i += 1) begin
       if(~(|PC_in_Plus_hits[i]) & changed_addr & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
@@ -203,18 +243,29 @@ module icache(
   always_ff @(posedge clock) begin
     if(reset) begin
       last_PC_in   <= `SD -1;     
-      send_request <= `SD 0;
+      send_request <= `SD 1'b0;
       for(int i = 0; i < `INST_BUFFER_LEN; i += 1) begin
         PC_queue[i] <= `SD EMPTY_ICACHE;
       end
-      PC_queue_tail <= `SD 0;
-      send_req_ptr  <= `SD 0;
+      PC_queue_tail   <= `SD 0;
+      send_req_ptr    <= `SD 0;
+      mem_waiting_ptr <= `SD 0;
+      cache_wr_en     <= `SD 1'b0;
+      cache_wr_data   <= `SD 64'b0;
     end else begin
-      last_PC_in    <= `SD PC_in;
-      send_request  <= `SD unanswered_miss;
-      PC_queue      <= `SD PC_queue_next;
-      PC_queue_tail <= `SD PC_queue_tail_next;
-      send_req_ptr  <= `SD send_req_ptr_next;
+      last_PC_in      <= `SD PC_in;
+      send_request    <= `SD unanswered_miss;
+      PC_queue        <= `SD PC_queue_next;
+      PC_queue_tail   <= `SD PC_queue_tail_next;
+      send_req_ptr    <= `SD send_req_ptr_next;
+      mem_waiting_ptr <= `SD mem_waiting_ptr_next;
+      if(mem_done) begin
+        cache_wr_en   <= `SD 1'b1;
+        cache_wr_data <= `SD Imem2proc_data;
+      end else begin
+        cache_wr_en   <= `SD 1'b0;
+        cache_wr_data <= `SD 64'b0;
+      end
     end
   end
 

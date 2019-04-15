@@ -42,22 +42,18 @@
 // cache parameters/defines
 `define INST_BUFFER_LEN 6
 `define NUM_INST_PREFETCH 4
-`define NUM_WAYS 4
-`define NUM_SETS (32 / `NUM_WAYS)
-`define NUM_SET_BITS $clog2(`NUM_SETS)
-`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
+//`define NUM_WAYS 4
+//`define NUM_SETS (32 / `NUM_WAYS)
+//`define NUM_SET_BITS $clog2(`NUM_SETS)
+//`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
+//`define NUM_WR_FIFO 4
 `define NUM_FIFO 8
-`define FIFO_SIZE `NUM_SETS
+`define NUM_DATA_PREFETCH 2
+`define FIFO_SIZE 8
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
+//`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
-
-typedef struct packed {
-	logic [63:0] data;
-	logic [(`NUM_TAG_BITS - 1):0] tag;
-	logic valid;
-	logic dirty;
-} CACHE_LINE_T;
 
 typedef struct packed {
   logic [63:0] address;
@@ -74,10 +70,22 @@ const ICACHE_BUFFER_T EMPTY_ICACHE =
   1'b0
 };
 
+// typedef struct packed {
+//   logic [`NUM_TAG_BITS-1:0] tag;
+//   logic [`NUM_SET_BITS-1:0] idx;
+//   logic [63:0] data;
+//   logic [3:0] Dmem_tag;
+//   logic valid;
+// } DCACHE_FIFO_T;
 
-typedef struct packed {
-	CACHE_LINE_T [(`NUM_WAYS - 1):0] cache_lines;
-} CACHE_SET_T;
+// const DCACHE_FIFO_T EMPTY_DCACHE =
+// {
+//   {`NUM_TAG_BITS{1'b0}},
+//   {`NUM_SET_BITS{1'b0}},
+//   64'b0,
+//   4'b0,
+//   1'b0
+// };
 
 //////////////////////////////////////////////
 //

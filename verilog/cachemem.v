@@ -3,242 +3,284 @@
 `include "../../sys_defs.vh"
 `define DEBUG
 
-module cachemem(
-        input clock, reset, wr1_en, rd1_en, rd2_en,
-        input  [(`NUM_SET_BITS - 1):0] wr1_idx, rd1_idx, rd2_idx,
-        input  [(`NUM_TAG_BITS - 1):0] wr1_tag, rd1_tag, rd2_tag,
-        input [63:0] wr1_data,
-	input wr1_dirty, 
+module cachemem(clock, reset, 
+                rd_en, rd_idx, rd_tag,
+                wr_en, wr_idx, wr_tag, wr_data,
+                `ifdef DEBUG
+                  sets_out, bst_out,
+                `endif
+                rd_data, rd_valid,
+                rd_miss_idx, rd_miss_tag, rd_miss_valid,
+                wr_miss_idx, wr_miss_tag, wr_miss_valid,
+                vic_idx, victim, victim_valid);
+  parameter NUM_WAYS = 4;
+  parameter NUM_SETS = (32/NUM_WAYS);
+  parameter RD_PORTS = 2;
+  parameter WR_PORTS = 2;
+
+  `define NUM_SET_BITS $clog2(NUM_SETS)
+  `define NUM_TAG_BITS (13-`NUM_SET_BITS)
+
+  typedef struct packed {
+  logic [63:0] data;
+  logic [(`NUM_TAG_BITS-1):0] tag;
+  logic valid;
+  logic dirty;
+  } CACHE_LINE_T;
+
+  typedef struct packed {
+    CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
+  } CACHE_SET_T;
+
+  input clock, reset;
+  
+  //read inputs
+  input [(RD_PORTS-1):0] rd_en;
+  input [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] rd_idx;
+  input [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] rd_tag;
+
+  //write inputs
+  input [(WR_PORTS-1):0] wr_en;
+  input [(WR_PORTS-1):0][(`NUM_SET_BITS-1):0] wr_idx;
+  input [(WR_PORTS-1):0][(`NUM_TAG_BITS-1):0] wr_tag;
+  input [(WR_PORTS-1):0][63:0] wr_data;
 
 	`ifdef DEBUG
-		output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
-		output logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_out,
+		output CACHE_SET_T [(NUM_SETS-1):0] sets_out;
+		output logic [(NUM_SETS-1):0][(NUM_WAYS-2):0] bst_out;
 	`endif
 
-	// victim cache outputs
-	output logic victim_valid,
-	output CACHE_LINE_T victim,
-	output logic [(`NUM_SET_BITS - 1):0] vic_idx,
+  //read outputs
+  output logic [(RD_PORTS-1):0][63:0] rd_data;
+  output logic [(RD_PORTS-1):0] rd_valid;
+	output logic [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] rd_miss_idx; 
+	output logic [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] rd_miss_tag;
+  output logic [(RD_PORTS-1):0] rd_miss_valid;
 
-	output logic miss_valid_rd1, miss_valid_rd2,
-	output logic [(`NUM_SET_BITS - 1):0] miss_idx_rd1, miss_idx_rd2,
-	output logic [(`NUM_TAG_BITS - 1):0] miss_tag_rd1, miss_tag_rd2,
+  //write outputs
+	output logic [(WR_PORTS-1):0][(`NUM_SET_BITS-1):0] wr_miss_idx;
+	output logic [(WR_PORTS-1):0][(`NUM_TAG_BITS-1):0] wr_miss_tag;
+  output logic [(WR_PORTS-1):0] wr_miss_valid;
 
-	output logic miss_valid_wr,
-	output logic [(`NUM_SET_BITS - 1):0] miss_idx_wr,
-	output logic [(`NUM_TAG_BITS - 1):0] miss_tag_wr,
-
-        output logic [63:0] rd1_data, rd2_data,
-        output logic rd1_valid, rd2_valid
-);
+  // victim cache outputs
+  output logic [(WR_PORTS-1):0][(`NUM_SET_BITS-1):0] vic_idx;
+  output CACHE_LINE_T [(WR_PORTS-1):0] victim;
+  output logic [(WR_PORTS-1):0] victim_valid;
 
 	// given addr, find set index
 	// cam through the tags in that set for match
 	// output data at index of match
 
-	// internal data
-	CACHE_SET_T [(`NUM_SETS - 1):0] sets;
-	CACHE_SET_T [(`NUM_SETS - 1):0] sets_next;
+	//internal data
+	CACHE_SET_T [(NUM_SETS-1):0] sets, sets_next;
+  logic [(NUM_SETS-1):0][(NUM_WAYS-2):0] bst, bst_next;
 
-	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst; 
-	logic [(`NUM_SETS - 1):0] [(`NUM_WAYS - 2):0] bst_next;
+  //LRU search/update variables
+	logic [($clog2(NUM_WAYS-1)-1):0] next_bst_idx;
+	logic [($clog2(NUM_WAYS)-1):0] acc; 
+  logic [$clog2(NUM_WAYS)-1:0] temp_idx;
 
-	logic [($clog2(`NUM_WAYS - 1) - 1):0] next_bst_idx;
-	logic [($clog2(`NUM_WAYS) - 1):0] acc; 
+  //rd search variables
+	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0][0:0][(`NUM_TAG_BITS-1):0] rd_cam_table_in;
+	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0][0:0] rd_cam_hits_out;
+	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0] rd_tag_hits;
+  logic [(RD_PORTS-1):0][$clog2(NUM_WAYS)-1:0] rd_tag_idx;
+  logic [(RD_PORTS-1):0] wr_forward_to_rd;
 
-	logic [(`NUM_WAYS - 1):0][1:0][(`NUM_TAG_BITS - 1):0] tag_table_in_read;
-	logic [(`NUM_WAYS - 1):0] [(`NUM_TAG_BITS - 1):0] tag_table_in_write;
-	logic [(`NUM_WAYS - 1):0][1:0][1:0] read_cam_hits_out;
-	logic [(`NUM_WAYS - 1):0] tag_hits_read1, tag_hits_read2;
-	logic [(`NUM_WAYS - 1):0] tag_hits_write;
-	logic [(`NUM_WAYS - 1):0] tag_hits_write_found;
-	logic [(`NUM_WAYS - 1):0] tag_hits_read1_found, tag_hits_read2_found;
-	logic [(`NUM_WAYS - 1):0] has_invalid_write;
-	logic [(`NUM_WAYS - 1):0] has_invalid_read1, has_invalid_read2;
-	logic [(`NUM_WAYS - 1):0] invalid_sel;
-	logic [(`NUM_WAYS - 1):0] enc_in_write;
-	logic [(`NUM_WAYS - 1):0] enc_in_read1, enc_in_read2;
-	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_read1, tag_idx_read2;
-	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write;
-	logic [$clog2(`NUM_WAYS) - 1:0] tag_idx_write_out;
-	logic [$clog2(`NUM_WAYS) - 1:0] temp_idx;
+  //wr search variables
+  logic [(WR_PORTS-1):0][(NUM_WAYS-1):0][0:0][(`NUM_TAG_BITS-1):0] wr_cam_table_in;
+	logic [(WR_PORTS-1):0][(NUM_WAYS-1):0][0:0] wr_cam_hits_out;
+	logic [(WR_PORTS-1):0][(NUM_WAYS-1):0] wr_tag_hits;
+  logic [(WR_PORTS-1):0][$clog2(NUM_WAYS)-1:0] wr_tag_idx;
+  logic [$clog2(NUM_WAYS)-1:0] wr_new_tag_idx;
 
-	// modules
-	CAM #(
-		.LENGTH(`NUM_WAYS),
-		.WIDTH(2),
-		.NUM_TAGS(2),
-		.TAG_SIZE(`NUM_TAG_BITS))
-	read_cam(
-		.enable({rd1_en, rd2_en}),
-		.tags({rd1_tag, rd2_tag}),
-		.table_in(tag_table_in_read),
-		.hits(read_cam_hits_out));
+  // assign statements
+  `ifdef DEBUG
+    assign sets_out = sets;
+    assign bst_out = bst;
+  `endif
 
-	encoder #(.WIDTH(`NUM_WAYS))
-	read_enc1(
-		.in(tag_hits_read1),
-		.out(tag_idx_read1));
+	genvar ig, jg;
 
-	encoder #(.WIDTH(`NUM_WAYS))
-	read_enc2(
-		.in(tag_hits_read2),
-		.out(tag_idx_read2));
+  //rd search logic
+  for(ig = 0; ig < RD_PORTS; ig += 1) begin
+    for(jg = 0; jg < NUM_WAYS; jg += 1) begin
+      assign rd_cam_table_in[ig][jg][0] = sets[rd_idx[ig]].cache_lines[jg].tag;
+      assign rd_tag_hits[ig][jg] = rd_cam_hits_out[ig][jg][0] & sets[rd_idx[ig]].cache_lines[jg].valid;
+    end
 
-	CAM #(
-		.LENGTH(`NUM_WAYS),
-		.WIDTH(1),
-		.NUM_TAGS(1),
-		.TAG_SIZE(`NUM_TAG_BITS))
-	write_cam(
-		.enable(wr1_en),
-		.tags(wr1_tag),
-		.table_in(tag_table_in_write),
-		.hits(tag_hits_write));
+  	CAM #(
+  		.LENGTH(NUM_WAYS),
+  		.WIDTH(1),
+  		.NUM_TAGS(1),
+  		.TAG_SIZE(`NUM_TAG_BITS))
+  	rd_cam(
+  		.enable(rd_en[ig]),
+  		.tags(rd_tag[ig]),
+  		.table_in(rd_cam_table_in[ig]),
+  		.hits(rd_cam_hits_out[ig]));
 
-	encoder #(.WIDTH(`NUM_WAYS)) 
-	write_enc(
-		.in(enc_in_write),
-		.out(tag_idx_write_out));
+  	encoder #(.WIDTH(NUM_WAYS))
+  	rd_enc(
+  		.in(rd_tag_hits[ig]),
+  		.out(rd_tag_idx[ig]));
+  end
+	
+  //wr search logic
+  for(ig = 0; ig < WR_PORTS; ig += 1) begin
+    for(jg = 0; jg < NUM_WAYS; jg += 1) begin
+      assign wr_cam_table_in[ig][jg][0] = sets[wr_idx[ig]].cache_lines[jg].tag;
+      assign wr_tag_hits[ig][jg] = wr_cam_hits_out[ig][jg][0] & sets[wr_idx[ig]].cache_lines[jg].valid;
+    end
 
-	// assign statements
-	assign sets_out = sets;
-	assign bst_out = bst;
+  	CAM #(
+  		.LENGTH(NUM_WAYS),
+  		.WIDTH(1),
+  		.NUM_TAGS(1),
+  		.TAG_SIZE(`NUM_TAG_BITS))
+  	wr_cam(
+  		.enable(wr_en[ig]),
+  		.tags(wr_tag[ig]),
+  		.table_in(wr_cam_table_in[ig]),
+  		.hits(wr_cam_hits_out[ig]));
 
-	assign rd1_data = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? wr1_data : sets[rd1_idx].cache_lines[tag_idx_read1].data;
-	assign rd1_valid = (rd1_en & wr1_en & ((wr1_idx == rd1_idx) & (wr1_tag == rd1_tag))) ? 1'b1 : 
-				(|tag_hits_read1) ? sets[rd1_idx].cache_lines[tag_idx_read1].valid : 0;
+  	encoder #(.WIDTH(NUM_WAYS)) 
+  	wr_enc(
+  		.in(wr_tag_hits[ig]),
+  		.out(wr_tag_idx[ig]));
+  end
 
-	assign rd2_data = (rd2_en & wr1_en & ((wr1_idx == rd2_idx) & (wr1_tag == rd2_tag))) ? wr1_data : sets[rd2_idx].cache_lines[tag_idx_read2].data;
-	assign rd2_valid = (rd2_en & wr1_en & ((wr1_idx == rd2_idx) & (wr1_tag == rd2_tag))) ? 1'b1 : 
-				(|tag_hits_read2) ? sets[rd2_idx].cache_lines[tag_idx_read2].valid : 0;
-
-
-
-	assign victim_valid = wr1_en & (~|tag_hits_write_found) & sets[wr1_idx].cache_lines[tag_idx_write].valid;
-	assign victim = sets[wr1_idx].cache_lines[tag_idx_write];
-	assign vic_idx = wr1_idx;
-
-	assign miss_idx_rd1 = rd1_idx;
-	assign miss_tag_rd1 = rd1_tag;
-	assign miss_valid_rd1 = (rd1_en) & ~(|tag_hits_read1_found);
-
-	assign miss_idx_rd2 = rd2_idx;
-	assign miss_tag_rd2 = rd2_tag;
-	assign miss_valid_rd2 = (rd2_en) & ~(|tag_hits_read2_found);
-
-	assign miss_idx_wr = wr1_idx;
-	assign miss_tag_wr = wr1_tag;
-
-	for (genvar i = 0; i < `NUM_WAYS; ++i) begin
-		assign has_invalid_write[i] = ~sets[wr1_idx].cache_lines[i].valid;
-		assign has_invalid_read1[i] = ~sets[rd1_idx].cache_lines[i].valid;
-		assign has_invalid_read2[i] = ~sets[rd2_idx].cache_lines[i].valid;
-		assign tag_table_in_read[i][1] = sets[rd1_idx].cache_lines[i].tag;
-		assign tag_table_in_read[i][0] = sets[rd2_idx].cache_lines[i].tag;
-		assign tag_table_in_write[i] = sets[wr1_idx].cache_lines[i].tag;
-		assign tag_hits_read1[i] = read_cam_hits_out[i][1][1] & sets[rd1_idx].cache_lines[i].valid;
-		assign tag_hits_read2[i] = read_cam_hits_out[i][0][0] & sets[rd2_idx].cache_lines[i].valid;
-	end
-
+  //output and update logic
 	always_comb begin
 		sets_next = sets;
 		bst_next = bst;
-		enc_in_write = tag_hits_write;
-		enc_in_read1 = tag_hits_read1;
-		tag_idx_write = tag_idx_write_out;
-		tag_hits_write_found = tag_hits_write & ~has_invalid_write;
-		tag_hits_read1_found = tag_hits_read1 & ~has_invalid_read1;
-		tag_hits_read2_found = tag_hits_read2 & ~has_invalid_read2;
-		miss_valid_wr = 0;
+    next_bst_idx = 0;
+    acc = 0;
+    temp_idx = 0;
 
-		if (wr1_en) begin
-			if (|tag_hits_write_found) begin
-				enc_in_write = tag_hits_write;
-				next_bst_idx = 0;
-				acc = `NUM_WAYS / 2;
-				temp_idx = `NUM_WAYS / 2;
+    //rd output logic
+    for(int i = 0; i < RD_PORTS; i += 1) begin
+      rd_data[i] = 0;
+      rd_valid[i] = 0;
+      wr_forward_to_rd[i] = 0;
+      for(int j = 0; j < WR_PORTS; j += 1) begin
+        //wr to rd forwarding
+        if(rd_en[i] & wr_en[j] & ((wr_idx[j] == rd_idx[i]) & (wr_tag[j] == rd_tag[i]))) begin
+          rd_data[i] = wr_data[j];
+          rd_valid[i] = 1'b1;
+          wr_forward_to_rd[i] |= 1'b1;
+        end
+      end
+      //if not forwarded, rd block
+      if(~wr_forward_to_rd[i]) begin
+        rd_data[i] = sets[rd_idx[i]].cache_lines[rd_tag_idx[i]].data;
+        rd_valid[i] = (|rd_tag_hits[i])? sets[rd_idx[i]].cache_lines[rd_tag_idx[i]].valid : 1'b0;
+      end
 
-				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					bst_next[wr1_idx][next_bst_idx] = ~bst_next[wr1_idx][next_bst_idx];
-					if (tag_idx_write >= temp_idx) begin
-						next_bst_idx = (2 * next_bst_idx) + 2;
-						temp_idx += (acc / 2);
-					end else begin
-						next_bst_idx = (2 * next_bst_idx) + 1;
-						temp_idx -= (acc / 2);
-					end
-					acc /= 2;
-				end
-			end else begin
-				miss_valid_wr = 1;
-				// find positoin based on bst
-				tag_idx_write = 0;
-				next_bst_idx = 0;
-				acc = `NUM_WAYS / 2;
+      //rd miss if not found
+      rd_miss_idx[i] = rd_idx[i];
+      rd_miss_tag[i] = rd_tag[i];
+      rd_miss_valid[i] = (rd_en[i] & ~rd_valid[i]);
+    end
 
-				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					bst_next[wr1_idx][next_bst_idx] = ~bst_next[wr1_idx][next_bst_idx];
-					if (~bst_next[wr1_idx][next_bst_idx]) begin
-						tag_idx_write += acc;
-						next_bst_idx = (2 * next_bst_idx) + 2;
-					end else begin
-						next_bst_idx = (2 * next_bst_idx) + 1;
-					end
-					acc /= 2;
-				end
-			end
-			sets_next[wr1_idx].cache_lines[tag_idx_write].dirty = wr1_dirty;
-			sets_next[wr1_idx].cache_lines[tag_idx_write].data = wr1_data;
-			sets_next[wr1_idx].cache_lines[tag_idx_write].valid = 1;
-			sets_next[wr1_idx].cache_lines[tag_idx_write].tag = wr1_tag;
-		end
+    //wr logic
+    for(int i = 0; i < WR_PORTS; i += 1) begin
+      wr_miss_idx[i] = wr_idx[i];
+      wr_miss_tag[i] = wr_tag[i];
+      wr_miss_valid[i] = 1'b0;
+      wr_new_tag_idx = 0;
+      vic_idx[i] = wr_idx[i];
+      victim[i].data = 0;
+      victim[i].tag = 0;
+      victim[i].valid = 0;
+      victim[i].dirty = 0;
+      victim_valid[i] = 1'b0;
 
-		if (rd1_en) begin
-			if (|tag_hits_read1_found) begin
-				next_bst_idx = 0;
-				acc = `NUM_WAYS / 2;
-				temp_idx = `NUM_WAYS / 2;
+  		if (wr_en[i]) begin
+  			if (|wr_tag_hits[i]) begin
+          //wr hit, update LRU
+          wr_miss_valid[i] = 1'b0;
+          wr_new_tag_idx = wr_tag_idx[i];
+  				next_bst_idx = 0;
+  				acc = NUM_WAYS / 2;
+  				temp_idx = NUM_WAYS / 2;
 
-				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					bst_next[rd1_idx][next_bst_idx] = ~bst_next[rd1_idx][next_bst_idx];
-					if (tag_idx_read1 >= temp_idx) begin
-						next_bst_idx = (2 * next_bst_idx) + 2;
-						temp_idx += (acc / 2);
-					end else begin
-						next_bst_idx = (2 * next_bst_idx) + 1;
-						temp_idx -= (acc / 2);
-					end
-					acc /= 2;
-				end
-			end
-		end
+  				for (int j = 0; j < $clog2(NUM_WAYS); j += 1) begin
+  					if (wr_new_tag_idx >= temp_idx) begin
+              bst_next[wr_idx[i]][next_bst_idx] = 1'b0;
+  						next_bst_idx = (2 * next_bst_idx) + 2;
+  						temp_idx += (acc / 2);
+  					end else begin
+              bst_next[wr_idx[i]][next_bst_idx] = 1'b1;
+  						next_bst_idx = (2 * next_bst_idx) + 1;
+  						temp_idx -= (acc / 2);
+  					end
+  					acc /= 2;
+  				end
 
-		if (rd2_en) begin
-			if (|tag_hits_read2_found) begin
-				next_bst_idx = 0;
-				acc = `NUM_WAYS / 2;
-				temp_idx = `NUM_WAYS / 2;
+          sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].dirty = 1'b1;
+  			end else begin
+          //wr miss, find LRU index
+  				wr_miss_valid[i] = 1'b1;
+  				wr_new_tag_idx = 0;
+  				next_bst_idx = 0;
+  				acc = NUM_WAYS / 2;
 
-				for (int i = 0; i < $clog2(`NUM_WAYS); ++i) begin
-					bst_next[rd2_idx][next_bst_idx] = ~bst_next[rd2_idx][next_bst_idx];
-					if (tag_idx_read2 >= temp_idx) begin
-						next_bst_idx = (2 * next_bst_idx) + 2;
-						temp_idx += (acc / 2);
-					end else begin
-						next_bst_idx = (2 * next_bst_idx) + 1;
-						temp_idx -= (acc / 2);
-					end
-					acc /= 2;
-				end
-			end
-		end
+  				for (int j = 0; j < $clog2(NUM_WAYS); j += 1) begin
+  					bst_next[wr_idx[i]][next_bst_idx] = ~bst_next[wr_idx[i]][next_bst_idx];
+  					if (~bst_next[wr_idx[i]][next_bst_idx]) begin
+  						wr_new_tag_idx += acc;
+  						next_bst_idx = (2 * next_bst_idx) + 2;
+  					end else begin
+  						next_bst_idx = (2 * next_bst_idx) + 1;
+  					end
+  					acc /= 2;
+  				end
+
+          sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].dirty = 1'b0;
+
+          //if LRU index was filled, send to victim cache
+          victim[i] = sets[wr_idx[i]].cache_lines[wr_new_tag_idx];
+          victim_valid[i] = sets[wr_idx[i]].cache_lines[wr_new_tag_idx].valid;
+  			end
+
+        //wr block
+        sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].data = wr_data[i];
+        sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].tag = wr_tag[i];	
+  			sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].valid = 1'b1;
+  		end
+    end
+
+    //update LRU for rd
+    for(int i = 0; i < RD_PORTS; i += 1) begin
+  		if (rd_en[i]) begin
+  			if (|rd_tag_hits[i]) begin
+  				next_bst_idx = 0;
+  				acc = NUM_WAYS / 2;
+  				temp_idx = NUM_WAYS / 2;
+
+  				for (int j = 0; j < $clog2(NUM_WAYS); j += 1) begin
+  					if (rd_tag_idx[i] >= temp_idx) begin
+  						bst_next[rd_idx[i]][next_bst_idx] = 1'b0;
+  						next_bst_idx = (2 * next_bst_idx) + 2;
+  						temp_idx += (acc / 2);
+  					end else begin
+  						bst_next[rd_idx[i]][next_bst_idx] = 1'b1;
+  						next_bst_idx = (2 * next_bst_idx) + 1;
+  						temp_idx -= (acc / 2);
+  					end
+  					acc /= 2;
+  				end
+  			end
+  		end
+    end
 	end
 
+  //sequential logic
 	always_ff @(posedge clock) begin
 		if (reset) begin
-			for (int i = 0; i < `NUM_SETS; ++i) begin
-				for (int j = 0; j < `NUM_WAYS; ++j) begin
+			for (int i = 0; i < NUM_SETS; i += 1) begin
+				for (int j = 0; j < NUM_WAYS; j += 1) begin
 					sets[i].cache_lines[j].data <= `SD 0;
 					sets[i].cache_lines[j].tag <= `SD 0;
 					sets[i].cache_lines[j].valid <= `SD 0;
@@ -251,6 +293,5 @@ module cachemem(
 			bst <= `SD bst_next;
 		end
 	end
-
 
 endmodule
