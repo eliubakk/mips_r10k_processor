@@ -54,20 +54,36 @@
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
+`define MEM_BUFFER_SIZE 10
 
 typedef struct packed {
   logic [63:0] address;
-  logic cache_checked;
-  logic [3:0] Imem_tag;
+  logic [3:0] mem_tag;
   logic valid;
-} ICACHE_BUFFER_T;
+} MEM_REQ_T;
 
-const ICACHE_BUFFER_T EMPTY_ICACHE = 
+const MEM_REQ_T EMPTY_MEM_REQ = 
 {
   64'b0,
-  1'b1,
   4'b0,
   1'b0
+};
+
+typedef struct packed {
+  MEM_REQ_T req;
+  logic wr_to_cache;
+  logic wr_to_fifo;
+  logic [(`NUM_FIFO_BITS-1):0] fifo_num;
+  logic [(`NUM_FIFO_SIZE_BITS-1):0] fifo_idx;
+} DCACHE_MEM_REQ_T;
+
+const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
+{
+  EMPTY_MEM_REQ,
+  1'b0,
+  1'b0,
+  {`NUM_FIFO_BITS{1'b0}},
+  {`NUM_FIFO_SIZE_BITS{1'b0}}
 };
 
 // typedef struct packed {
