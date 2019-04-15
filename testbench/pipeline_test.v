@@ -48,6 +48,11 @@ module testbench;
   logic [63:0] pipeline_commit_NPC;
   logic	[5:0]  pipeline_commit_phys_reg;
   logic [5:0]  pipeline_commit_phys_from_arch;
+  
+  logic		pipeline_branch_en;
+  logic		pipeline_branch_pred_correct;
+  logic	[31:0]	branch_inst_count;
+  logic [31:0]  branch_pred_count;
 
   logic [63:0] if_NPC_out;
   logic [31:0] if_IR_out;
@@ -129,6 +134,8 @@ module testbench;
     .pipeline_commit_NPC(pipeline_commit_NPC),
     .pipeline_commit_phys_reg(pipeline_commit_phys_reg),
     .pipeline_commit_phys_from_arch(pipeline_commit_phys_from_arch),
+    .pipeline_branch_en(pipeline_branch_en),
+    .pipeline_branch_pred_correct(pipeline_branch_pred_correct),
 
     .if_NPC_out(if_NPC_out),
     .if_IR_out(if_IR_out),
@@ -243,7 +250,15 @@ module testbench;
       $display("@@  %4.2f ns total time to execute\n@@\n",
                 clock_count*`VIRTUAL_CLOCK_PERIOD);
     end
-  endtask  // task show_clk_count 
+  endtask  // task show_clk_count
+
+  task show_br_pred_accuracy;
+     real br_accuracy;
+	begin
+		br_accuracy = 100.0*(branch_pred_count)/(branch_inst_count);
+		$display("\n-------------Branch prediction accuracy : %0d correct / %0d branch instrs = %.4f percent",branch_pred_count,branch_inst_count, br_accuracy);
+	end
+  endtask 
 
   // Show contents of a range of Unified Memory, in both hex and decimal
   task show_mem_with_decimal;
@@ -287,7 +302,7 @@ module testbench;
 			end
 
 			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2);
+				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b, npc:%h, opcode:%h ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2, rs_table_out[i].npc, rs_table_out[i].inst_opcode);
 			end
 			$display("*******************************************************************\n");
 
@@ -568,6 +583,19 @@ module testbench;
 		end
 	endtask
 
+	task display_IQ;
+		begin
+			$display("\n--------Print Instruction Queue--------");
+			$display("Inst_queue_full? : %b, inst_queue_entry : %d", pipeline_0.inst_queue_full, pipeline_0.inst_queue_entry);
+			$display("Fetched instruction valid : %b, npc : %h, IR : %h", pipeline_0.if_inst_in.valid_inst, pipeline_0.if_inst_in.npc, pipeline_0.if_inst_in.ir);
+			$display("Decoded instruction valid : %b, npc : %h, IR : %h", pipeline_0.if_id_inst_out.valid_inst, pipeline_0.if_id_inst_out.npc, pipeline_0.if_id_inst_out.ir);
+			$display("--------Queue------");
+			for (int i = 0; i < `IQ_SIZE; ++i) begin
+				$display("Index : %d, valid : %b, npc : %h, IR : %h", i, pipeline_0.inst_queue_out[i].valid_inst, pipeline_0.inst_queue_out[i].npc, pipeline_0.inst_queue_out[i].ir);
+			end	
+		end
+	endtask
+
 	task display_stages;
 		begin
 			 if (clock_count == 1000) begin
@@ -586,11 +614,12 @@ module testbench;
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
-		display_id_di;
-			
-			display_di_issue;
-		//	display_RS_table;
-			//display_ROB_table;
+	//	display_id_di;
+	//	$display(" if_stage_dispatch_en : %b, if_valid_inst_out : %b,_ if_fetch_NPC_out : %h, if_IR_out : %h, if_PC_reg : %h", pipeline_0.if_stage_dispatch_en, pipeline_0.if_valid_inst_out, pipeline_0.if_fetch_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_PC_reg);
+		// display_IQ;	
+		//	display_di_issue;
+			//display_RS_table;
+		//display_ROB_table; //  *********************************
 		//	display_map_table;
 		//	$display("free_reg_dispatched : %d, free_list_tail", pipeline_0.fr_free_reg_T, pipeline_0.fr_tail_out);
 		//	$display("rega : %d, regb : %d, destreg: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
@@ -605,16 +634,16 @@ module testbench;
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
 			display_co_re_registers;
 			//display_arch_table;
-		//	display_free_list_table;
-		//	display_arch_table;
+		//	display_free_list_table;// *****************************
+		//	display_arch_table;  // *****************************
 			//display_phys_reg;	
 		//	$display("ROB output to arch map - busy: %b, T_old : %b, T_new : %b", pipeline_0.rob_retire_out.busy, pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new);				
 			//display_ROB_table;
-			$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
+		//	$display("dispatch_en : %b, dispatch_no_hazard : %b ",pipeline_0.dispatch_en, pipeline_0.dispatch_no_hazard);
 			//$display("enalbe : %b, CAM_en: %b, head: %d, tail: %d", pipeline_0.enable, pipeline_0.CDB_enable, pipeline_0.head_reg, pipeline_0.tail_reg);
 			// display_id_di;
 			
-			$display("branch_not_taken : %d, pred_incorrect : %d", pipeline_0.branch_not_taken, !pipeline_0.ret_pred_correct);
+		//	$display("branch_not_taken : %d, pred_incorrect : %d", pipeline_0.branch_not_taken, !pipeline_0.ret_pred_correct);
 			
 			//$display("halt : %b", pipeline_0.head_halt);
 			$display("\n");
@@ -674,7 +703,23 @@ module testbench;
     end
 	`SD;
 	 display_stages;
-  end  
+  end 
+
+  // Count the number of branch instructions and correctly predicted branches
+  always @(posedge clock) begin
+	if(reset) begin
+		branch_inst_count <= `SD 0;
+		branch_pred_count <= `SD 0;
+	end else begin
+		if(pipeline_branch_en) begin
+			branch_inst_count <= `SD branch_inst_count +1;
+		end
+		if(pipeline_branch_en & pipeline_branch_pred_correct) begin
+			branch_pred_count <= `SD branch_pred_count +1;
+		end
+	end
+  end
+ 
 
   
   always @(negedge clock) begin
@@ -816,6 +861,7 @@ module testbench;
         endcase
         $display("@@@\n@@");
         show_clk_count;
+	show_br_pred_accuracy;
         print_close(); // close the pipe_print output file
         $fclose(wb_fileno);
 	@(posedge clock);

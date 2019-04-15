@@ -40,7 +40,7 @@ module if_stage(
   logic    [63:0] next_PC;
   logic           PC_enable;
   logic           next_ready_for_valid;
-
+  logic		  if_valid_inst;
 	assign if_PC_reg = PC_reg;
 
 	assign PC_enable = ((dispatch_en & Imem_valid) | (if_bp_NPC_valid)) & (!co_ret_take_branch);
@@ -67,27 +67,28 @@ module if_stage(
   //assign PC_enable = if_valid_inst_out || ex_mem_take_branch;
 
   // Pass PC+4 down pipeline w/instruction
-  assign if_NPC_out = PC_plus_4;
+assign if_NPC_out = PC_plus_4;
 
   //assign if_valid_inst_out = ready_for_valid && Imem_valid;
 
 
-//assign if_valid_inst_out = Imem_valid;
+assign if_valid_inst_out = Imem_valid;
 //assign if_valid_inst_out = PC_enable; 
-assign if_valid_inst_out = PC_enable;
+//assign if_valid_inst_out = co_ret_take_branch | PC_enable;
 // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
   //                               !if_valid_inst_out;
 
   // This register holds the PC value
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if(reset)
+    if(reset) begin
       PC_reg <= `SD 0;       // initial PC value is 0
-   else if (co_ret_take_branch) 
+   end else if (co_ret_take_branch) begin
       PC_reg <= `SD co_ret_target_pc;
-   else if(PC_enable)
+  end else if(PC_enable) begin
       PC_reg <= `SD next_PC; // transition to next PC
-  end  // always
+  end 
+end  // always
 
   // This FF controls the stall signal that artificially forces
   // fetch to stall until the previous instruction has completed
