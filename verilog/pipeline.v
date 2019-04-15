@@ -410,7 +410,7 @@ logic tag_in_lq;
   // Store Queue Module
   SQ store_queue(
     .clock(clock),
-    .reset(reset | branch_not_taken),
+    .reset(reset),
 
     .rd_en(load_wants_store),
     .addr_rd(load_rd_addr),
@@ -455,7 +455,7 @@ logic tag_in_lq;
 
   LQ load_queue(
     .clock(clock),
-    .reset(reset | branch_not_taken),
+    .reset(reset),
 
     .load_in(lq_load_in),
     .write_en(lq_write_en),
@@ -1305,7 +1305,7 @@ end
           ex_co_alu_result[i]   <= `SD 0;
           ex_co_sq_idx[0] <= `SD 0;
           ex_co_sq_idx[1] <= `SD 0;
-	    //ex_co_done		<= `SD 1'b0;
+	  //ex_co_done		<= `SD 1'b0;
       end else if (ex_co_enable[i] && i!=3) begin
 		     // these are forwarded directly from ID/EX latches
 			    ex_co_NPC[i]          <= `SD issue_reg[i].npc;
@@ -1319,7 +1319,7 @@ end
      		  ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];
           // ex_co_sq_idx          <= `SD issue_reg[i].sq_idx;  
 	
-	    end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
+	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
           		ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
        			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
@@ -1334,11 +1334,8 @@ end
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
     end // for loop end
-    if (lq_write_en) begin 
-      ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
-      ex_co_sq_idx[0] <= `SD issue_reg[FU_ST_IDX].sq_idx;
-    end
-
+    ex_co_sq_idx[0] <= `SD issue_reg[FU_ST_IDX].sq_idx;
+    ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
   end // always
 
   always_ff @(posedge clock) begin
@@ -1441,7 +1438,7 @@ end
      .reset(reset),
      .ex_mem_rega(mem_data),
      .ex_mem_alu_result(mem_addr), 
-     .ex_mem_rd_mem(/*ex_co_rd_mem[FU_LD_IDX]*/ ex_co_valid_inst[FU_LD_IDX]),
+     .ex_mem_rd_mem(ex_co_rd_mem[FU_LD_IDX]),
      .ex_mem_wr_mem(retire_is_store_next ),
      .Dmem2proc_data(Dmem2proc_data),
      .Dmem2proc_tag(Dmem2proc_tag),
