@@ -219,13 +219,13 @@ module pipeline (
 // Outputs from MEM/COM Pipeline Register
   logic  mem_co_halt;
   logic  mem_co_illegal;
-  PHYS_REG  mem_co_dest_reg_idx;
+  logic [$clog2(`NUM_PHYS_REG)-1:0]   mem_co_dest_reg_idx;
   logic [63:0] mem_co_alu_result;
   
   
   logic  mem_co_halt_comb;
   logic  mem_co_illegal_comb;
-  PHYS_REG  mem_co_dest_reg_idx_comb;
+  logic [$clog2(`NUM_PHYS_REG)-1:0]   mem_co_dest_reg_idx_comb;
   logic [63:0] mem_co_alu_result_comb;
   logic mem_co_valid_inst_comb;   
   logic [63:0] mem_co_NPC_comb;        
@@ -1183,7 +1183,7 @@ end*/
     `endif
     .wr_clk(clock),
     .wr_en({1'b0, ex_co_valid_inst[4:3], mem_co_valid_inst, ex_co_valid_inst[1:0]}),
-    .wr_idx({`DUMMY_REG, ex_co_dest_reg_idx[4:3], mem_co_dest_reg_idx, ex_co_dest_reg_idx[1:0]}),
+    .wr_idx({{$clog2(`NUM_PHYS_REG){1'b1}}, ex_co_dest_reg_idx[4:3], mem_co_dest_reg_idx, ex_co_dest_reg_idx[1:0]}),
     .wr_data({64'b0, ex_co_alu_result[4], ex_alu_result_out[3], mem_co_alu_result, ex_co_alu_result[1:0]})
   );
 
