@@ -21,7 +21,8 @@ module mem_stage(
     input         ex_mem_wr_mem,      // write memory? (from decoder)
     input  [63:0] Dmem2proc_data,
     input   [3:0] Dmem2proc_tag, Dmem2proc_response,
-    input         sq_data_not_found,
+    input         sq_data_not_found,   // store addresses in the store queue not calculated
+    input         sq_data_valid,       //address not found for forwarding
 
     output [63:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
     output        mem_stall_out,
@@ -35,7 +36,7 @@ module mem_stage(
   // Determine the command that must be sent to mem
   assign proc2Dmem_command =  (mem_waiting_tag != 0) ?  BUS_NONE :
                               ex_mem_wr_mem  ? BUS_STORE :
-                              ex_mem_rd_mem & sq_data_not_found   ? BUS_LOAD :
+                              ex_mem_rd_mem & ~sq_data_not_found & ~sq_data_valid  ? BUS_LOAD :
                               BUS_NONE;
 
   // The memory address is calculated by the ALU

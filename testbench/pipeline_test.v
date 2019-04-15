@@ -251,15 +251,15 @@ module testbench;
     input [31:0] end_addr;
     int showing_data;
     begin
-      $display("@@@");
+      $display("@@@hello@@@");
       showing_data=0;
       for(int k=start_addr;k<=end_addr; k=k+1)
         if (memory.unified_memory[k] != 0) begin
-          $display("@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
+          $display("@@@hello@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
                                                     memory.unified_memory[k]);
           showing_data=1;
         end else if(showing_data!=0) begin
-          $display("@@@");
+          $display("@@@hello@@@");
         end
     end
   endtask  // task show_mem_with_decimal
@@ -570,7 +570,8 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 100) begin
+			 if (clock_count == 1000) begin
+       show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
 			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");

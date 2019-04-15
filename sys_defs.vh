@@ -292,6 +292,7 @@ typedef struct packed {
   logic illegal;
   PHYS_REG dest_reg;
   logic [63:0] alu_result;
+  logic [3:0] mem_response;
 } LQ_ROW_T;
 
 //////////////////////////////////////////////
