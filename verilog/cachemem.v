@@ -5,7 +5,7 @@
 
 module cachemem(clock, reset, 
                 rd_en, rd_idx, rd_tag,
-                wr_en, wr_idx, wr_tag, wr_data,
+                wr_en, wr_idx, wr_tag, wr_data, wr_dirty,
                 `ifdef DEBUG
                   sets_out, bst_out,
                 `endif
@@ -22,10 +22,10 @@ module cachemem(clock, reset,
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
   typedef struct packed {
-  logic [63:0] data;
-  logic [(`NUM_TAG_BITS-1):0] tag;
-  logic valid;
-  logic dirty;
+    logic [63:0] data;
+    logic [(`NUM_TAG_BITS-1):0] tag;
+    logic valid;
+    logic dirty;
   } CACHE_LINE_T;
 
   typedef struct packed {
@@ -44,6 +44,7 @@ module cachemem(clock, reset,
   input [(WR_PORTS-1):0][(`NUM_SET_BITS-1):0] wr_idx;
   input [(WR_PORTS-1):0][(`NUM_TAG_BITS-1):0] wr_tag;
   input [(WR_PORTS-1):0][63:0] wr_data;
+  input [(WR_PORTS-1):0] wr_dirty;
 
 	`ifdef DEBUG
 		output CACHE_SET_T [(`NUM_SETS-1):0] sets_out;
@@ -217,8 +218,6 @@ module cachemem(clock, reset,
   					end
   					acc /= 2;
   				end
-
-          sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].dirty = 1'b1;
   			end else begin
           //wr miss, find LRU index
   				wr_miss_valid[i] = 1'b1;
@@ -237,8 +236,6 @@ module cachemem(clock, reset,
   					acc /= 2;
   				end
 
-          sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].dirty = 1'b0;
-
           //if LRU index was filled, send to victim cache
           victim[i] = sets[wr_idx[i]].cache_lines[wr_new_tag_idx];
           victim_valid[i] = sets[wr_idx[i]].cache_lines[wr_new_tag_idx].valid;
@@ -248,6 +245,7 @@ module cachemem(clock, reset,
         sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].data = wr_data[i];
         sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].tag = wr_tag[i];	
   			sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].valid = 1'b1;
+        sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].dirty = wr_dirty[i];
   		end
     end
 

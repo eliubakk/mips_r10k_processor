@@ -61,7 +61,7 @@ module icache(clock, reset,
   logic cache_wr_en;
   logic [(`NUM_SET_BITS-1):0] cache_wr_idx;
   logic [(`NUM_TAG_BITS-1):0] cache_wr_tag;
-  logic [63:0]                  cache_wr_data;
+  logic [63:0] cache_wr_data;
   
   //cache memory outputs
   logic [(RD_PORTS+1):0][63:0] cache_rd_data;
@@ -91,6 +91,7 @@ module icache(clock, reset,
     .wr_idx(cache_wr_idx),
     .wr_tag(cache_wr_tag),
     .wr_data(cache_wr_data),
+    .wr_dirty(1'b0),
 
     //outputs
     .rd_data(cache_rd_data),
