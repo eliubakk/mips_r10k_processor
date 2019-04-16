@@ -598,7 +598,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 700) begin
+			 if (clock_count == 1000) begin
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end

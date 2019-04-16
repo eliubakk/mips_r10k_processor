@@ -553,13 +553,13 @@ assign if_stage_dispatch_en = !inst_queue_full;
 // We may divide the branch predictor and fetch stage
 	always_comb begin
 		// Initial value
-		if1_branch_inst.en = 1'b0;
-		if1_branch_inst.cond = 1'b0;
-		if1_branch_inst.direct = 1'b0;
-		if1_branch_inst.ret = 1'b0;
-		if1_branch_inst.pc = 64'h0;
-		//if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
-		//if_branch_inst.prediction = 0;
+		if12_branch_inst.en = 1'b0;
+		if12_branch_inst.cond = 1'b0;
+		if12_branch_inst.direct = 1'b0;
+		if12_branch_inst.ret = 1'b0;
+		if12_branch_inst.pc = 64'h0;
+		if12_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
+		if12_branch_inst.prediction = 0;
 
 		if(if1_valid_inst_out) begin // 
 			if1_branch_inst.pc = if1_PC_reg; // Save current PC
@@ -745,9 +745,9 @@ end
 	assign if_branch_inst.cond = if12_branch_inst.cond;
 	assign if_branch_inst.direct = if12_branch_inst.direct;
 	assign if_branch_inst.ret = if12_branch_inst.ret;
-	assign if_branch_inst.pc = if12_branch_inst.pc; 
-	assign if_branch_inst.br_idx = if2_branch_inst.br_idx; 
-	assign if_branch_inst.prediction = if2_branch_inst.prediction; 
+	assign if_branch_inst.pc = if12_PC_reg; 
+	assign if_branch_inst.br_idx = if2_bp_NPC_valid? if2_branch_inst.br_idx : if12_branch_inst.br_idx;
+	assign if_branch_inst.prediction = if2_bp_NPC_valid? if2_branch_inst.prediction : if12_branch_inst.prediction; 
 
 
 //Branch signals

@@ -1,15 +1,15 @@
 # Begin_DVE_Session_Save_Info
 # DVE full session
-# Saved on Tue Apr 16 01:14:00 2019
+# Saved on Tue Apr 16 01:32:23 2019
 # Designs open: 1
 #   Sim: dve
 # Toplevel windows open: 2
 # 	TopLevel.1
 # 	TopLevel.2
 #   Source.1: _vcs_unit__3321579943
-#   Wave.1: 48 signals
+#   Wave.1: 53 signals
 #   Group count = 2
-#   Group Group1 signal count = 25
+#   Group Fetch signal count = 30
 # End_DVE_Session_Save_Info
 
 # DVE version: N-2017.12-SP2-1_Full64
@@ -68,7 +68,7 @@ if {![gui_exist_window -window TopLevel.1]} {
 } else { 
     set TopLevel.1 TopLevel.1
 }
-gui_show_window -window ${TopLevel.1} -show_state normal -rect {{8 31} {1872 1044}}
+gui_show_window -window ${TopLevel.1} -show_state normal -rect {{8 31} {1871 1043}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -115,23 +115,23 @@ gui_show_toolbar -toolbar {Testbench}
 # End ToolBar settings
 
 # Docked window settings
-set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 254]
+set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 253]
 catch { set Hier.1 [gui_share_window -id ${HSPane.1} -type Hier] }
-gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 254
+gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 253
 gui_set_window_pref_key -window ${HSPane.1} -key dock_height -value_type integer -value -1
 gui_set_window_pref_key -window ${HSPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 253} {height 591} {dock_state left} {dock_on_new_line true} {child_hier_colhier 149} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
-set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 491]
+gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 252} {height 591} {dock_state left} {dock_on_new_line true} {child_hier_colhier 149} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
+set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 490]
 catch { set Data.1 [gui_share_window -id ${DLPane.1} -type Data] }
-gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 491
+gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 490
 gui_set_window_pref_key -window ${DLPane.1} -key dock_height -value_type integer -value 418
 gui_set_window_pref_key -window ${DLPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 490} {height 591} {dock_state left} {dock_on_new_line true} {child_data_colvariable 212} {child_data_colvalue 153} {child_data_coltype 144} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
-set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 324]
+gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 489} {height 591} {dock_state left} {dock_on_new_line true} {child_data_colvariable 212} {child_data_colvalue 153} {child_data_coltype 144} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
+set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 323]
 gui_set_window_pref_key -window ${Console.1} -key dock_width -value_type integer -value 1535
-gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 324
+gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 323
 gui_set_window_pref_key -window ${Console.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 1864} {height 323} {dock_state bottom} {dock_on_new_line true}}
+gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 1863} {height 322} {dock_state bottom} {dock_on_new_line true}}
 #### Start - Readjusting docked view's offset / size
 set dockAreaList { top left right bottom }
 foreach dockArea $dockAreaList {
@@ -168,7 +168,7 @@ if {![gui_exist_window -window TopLevel.2]} {
 } else { 
     set TopLevel.2 TopLevel.2
 }
-gui_show_window -window ${TopLevel.2} -show_state normal -rect {{8 31} {1872 1044}}
+gui_show_window -window ${TopLevel.2} -show_state normal -rect {{8 31} {1871 1043}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -220,7 +220,7 @@ gui_sync_global -id ${TopLevel.2} -option true
 # MDI window settings
 set Wave.1 [gui_create_window -type {Wave}  -parent ${TopLevel.2}]
 gui_show_window -window ${Wave.1} -show_state maximized
-gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 542} {child_wave_right 1317} {child_wave_colname 214} {child_wave_colvalue 324} {child_wave_col1 0} {child_wave_col2 1}}
+gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 542} {child_wave_right 1316} {child_wave_colname 214} {child_wave_colvalue 324} {child_wave_col1 0} {child_wave_col2 1}}
 
 # End MDI window settings
 
@@ -271,20 +271,20 @@ gui_load_child_values {testbench}
 gui_load_child_values {testbench.pipeline_0.if_stage_0}
 
 
-set _session_group_3 Group1
-gui_sg_create "$_session_group_3"
-set Group1 "$_session_group_3"
+set _session_group_1 Fetch
+gui_sg_create "$_session_group_1"
+set Fetch "$_session_group_1"
 
-gui_sg_addsignal -group "$_session_group_3" { testbench.clock_count testbench.pipeline_0.if_NPC_out testbench.pipeline_0.if_IR_out testbench.pipeline_0.if_valid_inst_out testbench.pipeline_0.if1_fetch_NPC_out testbench.pipeline_0.if1_IR_out testbench.pipeline_0.if1_PC_reg testbench.pipeline_0.if1_valid_inst_out testbench.pipeline_0.if1_branch_inst testbench.pipeline_0.if12_fetch_NPC_out testbench.pipeline_0.if12_IR_out testbench.pipeline_0.if12_PC_reg testbench.pipeline_0.if12_valid_inst_out testbench.pipeline_0.if12_branch_inst testbench.pipeline_0.if2_fetch_NPC_out testbench.pipeline_0.if2_IR_out testbench.pipeline_0.if2_PC_reg testbench.pipeline_0.if2_valid_inst_out testbench.pipeline_0.if2_branch_inst testbench.pipeline_0.if_branch_inst testbench.pipeline_0.branch_not_taken testbench.pipeline_0.if_bp_NPC_valid testbench.pipeline_0.if1_valid_inst_out testbench.pipeline_0.rob_retire_out }
+gui_sg_addsignal -group "$_session_group_1" { testbench.clock_count testbench.pipeline_0.if_NPC_out testbench.pipeline_0.if_IR_out testbench.pipeline_0.if_valid_inst_out testbench.pipeline_0.if1_fetch_NPC_out testbench.pipeline_0.if1_IR_out testbench.pipeline_0.if1_PC_reg testbench.pipeline_0.if1_valid_inst_out testbench.pipeline_0.if1_branch_inst testbench.pipeline_0.if12_fetch_NPC_out testbench.pipeline_0.if12_IR_out testbench.pipeline_0.if12_PC_reg testbench.pipeline_0.if12_valid_inst_out testbench.pipeline_0.if12_branch_inst testbench.pipeline_0.if2_fetch_NPC_out testbench.pipeline_0.if2_IR_out testbench.pipeline_0.if2_PC_reg testbench.pipeline_0.if2_valid_inst_out testbench.pipeline_0.if2_branch_inst testbench.pipeline_0.if_branch_inst testbench.pipeline_0.branch_not_taken testbench.pipeline_0.if_bp_NPC_valid testbench.pipeline_0.if1_valid_inst_out testbench.pipeline_0.rob_retire_out testbench.pipeline_0.if_id_NPC testbench.pipeline_0.if_id_IR testbench.pipeline_0.if_id_valid_inst testbench.pipeline_0.if_id_inst_out testbench.pipeline_0.if_id_branch_inst }
 gui_set_radix -radix {decimal} -signals {Sim:testbench.clock_count}
 gui_set_radix -radix {unsigned} -signals {Sim:testbench.clock_count}
 
-set _session_group_4 $_session_group_3|
-append _session_group_4 if_stage_0
-gui_sg_create "$_session_group_4"
-set Group1|if_stage_0 "$_session_group_4"
+set _session_group_2 $_session_group_1|
+append _session_group_2 if_stage_0
+gui_sg_create "$_session_group_2"
+set Fetch|if_stage_0 "$_session_group_2"
 
-gui_sg_addsignal -group "$_session_group_4" { testbench.pipeline_0.if_stage_0.Imem_valid testbench.pipeline_0.if_stage_0.next_ready_for_valid testbench.pipeline_0.if_stage_0.if_IR_out testbench.pipeline_0.if_stage_0.clock testbench.pipeline_0.if_stage_0.reset testbench.pipeline_0.if_stage_0.next_PC testbench.pipeline_0.if_stage_0.PC_reg testbench.pipeline_0.if_stage_0.PC_plus_4 testbench.pipeline_0.if_stage_0.if_bp_NPC testbench.pipeline_0.if_stage_0.co_ret_take_branch testbench.pipeline_0.if_stage_0.co_ret_valid_inst testbench.pipeline_0.if_stage_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.if_valid_inst testbench.pipeline_0.if_stage_0.if_PC_reg testbench.pipeline_0.if_stage_0.if_NPC_out testbench.pipeline_0.if_stage_0.co_ret_branch_valid testbench.pipeline_0.if_stage_0.Imem2proc_data testbench.pipeline_0.if_stage_0.proc2Imem_addr testbench.pipeline_0.if_stage_0.if_bp_NPC_valid {testbench.pipeline_0.if_stage_0.$unit} testbench.pipeline_0.if_stage_0.ready_for_valid testbench.pipeline_0.if_stage_0.PC_enable testbench.pipeline_0.if_stage_0.dispatch_en testbench.pipeline_0.if_stage_0.co_ret_target_pc }
+gui_sg_addsignal -group "$_session_group_2" { testbench.pipeline_0.if_stage_0.Imem_valid testbench.pipeline_0.if_stage_0.next_ready_for_valid testbench.pipeline_0.if_stage_0.if_IR_out testbench.pipeline_0.if_stage_0.clock testbench.pipeline_0.if_stage_0.reset testbench.pipeline_0.if_stage_0.next_PC testbench.pipeline_0.if_stage_0.PC_reg testbench.pipeline_0.if_stage_0.PC_plus_4 testbench.pipeline_0.if_stage_0.if_bp_NPC testbench.pipeline_0.if_stage_0.co_ret_take_branch testbench.pipeline_0.if_stage_0.co_ret_valid_inst testbench.pipeline_0.if_stage_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.if_valid_inst testbench.pipeline_0.if_stage_0.if_PC_reg testbench.pipeline_0.if_stage_0.if_NPC_out testbench.pipeline_0.if_stage_0.co_ret_branch_valid testbench.pipeline_0.if_stage_0.Imem2proc_data testbench.pipeline_0.if_stage_0.proc2Imem_addr testbench.pipeline_0.if_stage_0.if_bp_NPC_valid {testbench.pipeline_0.if_stage_0.$unit} testbench.pipeline_0.if_stage_0.ready_for_valid testbench.pipeline_0.if_stage_0.PC_enable testbench.pipeline_0.if_stage_0.dispatch_en testbench.pipeline_0.if_stage_0.co_ret_target_pc }
 
 # Global: Highlighting
 
@@ -326,10 +326,10 @@ gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Data 'Data.1'
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
-gui_list_set_filter -id ${Data.1} -text {rob_retire*}
+gui_list_set_filter -id ${Data.1} -text {if_id*}
 gui_list_show_data -id ${Data.1} {testbench.pipeline_0}
 gui_show_window -window ${Data.1}
-catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.rob_retire_out }}
+catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.if_id_NPC testbench.pipeline_0.if_id_IR testbench.pipeline_0.if_id_valid_inst testbench.pipeline_0.if_id_inst_out testbench.pipeline_0.if_id_branch_inst }}
 gui_view_scroll -id ${Data.1} -vertical -set 0
 gui_view_scroll -id ${Data.1} -horizontal -set 0
 gui_view_scroll -id ${Hier.1} -vertical -set 259
@@ -354,10 +354,10 @@ set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
 gui_marker_set_ref -id ${Wave.1}  C1
 gui_wv_zoom_timerange -id ${Wave.1} 8028 10390
-gui_list_add_group -id ${Wave.1} -after {New Group} {Group1}
-gui_list_add_group -id ${Wave.1}  -after Group1 {Group1|if_stage_0}
-gui_list_collapse -id ${Wave.1} Group1|if_stage_0
-gui_list_select -id ${Wave.1} {testbench.pipeline_0.if12_branch_inst }
+gui_list_add_group -id ${Wave.1} -after {New Group} {Fetch}
+gui_list_add_group -id ${Wave.1}  -after Fetch {Fetch|if_stage_0}
+gui_list_collapse -id ${Wave.1} Fetch|if_stage_0
+gui_list_select -id ${Wave.1} {testbench.pipeline_0.rob_retire_out }
 gui_seek_criteria -id ${Wave.1} {Any Edge}
 
 
@@ -373,7 +373,7 @@ if { $groupExD } {
 }
 gui_list_set_filter -id ${Wave.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
 gui_list_set_filter -id ${Wave.1} -text {*}
-gui_list_set_insertion_bar  -id ${Wave.1} -group Group1  -position in
+gui_list_set_insertion_bar  -id ${Wave.1} -group Fetch  -position in
 
 gui_marker_move -id ${Wave.1} {C1} 10044
 gui_view_scroll -id ${Wave.1} -vertical -set 0
