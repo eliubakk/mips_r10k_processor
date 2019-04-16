@@ -71,7 +71,7 @@ $(SYN_SIMV): syn_simv_%: $(TEST_DIR)/%_test.v
 $(SIMV): simv_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
-	$(VCS) $(patsubst %.v,../../%.v,$^) -o $@ &&\
+	$(VCS)+define+SIMV=1 $(patsubst %.v,../../%.v,$^) -o $@ &&\
 	./$@ | tee $*_simv_program.out
 
 $(MISC_SIMV): simv_%: $(MISC_SRC) $(TEST_DIR)/%_test.v
