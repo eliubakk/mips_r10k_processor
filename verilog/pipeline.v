@@ -495,6 +495,8 @@ logic tag_in_lq;
 	logic		if2_valid_inst_out;
 	BR_SIG		if2_branch_inst;
 
+	logic 		if2_bp_NPC_valid;
+	logic [31:0]	if2_bp_NPC;
 
  
 BR_SIG if_branch_inst;
@@ -734,7 +736,7 @@ end
 
   // Determine the next pc (from Fetch unit or from BP)
 	assign if_NPC_out =  if12_fetch_NPC_out;
-	assign if_branch_inst.pred_pc = if2_bp_NPC_valid ? if_bp_NPC : if12_fetch_NPC_out ;
+	assign if_branch_inst.pred_pc = if_bp_NPC;
 	//assign if_bp_NPC_valid = 1'b0;// Should remove this, chk4
 	//assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk5
 
@@ -759,7 +761,7 @@ end
 			if_bp_NPC	<= `SD 64'h0;
 		end else if (if2_bp_NPC_valid) begin
 			if_bp_NPC_valid <= `SD if2_bp_NPC_valid;
-			if_bp_NPC	<= `SD if2_bp_NPC;
+			if_bp_NPC	<= `SD {if12_PC_reg[63:32], if2_bp_NPC};
 		end else if (inst_queue_full) begin
 			if_bp_NPC_valid	<= `SD if_bp_NPC_valid;
 			if_bp_NPC	<= `SD if_bp_NPC;
