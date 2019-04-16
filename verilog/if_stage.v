@@ -43,7 +43,7 @@ module if_stage(
   logic		  if_valid_inst;
 	assign if_PC_reg = PC_reg;
 
-	assign PC_enable = ((dispatch_en & Imem_valid) | (!if_bp_NPC_valid)) & (!co_ret_take_branch);
+	assign PC_enable = ((dispatch_en & Imem_valid) & !((if_bp_NPC_valid)) | (co_ret_take_branch));
 	// When NPC is given by branch predictor
 
  
