@@ -56,7 +56,7 @@ module testbench;
 
 	integer i,j,k,l;
 
-	BP2 bp(
+	BP2 bp2(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 

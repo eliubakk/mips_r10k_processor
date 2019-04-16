@@ -8,12 +8,21 @@
 # added "-sverilog" and "SW_VCS=2012.09" option,
 #	and removed deprecated Virsim references -- jbbeau fall 2013
 # updated library path name -- jbbeau fall 2013
-VCS_BASE = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps 
+#VCS_BASE = SW_VCS=2017.12-SP2-1 vcs +v2k -sverilog +vc -Mupdate -line -full64 -timescale=1ns/100ps 
+
+VCS_BASE = vcs -sverilog +v2k +vc -Mupdate -line -full64 -timescale=1ns/100ps 
 VCS = $(VCS_BASE)
 VCS_PIPE = $(VCS_BASE) +define+PIPELINE=1
 LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
 # testing commit
+
+# pipeline synthesis defines
+PIPE_HEADERS = $(wildcard *.vh)
+PIPE_TESTBENCH = $(wildcard testbench/*.v)
+PIPE_TESTBENCH += $(wildcard testbench/*.c)
+PIPE_FILES = $(wildcard verilog/*.v)
+PIPE_SIMFILES = $(PIPE_FILES)
 
 all:    simv
 	./simv | tee program.out
@@ -105,8 +114,14 @@ clean_%:
 sim:	simv $(ASSEMBLED)
 	./simv | tee sim_program.out
 
-simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
-	$(VCS) $^ -o simv
+# simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
+# 	$(VCS) $^ -o simv
+
+simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
+	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
+	$(VCS_PIPE) $(patsubst %,../../%,$^) -o simv &&\
+	mv * ../../. && cd ../.. 
 
 .PHONY: sim
 
