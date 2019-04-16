@@ -266,15 +266,15 @@ module testbench;
     input [31:0] end_addr;
     int showing_data;
     begin
-      $display("@@@hello@@@");
+      $display("@@@");
       showing_data=0;
       for(int k=start_addr;k<=end_addr; k=k+1)
         if (memory.unified_memory[k] != 0) begin
-          $display("@@@hello@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
+          $display("@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
                                                     memory.unified_memory[k]);
           showing_data=1;
         end else if(showing_data!=0) begin
-          $display("@@@hello@@@");
+          $display("@@@");
         end
     end
   endtask  // task show_mem_with_decimal
@@ -602,7 +602,7 @@ module testbench;
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
-			$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			//$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
 			$display("Pipeline Assigns");
 			//display_icache;
@@ -626,9 +626,9 @@ module testbench;
 		//	$display("map_table Told : %d, Told_busy: %b, map_table_T1: %d,T1_busy: %b,  map_table_T2: %d, T2_busy: %b", pipeline_0.T_old[5:0], pipeline_0.T_old[6], pipeline_0.id_inst_out.T1[5:0], pipeline_0.id_inst_out.T1[6],  pipeline_0.id_inst_out.T2[5:0], pipeline_0.id_inst_out.T2[6]);
 		
 		//	display_issue_ex;
-			display_is_ex_registers;
+			// display_is_ex_registers;
 		//	display_ex;
-			display_ex_co_registers;
+			// display_ex_co_registers;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
@@ -662,10 +662,10 @@ module testbench;
 	reset = 1'b1;
     @(posedge clock);
     @(posedge clock);
-	$display("@@@@@@memory1");
+	// $display("@@@@@@memory1");
     $readmemh("../../program.mem", memory.unified_memory);
 
-	$display("@@@@@@memory2");
+	// $display("@@@@@@memory2");
     @(posedge clock);
     @(posedge clock);
     `SD;
@@ -675,15 +675,17 @@ module testbench;
     $display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime);
 
     wb_fileno = $fopen("../../writeback.out");
-	$display("@@@Start");
+	// $display("@@@Start");
 
 //----Check issue_reg
 
+	/*
 	for(int p=0; p<5; p++) begin
 
 	$display("issue_reg.inst.halt[p] = %b", pipeline_0.issue_reg[p].inst.halt);
  
 	end
+	*/
 
     //Open header AFTER throwing the reset otherwise the reset state is displayed
     print_header("                                                                                                        D-MEM Bus &\n");
@@ -702,7 +704,7 @@ module testbench;
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
 	`SD;
-	 display_stages;
+	 // display_stages;
   end 
 
   // Count the number of branch instructions and correctly predicted branches
@@ -791,9 +793,9 @@ module testbench;
         //end
       end
       copy_pipe_counter = pipe_counter;
-      $display("@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@");
-      $display("issue_next_inst_opcode=%t issue_next_npc=%d issue_next_valid_inst=%b",issue_next_inst_opcode,issue_next_npc, issue_next_valid_inst);
-      $display("@@@@@@@@@@@@@@@@@@  pipe_counter=%t",pipe_counter);
+      // $display("@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@*@");
+      // $display("issue_next_inst_opcode=%t issue_next_npc=%d issue_next_valid_inst=%b",issue_next_inst_opcode,issue_next_npc, issue_next_valid_inst);
+      // $display("@@@@@@@@@@@@@@@@@@  pipe_counter=%t",pipe_counter);
       // if (`NUM_FU_TOTAL>copy_pipe_counter)begin
       //   for (integer i = copy_pipe_counter; i < `NUM_FU_TOTAL; i=i+1) begin        
       //     if (pipe_counter==0) begin
