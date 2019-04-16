@@ -123,11 +123,16 @@ module  BP2(
 
 
 	// BP module output, should be combinational 
-		assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
+	/*	assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
 		//assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
 		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE)-1){0}} : br_idx;
 		assign next_pc			= reset ? 32'h0 : next_pc_calc;
 		assign next_pc_prediction	= reset ? 1'b0 : next_pc_prediction_calc;	    
+*/
+		assign next_pc_valid 		= next_pc_valid_calc;
+		assign next_pc_index 		= br_idx;
+		assign next_pc			= next_pc_calc;
+		assign next_pc_prediction	= next_pc_prediction_calc;	    
 
 	//----------Value evaluation
 	// Fetch is invalid during roll back

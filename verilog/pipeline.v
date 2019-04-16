@@ -746,8 +746,8 @@ end
 	assign if_branch_inst.direct = if12_branch_inst.direct;
 	assign if_branch_inst.ret = if12_branch_inst.ret;
 	assign if_branch_inst.pc = if12_PC_reg; 
-	assign if_branch_inst.br_idx = if2_bp_NPC_valid? if2_branch_inst.br_idx : if12_branch_inst.br_idx;
-	assign if_branch_inst.prediction = if2_bp_NPC_valid? if2_branch_inst.prediction : if12_branch_inst.prediction; 
+	assign if_branch_inst.br_idx = if2_branch_inst.br_idx;
+	assign if_branch_inst.prediction = if2_branch_inst.prediction; 
 
 
 //Branch signals
