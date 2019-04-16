@@ -2,9 +2,11 @@
 // Should include BTB, GSHARE, OBQ 
 `include "../../sys_defs.vh"
 `ifndef PIPELINE
+`ifdef SIMV
 `include "../../verilog/BTB.v"
 `include "../../verilog/RAS.v"
 `include "../../verilog/PHT_TWO_SC.v"
+`endif
 `endif
 `define	DEBUG
 

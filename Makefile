@@ -17,6 +17,13 @@ LIB = /afs/umich.edu/class/eecs470/lib/verilog/lec25dscc25.v
 
 # testing commit
 
+# pipeline synthesis defines
+PIPE_HEADERS = $(wildcard *.vh)
+PIPE_TESTBENCH = $(wildcard testbench/*.v)
+PIPE_TESTBENCH += $(wildcard testbench/*.c)
+PIPE_FILES = $(wildcard verilog/*.v)
+PIPE_SIMFILES = $(PIPE_FILES)
+
 all:    simv
 	./simv | tee program.out
 ##### 
@@ -73,7 +80,7 @@ $(SYN_SIMV): syn_simv_%: $(TEST_DIR)/%_test.v
 $(SIMV): simv_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
-	$(VCS) $(patsubst %.v,../../%.v,$^) -o $@ &&\
+	$(VCS) +define+SIMV=1 $(patsubst %.v,../../%.v,$^) -o $@ &&\
 	./$@ | tee $*_simv_program.out
 
 $(MISC_SIMV): simv_%: $(MISC_SRC) $(TEST_DIR)/%_test.v
@@ -107,8 +114,14 @@ clean_%:
 sim:	simv $(ASSEMBLED)
 	./simv | tee sim_program.out
 
-simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
-	$(VCS) $^ -o simv
+# simv:	$(HEADERS) $(SIMFILES) $(TESTBENCH)
+# 	$(VCS) $^ -o simv
+
+simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
+	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
+	$(VCS_PIPE) $(patsubst %,../../%,$^) -o simv &&\
+	mv * ../../. && cd ../.. 
 
 .PHONY: sim
 
