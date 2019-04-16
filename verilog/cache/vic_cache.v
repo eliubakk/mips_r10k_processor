@@ -4,22 +4,27 @@
 module vic_cache(
     input clock,
     input reset,
-    input valid,//cacheline input
+    input valid1,//cacheline input
+    input valid2,//cacheline input
     input valid_cam1,//for camming
     input valid_cam2,//for camming
-    input CACHE_LINE_T  new_victim,// i don't do anything with new_victim.valid
+    input CACHE_LINE_T  new_victim1,// i don't do anything with new_victim.valid
+    input CACHE_LINE_T  new_victim2,// i don't do anything with new_victim.valid
     input [(`NUM_SET_BITS - 1):0] set_index_cam1,
     input [(`NUM_SET_BITS - 1):0] set_index_cam2,
-    input [(`NUM_SET_BITS - 1):0] set_index,
+    input [(`NUM_SET_BITS - 1):0] set_index1,
+    input [(`NUM_SET_BITS - 1):0] set_index2,
     input [(`NUM_TAG_BITS - 1):0] tag_cam1,
     input [(`NUM_TAG_BITS - 1):0] tag_cam2,
 
     output CACHE_LINE_T [3:0]	 vic_table_out,
     output logic [3:0][`NUM_SET_BITS:0] set_index_table_out,//index + 1bit for busy
-    output CACHE_LINE_T  fired_victim,
+    output CACHE_LINE_T  fired_victim1,
+    output CACHE_LINE_T  fired_victim2,
     output CACHE_LINE_T  out_victim1,
     output CACHE_LINE_T  out_victim2,
-    output logic              fired_valid,
+    output logic              fired_valid1,
+    output logic              fired_valid2,
     output logic              out_valid1,
     output logic              out_valid2
     );
@@ -34,15 +39,24 @@ module vic_cache(
     logic [1:0]                  index_table2;
     logic [3:0][`NUM_SET_BITS-1:0] set_index_table_temp;
     logic [3:0][`NUM_TAG_BITS-1:0] vic_table_out_temp;
-    CACHE_LINE_T  fired_victim_next;
-    logic              fired_valid_next;
+    CACHE_LINE_T  fired_victim1_next;
+    CACHE_LINE_T  fired_victim2_next;
+    logic              fired_valid1_next;
+    logic              fired_valid2_next;
+    logic [1:0]        num_valids;
+    //logic [1:0]        loop_counter;
+    //logic [1:0]        valid_array;
 
-    assign fired_victim_next = vic_table_out[3];
+    assign fired_victim1_next = vic_table_out[2];
+    assign fired_victim2_next = vic_table_out[3];
     assign out_victim1 = vic_table_out[index_table1];
     assign out_victim2 = vic_table_out[index_table2];
-
+    assign num_valids = valid1 + valid2;
+    //assign valid_array = {valid1,valid2};
+    //assign new_victim_array = {}
     always_comb begin
-        fired_valid_next = 1'b0;
+        fired_valid1_next = 1'b0;
+        fired_valid2_next = 1'b0;
         out_valid1 = 1'b0;
         out_valid2 = 1'b0;
         set_index_table_next = set_index_table_out;
@@ -65,26 +79,49 @@ module vic_cache(
             vic_table_next[index_table2]=0;
         end
 
-        if (set_index_table_out[3][`NUM_SET_BITS] & ~((out_valid1 & (index_table1==2'b11)) | (out_valid2 & (index_table2==2'b11)))) begin
-            fired_valid_next = 1'b1;
+        if ((valid1 & valid2) & set_index_table_out[2][`NUM_SET_BITS] & ~((out_valid1 & (index_table1==2'b10)) | (out_valid2 & (index_table2==2'b10)))) begin
+            fired_valid1_next = 1'b1;
+            set_index_table_next[2][`NUM_SET_BITS] = 1'b0;
+        end
+
+        if ((valid1 | valid2) & set_index_table_out[3][`NUM_SET_BITS] & ~((out_valid1 & (index_table1==2'b11)) | (out_valid2 & (index_table2==2'b11)))) begin
+            fired_valid2_next = 1'b1;
             set_index_table_next[3][`NUM_SET_BITS] = 1'b0;
         end
 
-        for (int i=2; i>=0; i-=1) begin
-            //if (!set_index_table_out[i+1][`NUM_SET_BITS])begin
-            set_index_table_next[i+1] = set_index_table_out[i];
-            vic_table_next[i+1] = vic_table_out[i];
-            //end
-        end
+        case(num_valids)
+            2'b10:begin
+                for (int i=1; i>=0; i-=1) begin
+                    set_index_table_next[i+2] = set_index_table_out[i];
+                    vic_table_next[i+2] = vic_table_out[i];
+                end
 
-        vic_table_next[0] = 0;
-        set_index_table_next[0] = 0;
+                vic_table_next[1:0] = 0;
+                set_index_table_next[1:0] = 0;
+                vic_table_next[1] = new_victim1;
+                set_index_table_next[1] = {1'b1,set_index1};
+                vic_table_next[0] = new_victim2;
+                set_index_table_next[0] = {1'b1,set_index2};
+            end
 
-        if (valid) begin
-            vic_table_next[0] = new_victim;
-            set_index_table_next[0] = {1'b1,set_index};
-        end
+            2'b01:begin
+                for (int i=2; i>=0; i-=1) begin
+                    set_index_table_next[i+1] = set_index_table_out[i];
+                    vic_table_next[i+1] = vic_table_out[i];
+                end
 
+                vic_table_next[0] = 0;
+                set_index_table_next[0] = 0;
+                if(valid1) begin
+                    vic_table_next[0] = new_victim1;
+                    set_index_table_next[0] = {1'b1,set_index1};
+                end else if(valid2) begin
+                    vic_table_next[0] = new_victim2;
+                    set_index_table_next[0] = {1'b1,set_index2};
+                end
+            end
+            
+        endcase
     end
 
     CAM #(
@@ -151,17 +188,17 @@ module vic_cache(
         if (reset) begin
             for (int i = 0; i < 4; i += 1) begin
                 set_index_table_out[i] <= `SD 0;
-                vic_table_out[i].valid <= `SD 0;
+                vic_table_out[i].valid1 <= `SD 0;
                 vic_table_out[i].data <= `SD 0;
                 vic_table_out[i].tag <= `SD 0;
-                fired_valid <= `SD 1'b0;
-                fired_victim <= `SD 0;
+                fired_valid1 <= `SD 1'b0;
+                fired_victim1 <= `SD 0;
             end
         end else begin
             vic_table_out <= `SD vic_table_next;
             set_index_table_out <= `SD set_index_table_next;
-            fired_valid <= `SD fired_valid_next;
-            fired_victim <= `SD fired_victim_next;
+            fired_valid1 <= `SD fired_valid1_next;
+            fired_victim1 <= `SD fired_victim1_next;
         end
     end
 endmodule
