@@ -23,6 +23,8 @@ set cache_module [getenv CACHE_NAME]
 read_file -f ddc [list ${cache_module}.ddc]
 set_dont_touch ${cache_module}
 
+# read_file -f ddc [list ${MODULE_DDC}]
+
 set headers [getenv HEADERS]
 set sources [getenv PIPEFILES]
 
