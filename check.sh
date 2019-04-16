@@ -5,7 +5,7 @@
 OUTPUT_DIR="test_output_files"
 CORRECT_DIR="correct_outputs"
 DIFF_DIR="diff_outputs"
-TIMEOUT=60
+TIMEOUT=10
 
 # create output directory
 rm -rf $OUTPUT_DIR

@@ -272,10 +272,13 @@ module testbench;
         if (memory.unified_memory[k] != 0) begin
           $display("@@@ mem[%5d] = %x : %0d", k*8, memory.unified_memory[k], 
                                                     memory.unified_memory[k]);
+
           showing_data=1;
         end else if(showing_data!=0) begin
+	  showing_data=0;
           $display("@@@");
         end
+	$display("@@@");
     end
   endtask  // task show_mem_with_decimal
 
@@ -663,7 +666,7 @@ module testbench;
     @(posedge clock);
     @(posedge clock);
 	// $display("@@@@@@memory1");
-    $readmemh("../../program.mem", memory.unified_memory);
+    $readmemh("program.mem", memory.unified_memory);
 
 	// $display("@@@@@@memory2");
     @(posedge clock);
@@ -674,7 +677,7 @@ module testbench;
     reset = 1'b0;
     $display("@@  %t  Deasserting System reset......\n@@\n@@", $realtime);
 
-    wb_fileno = $fopen("../../writeback.out");
+    wb_fileno = $fopen("writeback.out");
 	// $display("@@@Start");
 
 //----Check issue_reg

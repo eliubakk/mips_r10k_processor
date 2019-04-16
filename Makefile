@@ -48,6 +48,9 @@ SIMV = $(patsubst $(VERILOG_DIR)/%.v,simv_%,$(VERILOG_SRC))
 MISC_SIMV = $(patsubst $(VERILOG_DIR)/misc/%.v,simv_%,$(MISC_SRC))
 DVE = $(patsubst $(VERILOG_DIR)/%.v,dve_%,$(VERILOG_SRC))
 
+MODULES_VG = $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg)
+MISC_MODULES_VG = $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
+
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
@@ -58,14 +61,14 @@ $(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_de
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 
-$(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
+$(MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	make $*.vg
 
-$(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
+$(MISC_MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
 	make $*.vg
 
-.PHONY: $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg)
-.PHONY: $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
+.PHONY: $(MODULES_VG)
+.PHONY: $(MISC_MODULES_VG)
 
 $(SYN_SIMV): syn_simv_%: $(TEST_DIR)/%_test.v
 	make $(SYN_DIR)/$*/$*.vg && \
@@ -95,14 +98,11 @@ simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_p
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
-$(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg) $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
+$(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(MODULES_VG) $(MISC_MODULES_VG)
 	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
 	$(VCS) $*.vg ../../$(TEST_DIR)/$*_test.v $(LIB) -o $@
-	mv * ../../. && cd ../..
-
-$(PIPELINE_NAME): syn_simv
-	
+	mv * ../../. && cd ../..	
 
 $(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	cd $(SYN_DIR) && \
@@ -147,7 +147,7 @@ syn:	syn_simv
 clean:
 	rm -rvf simv *.daidir csrc vcs.key program.out \
 	  syn_simv* syn_simv.daidir syn_program.out \
-          dve *.vpd *.vcd *.dump ucli.key
+          dve *.vpd *.vcd *.dump ucli.key *.out
 
 nuke:	clean
 	cd $(SYN_DIR) && \
