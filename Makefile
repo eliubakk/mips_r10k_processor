@@ -95,10 +95,14 @@ simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_p
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
-$(PIPELINE_NAME): syn_simv_$(PIPELINE_NAME)
-	cd $(SYN_DIR) && \
-	mkdir -p $* && cd $* && \
-	./syn_simv_$@ | tee $@_syn_program.out
+$(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg) $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
+	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
+	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
+	$(VCS) $*.vg ../../$(TEST_DIR)/$*_test.v $(LIB) -o $@
+	mv * ../../. && cd ../..
+
+$(PIPELINE_NAME): syn_simv
+	
 
 $(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	cd $(SYN_DIR) && \
