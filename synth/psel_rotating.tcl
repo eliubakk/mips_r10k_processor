@@ -11,16 +11,17 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-#read_file -f ddc [list "CAM_NUM_TAG1.ddc" "encoder.ddc"]
+#read_file -f ddc [list "psel_single_WIDTH16.ddc" "CAM_NUM_TAG1.ddc" "encoder.ddc"]
+#set_dont_touch psel_single_WIDTH16
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/vic_cache.v" $misc_files]
-elaborate vic_cache
-set design_name vic_cache
+analyze -f sverilog [concat "../../verilog/psel_rotating.v" $misc_files]
+elaborate psel_rotating
+set design_name psel_rotating
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 2.8
+set CLK_PERIOD 1.8
 
 
 
