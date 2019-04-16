@@ -127,7 +127,7 @@ simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR
 	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o simv &&\
-	mv * ../../. && cd ../.. && \
+	mv * ../../. && cd ../..
 
 .PHONY: sim
 
