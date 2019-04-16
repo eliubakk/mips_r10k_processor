@@ -474,6 +474,28 @@ logic tag_in_lq;
   //                  IF-Stage (Fetch 1)          //
   //                                              //
   //////////////////////////////////////////////////
+// For different stages of fetch
+// Fetch 1 outputs
+	logic [63:0]	if1_fetch_NPC_out;
+	logic [31:0]	if1_IR_out;
+	logic [63:0]	if1_PC_reg;
+	logic		if1_valid_inst_out;
+	BR_SIG		if1_branch_inst;
+// Fetch 1/2 registers
+	logic [63:0]	if12_fetch_NPC_out;
+	logic [31:0]	if12_IR_out;
+	logic [63:0]	if12_PC_reg;
+	logic		if12_valid_inst_out;
+	BR_SIG		if12_branch_inst;
+
+// Fetch 2(BP) outputs
+	logic [63:0]	if2_fetch_NPC_out;
+	logic [31:0]	if2_IR_out;
+	logic [63:0]	if2_PC_reg;
+	logic		if2_valid_inst_out;
+	BR_SIG		if2_branch_inst;
+
+
  
 BR_SIG if_branch_inst;
 BR_SIG if_id_branch_inst;
@@ -520,59 +542,58 @@ assign if_stage_dispatch_en = !inst_queue_full;
     .if_bp_NPC_valid(if_bp_NPC_valid),
 
     // Outputs
-    .if_NPC_out(if_fetch_NPC_out), 
-    .if_IR_out(if_IR_out),
-    .if_PC_reg(if_PC_reg),
+    .if_NPC_out(if1_fetch_NPC_out), 
+    .if_IR_out(if1_IR_out),
+    .if_PC_reg(if1_PC_reg),
     .proc2Imem_addr(proc2Icache_addr),
-    .if_valid_inst_out(if_valid_inst_out)
+    .if_valid_inst_out(if1_valid_inst_out)
   );
 
 // Small decoder for branch predictor
 // We may divide the branch predictor and fetch stage
 	always_comb begin
 		// Initial value
-		if_branch_inst.en = 1'b0;
-		if_branch_inst.cond = 1'b0;
-		if_branch_inst.direct = 1'b0;
-		if_branch_inst.ret = 1'b0;
-		if_branch_inst.pc = 64'h0;
+		if1_branch_inst.en = 1'b0;
+		if1_branch_inst.cond = 1'b0;
+		if1_branch_inst.direct = 1'b0;
+		if1_branch_inst.ret = 1'b0;
+		if1_branch_inst.pc = 64'h0;
 		//if_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
 		//if_branch_inst.prediction = 0;
-		//if_branch_inst.taken = 0;
 
-		if(if_valid_inst_out & if_stage_dispatch_en & !branch_not_taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
-			if_branch_inst.pc = if_PC_reg; // Save current PC
+		if(if1_valid_inst_out & if_stage_dispatch_en & !branch_not_taken) begin // BP is valid only when instruction is valid & dispatch is enabled and not flushing
+			if1_branch_inst.pc = if1_PC_reg; // Save current PC
 			case (if_IR_out[31:26])
 				//COND & DIRECT
 				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST, `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
-					if_branch_inst.en = 1'b1;
-					if_branch_inst.cond = 1'b1;
-					if_branch_inst.direct = 1'b1;
-					if_branch_inst.ret = 1'b0;
+					if1_branch_inst.en = 1'b1;
+					if1_branch_inst.cond = 1'b1;
+					if1_branch_inst.direct = 1'b1;
+					if1_branch_inst.ret = 1'b0;
 				end
 				//UNCOND & DIRECT
 				`BR_INST, `BSR_INST : begin
-					if_branch_inst.en = 1'b1;
-					if_branch_inst.cond = 1'b0;
-					if_branch_inst.direct = 1'b1;
-					if_branch_inst.ret = 1'b0;
+					if1_branch_inst.en = 1'b1;
+					if1_branch_inst.cond = 1'b0;
+					if1_branch_inst.direct = 1'b1;
+					if1_branch_inst.ret = 1'b0;
 				end
 				// UNCOND & INDIRECT
 				`JSR_GRP : begin
-					case (if_IR_out[20:19])
+					case (if1_IR_out[20:19])
 					// NOT RETURN
 						`JMP_INST, `JSR_INST, `JSR_CO_INST : begin
-							if_branch_inst.en = 1'b1;
-							if_branch_inst.cond = 1'b0;
-							if_branch_inst.direct = 1'b0;
-							if_branch_inst.ret = 1'b0;
+							if1_branch_inst.en = 1'b1;
+							if1_branch_inst.cond = 1'b0;
+							if1_branch_inst.direct = 1'b0;
+							if1_branch_inst.ret = 1'b0;
 						end
 					// RETURN
 						`RET_INST : begin
-							if_branch_inst.en = 1'b1;
-							if_branch_inst.cond = 1'b0;
-							if_branch_inst.direct = 1'b0;
-							if_branch_inst.ret = 1'b1;
+							if1_branch_inst.en = 1'b1;
+							if1_branch_inst.cond = 1'b0;
+							if1_branch_inst.direct = 1'b0;
+							if1_branch_inst.ret = 1'b1;
 						end
 					endcase
 				end			
@@ -616,58 +637,50 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 //		Fetch1 /Fetch2 pipelne register
 //
 ////////////////////////////////////////////////////////////////////////
-/*
+
 always_ff @(posedge clock) begin
-    if(reset | branch_not_taken) begin
-      if_id_NPC        <= `SD 0;
-      if_id_IR         <= `SD `NOOP_INST;
-      if_id_valid_inst <= `SD `FALSE;
-     
-	if_id_branch_inst.en 		<= `SD 1'b0;
-	if_id_branch_inst.cond 		<= `SD 1'b0;
-	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.ret		<= `SD 1'b0;
-	if_id_branch_inst.pc 		<= `SD 64'h0;
-	if_id_branch_inst.pred_pc	<= `SD 64'h0;
-	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	if_id_branch_inst.prediction 	<= `SD 0;
-	//if_id_branch_inst.taken 	<= `SD 0;
+	if( reset | branch_not_taken | if_bp_NPC_valid) begin
+		if12_fetch_NPC_out     		<= `SD 64'h0;
+		if12_IR_out        		<= `SD `NOOP_INST;
+		if12_valid_inst_out 		<= `SD `FALSE;
+		if12_PC_reg			<= `SD 64'h0;
+		if12_branch_inst.en 		<= `SD 1'b0;
+		if12_branch_inst.cond 		<= `SD 1'b0;
+		if12_branch_inst.direct 	<= `SD 1'b0;
+		if12_branch_inst.ret		<= `SD 1'b0;
+		if12_branch_inst.pc 		<= `SD 64'h0;
+		if12_branch_inst.pred_pc	<= `SD 64'h0;
+		if12_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+		if12_branch_inst.prediction 	<= `SD 0;
 
-
- 
-    end else if(if_id_enable) begin
-      if_id_NPC        <= `SD if_NPC_out;
-      if_id_IR         <= `SD if_IR_out;
-      if_id_valid_inst <= `SD if_valid_inst_out;
-      if_id_branch_inst	<= `SD if_branch_inst;
-
-    end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
-      if_id_NPC        <= `SD if_id_NPC;
-      if_id_IR         <= `SD if_id_IR;
-      if_id_valid_inst <= `SD if_id_valid_inst;
+	end else if(if1_valid_inst_out) begin
+		if12_fetch_NPC_out		<= `SD if1_fetch_NPC_out;
+		if12_IR_out			<= `SD if1_IR_out;
+		if12_valid_inst_out		<= `SD if1_valid_inst_out;
+		if12_PC_reg			<= `SD if1_PC_reg;
+		if12_branch_inst		<= `SD if1_branch_inst;
+	end else if(inst_queue_full) begin
+		if12_fetch_NPC_out		<= `SD if12_fetch_NPC_out;
+		if12_IR_out			<= `SD if12_IR_out;
+		if12_valid_inst_out		<= `SD if12_valid_inst_out;
+		if12_PC_reg			<= `SD if12_PC_reg;
+		if12_branch_inst		<= `SD if12_branch_inst;
 	
-	if_id_branch_inst	<= `SD if_id_branch_inst;
-
-    end else begin
-      if_id_NPC        <= `SD 0;
-      if_id_IR         <= `SD `NOOP_INST;
-      if_id_valid_inst <= `SD `FALSE;
-
-	if_id_branch_inst.en 		<= `SD 1'b0;
-	if_id_branch_inst.cond 		<= `SD 1'b0;
-	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.ret	 	<= `SD 1'b0;
-	if_id_branch_inst.pc 		<= `SD 64'h0;
-	if_id_branch_inst.pred_pc	<= `SD 64'h0;
-	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	if_id_branch_inst.prediction 	<= `SD 0;
-	//if_id_branch_inst.taken 	<= `SD 0;
-
-
-    end
-  end
-*/
-
+	end else begin
+		if12_fetch_NPC_out        	<= `SD 64'h0;
+		if12_IR_out        		<= `SD `NOOP_INST;
+		if12_valid_inst_out 		<= `SD `FALSE;
+		if12_PC_reg			<= `SD 64'h0;
+		if12_branch_inst.en 		<= `SD 1'b0;
+		if12_branch_inst.cond 		<= `SD 1'b0;
+		if12_branch_inst.direct 	<= `SD 1'b0;
+		if12_branch_inst.ret		<= `SD 1'b0;
+		if12_branch_inst.pc 		<= `SD 64'h0;
+		if12_branch_inst.pred_pc	<= `SD 64'h0;
+		if12_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+		if12_branch_inst.prediction 	<= `SD 0;
+	end
+end
 ///////////////////////////////////////////////////////////////////////////////////
 //										//
 //		 Branch predictor stage (Fetch 2)
@@ -681,11 +694,11 @@ always_ff @(posedge clock) begin
 		.reset(reset), 
 		.enable(enable),
 		
-		.if_en_branch(if_branch_inst.en),
-		.if_cond_branch(if_branch_inst.cond),
-		.if_direct_branch(if_branch_inst.direct),
-		.if_return_branch(if_branch_inst.ret), 
-		.if_pc_in(if_PC_reg),
+		.if_en_branch(if12_branch_inst.en),
+		.if_cond_branch(if12_branch_inst.cond),
+		.if_direct_branch(if12_branch_inst.direct),
+		.if_return_branch(if12_branch_inst.ret), 
+		.if_pc_in(if12_PC_reg),
 
 		.rt_en_branch(ret_branch_inst.en),			//Get value from retire_inst_busy
 		.rt_cond_branch(ret_branch_inst.cond),			
@@ -711,19 +724,50 @@ always_ff @(posedge clock) begin
 		.ras_head_out(ras_head_out),
 		.ras_tail_out(ras_tail_out),
 		`endif
-		.next_pc_valid(if_bp_NPC_valid), // Should add this, chk2
-		.next_pc_index(if_branch_inst.br_idx),
-		.next_pc(if_bp_NPC),
-		.next_pc_prediction(if_branch_inst.prediction) // Should add this, chk3
+		.next_pc_valid(if2_bp_NPC_valid), // Should add this, chk2
+		.next_pc_index(if2_branch_inst.br_idx),
+		.next_pc(if2_bp_NPC),
+		.next_pc_prediction(if2_branch_inst.prediction) // Should add this, chk3
 
 	);
 
 
   // Determine the next pc (from Fetch unit or from BP)
-	assign if_NPC_out =  if_fetch_NPC_out;
-	assign if_branch_inst.pred_pc = if_bp_NPC_valid ? if_bp_NPC : 64'h0 ;
+	assign if_NPC_out =  if12_fetch_NPC_out;
+	assign if_branch_inst.pred_pc = if2_bp_NPC_valid ? if_bp_NPC : if12_fetch_NPC_out ;
 	//assign if_bp_NPC_valid = 1'b0;// Should remove this, chk4
 	//assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk5
+
+// Other signals
+	assign if_IR_out = if12_IR_out;
+	assign if_valid_inst_out = if12_valid_inst_out;
+	assign if_branch_inst.en = if12_branch_inst.en;
+	assign if_branch_inst.cond = if12_branch_inst.cond;
+	assign if_branch_inst.direct = if12_branch_inst.direct;
+	assign if_branch_inst.ret = if12_branch_inst.ret;
+	assign if_branch_inst.pc = if12_branch_inst.pc; 
+	assign if_branch_inst.br_idx = if2_branch_inst.br_idx; 
+	assign if_branch_inst.prediction = if2_branch_inst.prediction; 
+
+
+//Branch signals
+
+
+	always_ff @(posedge clock) begin
+		if( reset | branch_not_taken) begin
+			if_bp_NPC_valid <= `SD 1'b0;
+			if_bp_NPC	<= `SD 64'h0;
+		end else if (if2_bp_NPC_valid) begin
+			if_bp_NPC_valid <= `SD if2_bp_NPC_valid;
+			if_bp_NPC	<= `SD if2_bp_NPC;
+		end else if (inst_queue_full) begin
+			if_bp_NPC_valid	<= `SD if_bp_NPC_valid;
+			if_bp_NPC	<= `SD if_bp_NPC;
+		end else begin
+			if_bp_NPC_valid <= `SD 1'b0;
+			if_bp_NPC	<= `SD 64'h0;
+		end
+	end
 
   //////////////////////////////////////////////////////////////////////////////
   //									      //

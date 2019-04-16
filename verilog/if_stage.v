@@ -43,7 +43,7 @@ module if_stage(
   logic		  if_valid_inst;
 	assign if_PC_reg = PC_reg;
 
-	assign PC_enable = ((dispatch_en & Imem_valid) | (if_bp_NPC_valid)) & (!co_ret_take_branch);
+	assign PC_enable = ((dispatch_en & Imem_valid) | (!if_bp_NPC_valid)) & (!co_ret_take_branch);
 	// When NPC is given by branch predictor
 
  
@@ -59,8 +59,9 @@ module if_stage(
   // the next sequential PC (PC+4) if no branch
   // For branch instruction, NPC will be the PC from BP
   // (halting is handled with the enable PC_enable;
-  assign next_PC = if_bp_NPC_valid ? if_bp_NPC : PC_plus_4;
-  /*assign next_PC = co_ret_take_branch) ?  co_ret_target_pc : 
+  //assign next_PC = if_bp_NPC_valid ? if_bp_NPC : PC_plus_4;
+  assign next_PC = PC_plus_4;
+	/*assign next_PC = co_ret_take_branch) ?  co_ret_target_pc : 
 			if_bp_NPC_valid ? if_bp_NPC : PC_plus_4;*/
 
   // The take-branch signal must override stalling (otherwise it may be lost)
@@ -85,7 +86,9 @@ assign if_valid_inst_out = Imem_valid;
       PC_reg <= `SD 0;       // initial PC value is 0
    end else if (co_ret_take_branch) begin
       PC_reg <= `SD co_ret_target_pc;
-  end else if(PC_enable) begin
+  end else if (!co_ret_take_branch & if_bp_NPC_valid) begin
+      PC_reg	<= `SD if_bp_NPC;
+   end else if(PC_enable) begin
       PC_reg <= `SD next_PC; // transition to next PC
   end 
 end  // always

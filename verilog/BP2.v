@@ -268,7 +268,7 @@ module  BP2(
 						next_pc_calc		 = btb_next_pc;
 						next_pc_prediction_calc	 = 1'b1;
 					end else begin
-						next_pc_valid_calc	 = 1'b1;
+						next_pc_valid_calc	 = 1'b0;
 						//next_pc_index_calc	 = bh_index;
 						next_br_idx		= br_idx + 1;
 						next_pc_calc		 = if_pc_in + 4;
@@ -287,7 +287,7 @@ module  BP2(
 						next_pc_calc		 = btb_next_pc;
 						next_pc_prediction_calc	 = 1'b1;
 					end else begin
-						next_pc_valid_calc	 = 1'b1;
+						next_pc_valid_calc	 = 1'b0;
 						//next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
 						next_br_idx		= br_idx + 1;
 						next_pc_calc		 = if_pc_in + 4;
@@ -307,7 +307,7 @@ module  BP2(
 							next_pc_calc		 = ras_next_pc;
 							next_pc_prediction_calc	 = 1'b1;
 						end else begin
-							next_pc_valid_calc	 = 1'b1;
+							next_pc_valid_calc	 = 1'b0;
 							//next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
 							next_br_idx		= br_idx + 1;
 							next_pc_calc		 = if_pc_in + 4;
@@ -321,7 +321,7 @@ module  BP2(
 							next_pc_calc		 = btb_next_pc;
 							next_pc_prediction_calc	 = 1'b1;
 						end else begin
-							next_pc_valid_calc	 = 1'b1;
+							next_pc_valid_calc	 = 1'b0;
 							//next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
 							next_br_idx		= br_idx + 1;
 							next_pc_calc		 = if_pc_in + 4;
@@ -330,7 +330,7 @@ module  BP2(
 					end
 
 				end else begin
-					next_pc_valid_calc	= if_pc_in + 4;
+					next_pc_valid_calc	= 1'b0;
 				end
 			end
 		end
