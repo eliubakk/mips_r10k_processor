@@ -24,6 +24,8 @@ PIPE_TESTBENCH += $(wildcard testbench/*.c)
 PIPE_FILES = $(wildcard verilog/*.v)
 PIPE_SIMFILES = $(PIPE_FILES)
 
+DDC_LIST = 
+
 all:    simv
 	./simv | tee program.out
 ##### 
@@ -98,7 +100,7 @@ simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_p
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
-$(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(MODULES_VG) $(MISC_MODULES_VG)
+$(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(MODULES_SYN_FILES) $(MISC_MODULES_SYN_FILES)
 	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
 	$(VCS) $*.vg ../../$(TEST_DIR)/$*_test.v $(LIB) -o $@
@@ -125,7 +127,7 @@ simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR
 	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o simv &&\
-	mv * ../../. && cd ../.. 
+	mv * ../../. && cd ../.. && \
 
 .PHONY: sim
 
