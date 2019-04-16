@@ -16,12 +16,14 @@ set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat  "../../verilog/RAS.v" "../../verilog/PHT_TWO_SC.v" "../../verilog/BTB.v" "../../verilog/BP.v" $misc_files]
+analyze -f sverilog [concat  "../../verilog/RAS.v" "../../verilog/PHT_TWO_SC.v" "../../verilog/BTB.v" "../../verilog/BP2.v" $misc_files]
 elaborate BP2
 set design_name BP2
 set clock_name clock
 set reset_name reset
-#set CLK_PERIOD 5
+#SINGLESCALAR
+set CLK_PERIOD 10
+#SUPERSCALAR
 set CLK_PERIOD 10
 
 
