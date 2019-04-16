@@ -16,6 +16,7 @@ module RS
 	input 		   [(`NUM_FU_TOTAL-1):0] issue_stall, // Don't issue to functional unit
 	input RS_ROW_T [(`SS_SIZE-1):0]	inst_in,
 	input							branch_not_taken, // signal to mention the status of the branch
+	input	[$clog2(`OBQ_SIZE) -1 :0]	di_branch_inst_idx, // To store branch index in RS
 	
 	// OUTPUTS
 	`ifdef DEBUG 
@@ -26,9 +27,9 @@ module RS
 	output logic 	[$clog2(`RS_SIZE):0]	free_rows_next,
 	output wand	rs_full
 	);
-	parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
-	parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
-	parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
+	parameter FU_NAME [0:(`NUM_TYPE_FU - 1)] FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR, FU_ST};
+	parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX, FU_ST_IDX};
+	parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 	
 	////////////////////////////
 	//	INTERNAL VARIABLES    //
@@ -206,6 +207,7 @@ module RS
 		for(i = 0; i < `SS_SIZE; i = i + 1) begin
 			if(dispatch_valid[i] & inst_in[i].inst.valid_inst & dispatch_idx_valid[i]) begin
 				rs_table_next[dispatch_idx[i]] = inst_in[i];
+				rs_table_next[dispatch_idx[i]].br_idx = di_branch_inst_idx;// **** Heewoo added for branch
 				rs_table_next[dispatch_idx[i]].busy = 1'b1;
 			// Update the cdb value, since it comes from
 			// Map table(during decode stage)

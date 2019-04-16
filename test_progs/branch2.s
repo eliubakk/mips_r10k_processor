@@ -21,7 +21,23 @@
 	lda	 $r1,14			
 	lda	 $r2,5
 	lda	 $r3,1
+	lda	 $r14,256
+	lda	 $r6,256
 loop:	subq	 $r2,$r3,$r2
+	lda	 $r10,100
+	addq	 $r14,$r6,$r14
+	addq	 $r14,$r6,$r15
+	addq	 $r15,$r6,$r16
+	addq	 $r16,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	addq	 $r17,$r6,$r17
+	lda	 $r14,0($r17)
 	bne	 $r2,loop
 	addq	 $r2,$r1,$r5
 	call_pal	0x555

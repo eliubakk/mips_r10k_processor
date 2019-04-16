@@ -42,7 +42,7 @@ module decoder(
   
   assign valid_inst = valid_inst_in && !illegal;
 
-   assign ra_idx= ((opa_select == ALU_OPA_IS_REGA)| (fu_name== FU_BR)) ? inst[25:21] : `ZERO_REG;
+   assign ra_idx= ((opa_select == ALU_OPA_IS_REGA)| (fu_name== FU_BR)| (fu_name== FU_ST)) ? inst[25:21] : `ZERO_REG;
   assign rb_idx= (opb_select == ALU_OPB_IS_REGB) ? inst[20:16] : `ZERO_REG;
   // assign rdest_idx= (dest_reg == DEST_IS_REGC) ? inst[4:0] :
   //                   (dest_reg == DEST_IS_REGA) ? inst[25:21]  : `ZERO_REG;
@@ -175,7 +175,7 @@ module decoder(
           case (inst[31:26])
             `LDA_INST:  /* defaults are OK */
             begin
-             fu_name = FU_LD;
+             fu_name = FU_ALU;
             end
             `LDQ_INST:
             begin
@@ -194,14 +194,14 @@ module decoder(
             begin
               wr_mem = `TRUE;
               dest_reg = DEST_NONE;
-              fu_name = FU_LD;
+              fu_name = FU_ST;
             end // case: `STQ_INST
             `STQ_C_INST:
             begin
               wr_mem = `TRUE;
               stc_mem = `TRUE;
               dest_reg = DEST_IS_REGA;
-              fu_name = FU_LD;
+              fu_name = FU_ST;
             end // case: `STQ_INST
             default:       illegal = `TRUE;
           endcase // case(inst[31:26])

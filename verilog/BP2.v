@@ -2,10 +2,11 @@
 // Should include BTB, GSHARE, OBQ 
 `include "../../sys_defs.vh"
 `ifndef PIPELINE
+`ifdef SIMV
 `include "../../verilog/BTB.v"
-`include "../../verilog/OBQ.v"
-`include "../../verilog/GSHARE.v"
 `include "../../verilog/RAS.v"
+`include "../../verilog/PHT_TWO_SC.v"
+`endif
 `endif
 `define	DEBUG
 
@@ -17,9 +18,9 @@
 //Target address : 	pc[TARGET_SIZE+1:2]
 
 //-------------------------------Module behavior---------------------------
-//1. Conditional and direct 	: Fetch : READ BTB, GSHARE/OBQ
-//				  Retire : Update BTB, GSHARE/OBQ
-//2. Conditional and indirect 	: Fetch : READ BTB, GSHARE/OBQ
+//1. Conditional and direct 	: Fetch : READ BTB, PHT_TWO_SC, assign br idx
+//				  Retire : Update BTB, PHT_TWO_SC
+//2. Conditional and indirect 	: Fetch : READ BTB, PHT_TWO_SC, assign br idx
 //				  Retire : Update BTB, GSHARE/OBQ
 //
 //3. Unconditional and direct 	: 
@@ -39,7 +40,7 @@
 //*** May need small decoder at the FETCH outside of BP module
 //----------------------------------------------------------------------
 
-module  BP(
+module  BP2(
 	input 					clock,    // Clock
 	input 					reset,  // Asynchronous reset active low
 	input 					enable, // Clock Enable
@@ -48,7 +49,7 @@ module  BP(
 	input					if_cond_branch,		// enabled when the branch is conditional
 	input					if_direct_branch,	// enabled when the branch is direct
 	input					if_return_branch,	// enabled when the branch is return(Uncond Direct)		
-	input		[63:0]			if_pc_in,		// input PC
+	input		[31:0]			if_pc_in,		// input PC
 	// Comes after execute state(after branch calculation)
 	input					rt_en_branch,		// enabled when the instruction is branch  
 	input					rt_cond_branch,		// enabled when it is conditional branch
@@ -56,17 +57,19 @@ module  BP(
 	input					rt_return_branch,
 	input					rt_branch_taken,	// enabled when the branch is actullly taken
 	input					rt_prediction_correct,  // enabled when the branch prediction is correct 
-	input		[63:0]			rt_pc,			// PC of the executed branch instruction
-	input		[63:0]			rt_calculated_pc,  	// Calculated target PC
-	input	[$clog2(`OBQ_SIZE) - 1:0]		rt_branch_index,	// Executed branch's OBQ index 
+	input		[31:0]			rt_pc,			// PC of the executed branch instruction
+	input		[31:0]			rt_calculated_pc,  	// Calculated target PC
+	input	[$clog2(`OBQ_SIZE) - 1:0]	rt_branch_index,	// Executed branch's OBQ index 
 		
 	
 	`ifdef DEBUG
-	output		logic	[`BH_SIZE-1:0]				gshare_ght_out,
-	output		logic	[2**(`BH_SIZE)-1:0]			gshare_pht_out,
-	output		OBQ_ROW_T 		[`OBQ_SIZE-1:0]		obq_out,
-	output		logic [$clog2(`OBQ_SIZE)-1:0] 			obq_head_out,
-	output		logic [$clog2(`OBQ_SIZE)-1:0] 			obq_tail_out,
+//	output		logic	[`BH_SIZE-1:0]				gshare_ght_out,
+//	output		logic	[2**(`BH_SIZE)-1:0]			gshare_pht_out,
+//	output		OBQ_ROW_T 		[`OBQ_SIZE-1:0]		obq_out,
+//	output		logic [$clog2(`OBQ_SIZE)-1:0] 			obq_head_out,
+//	output		logic [$clog2(`OBQ_SIZE)-1:0] 			obq_tail_out,
+	
+	output		logic	[`PHT_ROW-1:0][1:0]			pht_out,
 	output		logic 	[`BTB_ROW-1:0]				btb_valid_out,
 	output		logic	[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		btb_tag_out,
 	output		logic	[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	btb_target_address_out,
@@ -77,57 +80,64 @@ module  BP(
 
 	output		logic						next_pc_valid,		// Enabled when next_pc value is valid pc
 	output 		logic 	[$clog2(`OBQ_SIZE) - 1:0]		next_pc_index, 		// ************Index from OBQ	
-	output		logic	[63:0]					next_pc,
+	output		logic	[31:0]					next_pc,
 	output		logic						next_pc_prediction	// enabled when next pc is predicted to be taken
 	
 );
 	// Do not fetch during rollback
-		logic rt_roll_back;	
+	
+		logic roll_back;	
+
+	// Branch index without OBQ
+	logic	[$clog2(`OBQ_SIZE)-1 :0]	br_idx, next_br_idx;	
 
 	// Inputs for submodules
-		// For GSHARE and OBQ
-		logic read_en;				// Fetch, enabled for conditional branch
-		logic clear_en;				// Retire, Remove and pop out during misprediction of cond branch
-		logic shift_en;				// Retire, Remove row during correct prediction of cond branch 	
+		// For 2bit bimodal
+		logic bp_read_en;				// Fetch, enabled for conditional branch, read prediction
+		logic bp_write_en;				// Retire, enabled for conditional branch, update prediction
+
+		// For BTB
+		logic btb_read_en;
+		logic btb_write_en;
 
 		// For RAS
 		logic ras_write_en;				// Fetch, RAS write((write_en in RAS) of uncond-indirect
 		logic ras_read_en;				// Fetch, RAS read(clear_en in RAS) of return (uncond direct)
 
 	// Outputs for submodules
-		// GSHARE signals
-		logic	[`BH_SIZE-1:0]		ght;
-		logic				gshare_prediction_valid;
-		logic				gshare_prediction;
+		// For 2bit bimodal
+		logic if_prediction_valid;
+		logic if_prediction;
 
-		// OBQ signals
-		logic 				bh_pred_valid;		// Same as Gshare obq_bh_pred_valid
-		OBQ_ROW_T 			bh_pred;		// Same as [`BH_SIZE-1:0] obq_gh_in
-		logic	[$clog2(`OBQ_SIZE) - 1:0]	bh_index;		// *******Index from OBQ
-									// *******Was the branch predicted taken or not taken?
 		// BTB signals
-		logic	[63:0]			btb_next_pc; 	
+		logic	[31:0]			btb_next_pc; 	
 		logic				btb_next_pc_valid;
 
 		// RAS signals
-		logic	[63:0]			ras_next_pc;
+		logic	[31:0]			ras_next_pc;
 		logic				ras_next_pc_valid;
 
 	// Outputs for BP module
-		logic				next_pc_valid_calc;
+		logic					next_pc_valid_calc;
 		logic 	[$clog2(`OBQ_SIZE) - 1:0]	next_pc_index_calc; 		
-		logic	[63:0]			next_pc_calc;
-		logic				next_pc_prediction_calc;	
+		logic	[31:0]				next_pc_calc;
+		logic					next_pc_prediction_calc;	
 
 
 	// BP module output, should be combinational 
-		assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
-		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
-		assign next_pc			= reset ? 63'h0 : next_pc_calc;
+	/*	assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
+		//assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
+		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE)-1){0}} : br_idx;
+		assign next_pc			= reset ? 32'h0 : next_pc_calc;
 		assign next_pc_prediction	= reset ? 1'b0 : next_pc_prediction_calc;	    
+*/
+		assign next_pc_valid 		= next_pc_valid_calc;
+		assign next_pc_index 		= br_idx;
+		assign next_pc			= next_pc_calc;
+		assign next_pc_prediction	= next_pc_prediction_calc;	    
 
 	//----------Value evaluation
-
+	// Fetch is invalid during roll back
 	assign roll_back	= rt_en_branch & ~rt_prediction_correct; 
 
 	// Prediction is incorrect when
@@ -135,78 +145,54 @@ module  BP(
 	// 2. Direct Uncond : target PC incorrect
 	// 3. Direct Cond : target PC incorrect
 
-	//---------For Gshare and OBQ
-	
-	// During Fetch		/ cond
-	assign read_en   	= (!roll_back)& (if_en_branch & if_cond_branch); 
-	// During retire	/ cond / the branch prediction is wrong   
-	assign clear_en		= roll_back & rt_cond_branch;
-	// During retire	/ cond / the branch prediction is correct   
-	assign shift_en		= rt_en_branch & rt_cond_branch & rt_prediction_correct; 
-	
-	assign gshare_ght_out	= ght;
 
-	//----------For BTB and RAS
-	// During retirement	/ update when branch is taken (except
-	//return)
-	assign btb_write_en	= rt_en_branch & rt_branch_taken &  !rt_return_branch ; 				
+	// 1. Input value evaluation
+
+	//------Bimodal predictor
+
+	
+	// During Fetch
+	assign bp_read_en = (!roll_back) & if_en_branch & if_cond_branch;
+	// During retire
+	assign bp_write_en = rt_en_branch & rt_cond_branch; 	
+
+	//----- BTB
 	// During fetch		/ Everytime when branch comes in except return
 	// branch
 	assign btb_read_en	= (!roll_back) & if_en_branch & !(if_return_branch); 				
+	// During retirement	/ update when branch is taken (except
+	//return)
+	assign btb_write_en	= rt_en_branch & rt_branch_taken & !rt_return_branch ; 				
 
-		
+	// -----RAS	
 	// During fetch 	/ unconditional indirect but not return branch
-	assign ras_write_en	= (!roll_back) & if_en_branch & !if_cond_branch & !if_direct_branch & !if_return_branch;
+	assign ras_write_en	=  (!roll_back) & if_en_branch & !if_cond_branch & !if_direct_branch & !if_return_branch;
 	// During fetch		/ return branch
-	assign ras_read_en	= (!roll_back) & if_en_branch & if_return_branch;				
+	assign ras_read_en	=  (!roll_back) & if_en_branch & if_return_branch;				
 
 	// internal registers
-//	OBQ_ROW_T last_pred;
 
-	// GSHARE module
-	GSHARE gshare0(
+
+	// 2bit bimodal predictor
+	
+	PHT_TWO_SC pht_0(
 		// inputs
 		.clock(clock), 
 		.reset(reset), 
-		.enable(enable),
-		.if_branch(read_en), 
-		.pc_in(if_pc_in),
-		.obq_bh_pred_valid(bh_pred_valid),
-		.obq_gh_in(bh_pred.branch_history),
-		.clear_en(clear_en),
-		.rt_pc(rt_pc),
+		.enable(enable), 
+		.if_branch(bp_read_en),
+		.if_pc_in(if_pc_in),
+		.rt_branch(bp_write_en),
+		.rt_pc_in(rt_pc),
+		.rt_branch_taken(rt_branch_taken),
 		
-		// outputs
+		// outputs 
 		`ifdef DEBUG
-		.pht_out(gshare_pht_out),
-		`endif
-		.ght_out(ght), 
-		.prediction_valid(gshare_prediction_valid),
-		.prediction_out(gshare_prediction)
-	);
-
-	// OBQ module
-	OBQ obq0(
-		// inputs
-		.clock(clock),
-		.reset(reset),
-		.write_en(gshare_prediction_valid),
-		.bh_row(ght),
-		.clear_en(clear_en),		// When the prediction is mispredicted
-		.index(rt_branch_index),
-		.shift_en(shift_en),			// When the branch instruction's prediction is correct, and is retiring
-		.shift_index(rt_branch_index),			
-
-		// outputs
-		`ifdef DEBUG
-		.obq_out(obq_out),
-		.head_out(obq_head_out),
-		.tail_out(obq_tail_out),
-		`endif
-
-		.row_tag(bh_index),//****************	
-		.bh_pred_valid(bh_pred_valid),
-		.bh_pred(bh_pred)
+		.pht_out(pht_out),
+		`endif	
+	
+		.if_prediction(if_prediction),
+		.if_prediction_valid(if_prediction_valid)
 	);
 
 
@@ -237,7 +223,7 @@ module  BP(
 	);
 
 	// RAS module
-	
+
 	RAS ras0 (
 		// inputs
 		.clock(clock),
@@ -257,6 +243,7 @@ module  BP(
 
 	);
 
+
 	// --------------------------------------------------------
 	// ---------------------Determining the output of BP module
 	// --------------------------------------------------------
@@ -264,7 +251,9 @@ module  BP(
 	always_comb begin
 		// value initialization
 		next_pc_valid_calc			= 1'b0;
-		next_pc_index_calc			= {($clog2(`OBQ_SIZE+1)){0}}; 		
+		//next_pc_index_calc			= {($clog2(`OBQ_SIZE+1)){0}}; 						
+	
+		next_br_idx				= br_idx; 						
 		next_pc_calc				= if_pc_in + 4;			
 		next_pc_prediction_calc			= 1'b0;
 
@@ -279,14 +268,16 @@ module  BP(
 				// ----------Conditional direct/indirect
 				// If prediction is taken, then bring value from BTB
 				// If prediction is not taken or BTB not match, then PC+4
-					if(gshare_prediction_valid & gshare_prediction & btb_next_pc_valid) begin
+					if(if_prediction_valid & if_prediction & btb_next_pc_valid) begin
 						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = bh_index;
+						//next_pc_index_calc	 = bh_index;
+						next_br_idx		= br_idx + 1;
 						next_pc_calc		 = btb_next_pc;
 						next_pc_prediction_calc	 = 1'b1;
 					end else begin
-						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = bh_index;
+						next_pc_valid_calc	 = 1'b0;
+						//next_pc_index_calc	 = bh_index;
+						next_br_idx		= br_idx + 1;
 						next_pc_calc		 = if_pc_in + 4;
 						next_pc_prediction_calc	 = 1'b0;
 					end			
@@ -298,12 +289,14 @@ module  BP(
 				// PC + 4 when BTB not match
 					if(btb_next_pc_valid) begin
 						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
+						//next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
+						next_br_idx		= br_idx + 1;
 						next_pc_calc		 = btb_next_pc;
 						next_pc_prediction_calc	 = 1'b1;
 					end else begin
-						next_pc_valid_calc	 = 1'b1;
-						next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
+						next_pc_valid_calc	 = 1'b0;
+						//next_pc_index_calc	 = {($clog2(`OBQ_SIZE) - 1){0}};
+						next_br_idx		= br_idx + 1;
 						next_pc_calc		 = if_pc_in + 4;
 						next_pc_prediction_calc	 = 1'b0;
 					end
@@ -316,31 +309,35 @@ module  BP(
 					if(if_return_branch) begin
 						if(ras_next_pc_valid) begin
 							next_pc_valid_calc	 = 1'b1;
-							next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							//next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							next_br_idx		= br_idx + 1;
 							next_pc_calc		 = ras_next_pc;
 							next_pc_prediction_calc	 = 1'b1;
 						end else begin
-							next_pc_valid_calc	 = 1'b1;
-							next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							next_pc_valid_calc	 = 1'b0;
+							//next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							next_br_idx		= br_idx + 1;
 							next_pc_calc		 = if_pc_in + 4;
 							next_pc_prediction_calc	 = 1'b0;
 						end 
 					end else begin
 						if(btb_next_pc_valid) begin
 							next_pc_valid_calc	 = 1'b1;
-							next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							//next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							next_br_idx		= br_idx + 1;
 							next_pc_calc		 = btb_next_pc;
 							next_pc_prediction_calc	 = 1'b1;
 						end else begin
-							next_pc_valid_calc	 = 1'b1;
-							next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							next_pc_valid_calc	 = 1'b0;
+							//next_pc_index_calc	 = {($clog2(`OBQ_SIZE)+1){0}};
+							next_br_idx		= br_idx + 1;
 							next_pc_calc		 = if_pc_in + 4;
 							next_pc_prediction_calc	 = 1'b0;
 						end
 					end
 
 				end else begin
-					next_pc_valid_calc	= if_pc_in + 4;
+					next_pc_valid_calc	= 1'b0;
 				end
 			end
 		end
@@ -348,6 +345,15 @@ module  BP(
 
 	end
 
+
+	always_ff @(posedge clock) begin
+		if(reset) begin
+			br_idx <= `SD {($clog2(`OBQ_SIZE)){0}};
+		end else begin
+			br_idx <= `SD next_br_idx;
+		end
+
+	end
 
 /*	always_ff @(posedge clock) begin
 

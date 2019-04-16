@@ -5,7 +5,7 @@
 OUTPUT_DIR="test_output_files"
 CORRECT_DIR="correct_outputs"
 DIFF_DIR="diff_outputs"
-TIMEOUT=60
+TIMEOUT=10
 
 # create output directory
 rm -rf $OUTPUT_DIR
@@ -27,7 +27,7 @@ do
 	echo "Running $file"
 
 	# run test case
-	timeout $TIMEOUT make simv_pipeline
+	timeout $TIMEOUT make clean all
 	echo "Saving $file output"
 	
 	# save the output

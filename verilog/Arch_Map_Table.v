@@ -78,7 +78,7 @@ module Arch_Map_Table(
 	always_comb begin
 		arch_map_table_next = arch_map_table;
 
-		for (integer i = 0; i < `NUM_GEN_REG; i += 1) begin
+		for (integer i = 0; i < `NUM_GEN_REG-1; i += 1) begin
 			for(integer j = `SS_SIZE-1; j >= 0; j -= 1) begin
 				if(cam_hits[i][j]) begin
 					arch_map_table_next[i] = T_new_forwarded[j];

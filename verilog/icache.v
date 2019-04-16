@@ -12,10 +12,10 @@ module icache(clock, reset,
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
   typedef struct packed {
-  logic [63:0] data;
-  logic [(`NUM_TAG_BITS-1):0] tag;
-  logic valid;
-  logic dirty;
+    logic [63:0] data;
+    logic [(`NUM_TAG_BITS-1):0] tag;
+    logic valid;
+    logic dirty;
   } CACHE_LINE_T;
 
   typedef struct packed {
@@ -48,21 +48,21 @@ module icache(clock, reset,
 
   //instantiate cachemem module
   //cache memory inputs    
-  logic [RD_PORTS:0] cache_rd_en;
-  logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_idx;
-  logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
+  logic [(RD_PORTS+1):0] cache_rd_en;
+  logic [(RD_PORTS+1):0][(`NUM_SET_BITS-1):0] cache_rd_idx;
+  logic [(RD_PORTS+1):0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
 
   logic cache_wr_en;
   logic [(`NUM_SET_BITS-1):0] cache_wr_idx;
   logic [(`NUM_TAG_BITS-1):0] cache_wr_tag;
-  logic [63:0]                  cache_wr_data;
+  logic [63:0] cache_wr_data;
   
   //cache memory outputs
-  logic [RD_PORTS:0][63:0] cache_rd_data;
-  logic [RD_PORTS:0] cache_rd_valid;
-  logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_miss_idx;
-  logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
-  logic [RD_PORTS:0] cache_rd_miss_valid;
+  logic [(RD_PORTS+1):0][63:0] cache_rd_data;
+  logic [(RD_PORTS+1):0] cache_rd_valid;
+  logic [(RD_PORTS+1):0][(`NUM_SET_BITS-1):0] cache_rd_miss_idx;
+  logic [(RD_PORTS+1):0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
+  logic [(RD_PORTS+1):0] cache_rd_miss_valid;
 
   logic [(`NUM_SET_BITS-1):0] cache_wr_miss_idx;
   logic [(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
@@ -71,7 +71,7 @@ module icache(clock, reset,
   cachemem #(
     .NUM_WAYS(4),
     .NUM_SETS((32/NUM_WAYS)),
-    .RD_PORTS(RD_PORTS+1),
+    .RD_PORTS(RD_PORTS+2),
     .WR_PORTS(1)) 
   memory(
     .clock(clock),
@@ -86,13 +86,14 @@ module icache(clock, reset,
     .wr_idx(cache_wr_idx),
     .wr_tag(cache_wr_tag),
     .wr_data(cache_wr_data),
+    .wr_dirty(1'b0),
 
     //outputs
     .rd_data(cache_rd_data),
     .rd_valid(cache_rd_valid),
     .rd_miss_idx(cache_rd_miss_idx),
     .rd_miss_tag(cache_rd_miss_tag),
-    .rd_miss_valid(cache_miss_PC_in_valid_rd),
+    .rd_miss_valid(cache_rd_miss_valid),
 
     .wr_miss_idx(cache_wr_miss_idx),
     .wr_miss_tag(cache_wr_miss_tag),
@@ -103,7 +104,7 @@ module icache(clock, reset,
     .victim_valid()
   );
 
-  ICACHE_BUFFER_T [(`INST_BUFFER_LEN-1):0] PC_queue, PC_queue_next;
+  MEM_REQ_T [(`INST_BUFFER_LEN-1):0] PC_queue, PC_queue_next;
   logic [($clog2(`INST_BUFFER_LEN)-1):0] PC_queue_tail, PC_queue_tail_next;
   logic [($clog2(`INST_BUFFER_LEN)-1):0] send_req_ptr, send_req_ptr_next;
   logic [($clog2(`INST_BUFFER_LEN)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
@@ -162,32 +163,38 @@ module icache(clock, reset,
   for(ig = 0; ig < `NUM_INST_PREFETCH; ig += 1) begin
     assign PC_in_Plus[ig] = {proc2Icache_addr[RD_PORTS-1][63:3],3'b0}+(8*(ig+1));
   end
-  assign {current_tag, current_index} = PC_queue[0].address[31:3];
 
   assign changed_addr = (PC_in != last_PC_in);
 
+  //cache rd PC_in
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
     assign cache_rd_en[ig] = 1'b1;
     assign {cache_rd_tag[ig], cache_rd_idx[ig]} = PC_in[ig][31:3];
+    assign Icache_data_out[ig] = cache_rd_data[ig];
+    assign Icache_valid_out[ig] = cache_rd_valid[ig];
   end
 
-  assign Icache_data_out = cache_rd_data;
-  assign Icache_valid_out = cache_rd_valid;
+  //cache rd front of queue
+  assign cache_rd_en[RD_PORTS] = (PC_queue_tail != 0)? 1'b1 : 1'b0;
+  assign {cache_rd_tag[RD_PORTS], cache_rd_idx[RD_PORTS]} = PC_queue[0].address[31:3];
+
+  //cache rd PC_queue entry to send to main memory
+  assign cache_rd_en[RD_PORTS+1] = (send_req_ptr < PC_queue_tail)? 1'b1 : 1'b0;
+  assign {cache_rd_tag[RD_PORTS+1], cache_rd_idx[RD_PORTS+1]} = PC_queue[send_req_ptr].address[31:3];
 
   assign unanswered_miss = send_request? (Imem2proc_response == 0) :
                            (PC_queue_tail == 0) & changed_addr? cache_rd_en[0] & ~cache_rd_valid[0] : 
-                                                              cache_rd_en[RD_PORTS] & ~cache_rd_valid[RD_PORTS];
+                                                              cache_rd_en[RD_PORTS+1] & ~cache_rd_valid[RD_PORTS+1];
 
   assign proc2Imem_addr = send_request? PC_queue[send_req_ptr].address :
                                         64'b0;
   assign proc2Imem_command = send_request? BUS_LOAD :
                                            BUS_NONE;
 
-  assign mem_done = (PC_queue[mem_waiting_ptr].Imem_tag == Imem2proc_tag) &&
-                              (PC_queue[mem_waiting_ptr].Imem_tag != 0);
+  assign mem_done = (PC_queue[mem_waiting_ptr].mem_tag == Imem2proc_tag) &&
+                              (PC_queue[mem_waiting_ptr].mem_tag != 0);
 
-  assign cache_wr_idx = current_index;
-  assign cache_wr_tag = current_tag;
+  assign {cache_wr_tag, cache_wr_idx} = PC_queue[mem_waiting_ptr-1].address[31:3];
 
   assign update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
 
@@ -196,35 +203,30 @@ module icache(clock, reset,
     PC_queue_tail_next = PC_queue_tail;
     send_req_ptr_next = send_req_ptr;
     mem_waiting_ptr_next = mem_waiting_ptr;
-    cache_rd_en[RD_PORTS] = 1'b0;
-    cache_rd_tag[RD_PORTS] = 0;
-    cache_rd_idx[RD_PORTS] = 0;
 
     if(mem_done) begin
       mem_waiting_ptr_next += 1;
     end
 
-    if(cache_wr_en) begin
-      PC_queue_next[`INST_BUFFER_LEN-1:0] = {EMPTY_ICACHE, PC_queue[`INST_BUFFER_LEN-1:1]};
+    if(cache_rd_valid[RD_PORTS]) begin
+      PC_queue_next[`INST_BUFFER_LEN-1:0] = {EMPTY_MEM_REQ, PC_queue[`INST_BUFFER_LEN-1:1]};
       PC_queue_tail_next -= 1;
-      send_req_ptr_next -= 1;
-      mem_waiting_ptr_next -= 1;
-    end
-
-    if(send_req_ptr < PC_queue_tail & ~send_request) begin
-      cache_rd_en[RD_PORTS] = 1'b1;
-      {cache_rd_tag[RD_PORTS], cache_rd_idx[RD_PORTS]} = PC_queue[send_req_ptr].address[31:3];
+      if(send_req_ptr > 0) begin
+        send_req_ptr_next -= 1;
+      end
+      if(mem_waiting_ptr > 0) begin
+        mem_waiting_ptr_next -= 1;
+      end
     end
 
     if(update_mem_tag) begin
-      PC_queue_next[send_req_ptr_next].Imem_tag = Imem2proc_response;
+      PC_queue_next[send_req_ptr_next].mem_tag = Imem2proc_response;
       send_req_ptr_next += 1;
     end
 
     for(int i = 0; i < RD_PORTS; i += 1) begin
       if(~(|PC_in_hits[i]) & changed_addr & ~cache_rd_valid[i] & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
         PC_queue_next[PC_queue_tail_next].address = {PC_in[i][63:3], 3'b0};
-        PC_queue_next[PC_queue_tail_next].cache_checked = 1'b1;
         PC_queue_next[PC_queue_tail_next].valid = 1'b1;
         PC_queue_tail_next += 1;
       end
@@ -232,7 +234,6 @@ module icache(clock, reset,
     for(int i = 0; i < `NUM_INST_PREFETCH; i += 1) begin
       if(~(|PC_in_Plus_hits[i]) & changed_addr & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
         PC_queue_next[PC_queue_tail_next].address = PC_in_Plus[i];
-        PC_queue_next[PC_queue_tail_next].cache_checked = 1'b0;
         PC_queue_next[PC_queue_tail_next].valid = 1'b1;
         PC_queue_tail_next += 1;
       end
@@ -245,7 +246,7 @@ module icache(clock, reset,
       last_PC_in   <= `SD -1;     
       send_request <= `SD 1'b0;
       for(int i = 0; i < `INST_BUFFER_LEN; i += 1) begin
-        PC_queue[i] <= `SD EMPTY_ICACHE;
+        PC_queue[i] <= `SD EMPTY_MEM_REQ;
       end
       PC_queue_tail   <= `SD 0;
       send_req_ptr    <= `SD 0;

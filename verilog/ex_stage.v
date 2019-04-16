@@ -102,10 +102,10 @@ module ex_stage(
     
     //input  [31:0]  id_ex_IR,            // incoming instruction
     input  RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_reg,           // Input from the issue register
-    input [4:0][63:0] T1_value,
-    input [4:0][63:0]  T2_value,
+    input [`NUM_FU_TOTAL-1:0][63:0] T1_value,
+    input [`NUM_FU_TOTAL-1:0][63:0]  T2_value,
     
-    output logic [4:0][63:0]  ex_alu_result_out,   // ALU0 result
+    output logic [`NUM_FU_TOTAL-1:0][63:0]  ex_alu_result_out,   // ALU0 result
     
    
 		output logic done,
@@ -115,45 +115,48 @@ module ex_stage(
     
   );
 
-  logic  [4:0][63:0]   mem_disp;
-  logic  [4:0][63:0]   br_disp;
-  logic [4:0][63:0]    alu_imm;
+  logic  [`NUM_FU_TOTAL-1:0][63:0]   mem_disp;
+  logic  [`NUM_FU_TOTAL-1:0][63:0]   br_disp;
+  logic [`NUM_FU_TOTAL-1:0][63:0]    alu_imm;
 
-  logic  [4:0][63:0] opa_mux_out, opb_mux_out;
+  logic  [`NUM_FU_TOTAL-1:0][63:0] opa_mux_out, opb_mux_out;
   logic         brcond_result;
 
   // set up possible immediates:
   //   mem_disp: sign-extended 16-bit immediate for memory format
   //   br_disp: sign-extended 21-bit immediate * 4 for branch displacement
   //   alu_imm: zero-extended 8-bit immediate for ALU ops
-  assign  mem_disp[0] = { {48{issue_reg[0].inst_opcode[15]}}, issue_reg[0].inst_opcode[15:0] };
-  assign  br_disp[0]  = { {41{issue_reg[0].inst_opcode[20]}}, issue_reg[0].inst_opcode[20:0], 2'b00 };
-  assign  alu_imm[0]  = { 56'b0, issue_reg[0].inst_opcode[20:13] };
+
+  assign  mem_disp[FU_ALU_IDX] = { {48{issue_reg[FU_ALU_IDX].inst_opcode[15]}}, issue_reg[FU_ALU_IDX].inst_opcode[15:0] };
+  assign  br_disp[FU_ALU_IDX]  = { {41{issue_reg[FU_ALU_IDX].inst_opcode[20]}}, issue_reg[FU_ALU_IDX].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[FU_ALU_IDX]  = { 56'b0, issue_reg[FU_ALU_IDX].inst_opcode[20:13] };
    
 
-  assign  mem_disp[1] = { {48{issue_reg[1].inst_opcode[15]}}, issue_reg[1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
-  assign  br_disp[1]  = { {41{issue_reg[1].inst_opcode[20]}}, issue_reg[1].inst_opcode[20:0], 2'b00 };
-  assign  alu_imm[1]  = { 56'b0, issue_reg[1].inst_opcode[20:13] };
+  assign  mem_disp[FU_ALU_IDX+1] = { {48{issue_reg[FU_ALU_IDX + 1].inst_opcode[15]}}, issue_reg[FU_ALU_IDX + 1].inst_opcode[15:0]};           // incoming instruction PC+4reg[1].inst_opcode[15:0] };
+  assign  br_disp[FU_ALU_IDX + 1]  = { {41{issue_reg[FU_ALU_IDX + 1].inst_opcode[20]}}, issue_reg[FU_ALU_IDX + 1].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[FU_ALU_IDX + 1]  = { 56'b0, issue_reg[FU_ALU_IDX + 1].inst_opcode[20:13] };
   
-  assign  mem_disp[2] = { {48{issue_reg[2].inst_opcode[15]}}, issue_reg[2].inst_opcode[15:0] };
-  assign  br_disp[2]  = { {41{issue_reg[2].inst_opcode[20]}}, issue_reg[2].inst_opcode[20:0], 2'b00 };
-  assign  alu_imm[2]  = { 56'b0, issue_reg[2].inst_opcode[20:13] };
+  assign  mem_disp[FU_LD_IDX] = { {48{issue_reg[FU_LD_IDX].inst_opcode[15]}}, issue_reg[FU_LD_IDX].inst_opcode[15:0] };
+  assign  br_disp[FU_LD_IDX]  = { {41{issue_reg[FU_LD_IDX].inst_opcode[20]}}, issue_reg[FU_LD_IDX].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[FU_LD_IDX]  = { 56'b0, issue_reg[FU_LD_IDX].inst_opcode[20:13] };
   
-  assign  mem_disp[3] = { {48{issue_reg[3].inst_opcode[15]}}, issue_reg[3].inst_opcode[15:0] };
-  assign  br_disp[3]  = { {41{issue_reg[3].inst_opcode[20]}}, issue_reg[3].inst_opcode[20:0], 2'b00 };
-  assign  alu_imm[3]  = { 56'b0, issue_reg[3].inst_opcode[20:13] };
+  assign  mem_disp[FU_MULT_IDX] = { {48{issue_reg[FU_MULT_IDX].inst_opcode[15]}}, issue_reg[FU_MULT_IDX].inst_opcode[15:0] };
+  assign  br_disp[FU_MULT_IDX]  = { {41{issue_reg[FU_MULT_IDX].inst_opcode[20]}}, issue_reg[FU_MULT_IDX].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[FU_MULT_IDX]  = { 56'b0, issue_reg[FU_MULT_IDX].inst_opcode[20:13] };
    
-  assign  mem_disp[4] = { {48{issue_reg[4].inst_opcode[15]}}, issue_reg[4].inst_opcode[15:0] };
-  assign  br_disp[4]  = { {41{issue_reg[4].inst_opcode[20]}}, issue_reg[4].inst_opcode[20:0], 2'b00 };
-  assign  alu_imm[4]  = { 56'b0, issue_reg[4].inst_opcode[20:13] };
-  
+  assign  mem_disp[FU_BR_IDX] = { {48{issue_reg[FU_BR_IDX].inst_opcode[15]}}, issue_reg[FU_BR_IDX].inst_opcode[15:0] };
+  assign  br_disp[FU_BR_IDX]  = { {41{issue_reg[FU_BR_IDX].inst_opcode[20]}}, issue_reg[FU_BR_IDX].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[FU_BR_IDX]  = { 56'b0, issue_reg[FU_BR_IDX].inst_opcode[20:13] };
 
+  assign  mem_disp[FU_ST_IDX] = { {48{issue_reg[FU_ST_IDX].inst_opcode[15]}}, issue_reg[FU_ST_IDX].inst_opcode[15:0] };
+  assign  br_disp[FU_ST_IDX]  = { {41{issue_reg[FU_ST_IDX].inst_opcode[20]}}, issue_reg[FU_ST_IDX].inst_opcode[20:0], 2'b00 };
+  assign  alu_imm[FU_ST_IDX]  = { 56'b0, issue_reg[FU_ST_IDX].inst_opcode[20:13] };
   
    //
    // ALU0 opA mux
-   //
+  
   always_comb begin
-    for (integer i=0; i<5; i=i+1) begin
+    for (integer i=0; i<`NUM_FU_TOTAL; i=i+1) begin
       case (issue_reg[i].inst.opa_select)
         ALU_OPA_IS_REGA:     opa_mux_out[i] = T1_value[i];
         ALU_OPA_IS_MEM_DISP:  opa_mux_out[i] = mem_disp[i];
@@ -229,7 +232,7 @@ module ex_stage(
     // Default value, Set only because the case isnt full.  If you see this
     // value on the output of the mux you have an invalid opb_select
     opb_mux_out = 64'hbaadbeefdeadbeef;
-    for (integer i=0; i<5; i=i+1) begin
+    for (integer i=0; i<`NUM_FU_TOTAL; i=i+1) begin
       case (issue_reg[i].inst.opb_select)
       ALU_OPB_IS_REGB:    opb_mux_out[i]= T2_value[i];//id_ex_regb;
       ALU_OPB_IS_ALU_IMM:  opb_mux_out[i] = alu_imm[i];
@@ -335,6 +338,14 @@ module ex_stage(
     .result(ex_alu_result_out[2])
   );  
 
+  alu alu_st (// Inputs                //    *******LOAD AND STORE**********
+    .opa(opa_mux_out[5]),
+    .opb(opb_mux_out[5]),
+    .func(issue_reg[5].inst.alu_func),
+
+    // Output
+    .result(ex_alu_result_out[5])
+  );  
   // alu alu_store (// Inputs
   //   .opa(opa_mux_out_alu_store),
   //   .opb(opb_mux_out_alu_store),
@@ -356,7 +367,7 @@ module ex_stage(
   );
 
   
-    alu alu_branch (// Inputs                //    *******LOAD AND STORE**********
+    alu alu_branch (// Inputs                //    *******BRANCH**********
     .opa(opa_mux_out[4]),
     .opb(opb_mux_out[4]),
     .func(issue_reg[4].inst.alu_func),
@@ -379,7 +390,7 @@ module ex_stage(
 
    // ultimate "take branch" signal:
    //    unconditional, or conditional and the condition is true
-  assign ex_take_branch_out = issue_reg[4].inst.uncond_branch
-                              | (issue_reg[4].inst.cond_branch & brcond_result);
+  assign ex_take_branch_out = issue_reg[4].busy & (issue_reg[4].inst.uncond_branch
+                              | (issue_reg[4].inst.cond_branch & brcond_result));
 
 endmodule // module ex_stage
