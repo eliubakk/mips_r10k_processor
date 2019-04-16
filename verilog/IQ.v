@@ -44,7 +44,7 @@ module IQ(
 	assign inst_queue_entry = tail;
 	`endif
 
-	assign inst_queue_full 	= (tail == `IQ_SIZE) & !(dispatch_no_hazard);
+	assign inst_queue_full 	= (tail >= `IQ_SIZE-1) & !(dispatch_no_hazard);
 	//assign fetch_en		= fetch_valid & !duplicate_fetch; 
 	assign fetch_en		= fetch_valid;
 

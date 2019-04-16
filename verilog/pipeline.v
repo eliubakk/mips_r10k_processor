@@ -555,47 +555,47 @@ assign if_stage_dispatch_en = !inst_queue_full;
 // We may divide the branch predictor and fetch stage
 	always_comb begin
 		// Initial value
-		if12_branch_inst.en = 1'b0;
-		if12_branch_inst.cond = 1'b0;
-		if12_branch_inst.direct = 1'b0;
-		if12_branch_inst.ret = 1'b0;
-		if12_branch_inst.pc = 64'h0;
-		if12_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
-		if12_branch_inst.prediction = 0;
+		if1_branch_inst.en = 1'b0;
+		if1_branch_inst.cond = 1'b0;
+		if1_branch_inst.direct = 1'b0;
+		if1_branch_inst.ret = 1'b0;
+		if1_branch_inst.pc = 64'h0;
+		if1_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
+		if1_branch_inst.prediction = 0;
 
 		if(if1_valid_inst_out) begin // 
 			if1_branch_inst.pc = if1_PC_reg; // Save current PC
-			case (if_IR_out[31:26])
+			case (if1_IR_out[31:26])
 				//COND & DIRECT
 				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST, `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
-					if12_branch_inst.en = 1'b1;
-					if12_branch_inst.cond = 1'b1;
-					if12_branch_inst.direct = 1'b1;
-					if12_branch_inst.ret = 1'b0;
+					if1_branch_inst.en = 1'b1;
+					if1_branch_inst.cond = 1'b1;
+					if1_branch_inst.direct = 1'b1;
+					if1_branch_inst.ret = 1'b0;
 				end
 				//UNCOND & DIRECT
 				`BR_INST, `BSR_INST : begin
-					if12_branch_inst.en = 1'b1;
-					if12_branch_inst.cond = 1'b0;
-					if12_branch_inst.direct = 1'b1;
-					if12_branch_inst.ret = 1'b0;
+					if1_branch_inst.en = 1'b1;
+					if1_branch_inst.cond = 1'b0;
+					if1_branch_inst.direct = 1'b1;
+					if1_branch_inst.ret = 1'b0;
 				end
 				// UNCOND & INDIRECT
 				`JSR_GRP : begin
 					case (if1_IR_out[20:19])
 					// NOT RETURN
 						`JMP_INST, `JSR_INST, `JSR_CO_INST : begin
-							if12_branch_inst.en = 1'b1;
-							if12_branch_inst.cond = 1'b0;
-							if12_branch_inst.direct = 1'b0;
-							if12_branch_inst.ret = 1'b0;
+							if1_branch_inst.en = 1'b1;
+							if1_branch_inst.cond = 1'b0;
+							if1_branch_inst.direct = 1'b0;
+							if1_branch_inst.ret = 1'b0;
 						end
 					// RETURN
 						`RET_INST : begin
-							if12_branch_inst.en = 1'b1;
-							if12_branch_inst.cond = 1'b0;
-							if12_branch_inst.direct = 1'b0;
-							if12_branch_inst.ret = 1'b1;
+							if1_branch_inst.en = 1'b1;
+							if1_branch_inst.cond = 1'b0;
+							if1_branch_inst.direct = 1'b0;
+							if1_branch_inst.ret = 1'b1;
 						end
 					endcase
 				end			
@@ -646,7 +646,7 @@ always_ff @(posedge clock) begin
 		if12_IR_out        		<= `SD `NOOP_INST;
 		if12_valid_inst_out 		<= `SD `FALSE;
 		if12_PC_reg			<= `SD 64'h0;
-		/*if12_branch_inst.en 		<= `SD 1'b0;
+	/*	if12_branch_inst.en 		<= `SD 1'b0;
 		if12_branch_inst.cond 		<= `SD 1'b0;
 		if12_branch_inst.direct 	<= `SD 1'b0;
 		if12_branch_inst.ret		<= `SD 1'b0;
@@ -661,14 +661,14 @@ always_ff @(posedge clock) begin
 		if12_valid_inst_out		<= `SD if1_valid_inst_out;
 		if12_PC_reg			<= `SD if1_PC_reg;
 		//if12_branch_inst		<= `SD if1_branch_inst;
-	end else if(inst_queue_full) begin
+	end /*else if(inst_queue_full) begin
 		if12_fetch_NPC_out		<= `SD if12_fetch_NPC_out;
 		if12_IR_out			<= `SD if12_IR_out;
 		if12_valid_inst_out		<= `SD if12_valid_inst_out;
 		if12_PC_reg			<= `SD if12_PC_reg;
 		//if12_branch_inst		<= `SD if12_branch_inst;
 	
-	end else begin
+	end*/ else begin
 		if12_fetch_NPC_out        	<= `SD 64'h0;
 		if12_IR_out        		<= `SD `NOOP_INST;
 		if12_valid_inst_out 		<= `SD `FALSE;
@@ -689,7 +689,62 @@ end
 //
 ////////////////////////////////////////////////////////////////////////////////
 
- 
+ // Small decoder for branch predictor
+// We may divide the branch predictor and fetch stage
+	always_comb begin
+		// Initial value
+		if12_branch_inst.en = 1'b0;
+		if12_branch_inst.cond = 1'b0;
+		if12_branch_inst.direct = 1'b0;
+		if12_branch_inst.ret = 1'b0;
+		if12_branch_inst.pc = 64'h0;
+		if12_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
+		if12_branch_inst.prediction = 0;
+
+		if(if12_valid_inst_out) begin // 
+			if12_branch_inst.pc = if12_PC_reg; // Save current PC
+			case (if12_IR_out[31:26])
+				//COND & DIRECT
+				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST, `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
+					if12_branch_inst.en = 1'b1;
+					if12_branch_inst.cond = 1'b1;
+					if12_branch_inst.direct = 1'b1;
+					if12_branch_inst.ret = 1'b0;
+				end
+				//UNCOND & DIRECT
+				`BR_INST, `BSR_INST : begin
+					if12_branch_inst.en = 1'b1;
+					if12_branch_inst.cond = 1'b0;
+					if12_branch_inst.direct = 1'b1;
+					if12_branch_inst.ret = 1'b0;
+				end
+				// UNCOND & INDIRECT
+				`JSR_GRP : begin
+					case (if12_IR_out[20:19])
+					// NOT RETURN
+						`JMP_INST, `JSR_INST, `JSR_CO_INST : begin
+							if12_branch_inst.en = 1'b1;
+							if12_branch_inst.cond = 1'b0;
+							if12_branch_inst.direct = 1'b0;
+							if12_branch_inst.ret = 1'b0;
+						end
+					// RETURN
+						`RET_INST : begin
+							if12_branch_inst.en = 1'b1;
+							if12_branch_inst.cond = 1'b0;
+							if12_branch_inst.direct = 1'b0;
+							if12_branch_inst.ret = 1'b1;
+						end
+					endcase
+				end			
+
+			endcase	
+		end
+
+
+	end
+
+
 	BP2 bp0(
 		// inputs
 		.clock(clock), 
