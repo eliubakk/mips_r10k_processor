@@ -601,7 +601,7 @@ module testbench;
 
 	task display_stages;
 		begin
-			 if (clock_count == 1000) begin
+			 if (clock_count == 10000) begin
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
@@ -635,7 +635,7 @@ module testbench;
 		//	display_complete;
 		//	$display("CDB input : tag in : %d, cdb_ex_valid : %d", pipeline_0.co_reg_wr_idx_out, pipeline_0.co_valid_inst_selected); 
 			//$display("CDB output : CDB_tag_out : %d, CDB_en_out : %d, busy : %d", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
-			display_co_re_registers;
+			//display_co_re_registers;
 			//display_arch_table;
 		//	display_free_list_table;// *****************************
 		//	display_arch_table;  // *****************************
