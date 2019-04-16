@@ -1,22 +1,23 @@
  `include "../../sys_defs.vh"
 
  `define DEBUG
-parameter NUM_WAYS = 4;
-parameter NUM_SETS = (32/NUM_WAYS);
-parameter RD_PORTS = 1;
-`define NUM_SET_BITS $clog2(NUM_SETS)
-`define NUM_TAG_BITS (13-`NUM_SET_BITS)
+    parameter NUM_WAYS = 4;
+    parameter NUM_SETS = (32/NUM_WAYS);
+    parameter RD_PORTS = 1;
+    `define NUM_SET_BITS $clog2(NUM_SETS)
+    `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
-typedef struct packed {
-logic [63:0] data;
-logic [(`NUM_TAG_BITS-1):0] tag;
-logic valid;
-logic dirty;
-} CACHE_LINE_T;
+    typedef struct packed {
+    logic [63:0] data;
+    logic [(`NUM_TAG_BITS-1):0] tag;
+    logic valid;
+    logic dirty;
+    } CACHE_LINE_T;
 
-typedef struct packed {
-CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
-} CACHE_SET_T;
+    typedef struct packed {
+    CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
+    } CACHE_SET_T;
+
 
 module vic_cache(clock, reset, valid1, valid2, valid_cam1, valid_cam2, new_victim1, new_victim2,
                 set_index_cam1, set_index_cam2, set_index1, set_index2, tag_cam1, tag_cam2,
@@ -100,12 +101,15 @@ module vic_cache(clock, reset, valid1, valid2, valid_cam1, valid_cam2, new_victi
         //valid_cam_module1=1'b1;
         if (valid_cam1 & (vic_table_hits1 == set_index_table_hits1) & (|vic_table_hits1)) begin
             out_valid1_next = 1'b1;
-            for (int i = index_table1; i>=0; i-=1) begin
-                set_index_table_next[i]=0;
-                vic_table_next[i]=0;
-                if (i>0) begin
-                    set_index_table_next[i] = set_index_table_next[i-1];
-                    vic_table_next[i] = vic_table_next[i-1];
+            //for (int i = index_table1; i>=0; i-=1) begin
+            for (int i = 3; i>=0; i-=1) begin
+                if (i <= index_table1) begin
+                    set_index_table_next[i]=0;
+                    vic_table_next[i]=0;
+                    if (i>0) begin
+                        set_index_table_next[i] = set_index_table_next[i-1];
+                        vic_table_next[i] = vic_table_next[i-1];
+                    end
                 end
             end
         end
@@ -113,12 +117,15 @@ module vic_cache(clock, reset, valid1, valid2, valid_cam1, valid_cam2, new_victi
         //valid_cam_module2=1'b1;
         if (valid_cam2 & (vic_table_hits2 == set_index_table_hits2) & (|vic_table_hits2)) begin
             out_valid2_next = 1'b1;
-            for (int i = index_table2; i>=0; i-=1) begin
-                set_index_table_next[i]=0;
-                vic_table_next[i]=0;
-                if (i>0) begin
-                    set_index_table_next[i] = set_index_table_next[i-1];
-                    vic_table_next[i] = vic_table_next[i-1];
+            //for (int i = index_table2; i>=0; i-=1) begin
+            for (int i = 3; i>=0; i-=1) begin
+                if (i <= index_table2) begin
+                    set_index_table_next[i]=0;
+                    vic_table_next[i]=0;
+                    if (i>0) begin
+                        set_index_table_next[i] = set_index_table_next[i-1];
+                        vic_table_next[i] = vic_table_next[i-1];
+                    end
                 end
             end
         end

@@ -2,6 +2,22 @@
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
+parameter _NUM_WAYS = 4;
+parameter _NUM_SETS = (32/_NUM_WAYS);
+parameter _RD_PORTS = 1;
+`define _NUM_SET_BITS $clog2(_NUM_SETS)
+`define _NUM_TAG_BITS (13-`_NUM_SET_BITS)
+
+typedef struct packed {
+logic [63:0] data;
+logic [(`_NUM_TAG_BITS-1):0] tag;
+logic valid;
+logic dirty;
+} _CACHE_LINE_T;
+
+typedef struct packed {
+_CACHE_LINE_T [(_NUM_WAYS-1):0] cache_lines;
+} _CACHE_SET_T;
 
 module testbench;
     //inputs
@@ -11,21 +27,21 @@ module testbench;
     logic valid2;
     logic valid_cam1;
     logic valid_cam2;
-    CACHE_LINE_T  new_victim1;
-    CACHE_LINE_T  new_victim2;
-    logic [(`NUM_SET_BITS - 1):0] set_index_cam1;
-    logic [(`NUM_SET_BITS - 1):0] set_index_cam2;
-    logic [(`NUM_SET_BITS - 1):0] set_index1;
-    logic [(`NUM_SET_BITS - 1):0] set_index2;
-    logic [(`NUM_TAG_BITS - 1):0] tag_cam1;
-    logic [(`NUM_TAG_BITS - 1):0] tag_cam2;
+    _CACHE_LINE_T  new_victim1;
+    _CACHE_LINE_T  new_victim2;
+    logic [(`_NUM_SET_BITS - 1):0] set_index_cam1;
+    logic [(`_NUM_SET_BITS - 1):0] set_index_cam2;
+    logic [(`_NUM_SET_BITS - 1):0] set_index1;
+    logic [(`_NUM_SET_BITS - 1):0] set_index2;
+    logic [(`_NUM_TAG_BITS - 1):0] tag_cam1;
+    logic [(`_NUM_TAG_BITS - 1):0] tag_cam2;
     //outputs
-    CACHE_LINE_T [3:0]	 vic_table_out;
-    logic [3:0][`NUM_SET_BITS:0] set_index_table_out;
-    CACHE_LINE_T  fired_victim1;
-    CACHE_LINE_T  fired_victim2;
-    CACHE_LINE_T  out_victim1;
-    CACHE_LINE_T  out_victim2;
+    _CACHE_LINE_T [3:0]	 vic_table_out;
+    logic [3:0][`_NUM_SET_BITS:0] set_index_table_out;
+    _CACHE_LINE_T  fired_victim1;
+    _CACHE_LINE_T  fired_victim2;
+    _CACHE_LINE_T  out_victim1;
+    _CACHE_LINE_T  out_victim2;
     logic               fired_valid1;
     logic               fired_valid2;
     logic               out_valid1;
@@ -61,10 +77,10 @@ module testbench;
  	);
 
     //intermediate signals
-    CACHE_LINE_T [3:0]	 vic_table_test;
-    logic [3:0][`NUM_SET_BITS:0] set_index_table_test;
-    CACHE_LINE_T [7:0]	 vic_array_test;
-    logic [7:0][`NUM_SET_BITS:0] set_index_array_test;
+    _CACHE_LINE_T [3:0]	 vic_table_test;
+    logic [3:0][`_NUM_SET_BITS:0] set_index_table_test;
+    _CACHE_LINE_T [7:0]	 vic_array_test;
+    logic [7:0][`_NUM_SET_BITS:0] set_index_array_test;
 
     task exit_on_error;
 		begin
@@ -78,7 +94,7 @@ module testbench;
  		begin
  			for (int i = 0; i < 4; ++i) begin
  				assert(vic_table_out[i].valid == 0) else #1 exit_on_error;
-                assert(set_index_table_out[i][`NUM_SET_BITS] == 0) else #1 exit_on_error; 
+                assert(set_index_table_out[i][`_NUM_SET_BITS] == 0) else #1 exit_on_error; 
  			end
  		end
  	endtask
@@ -96,7 +112,7 @@ module testbench;
     task write_to_vic_test;
         input [1:0] entry_num;
         input valid;
-        input CACHE_LINE_T  new_victim_test;
+        input _CACHE_LINE_T  new_victim_test;
         begin
             if (valid) begin
                 vic_table_test[entry_num] = new_victim_test;
@@ -107,7 +123,7 @@ module testbench;
     task write_to_set_index_test;
             input [1:0] entry_num;
             input valid;
-            input [(`NUM_SET_BITS - 1):0] set_index_test;
+            input [(`_NUM_SET_BITS - 1):0] set_index_test;
         begin
             if (valid) begin
                 set_index_table_test[entry_num] = {1'b1,set_index_test};
@@ -157,14 +173,14 @@ module testbench;
  	endtask
 
     task print_vic_table_entry;
- 		input CACHE_LINE_T vic_table_entry;
+ 		input _CACHE_LINE_T vic_table_entry;
  		begin
  			$display("data = %d tag = %d valid = %b", vic_table_entry.data, vic_table_entry.tag, vic_table_entry.valid);
  		end
  	endtask
 
     task print_set_index_table_entry;
- 		input [`NUM_SET_BITS:0] set_index_table_entry;
+ 		input [`_NUM_SET_BITS:0] set_index_table_entry;
  		begin
  			$display("content = %d", set_index_table_entry);
  		end
@@ -173,7 +189,7 @@ module testbench;
     task check_fired_output1;
         input valid_test;
         input fired_valid_test;
-        input CACHE_LINE_T fired_victim_test;
+        input _CACHE_LINE_T fired_victim_test;
         begin
             assert(valid_test==fired_valid_test) else #1 exit_on_error;
             if (valid_test) begin
@@ -185,7 +201,7 @@ module testbench;
     task check_fired_output2;
         input valid_test;
         input fired_valid_test;
-        input CACHE_LINE_T fired_victim_test;
+        input _CACHE_LINE_T fired_victim_test;
         begin
             assert(valid_test==fired_valid_test) else #1 exit_on_error;
             if (valid_test) begin
@@ -197,7 +213,7 @@ module testbench;
     task check_cam_output1;
         input valid_test1;
         input cam_valid_test1;
-        input CACHE_LINE_T cam_victim_test1;
+        input _CACHE_LINE_T cam_victim_test1;
         begin
             assert(valid_test1==out_valid1) else #1 exit_on_error;
             if (valid_test1) begin
@@ -209,7 +225,7 @@ module testbench;
     task check_cam_output2;
         input valid_test2;
         input cam_valid_test2;
-        input CACHE_LINE_T cam_victim_test2;
+        input _CACHE_LINE_T cam_victim_test2;
         begin
             assert(valid_test2==out_valid2) else #1 exit_on_error;
             if (valid_test2) begin
