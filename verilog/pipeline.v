@@ -540,8 +540,8 @@ assign if_stage_dispatch_en = !inst_queue_full;
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_stage_dispatch_en),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
     .co_ret_branch_valid(ret_branch_inst.en),
-    .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
-    .if_bp_NPC_valid(if_bp_NPC_valid),
+    .if_bp_NPC(if2_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
+    .if_bp_NPC_valid(if2_bp_NPC_valid),
 
     // Outputs
     .if_NPC_out(if1_fetch_NPC_out), 
@@ -641,7 +641,7 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 ////////////////////////////////////////////////////////////////////////
 
 always_ff @(posedge clock) begin
-	if( reset | branch_not_taken | if_bp_NPC_valid) begin
+	if( reset | branch_not_taken | if2_bp_NPC_valid) begin
 		if12_fetch_NPC_out     		<= `SD 64'h0;
 		if12_IR_out        		<= `SD `NOOP_INST;
 		if12_valid_inst_out 		<= `SD `FALSE;
@@ -781,12 +781,15 @@ end
 	assign if_inst_in.ir = if_IR_out;
 	assign if_inst_in.valid_inst = if_valid_inst_out;
 	assign if_inst_in.branch_inst = if_branch_inst;
+	logic IQ_read_en;
+	//assign IQ_fetch_en = if_valid_inst_out & !if_bp_NPC_valid; // When branch prediction is valid, do not fetch the next instruction
 
+	assign IQ_fetch_en = if_valid_inst_out;
 	 IQ iq0(
  		// inputs
 		.clock(clock),
 		.reset(reset),
-		.fetch_valid(if_valid_inst_out),
+		.fetch_valid(IQ_fetch_en),
 		.if_inst_in(if_inst_in),
 		.dispatch_no_hazard(dispatch_no_hazard),
 		.branch_incorrect(branch_not_taken),

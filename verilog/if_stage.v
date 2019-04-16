@@ -73,7 +73,7 @@ assign if_NPC_out = PC_plus_4;
   //assign if_valid_inst_out = ready_for_valid && Imem_valid;
 
 
-assign if_valid_inst_out = Imem_valid;
+assign if_valid_inst_out = Imem_valid & dispatch_en;
 //assign if_valid_inst_out = PC_enable; 
 //assign if_valid_inst_out = co_ret_take_branch | PC_enable;
 // assign next_ready_for_valid = (ready_for_valid || co_ret_valid_inst) && 
