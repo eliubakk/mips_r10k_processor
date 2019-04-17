@@ -39,16 +39,18 @@ all:    simv
 TEST_DIR = testbench
 VERILOG_DIR = verilog
 SYN_DIR = synth
+LIB_DIR = libraries
 PIPELINE_NAME = pipeline
 PIPELINE = $(VERILOG_DIR)/$(PIPELINE_NAME).v 
-MISC_SRC = $(wildcard $(VERILOG_DIR)/misc/*.v)
 
+MISC_SRC = $(wildcard $(VERILOG_DIR)/misc/*.v)
 TEST_SRC = $(wildcard $(TEST_DIR)/*.v)
 VERILOG_SRC = $(filter-out $(PIPELINE),$(wildcard $(VERILOG_DIR)/*.v))
 MODULES = $(patsubst $(VERILOG_DIR)/%.v, %, $(VERILOG_SRC))
 MODULES_SYN_FILES = $(patsubst %, %.vg, $(MODULES))
 MISC_MODULES = $(patsubst $(VERILOG_DIR)/misc/%.v, %, $(MISC_SRC))
 MISC_MODULES_SYN_FILES = $(patsubst %, %.vg, $(MISC_MODULES))
+PIPELINE_SYN_FILE = $(PIPELINE_NAME).vg
 SYN_SIMV = $(patsubst %,syn_simv_%,$(MODULES))
 SYN_SIMV += $(patsubst %,syn_simv_%,$(MISC_MODULES))
 SIMV = $(patsubst $(VERILOG_DIR)/%.v,simv_%,$(VERILOG_SRC))
@@ -58,32 +60,50 @@ SYN_SRC = $(filter-out $(PIPELINE_NAME).tcl,$(wildcard $(SYN_DIR)/*.tcl))
 
 MODULES_VG = $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg)
 MISC_MODULES_VG = $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
+PIPELINE_SYN_FILES = $(foreach module,$(MODULES) $(MISC_MODULES),$(SYN_DIR)/$(module)/$(module).vg)
+PIPELINE_VG = $(SYN_DIR)/$(PIPELINE_NAME)/%.vg
+PIPELINE_MODULES = $(MODULES) $(MISC_MODULES)
+PIPELINE_LIBS = $(foreach module,$(PIPELINE_MODULES),../S(LIB_DIR)/$(module).ddc)
 
 MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MODULES_VG))
 MISC_MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MISC_MODULES_VG))
 
+export PIPELINE_NAME
+export LIB_DIR
+export PIPELINE_MODULES
+export PIPELINE_LIBS
+
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
-	dc_shell-t -f ../$*.tcl | tee $*_synth.out
+	dc_shell-t -f ../$*.tcl | tee $*_synth.out && \
+	mkdir -p ../$(LIB_DIR) && \
+	mv -f $*.ddc ../$(LIB_DIR)
 
 $(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
+	mkdir -p ../$(LIB_DIR) && \
+	mv -f $*.ddc ../$(LIB_DIR)
 
-$(MODULES_VG_NO_PIPE): $(SYN_SRC) $(VERILOG_SRC) sys_defs.vh
-	# make $*.vg 1
-	echo "INSIDE MODULES_VG_NO_PIPE"
-	make syn_simv_$*
-	pwd
+$(PIPELINE_SYN_FILE): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh
+	cd $(SYN_DIR) && \
+	mkdir -p $* && cd $* && \
+	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 
-$(MISC_MODULES_VG_NO_PIPE): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
-	# make $*.vg 2
-	make syn_simv_$*
+$(MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
+	make $*.vg
+
+$(MISC_MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
+	make $*.vg
+
+$(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh
+	make $*.vg
 
 .PHONY: $(MODULES_VG)
 .PHONY: $(MISC_MODULES_VG)
+.PHONY: $(PIPELINE_VG)
 
 $(SYN_SIMV): syn_simv_%: $(TEST_DIR)/%_test.v
 	make $(SYN_DIR)/$*/$*.vg && \
@@ -113,14 +133,6 @@ simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_p
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
-# $(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(MODULES_VG_NO_PIPE) $(MISC_MODULES_VG)
-#	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
-	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS) $*.vg ../../$(TEST_DIR)/$*_test.v $(LIB) -o $@ && \
-	mv * ../../. && cd ../..	
-	echo "look over here!!!!!!!!!!!!!!!"
-	pwd
-
 $(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
@@ -146,7 +158,7 @@ simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR
 
 .PHONY: sim
 
-dve_pipe: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+dve_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
 	$(VCS_PIPE) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
@@ -155,16 +167,10 @@ dve_pipe: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST
 dve:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
 
-synth/$(PIPELINE_NAME).vg: $(PIPELINE) $(MODULES_VG_NO_PIPE) $(MISC_MODULES_VG_NO_PIPE)
-	echo "STARTING THE ACTUAL COMMANDS"
-	make $(MODULES_VG_NO_PIPE)
-	echo "DID THE FIRST COMMANDS"
-	#make $(MISC_MODULES_VG_NO_PIPE)
-	#echo "DID THE ACTUAL COMMANDS"
-	#make syn_simv_pipeline
-
-syn_simv: synth/$(PIPELINE_NAME).vg $(PIPELINE_TESTBENCH)
-	$(VCS_PIPE) $(PIPELINE_TESTBENCH) synth/$(PIPELINE_NAME).vg $(LIB) -o syn_simv
+syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
+	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
+	$(VCS_PIPE) $(PIPELINE_NAME).vg ../../$^ $(LIB) -o $@
 
 #syn_simv:	$(SYNFILES) $(TESTBENCH)
 #	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
