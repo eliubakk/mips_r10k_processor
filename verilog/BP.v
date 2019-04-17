@@ -48,7 +48,7 @@ module  BP(
 	input					if_cond_branch,		// enabled when the branch is conditional
 	input					if_direct_branch,	// enabled when the branch is direct
 	input					if_return_branch,	// enabled when the branch is return(Uncond Direct)		
-	input		[31:0]			if_pc_in,		// input PC
+	input		[63:0]			if_pc_in,		// input PC
 	// Comes after execute state(after branch calculation)
 	input					rt_en_branch,		// enabled when the instruction is branch  
 	input					rt_cond_branch,		// enabled when it is conditional branch
@@ -56,8 +56,8 @@ module  BP(
 	input					rt_return_branch,
 	input					rt_branch_taken,	// enabled when the branch is actullly taken
 	input					rt_prediction_correct,  // enabled when the branch prediction is correct 
-	input		[31:0]			rt_pc,			// PC of the executed branch instruction
-	input		[31:0]			rt_calculated_pc,  	// Calculated target PC
+	input		[63:0]			rt_pc,			// PC of the executed branch instruction
+	input		[63:0]			rt_calculated_pc,  	// Calculated target PC
 	input	[$clog2(`OBQ_SIZE) - 1:0]		rt_branch_index,	// Executed branch's OBQ index 
 		
 	
@@ -77,7 +77,7 @@ module  BP(
 
 	output		logic						next_pc_valid,		// Enabled when next_pc value is valid pc
 	output 		logic 	[$clog2(`OBQ_SIZE) - 1:0]		next_pc_index, 		// ************Index from OBQ	
-	output		logic	[31:0]					next_pc,
+	output		logic	[63:0]					next_pc,
 	output		logic						next_pc_prediction	// enabled when next pc is predicted to be taken
 	
 );
@@ -106,29 +106,41 @@ module  BP(
 		logic	[$clog2(`OBQ_SIZE) - 1:0]	bh_index;		// *******Index from OBQ
 									// *******Was the branch predicted taken or not taken?
 		// BTB signals
-		logic	[31:0]			btb_next_pc; 	
+		logic	[63:0]			btb_next_pc; 	
 		logic				btb_next_pc_valid;
 
 		// RAS signals
-		logic	[31:0]			ras_next_pc;
+		logic	[63:0]			ras_next_pc;
 		logic				ras_next_pc_valid;
 
 	// Outputs for BP module
 		logic				next_pc_valid_calc;
 		logic 	[$clog2(`OBQ_SIZE) - 1:0]	next_pc_index_calc; 		
-		logic	[31:0]			next_pc_calc;
+		logic	[63:0]			next_pc_calc;
 		logic				next_pc_prediction_calc;	
-	
+
+
+	// BP module output, should be combinational 
+		assign next_pc_valid 		= reset ? 1'b0 : next_pc_valid_calc;
+		assign next_pc_index 		= reset ? {($clog2(`OBQ_SIZE) - 1){0}} : next_pc_index_calc;
+		assign next_pc			= reset ? 63'h0 : next_pc_calc;
+		assign next_pc_prediction	= reset ? 1'b0 : next_pc_prediction_calc;	    
+
 	//----------Value evaluation
 
-	assign roll_back	= rt_en_branch & rt_cond_branch & ~rt_prediction_correct; 
+	assign roll_back	= rt_en_branch & ~rt_prediction_correct; 
+
+	// Prediction is incorrect when
+	// 1. Direct Cond : target PC incorrect or prediction incorrect
+	// 2. Direct Uncond : target PC incorrect
+	// 3. Direct Cond : target PC incorrect
 
 	//---------For Gshare and OBQ
 	
 	// During Fetch		/ cond
 	assign read_en   	= (!roll_back)& (if_en_branch & if_cond_branch); 
 	// During retire	/ cond / the branch prediction is wrong   
-	assign clear_en		= roll_back;
+	assign clear_en		= roll_back & rt_cond_branch;
 	// During retire	/ cond / the branch prediction is correct   
 	assign shift_en		= rt_en_branch & rt_cond_branch & rt_prediction_correct; 
 	
@@ -253,7 +265,7 @@ module  BP(
 		// value initialization
 		next_pc_valid_calc			= 1'b0;
 		next_pc_index_calc			= {($clog2(`OBQ_SIZE+1)){0}}; 		
-		next_pc_calc				= 32'h0;			
+		next_pc_calc				= if_pc_in + 4;			
 		next_pc_prediction_calc			= 1'b0;
 
 		if(enable) begin
@@ -328,7 +340,7 @@ module  BP(
 					end
 
 				end else begin
-					next_pc_valid_calc	= 1'b0;
+					next_pc_valid_calc	= if_pc_in + 4;
 				end
 			end
 		end
@@ -337,7 +349,7 @@ module  BP(
 	end
 
 
-	always_ff @(posedge clock) begin
+/*	always_ff @(posedge clock) begin
 
 		if(reset) begin
 			next_pc_valid		<= 1'b0;
@@ -351,6 +363,7 @@ module  BP(
 			next_pc_prediction	<= next_pc_prediction_calc;
 
 		end
+*/
 
 /*
 		// Next PC value,	
@@ -367,8 +380,7 @@ module  BP(
 			next_pc_index	<= bh_index; //*********************default bh_idx
 			next_pc_valid	<= prediction_valid;
 		end
-*/
 
-	end
+	end*/
 
 endmodule

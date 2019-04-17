@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : ISR.tcl                          */
+#/*   FILE        : Free_List.tcl                           */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,7 +11,9 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "../../verilog/Free_List.v" "../../sys_defs.vh"]
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/Free_List.v" $misc_files]
+elaborate Free_List
 set design_name Free_List
 set clock_name clock
 set reset_name reset

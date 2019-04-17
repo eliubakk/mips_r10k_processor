@@ -96,14 +96,14 @@ module  BTB(
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			valid		<= `BTB_ROW'b0;
-			tag		<= {(`BTB_ROW*`TAG_SIZE){1'b0}}; 
-			target_address  <= {(`BTB_ROW*`TARGET_SIZE){1'b0}}; 
+			valid		<= `SD `BTB_ROW'b0;
+			tag		<= `SD {(`BTB_ROW*`TAG_SIZE){1'b0}}; 
+			target_address  <= `SD {(`BTB_ROW*`TARGET_SIZE){1'b0}}; 
 		
 		end else begin
-			valid		<= next_valid;
-			tag		<= next_tag;
-			target_address  <= next_target_address;
+			valid		<= `SD next_valid;
+			tag		<= `SD next_tag;
+			target_address  <= `SD next_target_address;
 		end	
 
 	end

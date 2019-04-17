@@ -11,8 +11,6 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-#read_file -f ddc [list "psel_single_WIDTH16.ddc"]
-#set_dont_touch psel_single_WIDTH16
 
 #############################################
 # the follwoing two lines for RS_test

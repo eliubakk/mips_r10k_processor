@@ -23,8 +23,9 @@ DVEfiles
 *.swp
 synth/*
 !synth/*.tcl
+!synth/dve_sessions
 .__afs*
 diff_outputs
 test_output_files
-output.txt
+output.tx*
 !correct_outputs/*

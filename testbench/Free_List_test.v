@@ -17,8 +17,10 @@ module testbench;
 	logic reset;
 	logic enable;
 	PHYS_REG T_old;
+	PHYS_REG T_new;
 	logic dispatch_en;
 
+	logic id_no_dest_reg;
 	logic branch_incorrect = ZERO;
 	PHYS_REG [`NUM_PHYS_REG-1:0] free_check_point;
 	logic [$clog2(`NUM_PHYS_REG):0] tail_check_point;
@@ -42,7 +44,9 @@ module testbench;
 		.reset(reset),
 		.enable(enable),
 		.T_old(T_old),
+		.T_new(T_new),
 
+		.id_no_dest_reg(id_no_dest_reg),
 		.branch_incorrect(branch_incorrect),
 		.free_check_point(free_check_point),
 		.tail_check_point(tail_check_point),
@@ -113,6 +117,7 @@ module testbench;
 		enable = ZERO;
 		T_old =  0;
 		dispatch_en = ZERO;
+		id_no_dest_reg = ZERO;
 
 		$display("Testing Reset...");
 		@(negedge clock);

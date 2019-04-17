@@ -18,7 +18,7 @@
 
 */
 	
-	lda	 $r1,14
+	lda	 $r1,14			
 	lda	 $r2,5
 	lda	 $r3,1
 loop:	subq	 $r2,$r3,$r2

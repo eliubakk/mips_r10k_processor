@@ -703,7 +703,7 @@ module testbench;
 		rt_branch_index		= {$clog2(`OBQ_SIZE){1'b0}}; 
 
 
-
+/*
 		// Reset
 		@(negedge clock);
 		$display("--------------------------------RESET----------------------------------"); 
@@ -1249,7 +1249,471 @@ module testbench;
 		`DELAY;
 		display_table;*/
 
+		$display("-----------------------------------------------------PIPELINE TEST CASE------------------------------------------------");
+		@(negedge clock);
+		reset = 1'b1;
+		enable = 1'b0;
 
+		@(negedge clock);
+		$display("Cycle 0");
+		reset = 1'b0;
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 0;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 4;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 1");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 0;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 2");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 0;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 3");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 4;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 4");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 8;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 5");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 8;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 6");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 0;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 7");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 12;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 8");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 16;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 4;
+		rt_branch_index		= 0;
+
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 9");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 16;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 8;
+		rt_branch_index		= 0;
+
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 10");
+		if_en_branch		= 1;
+		if_cond_branch		= 1;
+		if_direct_branch	= 1;
+		if_return_branch	= 0;
+		if_pc_in 		= 16;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 11");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 20;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 12");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 24;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 12;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 13");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 24;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 14");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 24;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 16;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 15");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 28;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 16");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 32;
+		//Input from retire
+		rt_en_branch		= 1;
+		rt_cond_branch		= 1;
+		rt_direct_branch	= 1;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 1;
+		rt_prediction_correct	= 0;
+		rt_pc			= 16;
+		rt_calculated_pc	= 12;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 17");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 12;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 4;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 18");
+		if_en_branch		= 1;
+		if_cond_branch		= 1;
+		if_direct_branch	= 1;
+		if_return_branch	= 0;
+		if_pc_in 		= 16;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 19");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 12;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 20");
+		if_en_branch		= 1;
+		if_cond_branch		= 1;
+		if_direct_branch	= 1;
+		if_return_branch	= 0;
+		if_pc_in 		= 16;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 21");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 20;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
+
+		@(posedge clock);
+
+		@(negedge clock);
+		$display("Cycle 22");
+		if_en_branch		= 0;
+		if_cond_branch		= 0;
+		if_direct_branch	= 0;
+		if_return_branch	= 0;
+		if_pc_in 		= 24;
+		//Input from retire
+		rt_en_branch		= 0;
+		rt_cond_branch		= 0;
+		rt_direct_branch	= 0;
+		rt_return_branch	= 0;
+		rt_branch_taken		= 0;
+		rt_prediction_correct	= 1;
+		rt_pc			= 0;
+		rt_calculated_pc	= 0;
+		rt_branch_index		= 0;
 
 		$display("@@@passed");
 		$finish;		

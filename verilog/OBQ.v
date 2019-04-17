@@ -98,14 +98,14 @@ module OBQ(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `OBQ_SIZE; ++i) begin
-				obq[i].branch_history <= 0;
+				obq[i].branch_history <= `SD 0;
 			end
-			tail <= 0;
-			head <= 0;
+			tail <= `SD 0;
+			head <= `SD 0;
 		end else begin
-			obq <= obq_next;
-			tail <= tail_next;
-			head <= head_next;
+			obq <= `SD obq_next;
+			tail <= `SD tail_next;
+			head <= `SD head_next;
 		end
 	end
 endmodule // OBQ

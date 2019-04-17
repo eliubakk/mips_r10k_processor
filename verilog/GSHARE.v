@@ -51,6 +51,8 @@ module GSHARE(
 		next_pht	= pht;
 		next_ght	= ght;
 		next_prediction	= 1'b0;
+		hash_idx_rt	= {`BH_SIZE{0}};
+		hash_idx	= {`BH_SIZE{0}};
 
 	// First : when clear_en (branch prediction is wrong) and obq is not empty, we need to update the prediction result(flip the bit)
 	// & roll back the GHT value, Update should also use the hashed
@@ -58,11 +60,13 @@ module GSHARE(
 	//
 	
 
-		if(clear_en & obq_bh_pred_valid) begin
+		if(clear_en & obq_bh_pred_valid) begin		// Change3
+	//	if(clear_en) begin
 			next_ght		= obq_gh_in;
 			//next_pht[obq_gh_in]	= ~pht[obq_gh_in]; // Should
 			//update the hashed obq_gh_in
-			hash_idx_rt		= next_ght ^ rt_pc[(`PC_SIZE)+1:2];
+			hash_idx_rt		= next_ght ^ rt_pc[(`PC_SIZE)+1:2]; // Change1
+			//hash_idx_rt		= rt_pc[(`PC_SIZE)+1:2];
 			next_pht[hash_idx_rt]	= ~pht[hash_idx_rt];		
 		end
 	 
@@ -75,7 +79,8 @@ module GSHARE(
 
 		if(enable & if_branch & !clear_en) begin
 
-			hash_idx		= ght ^ pc_partial;
+			hash_idx		= ght ^ pc_partial; // Change2
+			//hash_idx		= pc_partial;
 			next_prediction		= pht	[hash_idx];
 
 			if(next_prediction) begin
@@ -90,12 +95,14 @@ module GSHARE(
 
 	always_ff @(posedge clock) begin
 		if(reset) begin
-			pht		<=  {(2**`BH_SIZE){1'b0}}; // Initialized to not taken
-			ght		<=  {`BH_SIZE{1'b0}};
+			pht			<=  `SD {(2**`BH_SIZE){1'b0}}; // Initialized to not taken
+			ght			<=  `SD {`BH_SIZE{1'b0}};
+			//prediction_out		<= 1'b0;
 			//prediction	<= 1'b0;;
 		end else begin
-			pht		<= next_pht;
-			ght		<= next_ght;
+			pht		<= `SD next_pht;
+			ght		<= `SD next_ght;
+			//prediction_out	<= `SD next_prediction;
 			//prediction	<= next_prediction;
 		end
 

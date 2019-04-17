@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : RS.tcl                                  */
+#/*   FILE        : BTB.tcl                                 */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,10 +11,6 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-#read_file -f ddc [list "psel_generic_NUM_REQS1.ddc" "psel_single_WIDTH16.ddc" "CAM_NUM_TAG1.ddc" "encoder.ddc"]
-#set_dont_touch psel_generic_NUM_REQS1
-#set_dont_touch CAM_NUM_TAG1
-#set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
 analyze -f sverilog [concat "../../verilog/BTB.v" $misc_files]
 elaborate BTB

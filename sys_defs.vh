@@ -54,20 +54,38 @@
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
+`define MEM_BUFFER_SIZE 10
 
 typedef struct packed {
   logic [63:0] address;
-  logic cache_checked;
-  logic [3:0] Imem_tag;
+  logic [3:0] mem_tag;
   logic valid;
-} ICACHE_BUFFER_T;
+} MEM_REQ_T;
 
-const ICACHE_BUFFER_T EMPTY_ICACHE = 
+const MEM_REQ_T EMPTY_MEM_REQ = 
 {
   64'b0,
-  1'b1,
   4'b0,
   1'b0
+};
+
+typedef struct packed {
+  MEM_REQ_T req;
+  logic req_done;
+  logic wr_to_cache;
+  logic wr_to_fifo;
+  logic [(`NUM_FIFO_BITS-1):0] fifo_num;
+  logic [(`NUM_FIFO_SIZE_BITS-1):0] fifo_idx;
+} DCACHE_MEM_REQ_T;
+
+const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
+{
+  EMPTY_MEM_REQ,
+  1'b0,
+  1'b0,
+  1'b0,
+  {`NUM_FIFO_BITS{1'b0}},
+  {`NUM_FIFO_SIZE_BITS{1'b0}}
 };
 
 // typedef struct packed {
@@ -92,8 +110,8 @@ const ICACHE_BUFFER_T EMPTY_ICACHE =
 // Pipeline Parameters
 //
 //////////////////////////////////////////////
-`define NUM_FU_TOTAL 5 // total number of functional units
-`define NUM_TYPE_FU 4 // number of different types of functional units
+`define NUM_FU_TOTAL 6 // total number of functional units
+`define NUM_TYPE_FU 5 // number of different types of functional units
 `define NUM_LD 1
 `define RS_SIZE 16
 `define MAX_RS_SIZE 16
@@ -139,6 +157,40 @@ typedef struct packed {
 
 // RAS
 `define RAS_SIZE 2**6
+
+// Branch signals
+typedef struct packed{
+  logic en;
+  logic cond;
+  logic direct;
+  logic ret;
+  logic [63:0] pc;	// Current pc, NOT NEXT PC!
+  logic [63:0] pred_pc; // Predicted pc, used to check the flushing condition
+  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  
+  logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
+  //logic taken;		// 1: branch actual taken, 0: branch actual not taken
+  
+} BR_SIG;
+
+// PHT_TWO_SC
+
+`define PHT_ROW 8
+
+
+
+//////////////////////////////////////////////////
+//
+//	Instruction Queue
+//
+//////////////////////////////////////////////////
+`define IQ_SIZE 10
+typedef struct packed{
+	logic 		valid_inst;
+	logic 	[63:0]	npc; 
+	logic	[31:0]	ir;
+	BR_SIG		branch_inst;
+} INST_Q;
+
 
 //////////////////////////////////////////////
 //
@@ -225,7 +277,8 @@ typedef enum logic [2:0]{
   FU_ALU,
   FU_LD,
   FU_MULT,
-  FU_BR
+  FU_BR,
+  FU_ST
 } FU_NAME;
 
 const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
@@ -234,7 +287,8 @@ typedef enum logic [3:0]{
   FU_ALU_IDX = 0,
   FU_LD_IDX = 2,
   FU_MULT_IDX = 3,
-  FU_BR_IDX = 4
+  FU_BR_IDX = 4,
+  FU_ST_IDX = 5
 } FU_IDX;
 
 const FU_IDX [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
@@ -251,10 +305,11 @@ typedef struct packed{
   logic busy;
   logic halt;
   logic [31:0] opcode;
-  logic take_branch;
-  logic branch_valid;
+  logic take_branch;      
+  //logic branch_valid;     //  Same as branch_inst.valid
   logic [4:0] wr_idx;
-  logic [31:0] npc;
+  logic [63:0] npc;
+  BR_SIG branch_inst;
 } ROB_ROW_T;
 
 const ROB_ROW_T EMPTY_ROB_ROW = 
@@ -269,6 +324,19 @@ const ROB_ROW_T EMPTY_ROB_ROW =
 
 // Store Queue
 `define SQ_SIZE 16
+
+// Load Queue
+`define LQ_SIZE 15
+typedef struct packed {
+  logic valid_inst;
+  logic [31:0] NPC;
+  logic [31:0] IR;
+  logic halt;
+  logic illegal;
+  PHYS_REG dest_reg;
+  logic [63:0] alu_result;
+  logic [3:0] mem_response;
+} LQ_ROW_T;
 
 //////////////////////////////////////////////
 //
@@ -514,7 +582,8 @@ typedef struct packed{
   logic        busy;
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
-  logic [$clog2(`SQ_SIZE) - 1:0] ld_pos;
+  logic [$clog2(`SQ_SIZE) - 1:0] sq_idx; // ld_pos;
+  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  //*****Heewoo :  Added for branch instruction
 } RS_ROW_T;
 
 const RS_ROW_T EMPTY_ROW = 
@@ -526,7 +595,9 @@ const RS_ROW_T EMPTY_ROW =
   1'b0,
   `NOOP_INST,
   64'b0,
-  `NULL_LD_POS
+  `NULL_LD_POS,
+  {$clog2(`OBQ_SIZE){0}}
+  
 };
 
 `endif

@@ -63,16 +63,21 @@ module Map_Table(
 		next_map_table = branch_incorrect? map_check_point : map_table;
 		if(~branch_incorrect) begin
 			// Commit Stage first
-			for (int i = 0; i < `NUM_GEN_REG; i += 1) begin
+			for (int i = 0; i < `NUM_GEN_REG-1; i += 1) begin
 				next_map_table[i].phys_tag[$clog2(`NUM_PHYS_REG)] |=  (|cam_hits[i]);
 			end
 			for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
 				// Dispatch Stage second
 				if(enable[i]) begin
-					T1[i] = next_map_table[reg_a[i]].phys_tag;
-					T2[i] = next_map_table[reg_b[i]].phys_tag;
-					T_old[i] = next_map_table[reg_dest[i]].phys_tag;
-					next_map_table[reg_dest[i]].phys_tag = (reg_dest[i] == `ZERO_REG)? `DUMMY_REG : free_reg[i];
+					
+					T1[i] =  (reg_a == `ZERO_REG)? `DUMMY_REG :next_map_table[reg_a[i]].phys_tag;
+					T2[i] = (reg_b == `ZERO_REG)? `DUMMY_REG : next_map_table[reg_b[i]].phys_tag;
+					//T1[i] =  next_map_table[reg_a[i]].phys_tag;
+					//T2[i] =  next_map_table[reg_b[i]].phys_tag;
+					
+					T_old[i] = next_map_table[reg_dest[i]].phys_tag;	
+					next_map_table[reg_dest[i]].phys_tag = free_reg[i];
+					
 				end
 			end
 		end
