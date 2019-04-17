@@ -99,7 +99,7 @@ module SQ(
 
 	// assigns
 	assign data_rd = data_next[data_rd_idx];
-	assign rd_valid = |load_req;
+	assign rd_valid = |load_req & !store_data_stall;
 	assign tail_out = tail_next;
 	assign full = (tail + 1'b1 == head);
 
@@ -113,9 +113,14 @@ module SQ(
 	assign store_head_addr = addr[head];
 
 	for (genvar i = 0; i < `SQ_SIZE; ++i) begin
-	  assign stall_req[i] = (addr_ready[i]) | ~((i <= ld_pos) & (head <= tail ? (head <= i & i < tail) : (head <= i | i < tail)));
+	  assign stall_req[i] = ((i < ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next))) & ~addr_ready_next[i];
 	end
-	assign store_data_stall = ~(&stall_req);
+	assign store_data_stall = |stall_req;
+
+	// for (genvar i = 0; i < `SQ_SIZE; ++i) begin
+	//   assign stall_req[i] = (addr_ready[i]) | ~((i <= ld_pos) & (head <= tail ? (head <= i & i < tail) : (head <= i | i < tail)));
+	// end
+	// assign store_data_stall = ~(&stall_req);
 	
 	always_comb begin
 		// default case
@@ -161,7 +166,7 @@ module SQ(
 		if (rd_en) begin
 
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
-				load_req[i] = (addr_rd == addr_next[i]) & (addr_ready_next[i]) & (i <= ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next));
+				load_req[i] = (addr_rd == addr_next[i]) & (addr_ready_next[i]) & (i < ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next));
 			end
 		end else begin
 			load_req = 0;

@@ -670,7 +670,12 @@ module testbench;
     @(posedge clock);
     @(posedge clock);
 	// $display("@@@@@@memory1");
+`ifdef PIPELINE
     $readmemh("program.mem", memory.unified_memory);
+`endif
+`ifndef PIPELINE
+    $readmemh("../../program.mem", memory.unified_memory);
+`endif
 
 	// $display("@@@@@@memory2");
     @(posedge clock);
@@ -712,6 +717,9 @@ module testbench;
     end
 	`SD;
 	 // display_stages;
+	//  if (clock_count == 100) begin
+	// 	$finish;
+	// end
   end 
 
   // Count the number of branch instructions and correctly predicted branches
@@ -851,6 +859,9 @@ module testbench;
 
       // deal with any halting conditions
       if(pipeline_error_status != NO_ERROR) begin
+        // for (int i = 0; i < 10; ++i) begin
+        //   @(posedge clock);
+        // end
         $display("@@@ Unified Memory contents hex on left, decimal on right: ");
         show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
           // 8Bytes per line, 16kB total
