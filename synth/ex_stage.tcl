@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : PHT_TWO_SC.tcl                          */
+#/*   FILE        : RS.tcl                                  */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -16,9 +16,9 @@ set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/PHT_TWO_SC.v" $misc_files]
-elaborate PHT_TWO_SC
-set design_name PHT_TWO_SC
+analyze -f sverilog [concat "../../verilog/ex_stage.v" $misc_files]
+elaborate ex_stage
+set design_name ex_stage
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
