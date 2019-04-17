@@ -53,6 +53,8 @@ DVE = $(patsubst $(VERILOG_DIR)/%.v,dve_%,$(VERILOG_SRC))
 MODULES_VG = $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg)
 MISC_MODULES_VG = $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
 
+# MODULES_VG = $(filter-out 
+
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
@@ -64,10 +66,12 @@ $(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_de
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 
 $(MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
-	make $*.vg
+	# make $*.vg
+	make syn_simv_$*
 
 $(MISC_MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
-	make $*.vg
+	# make $*.vg
+	make syn_simv_$*
 
 .PHONY: $(MODULES_VG)
 .PHONY: $(MISC_MODULES_VG)
