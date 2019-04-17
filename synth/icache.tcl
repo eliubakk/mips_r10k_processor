@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : vic_cache.tcl                                 */
+#/*   FILE        : icache.tcl                              */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,11 +11,8 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-#read_file -f ddc [list "CAM_NUM_TAG1.ddc" "encoder.ddc"]
-#set_dont_touch CAM_NUM_TAG1
-#set_dont_touch encoder
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/icache.v" $misc_files]
+analyze -f sverilog [concat "../../verilog/icache.v" "../../verilog/cachemem.v" $misc_files]
 elaborate icache
 set design_name icache
 set clock_name clock
