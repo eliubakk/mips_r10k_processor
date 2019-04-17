@@ -95,7 +95,7 @@ $(MISC_SIMV): simv_%: $(MISC_SRC) $(TEST_DIR)/%_test.v
 simv_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS_PIPE) $(patsubst %,../../%,$^) -o $@ &&\
+	$(VCS) +define+SIMV=1 $(patsubst %,../../%,$^) -o $@ &&\
 	./$@ | tee $(PIPELINE_NAME)_simv_program.out
 
 $(PIPELINE_NAME).vg: %.vg: $(SYN_DIR)/%.tcl $(MODULES_VG) $(MISC_MODULES_VG)
@@ -132,7 +132,7 @@ simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR
 dve_pipe: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/$(PIPELINE_NAME)_test.v
 	cd $(SYN_DIR) && \
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
-	$(VCS_PIPE) +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
+	$(VCS) +define+SIMV=1 +memcbk $(patsubst %,../../%,$^) -o dve -R -gui
 # updated interactive debugger "DVE", using the latest version of VCS
 # awdeorio fall 2011
 dve:	$(SIMFILES) $(TESTBENCH)

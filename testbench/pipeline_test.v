@@ -666,7 +666,12 @@ module testbench;
     @(posedge clock);
     @(posedge clock);
 	// $display("@@@@@@memory1");
+`ifdef PIPELINE
     $readmemh("program.mem", memory.unified_memory);
+`endif
+`ifndef PIPELINE
+    $readmemh("../../program.mem", memory.unified_memory);
+`endif
 
 	// $display("@@@@@@memory2");
     @(posedge clock);

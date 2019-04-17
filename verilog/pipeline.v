@@ -407,6 +407,9 @@ logic tag_in_lq;
 
   // assign sq_data_not_found = sq_data_valid;
 
+  // logic stall_load_during_ex_co;
+  // assign stall_load_during_ex_co = ex_co_valid_inst[FU_LD_IDX] & sq_data_not_found & !mem_co_enable[FU_LD_IDX];
+
   // Store Queue Module
   SQ store_queue(
     .clock(clock),
@@ -1356,7 +1359,8 @@ end
       ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
-  assign ex_co_enable[FU_LD_IDX]= (~ex_co_valid_inst[FU_LD_IDX])| (ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & mem_co_enable); // add stall from store queue
+  // assign ex_co_enable[FU_LD_IDX] = !stall_load_during_ex_co; // (~ex_co_valid_inst[FU_LD_IDX])| (ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & mem_co_enable); // add stall from store queue
+  assign ex_co_enable[FU_LD_IDX] = ~ex_co_valid_inst[FU_LD_IDX] | (ex_co_valid_inst[FU_LD_IDX] & ((sq_data_valid & mem_co_enable) | (~sq_data_valid & ~sq_data_not_found & ~lq_full)));
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
   assign ex_co_enable[3] = 1 ;
@@ -1407,8 +1411,8 @@ end
           ex_co_valid_inst[i]   <= `SD 0;
           //ex_co_rega[i]         <= `SD 0;
           ex_co_alu_result[i]   <= `SD 0;
-          ex_co_sq_idx[0] <= `SD 0;
-          ex_co_sq_idx[1] <= `SD 0;
+          // ex_co_sq_idx[0] <= `SD 0;
+          // ex_co_sq_idx[1] <= `SD 0;
 	  //ex_co_done		<= `SD 1'b0;
       end else if (ex_co_enable[i] && i!=3) begin
 		     // these are forwarded directly from ID/EX latches
@@ -1438,9 +1442,24 @@ end
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
     end // for loop end
-    ex_co_sq_idx[0] <= `SD issue_reg[FU_ST_IDX].sq_idx;
-    ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
+    // ex_co_sq_idx[0] <= `SD issue_reg[FU_ST_IDX].sq_idx;
+    // ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
   end // always
+
+  always_ff @(posedge clock) begin
+    if (reset | branch_not_taken) begin
+      ex_co_sq_idx[0] <= `SD 0;
+      ex_co_sq_idx[1] <= `SD 0;
+    end else begin
+      if (ex_co_enable[FU_LD_IDX]) begin
+        ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
+      end
+
+      if (ex_co_enable[FU_ST_IDX]) begin
+        ex_co_sq_idx[0] <= `SD issue_reg[FU_ST_IDX].sq_idx;
+      end
+    end
+  end
 
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
@@ -1804,9 +1823,9 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //     end
   always_ff @(posedge clock) begin
     if(reset | branch_not_taken) begin
-      retire_is_store_next <= 0;
+      retire_is_store_next <= `SD 0;
     end else begin
-      retire_is_store_next <= retire_is_store;
+      retire_is_store_next <= `SD retire_is_store;
     end
   end
   
