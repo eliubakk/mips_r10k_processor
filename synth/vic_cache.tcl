@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : vic_cache.tcl                                 */
+#/*   FILE        : vic_cache.tcl                           */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
