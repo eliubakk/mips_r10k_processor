@@ -99,7 +99,7 @@ module SQ(
 
 	// assigns
 	assign data_rd = data_next[data_rd_idx];
-	assign rd_valid = |load_req;
+	assign rd_valid = |load_req & !store_data_stall;
 	assign tail_out = tail_next;
 	assign full = (tail + 1'b1 == head);
 
