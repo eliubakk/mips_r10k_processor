@@ -1,0 +1,63 @@
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 16 23:16 2019
+VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
+@@
+@@
+@@                     0  Asserting System reset......
+@@
+@@                     0 : System STILL at reset, can't show anything
+@@
+@@
+@@                   100 : System STILL at reset, can't show anything
+@@
+@@
+@@                   200 : System STILL at reset, can't show anything
+@@
+@@
+@@                   300 : System STILL at reset, can't show anything
+@@
+@@                   360  Deasserting System reset......
+@@
+@@
+@@@ Unified Memory contents hex on left, decimal on right: 
+@@@
+@@@ mem[    0] = 2ffe0000c3e00021 : 3458201567153356833
+@@@ mem[    8] = 0000000000000003 : 3
+@@@ mem[   16] = 0000000000000001 : 1
+@@@ mem[   24] = 0000000000000004 : 4
+@@@ mem[   32] = 0000000000000001 : 1
+@@@ mem[   40] = 0000000000000005 : 5
+@@@ mem[   48] = 0000000000000009 : 9
+@@@ mem[   56] = 0000000000000002 : 2
+@@@ mem[   64] = 0000000000000006 : 6
+@@@ mem[   72] = 0000000000000005 : 5
+@@@ mem[   80] = 0000000000000003 : 3
+@@@ mem[   88] = 0000000000000005 : 5
+@@@ mem[   96] = 0000000000000008 : 8
+@@@ mem[  104] = 0000000000000009 : 9
+@@@ mem[  112] = 0000000000000007 : 7
+@@@ mem[  120] = 0000000000000009 : 9
+@@@ mem[  128] = 0000000000000003 : 3
+@@@ mem[  136] = 207f0000205f0004 : 2341590331799044100
+@@@ mem[  144] = a4830004a4830000 : 11854318664109195264
+@@@ mem[  152] = b4430004b4430000 : 12989225770470801408
+@@@ mem[  160] = 00000555a4830000 : 5865390407680
+@@@
+@@@
+@@                  2720 : System halted
+@@
+@@@ System halted on memory error
+@@@
+@@
+@@  24 cycles / 4 instrs = 6.000000 CPI
+@@
+@@  690.00 ns total time to execute
+@@
+
+$finish called from file "testbench/testbench.v", line 257.
+$finish at simulation time                 3720
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 372000 ps
+CPU Time:      0.240 seconds;       Data structure size:   0.2Mb
+Tue Apr 16 23:16:46 2019

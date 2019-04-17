@@ -22,28 +22,30 @@ VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 207f0000205f0000 : 2341590331799044096
-@@@ mem[    8] = 404405a5209f0001 : 4630832523618746369
-@@@ mem[   16] = e4a00005f4a00004 : 16474167462500237316
-@@@ mem[   24] = 4044040340840404 : 4630830728857519108
-@@@ mem[   32] = 4044040200000555 : 4630830723480159573
-@@@ mem[   40] = 40430404c3fffffb : 4630549260381716475
-@@@ mem[   48] = 00000000c3fffff9 : 3288334329
+@@@ mem[    0] = 205f0002203f1000 : 2332583141132144640
+@@@ mem[    8] = 209f0004207f0003 : 2350597548235751427
+@@@ mem[   16] = b44100004c430402 : 12988662801592681474
+@@@ mem[   24] = 4c430403a4a10000 : 5495240384015564800
+@@@ mem[   32] = a4c10000b4610000 : 11871770095751593984
+@@@ mem[   40] = b48100004c430404 : 13006677200102163460
+@@@ mem[   48] = 00000555a4e10000 : 5865396568064
+@@@
+@@@ mem[ 4096] = 000000000000006c : 108
 @@@
 @@@
-@@                  5820 : System halted
+@@                  7320 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  55 cycles / 10 instrs = 5.500000 CPI
+@@  70 cycles / 13 instrs = 5.384615 CPI
 @@
-@@  1620.00 ns total time to execute
+@@  2070.00 ns total time to execute
 @@
 
 $finish called from file "testbench/testbench.v", line 257.
-$finish at simulation time                 6820
+$finish at simulation time                 8320
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 682000 ps
-CPU Time:      0.270 seconds;       Data structure size:   0.2Mb
-Tue Apr 16 23:17:06 2019
+Time: 832000 ps
+CPU Time:      0.280 seconds;       Data structure size:   0.2Mb
+Tue Apr 16 23:17:53 2019

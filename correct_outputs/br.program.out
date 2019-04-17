@@ -1,6 +1,6 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 16 23:17 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 16 23:15 2019
 VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@
@@ -22,28 +22,25 @@ VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 207f0000205f0000 : 2341590331799044096
-@@@ mem[    8] = 404405a5209f0001 : 4630832523618746369
-@@@ mem[   16] = e4a00005f4a00004 : 16474167462500237316
-@@@ mem[   24] = 4044040340840404 : 4630830728857519108
-@@@ mem[   32] = 4044040200000555 : 4630830723480159573
-@@@ mem[   40] = 40430404c3fffffb : 4630549260381716475
-@@@ mem[   48] = 00000000c3fffff9 : 3288334329
+@@@ mem[    0] = 205f0002203f0001 : 2332583141132140545
+@@@ mem[    8] = c2800002207f0003 : 14015202049512112131
+@@@ mem[   16] = 20bf0005209f0004 : 2359604751787556868
+@@@ mem[   24] = 0000055520df0006 : 5863181844486
 @@@
 @@@
-@@                  5820 : System halted
+@@                  3320 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  55 cycles / 10 instrs = 5.500000 CPI
+@@  30 cycles / 5 instrs = 6.000000 CPI
 @@
-@@  1620.00 ns total time to execute
+@@  870.00 ns total time to execute
 @@
 
 $finish called from file "testbench/testbench.v", line 257.
-$finish at simulation time                 6820
+$finish at simulation time                 4320
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 682000 ps
+Time: 432000 ps
 CPU Time:      0.270 seconds;       Data structure size:   0.2Mb
-Tue Apr 16 23:17:06 2019
+Tue Apr 16 23:15:13 2019

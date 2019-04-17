@@ -22,28 +22,34 @@ VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 207f0000205f0000 : 2341590331799044096
-@@@ mem[    8] = 404405a5209f0001 : 4630832523618746369
-@@@ mem[   16] = e4a00005f4a00004 : 16474167462500237316
-@@@ mem[   24] = 4044040340840404 : 4630830728857519108
-@@@ mem[   32] = 4044040200000555 : 4630830723480159573
-@@@ mem[   40] = 40430404c3fffffb : 4630549260381716475
-@@@ mem[   48] = 00000000c3fffff9 : 3288334329
+@@@ mem[    0] = 207f001420bf000a : 2341590417704681482
+@@@ mem[    8] = b4a10000203f1000 : 13015684398618447872
+@@@ mem[   16] = 47ff041fa4c10000 : 5187869829708709888
+@@@ mem[   24] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   32] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   40] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   48] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   56] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   64] = a481000047ff041f : 11853755695423751199
+@@@ mem[   72] = 40650404b4610000 : 4640119409327800320
+@@@ mem[   80] = 0000000000000555 : 1365
+@@@
+@@@ mem[ 4096] = 0000000000000014 : 20
 @@@
 @@@
-@@                  5820 : System halted
+@@                 10820 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  55 cycles / 10 instrs = 5.500000 CPI
+@@  105 cycles / 20 instrs = 5.250000 CPI
 @@
-@@  1620.00 ns total time to execute
+@@  3120.00 ns total time to execute
 @@
 
 $finish called from file "testbench/testbench.v", line 257.
-$finish at simulation time                 6820
+$finish at simulation time                11820
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 682000 ps
-CPU Time:      0.270 seconds;       Data structure size:   0.2Mb
-Tue Apr 16 23:17:06 2019
+Time: 1182000 ps
+CPU Time:      0.280 seconds;       Data structure size:   0.2Mb
+Tue Apr 16 23:17:23 2019
