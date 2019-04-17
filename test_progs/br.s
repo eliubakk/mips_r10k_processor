@@ -21,7 +21,7 @@
 	lda	 $r1,1		
 	lda	 $r2,2
 	lda	 $r3,3
-	br	 $r20,look
+	br	 look
 	lda	 $r4,4
 	lda	 $r5,5
 look:	lda	 $r6,6 

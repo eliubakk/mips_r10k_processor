@@ -1498,8 +1498,10 @@ end
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
   assign lq_load_in.mem_response = Dmem2proc_response;
 
-	assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid;
-//  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
+  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & ex_co_rd_mem[FU_LD_IDX];
+  // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
+	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
+  // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
   assign lq_pop_en = tag_in_lq;
   // assign lq_mem_tag = Dmem2proc_response;
 
