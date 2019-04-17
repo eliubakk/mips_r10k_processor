@@ -1,6 +1,6 @@
 # Begin_DVE_Session_Save_Info
 # DVE full session
-# Saved on Wed Apr 17 01:55:25 2019
+# Saved on Wed Apr 17 02:08:54 2019
 # Designs open: 1
 #   Sim: dve
 # Toplevel windows open: 3
@@ -9,8 +9,8 @@
 # 	TopLevel.3
 #   Source.1: _vcs_unit__76041625
 #   Wave.1: 269 signals
-#   Wave.2: 9 signals
-#   Group count = 26
+#   Wave.2: 18 signals
+#   Group count = 28
 #   Group Group1 signal count = 5
 #   Group Group9 signal count = 3
 #   Group Group3 signal count = 8
@@ -37,6 +37,8 @@
 #   Group Group19 signal count = 1
 #   Group Group20 signal count = 1
 #   Group Group21 signal count = 2
+#   Group Group22 signal count = 3
+#   Group Group23 signal count = 6
 # End_DVE_Session_Save_Info
 
 # DVE version: N-2017.12-SP2-1_Full64
@@ -142,23 +144,23 @@ gui_show_toolbar -toolbar {Testbench}
 # End ToolBar settings
 
 # Docked window settings
-set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 256]
+set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 255]
 catch { set Hier.1 [gui_share_window -id ${HSPane.1} -type Hier] }
-gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 256
+gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 255
 gui_set_window_pref_key -window ${HSPane.1} -key dock_height -value_type integer -value -1
 gui_set_window_pref_key -window ${HSPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 255} {height 716} {dock_state left} {dock_on_new_line true} {child_hier_colhier 149} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
-set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 493]
+gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 254} {height 717} {dock_state left} {dock_on_new_line true} {child_hier_colhier 149} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
+set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 492]
 catch { set Data.1 [gui_share_window -id ${DLPane.1} -type Data] }
-gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 493
+gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 492
 gui_set_window_pref_key -window ${DLPane.1} -key dock_height -value_type integer -value 1000
 gui_set_window_pref_key -window ${DLPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 492} {height 716} {dock_state left} {dock_on_new_line true} {child_data_colvariable 212} {child_data_colvalue 153} {child_data_coltype 144} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
-set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 166]
+gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 491} {height 717} {dock_state left} {dock_on_new_line true} {child_data_colvariable 212} {child_data_colvalue 153} {child_data_coltype 144} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
+set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 165]
 gui_set_window_pref_key -window ${Console.1} -key dock_width -value_type integer -value 1860
-gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 166
+gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 165
 gui_set_window_pref_key -window ${Console.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 1919} {height 165} {dock_state bottom} {dock_on_new_line true}}
+gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 1919} {height 164} {dock_state bottom} {dock_on_new_line true}}
 #### Start - Readjusting docked view's offset / size
 set dockAreaList { top left right bottom }
 foreach dockArea $dockAreaList {
@@ -195,7 +197,7 @@ if {![gui_exist_window -window TopLevel.2]} {
 } else { 
     set TopLevel.2 TopLevel.2
 }
-gui_show_window -window ${TopLevel.2} -show_state maximized -rect {{1 251} {1920 1231}}
+gui_show_window -window ${TopLevel.2} -show_state maximized -rect {{1 288} {1920 1268}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -260,7 +262,7 @@ if {![gui_exist_window -window TopLevel.3]} {
 } else { 
     set TopLevel.3 TopLevel.3
 }
-gui_show_window -window ${TopLevel.3} -show_state maximized -rect {{1 103} {1920 1083}}
+gui_show_window -window ${TopLevel.3} -show_state maximized -rect {{1 140} {1920 1120}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -366,7 +368,6 @@ gui_load_child_values {testbench.pipeline_0.regf_0}
 gui_load_child_values {testbench.pipeline_0.inst_memory}
 gui_load_child_values {testbench.pipeline_0.if_stage_0}
 gui_load_child_values {testbench.pipeline_0.inst_memory.PC_queue_cam}
-gui_load_child_values {testbench.pipeline_0.store_queue}
 
 
 set _session_group_1 Group1
@@ -570,6 +571,18 @@ set Group21 "$_session_group_26"
 
 gui_sg_addsignal -group "$_session_group_26" { testbench.pipeline_0.sq_data_valid testbench.pipeline_0.sq_data_not_found }
 
+set _session_group_27 Group22
+gui_sg_create "$_session_group_27"
+set Group22 "$_session_group_27"
+
+gui_sg_addsignal -group "$_session_group_27" { testbench.pipeline_0.store_queue.addr_rd testbench.pipeline_0.store_queue.ld_pos testbench.pipeline_0.store_queue.rd_en }
+
+set _session_group_28 Group23
+gui_sg_create "$_session_group_28"
+set Group23 "$_session_group_28"
+
+gui_sg_addsignal -group "$_session_group_28" { testbench.pipeline_0.store_queue.addr_next testbench.pipeline_0.store_queue.addr_ready_next testbench.pipeline_0.store_queue.data_next testbench.pipeline_0.store_queue.data_ready_next testbench.pipeline_0.store_queue.head_next testbench.pipeline_0.store_queue.tail_next }
+
 # Global: Highlighting
 
 # Global: Stack
@@ -578,7 +591,7 @@ gui_change_stack_mode -mode list
 # Post database loading setting...
 
 # Restore C1 time
-gui_set_time -C1_only 5335
+gui_set_time -C1_only 5444
 
 
 
@@ -605,19 +618,20 @@ gui_list_set_filter -id ${Hier.1} -text {*}
 gui_hier_list_init -id ${Hier.1}
 gui_change_design -id ${Hier.1} -design Sim
 catch {gui_list_expand -id ${Hier.1} testbench}
-catch {gui_list_select -id ${Hier.1} {testbench.pipeline_0}}
-gui_view_scroll -id ${Hier.1} -vertical -set 47
+catch {gui_list_expand -id ${Hier.1} testbench.pipeline_0}
+catch {gui_list_select -id ${Hier.1} {testbench.pipeline_0.store_queue}}
+gui_view_scroll -id ${Hier.1} -vertical -set 93
 gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Data 'Data.1'
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
-gui_list_set_filter -id ${Data.1} -text {*sq*}
-gui_list_show_data -id ${Data.1} {testbench.pipeline_0}
+gui_list_set_filter -id ${Data.1} -text {*next*}
+gui_list_show_data -id ${Data.1} {testbench.pipeline_0.store_queue}
 gui_show_window -window ${Data.1}
-catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.sq_data_valid testbench.pipeline_0.sq_data_not_found }}
+catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.store_queue.addr_next testbench.pipeline_0.store_queue.addr_ready_next testbench.pipeline_0.store_queue.data_next testbench.pipeline_0.store_queue.data_ready_next testbench.pipeline_0.store_queue.head_next testbench.pipeline_0.store_queue.tail_next }}
 gui_view_scroll -id ${Data.1} -vertical -set 0
 gui_view_scroll -id ${Data.1} -horizontal -set 0
-gui_view_scroll -id ${Hier.1} -vertical -set 47
+gui_view_scroll -id ${Hier.1} -vertical -set 93
 gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Source 'Source.1'
@@ -638,7 +652,7 @@ gui_list_set_height -id Wave -height 25
 set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
 gui_marker_set_ref -id ${Wave.1}  C1
-gui_wv_zoom_timerange -id ${Wave.1} 4205 6527
+gui_wv_zoom_timerange -id ${Wave.1} 3871 6193
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group9}
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group1}
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group3}
@@ -689,7 +703,7 @@ gui_list_set_filter -id ${Wave.1} -list { {Buffer 1} {Input 1} {Others 1} {Linka
 gui_list_set_filter -id ${Wave.1} -text {*}
 gui_list_set_insertion_bar  -id ${Wave.1} -group Group13  -position in
 
-gui_marker_move -id ${Wave.1} {C1} 5335
+gui_marker_move -id ${Wave.1} {C1} 5444
 gui_view_scroll -id ${Wave.1} -vertical -set 0
 gui_show_grid -id ${Wave.1} -enable false
 
@@ -702,7 +716,7 @@ gui_list_set_height -id Wave -height 25
 set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
 gui_marker_set_ref -id ${Wave.2}  C1
-gui_wv_zoom_timerange -id ${Wave.2} 3995 6268
+gui_wv_zoom_timerange -id ${Wave.2} 3699 5972
 gui_list_add_group -id ${Wave.2} -after {New Group} {Group14}
 gui_list_add_group -id ${Wave.2} -after {New Group} {Group15}
 gui_list_add_group -id ${Wave.2} -after {New Group} {Group16}
@@ -711,8 +725,11 @@ gui_list_add_group -id ${Wave.2} -after {New Group} {Group18}
 gui_list_add_group -id ${Wave.2} -after {New Group} {Group19}
 gui_list_add_group -id ${Wave.2} -after {New Group} {Group20}
 gui_list_add_group -id ${Wave.2} -after {New Group} {Group21}
+gui_list_add_group -id ${Wave.2} -after {New Group} {Group22}
+gui_list_add_group -id ${Wave.2} -after {New Group} {Group23}
 gui_list_expand -id ${Wave.2} testbench.pipeline_0.ex_co_IR
-gui_list_select -id ${Wave.2} {testbench.pipeline_0.sq_data_not_found }
+gui_list_expand -id ${Wave.2} testbench.pipeline_0.store_queue.addr_ready_next
+gui_list_select -id ${Wave.2} {testbench.pipeline_0.store_queue.head_next }
 gui_seek_criteria -id ${Wave.2} {Any Edge}
 
 
@@ -728,10 +745,10 @@ if { $groupExD } {
 }
 gui_list_set_filter -id ${Wave.2} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
 gui_list_set_filter -id ${Wave.2} -text {*}
-gui_list_set_insertion_bar  -id ${Wave.2} -group Group21  -position in
+gui_list_set_insertion_bar  -id ${Wave.2} -group Group23  -position in
 
-gui_marker_move -id ${Wave.2} {C1} 5335
-gui_view_scroll -id ${Wave.2} -vertical -set 0
+gui_marker_move -id ${Wave.2} {C1} 5444
+gui_view_scroll -id ${Wave.2} -vertical -set 503
 gui_show_grid -id ${Wave.2} -enable false
 # Restore toplevel window zorder
 # The toplevel window could be closed if it has no view/pane

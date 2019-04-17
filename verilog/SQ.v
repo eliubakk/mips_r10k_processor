@@ -113,7 +113,7 @@ module SQ(
 	assign store_head_addr = addr[head];
 
 	for (genvar i = 0; i < `SQ_SIZE; ++i) begin
-	  assign stall_req[i] = ((i <= ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next))) & ~addr_ready_next[i];
+	  assign stall_req[i] = ((i < ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next))) & ~addr_ready_next[i];
 	end
 	assign store_data_stall = |stall_req;
 
