@@ -15,10 +15,10 @@ module dcache(clock, reset,
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
   typedef struct packed {
-  logic [63:0] data;
-  logic [(`NUM_TAG_BITS-1):0] tag;
-  logic valid;
-  logic dirty;
+    logic [63:0] data;
+    logic [(`NUM_TAG_BITS-1):0] tag;
+    logic valid;
+    logic dirty;
   } CACHE_LINE_T;
 
   typedef struct packed {
@@ -29,7 +29,6 @@ module dcache(clock, reset,
     logic [`NUM_TAG_BITS-1:0] tag;
     logic [`NUM_SET_BITS-1:0] idx;
     logic [63:0] data;
-    logic [3:0] Dmem_tag;
     logic valid;
   } DCACHE_FIFO_T;
 
@@ -38,7 +37,6 @@ module dcache(clock, reset,
     {`NUM_TAG_BITS{1'b0}},
     {`NUM_SET_BITS{1'b0}},
     64'b0,
-    4'b0,
     1'b0
   };
 
@@ -84,11 +82,11 @@ module dcache(clock, reset,
   logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_idx;
   logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
 
-  logic [(WR_PORTS+RD_PORTS-1):0] cache_wr_en;
-  logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_SET_BITS-1):0] cache_wr_idx;
-  logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] cache_wr_tag;
-  logic [(WR_PORTS+RD_PORTS-1):0][63:0] cache_wr_data;
-  logic [(WR_PORTS+RD_PORTS-1):0] cache_wr_dirty;
+  logic [(WR_PORTS+RD_PORTS):0] cache_wr_en;
+  logic [(WR_PORTS+RD_PORTS):0][(`NUM_SET_BITS-1):0] cache_wr_idx;
+  logic [(WR_PORTS+RD_PORTS):0][(`NUM_TAG_BITS-1):0] cache_wr_tag;
+  logic [(WR_PORTS+RD_PORTS):0][63:0] cache_wr_data;
+  logic [(WR_PORTS+RD_PORTS):0] cache_wr_dirty;
 
   //cache memory outputs
   logic [RD_PORTS:0][63:0] cache_rd_data;
@@ -97,14 +95,14 @@ module dcache(clock, reset,
   logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
   logic [RD_PORTS:0] cache_rd_miss_valid;
 
-  logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_SET_BITS-1):0] cache_wr_miss_idx;
-  logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
-  logic [(WR_PORTS+RD_PORTS-1):0] cache_wr_miss_valid;
+  logic [(WR_PORTS+RD_PORTS):0][(`NUM_SET_BITS-1):0] cache_wr_miss_idx;
+  logic [(WR_PORTS+RD_PORTS):0][(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
+  logic [(WR_PORTS+RD_PORTS):0] cache_wr_miss_valid;
 
   cachemem #(
     .NUM_WAYS(NUM_WAYS),
     .RD_PORTS(RD_PORTS+1),
-    .WR_PORTS(WR_PORTS+RD_PORTS)) 
+    .WR_PORTS(WR_PORTS+RD_PORTS+1)) 
   memory(
     .clock(clock),
     .reset(reset),
@@ -148,10 +146,10 @@ module dcache(clock, reset,
   logic [(`NUM_FIFO_BITS-1):0] acc;
   logic [63:0] next_rd_addr;
 
-  DCACHE_MEM_REQ_T [] mem_req_queue;
-
-
-
+  DCACHE_MEM_REQ_T [(`MEM_BUFFER_SIZE-1):0] mem_req_queue, mem_req_queue_next;
+  logic [($clog2(`MEM_BUFFER_SIZE)-1):0] mem_req_queue_tail, mem_req_queue_tail_next;
+  logic [($clog2(`MEM_BUFFER_SIZE)-1):0] send_req_ptr, send_req_ptr_next;
+  logic [($clog2(`MEM_BUFFER_SIZE)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
 
   logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][[(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_addr_table_in;
   logic [(RD_PORTS-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_cam_tags;
@@ -168,6 +166,7 @@ module dcache(clock, reset,
   logic unanswered_miss;
   logic update_mem_tag;
   logic mem_done;
+  logic [63:0] mem_rd_data;
 
   //Instantiate CAM to check for rd address in fifo
   genvar ig, jg, kg;
@@ -242,84 +241,169 @@ module dcache(clock, reset,
   end
 
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
-                                      !fifo_hit_num_valid & cache_miss_addr_valid_rd;
+                                      !fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
 
+  assign proc2Dmem_addr = send_request? proc2Dcache_rd_addr[0] : 64'b0;
   assign proc2Dmem_command = send_request? BUS_LOAD :
                                            BUS_NONE;
-  assign proc2Dmem_addr = send_request? proc2Dcache_rd_addr : 64'b0;
+  
+  assign mem_done = (mem_req_queue[mem_waiting_ptr].req.mem_tag == Dmem2proc_tag) &&
+                              (mem_req_queue[mem_waiting_ptr].req.mem_tag  != 0);
+
+  assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = mem_req_queue[mem_waiting_ptr-1].req.address[31:3];
+  assign cache_wr_dirty[RD_PORTS+WR_PORTS] = 1'b0;
+  assign cache_wr_data[RD_PORTS+WR_PORTS] = mem_rd_data;
+
+  assign update_mem_tag = send_request? (Dmem2proc_response != 0) : 1'b0;
 
   always_comb begin
+    mem_req_queue_next = mem_req_queue;
+    mem_req_queue_tail_next = mem_req_queue_tail;
+    send_req_ptr_next = send_req_ptr;
+    mem_waiting_ptr_next = mem_waiting_ptr;
     fifo_next = fifo;
     fetch_stride_next = fetch_stride;
     fifo_tail_next = fifo_tail;
     fifo_busy_next = fifo_busy;
     fifo_lru_next = fifo_lru;
 
-    //allocate new fifo
-    if(!fifo_hit_num_valid & cache_miss_addr_valid_rd) begin
-      // find position based on lru
-      fill_fifo_idx = 0;
-      next_lru_idx = 0;
-      acc = `NUM_FIFO / 2;
+    if(mem_done) begin
+      mem_req_queue_next[mem_waiting_ptr_next].req_done = 1'b1;
+      mem_waiting_ptr_next += 1;
+    end
 
-      for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
-        fifo_lru_next[next_lru_idx] = ~fifo_lru_next[next_lru_idx];
-        if (~fifo_lru_next[next_lru_idx]) begin
-          fill_fifo_idx += acc;
-          next_lru_idx = (2 * next_lru_idx) + 2;
-        end else begin
-          next_lru_idx = (2 * next_lru_idx) + 1;
-        end
-        acc /= 2;
+    if(mem_req_queue[0].req_done) begin
+      if(mem_req_queue[0].wr_to_fifo) begin
+        {fifo_next[mem_req_queue[0].fifo_num][mem_req_queue[0].fifo_idx].tag,
+         fifo_next[mem_req_queue[0].fifo_num][mem_req_queue[0].fifo_idx].idx} = mem_req_queue[0].req.address;
+         fifo_next[mem_req_queue[0].fifo_num][mem_req_queue[0].fifo_idx].data = mem_rd_data;
+         fifo_next[mem_req_queue[0].fifo_num][mem_req_queue[0].fifo_idx].valid = 1'b1;
       end
-
-      next_rd_addr = {proc2Dcache_rd_addr[63:3], 3'b0} + 8;
-
-      {fifo_next[fill_fifo_idx][0].tag, fifo_next[fill_fifo_idx][0].idx} = next_rd_addr[31:3];
-      fifo_next[fill_fifo_idx][0].data = 64'b0;
-      fifo_next[fill_fifo_idx][0].Dmem_tag = 4'b0;
-      fifo_next[fill_fifo_idx][0].valid = 1'b0;
-      fifo_next[fill_fifo_idx][`FIFO_SIZE-1:1] = {(`FIFO_SIZE-1){EMPTY_DCACHE}};
-      fetch_stride_next[fill_fifo_idx] = 1;
-      fifo_tail_next[fill_fifo_idx] = 0;
-      fifo_busy_next[fill_fifo_idx] = 1'b1;
-    //update fifo after data is written to cache
-    end else if (fifo_hit_num_valid & cache_miss_addr_valid_rd) begin
-      //update lru
-      next_lru_idx = 0;
-      acc = `NUM_FIFO / 2;
-      temp_lru_idx = `NUM_FIFO / 2;
-
-      for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
-        if (fifo_hit_num >= temp_lru_idx) begin
-          fifo_lru_next[next_lru_idx] = 1'b0;
-          next_lru_idx = (2 * next_lru_idx) + 2;
-          temp_lru_idx += (acc / 2);
-        end else begin
-          fifo_lru_next[next_lru_idx] = 1'b1;
-          next_lru_idx = (2 * next_lru_idx) + 1;
-          temp_lru_idx -= (acc / 2);
-        end
-        acc /= 2;
+      mem_req_queue_next[`MEM_BUFFER_SIZE-1:0] = {EMPTY_DCACHE_MEM_REQ, mem_req_queue_next[`MEM_BUFFER_SIZE-1:1]};
+      mem_req_queue_tail_next -= 1;
+      if(send_req_ptr > 0) begin
+        send_req_ptr_next -= 1;
       end
-
-      //update fifo
-      if(fifo_hit_idx_valid) begin
-        fetch_stride_next[fifo_hit_num] += (fetch_stride[fifo_hit_num] * fifo_hit_idx);
-        fifo_next[fifo_hit_num] = fifo[fifo_hit_num] >> ((fifo_hit_idx+1)*$bits(DCACHE_FIFO_T));
-        fifo_tail_next[fifo_hit_num] -= (fifo_hit_idx + 1);
-        //fifo_next[fifo_hit_num][`FIFO_SIZE-1:0] = {{(fifo_hit_idx+1){EMPTY_DCACHE}}, fifo[fifo_hit_num][`FIFO_SIZE-1:(fifo_hit_idx+1)]};
+      if(mem_waiting_ptr > 0) begin
+        mem_waiting_ptr_next -= 1;
       end
     end
 
-    if()
+    if(update_mem_tag) begin
+      mem_req_queue_next[send_req_ptr_next].req.mem_tag = Dmem2proc_response;
+      send_req_ptr_next += 1;
+    end
+
+    //allocate new fifo
+    for(int i = 0; i < RD_PORTS; i += 1) begin
+      if(!fifo_hit_num_valid[i] & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+        mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[ig][63:3], 3'b0};
+        mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
+        mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
+        mem_req_queue_next[mem_req_queue_tail_next].req_done = 1'b0;
+        mem_req_queue_next[mem_req_queue_tail_next].wr_to_cache = 1'b1;
+        mem_req_queue_next[mem_req_queue_tail_next].wr_to_fifo = 1'b0;
+        mem_req_queue_tail_next += 1;
+
+        // find position based on lru
+        fill_fifo_idx = 0;
+        next_lru_idx = 0;
+        acc = `NUM_FIFO / 2;
+
+        for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
+          fifo_lru_next[next_lru_idx] = ~fifo_lru_next[next_lru_idx];
+          if (~fifo_lru_next[next_lru_idx]) begin
+            fill_fifo_idx += acc;
+            next_lru_idx = (2 * next_lru_idx) + 2;
+          end else begin
+            next_lru_idx = (2 * next_lru_idx) + 1;
+          end
+          acc /= 2;
+        end
+
+        next_rd_addr = {proc2Dcache_rd_addr[i][63:3], 3'b0} + 8;
+
+        {fifo_next[fill_fifo_idx][0].tag, fifo_next[fill_fifo_idx][0].idx} = next_rd_addr[31:3];
+        fifo_next[fill_fifo_idx][0].data = 64'b0;
+        //fifo_next[fill_fifo_idx][0].Dmem_tag = 4'b0;
+        fifo_next[fill_fifo_idx][0].valid = 1'b0;
+        fifo_next[fill_fifo_idx][`FIFO_SIZE-1:1] = {(`FIFO_SIZE-1){EMPTY_DCACHE}};
+        fetch_stride_next[fill_fifo_idx] = 1;
+        fifo_tail_next[fill_fifo_idx] = 0;
+        fifo_busy_next[fill_fifo_idx] = 1'b1;
+      //update fifo after data is written to cache
+      end else if (fifo_hit_num_valid[i] & cache_rd_miss_valid[i]) begin
+        //update lru
+        next_lru_idx = 0;
+        acc = `NUM_FIFO / 2;
+        temp_lru_idx = `NUM_FIFO / 2;
+
+        for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
+          if (fifo_hit_num[i] >= temp_lru_idx) begin
+            fifo_lru_next[next_lru_idx] = 1'b0;
+            next_lru_idx = (2 * next_lru_idx) + 2;
+            temp_lru_idx += (acc / 2);
+          end else begin
+            fifo_lru_next[next_lru_idx] = 1'b1;
+            next_lru_idx = (2 * next_lru_idx) + 1;
+            temp_lru_idx -= (acc / 2);
+          end
+          acc /= 2;
+        end
+      end
+
+      //update fifo
+      if(fifo_hit_idx_valid[i]) begin
+        fetch_stride_next[fifo_hit_num[i]] += (fetch_stride[fifo_hit_num[i]] * fifo_hit_idx[i]);
+        fifo_next[fifo_hit_num[i]] = fifo[fifo_hit_num[i]] >> ((fifo_hit_idx[i]+1)*$bits(DCACHE_FIFO_T));
+        fifo_tail_next[fifo_hit_num[i]] -= (fifo_hit_idx[i] + 1);
+        //fifo_next[fifo_hit_num][`FIFO_SIZE-1:0] = {{(fifo_hit_idx+1){EMPTY_DCACHE}}, fifo[fifo_hit_num][`FIFO_SIZE-1:(fifo_hit_idx+1)]};
+      end
+    end
   end
 
-
-
   always_ff @(posedge clock) begin
-    if (reset) begin
-      test <= `SD 0;
+    if(reset) begin
+      for(int i = 0; i < `NUM_FIFO; i += 1) begin
+        for(int j = 0; j < `FIFO_SIZE; j += 1) begin
+          fifo[i][j] <= `SD EMPTY_DCACHE;
+        end
+        fifo_tail[i] <= `SD 0;
+        fetch_stride[i] <= `SD 0;
+      end
+      fifo_busy <= `SD 0;
+      fifo_lru <= `SD 0;
+      //last_PC_in   <= `SD -1;     
+      send_request <= `SD 1'b0;
+      for(int i = 0; i < `MEM_BUFFER_SIZE; i += 1) begin
+        mem_req_queue[i] <= `SD EMPTY_MEM_REQ;
+      end
+      mem_req_queue_tail   <= `SD 0;
+      send_req_ptr    <= `SD 0;
+      mem_waiting_ptr <= `SD 0;
+      cache_wr_en[RD_PORTS+WR_PORTS] <= `SD 1'b0;
+      cache_wr_data[RD_PORTS+WR_PORTS] <= `SD 64'b0;
+      mem_rd_data <= `SD 64'b0;
+    end else begin
+      fifo <= `SD fifo_next;
+      fifo_tail <= `SD fifo_tail_next;
+      fetch_stride <= `SD fetch_stride_next;
+      fifo_busy <= `SD fifo_busy_next;
+      fifo_lru <= `SD fifo_lru_next;
+      //last_PC_in      <= `SD PC_in;
+      send_request    <= `SD unanswered_miss;
+      mem_req_queue   <= `SD mem_req_queue_next;
+      mem_req_queue_tail   <= `SD mem_req_queue_tail_next;
+      send_req_ptr    <= `SD send_req_ptr_next;
+      mem_waiting_ptr <= `SD mem_waiting_ptr_next;
+
+      if(mem_done) begin
+        mem_rd_data <= `SD Dmem2proc_data;
+        cache_wr_en[RD_PORTS+WR_PORTS] <= `SD mem_req_queue[mem_waiting_ptr].wr_to_cache;
+      end else begin
+        mem_rd_data <= `SD 64'b0;
+        cache_wr_en[RD_PORTS+WR_PORTS] <= `SD 1'b0;
+      end
     end
   end
 

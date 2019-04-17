@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : ISR.tcl                          */
+#/*   FILE        : CDB.tcl                                 */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,8 +11,11 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-read_file -f sverilog [list "verilog/cdb.v"]
+
+analyze -f sverilog [list "../../verilog/CDB.v"]
+elaborate CDB
 set design_name CDB
+##############################################
 set clock_name clock
 set reset_name reset
 set CLK_PERIOD 10

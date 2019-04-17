@@ -78,14 +78,14 @@ $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out && \
 	mkdir -p ../$(LIB_DIR) && \
-	mv -f $*.ddc ../$(LIB_DIR)
+	cp -f $*.ddc ../$(LIB_DIR)
 
 $(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 	mkdir -p ../$(LIB_DIR) && \
-	mv -f $*.ddc ../$(LIB_DIR)
+	cp -f $*.ddc ../$(LIB_DIR)
 
 $(PIPELINE_SYN_FILE): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh
 	cd $(SYN_DIR) && \
