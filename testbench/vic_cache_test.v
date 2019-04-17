@@ -12,7 +12,7 @@ typedef struct packed {
 logic [63:0] data;
 logic [(`_NUM_TAG_BITS-1):0] tag;
 logic valid;
-logic dirty;
+//logic dirty;
 } _CACHE_LINE_T;
 
 typedef struct packed {
@@ -23,57 +23,57 @@ module testbench;
     //inputs
     logic clock;
     logic reset;
-    logic valid1;
-    logic valid2;
-    logic valid_cam1;
-    logic valid_cam2;
-    _CACHE_LINE_T  new_victim1;
-    _CACHE_LINE_T  new_victim2;
-    logic [(`_NUM_SET_BITS - 1):0] set_index_cam1;
-    logic [(`_NUM_SET_BITS - 1):0] set_index_cam2;
-    logic [(`_NUM_SET_BITS - 1):0] set_index1;
-    logic [(`_NUM_SET_BITS - 1):0] set_index2;
-    logic [(`_NUM_TAG_BITS - 1):0] tag_cam1;
-    logic [(`_NUM_TAG_BITS - 1):0] tag_cam2;
+    logic [1:0] valid;
+    //logic valid2;
+    logic [1:0] valid_cam;
+    //logic valid_cam2;
+    _CACHE_LINE_T  [1:0] new_victim;
+    //_CACHE_LINE_T  new_victim2;
+    logic [1:0] [(`_NUM_SET_BITS - 1):0] set_index_cam;
+    //logic [(`_NUM_SET_BITS - 1):0] set_index_cam2;
+    logic [1:0] [(`_NUM_SET_BITS - 1):0] set_index;
+    //logic [(`_NUM_SET_BITS - 1):0] set_index2;
+    logic [1:0] [(`_NUM_TAG_BITS - 1):0] tag_cam;
+    //logic [(`_NUM_TAG_BITS - 1):0] tag_cam2;
     //outputs
     _CACHE_LINE_T [3:0]	 vic_table_out;
     logic [3:0][`_NUM_SET_BITS:0] set_index_table_out;
-    _CACHE_LINE_T  fired_victim1;
-    _CACHE_LINE_T  fired_victim2;
-    _CACHE_LINE_T  out_victim1;
-    _CACHE_LINE_T  out_victim2;
-    logic               fired_valid1;
-    logic               fired_valid2;
-    logic               out_valid1;
-    logic               out_valid2;
+    _CACHE_LINE_T  [1:0] fired_victim;
+    //_CACHE_LINE_T  fired_victim2;
+    _CACHE_LINE_T  [1:0] out_victim;
+    //_CACHE_LINE_T  out_victim2;
+    logic [1:0]              fired_valid;
+    //logic               fired_valid2;
+    logic [1:0]              out_valid;
+    //logic               out_valid2;
 
     // set clock change
     `DUT(vic_cache) vic_cache0(
     .clock(clock),
     .reset(reset),
-    .valid1(valid1),
-    .valid2(valid2),
-    .valid_cam1(valid_cam1),
-    .valid_cam2(valid_cam2),
-    .new_victim1(new_victim1),
-    .new_victim2(new_victim2),
-    .set_index_cam1(set_index_cam1),
-    .set_index_cam2(set_index_cam2),
-    .set_index1(set_index1),
-    .set_index2(set_index2),
-    .tag_cam1(tag_cam1),
-    .tag_cam2(tag_cam2),
+    .valid(valid),
+    //.valid2(valid2),
+    .valid_cam(valid_cam),
+    //.valid_cam2(valid_cam2),
+    .new_victim(new_victim),
+    //.new_victim2(new_victim2),
+    .set_index_cam(set_index_cam),
+    //.set_index_cam2(set_index_cam2),
+    .set_index(set_index),
+    //.set_index2(set_index2),
+    .tag_cam(tag_cam),
+    //.tag_cam2(tag_cam2),
 
     .vic_table_out(vic_table_out),
     .set_index_table_out(set_index_table_out),
-    .fired_victim1(fired_victim1),
-    .fired_victim2(fired_victim2),
-    .out_victim1(out_victim1),
-    .out_victim2(out_victim2),
-    .fired_valid1(fired_valid1),
-    .fired_valid2(fired_valid2),
-    .out_valid1(out_valid1),
-    .out_valid2(out_valid2)
+    .fired_victim(fired_victim),
+    //.fired_victim2(fired_victim2),
+    .out_victim(out_victim),
+    //.out_victim2(out_victim2),
+    .fired_valid(fired_valid),
+    //.fired_valid2(fired_valid2),
+    .out_valid(out_valid)
+    //.out_valid2(out_valid2)
  	);
 
     //intermediate signals
@@ -92,10 +92,12 @@ module testbench;
 
  	task check_correct_reset;
  		begin
- 			for (int i = 0; i < 4; ++i) begin
- 				assert(vic_table_out[i].valid == 0) else #1 exit_on_error;
-                assert(set_index_table_out[i][`_NUM_SET_BITS] == 0) else #1 exit_on_error; 
- 			end
+            assert(vic_table_out == 0) else #1 exit_on_error;
+            assert(set_index_table_out == 0) else #1 exit_on_error;
+ 			// for (int i = 0; i < 4; ++i) begin
+ 			// 	assert(vic_table_out[i].valid == 0) else #1 exit_on_error;
+            //     assert(set_index_table_out[i][`_NUM_SET_BITS] == 0) else #1 exit_on_error; 
+ 			// end
  		end
  	endtask
 
@@ -193,7 +195,7 @@ module testbench;
         begin
             assert(valid_test==fired_valid_test) else #1 exit_on_error;
             if (valid_test) begin
-                assert(fired_victim_test==fired_victim1) else #1 exit_on_error;
+                assert(fired_victim_test==fired_victim[0]) else #1 exit_on_error;
             end
         end
     endtask
@@ -205,7 +207,7 @@ module testbench;
         begin
             assert(valid_test==fired_valid_test) else #1 exit_on_error;
             if (valid_test) begin
-                assert(fired_victim_test==fired_victim2) else #1 exit_on_error;
+                assert(fired_victim_test==fired_victim[1]) else #1 exit_on_error;
             end
         end
     endtask
@@ -215,9 +217,9 @@ module testbench;
         input cam_valid_test1;
         input _CACHE_LINE_T cam_victim_test1;
         begin
-            assert(valid_test1==out_valid1) else #1 exit_on_error;
+            assert(valid_test1==out_valid[0]) else #1 exit_on_error;
             if (valid_test1) begin
-                assert(cam_victim_test1==out_victim1) else #1 exit_on_error;
+                assert(cam_victim_test1==out_victim[0]) else #1 exit_on_error;
             end
         end
     endtask
@@ -227,9 +229,9 @@ module testbench;
         input cam_valid_test2;
         input _CACHE_LINE_T cam_victim_test2;
         begin
-            assert(valid_test2==out_valid2) else #1 exit_on_error;
+            assert(valid_test2==out_valid[1]) else #1 exit_on_error;
             if (valid_test2) begin
-                assert(cam_victim_test2==out_victim2) else #1 exit_on_error;
+                assert(cam_victim_test2==out_victim[1]) else #1 exit_on_error;
             end
         end
     endtask
@@ -242,38 +244,38 @@ module testbench;
         // intial values
         clock = 0;
         reset = 0;
-        valid1 = 0;
-        valid2 = 0;
-        valid_cam1 = 0;
-        valid_cam2 = 0;
-        new_victim1.valid = 0;
-        new_victim2.valid = 0;
-        set_index_cam1 = 0;
-        set_index_cam2 = 0;
-        set_index1 = 0;
-        set_index2 = 0;
-        tag_cam1 = 0;
-        tag_cam2 = 0;
+        valid = 0;
+        //valid2 = 0;
+        valid_cam = 0;
+        //valid_cam2 = 0;
+        new_victim[0].valid = 0;
+        new_victim[1].valid = 0;
+        set_index_cam = 0;
+        //set_index_cam2 = 0;
+        set_index = 0;
+        //set_index2 = 0;
+        tag_cam = 0;
+        //tag_cam2 = 0;
 
         $display("Testing Reset...");
         @(negedge clock);
         reset = 1'b1;
-        valid1 = 0;
-        valid2 = 0;
-        valid_cam1 = 0;
-        valid_cam2 = 0;
-        new_victim1.valid = 0;
-        new_victim2.valid = 0;
-        new_victim1.data = 0;
-        new_victim2.data = 0;
-        new_victim1.tag = 0;
-        new_victim2.tag = 0;
-        set_index_cam1 = 0;
-        set_index_cam2 = 0;
-        set_index1 = 0;
-        set_index2 = 0;
-        tag_cam1 = 0;
-        tag_cam2 = 0;
+        valid = 0;
+        //valid2 = 0;
+        valid_cam = 0;
+        //valid_cam2 = 0;
+        new_victim[0].valid = 0;
+        new_victim[1].valid = 0;
+        new_victim[0].data = 0;
+        new_victim[1].data = 0;
+        new_victim[0].tag = 0;
+        new_victim[1].tag = 0;
+        set_index_cam = 0;
+        //set_index_cam2 = 0;
+        set_index = 0;
+        //set_index2 = 0;
+        tag_cam = 0;
+        //tag_cam2 = 0;
         test_tables_reset;
         @(posedge clock);
         `DELAY;
@@ -284,57 +286,57 @@ module testbench;
         $display("Testing One Write...");
  		@(negedge clock);
  		reset = 0;
-        valid1 = 1'b1;
-        valid2 = 0;
-        valid_cam1 = 0;
-        valid_cam2 = 0;
-        new_victim1.valid = 1'b1;
-        new_victim1.data = 5;
-        new_victim1.tag = 10;
-        new_victim2.valid = 1'b0;
-        new_victim2.data = 15;
-        new_victim2.tag = 7;
-        set_index_cam1 = 0;
-        set_index_cam2 = 0;
-        set_index1 = 15;
-        set_index2 = 15;
-        tag_cam1 = 0;
-        tag_cam2 = 0;
-        vic_array_test[0]=new_victim1;
-        set_index_array_test[0]=set_index1;
+        valid[0] = 1'b1;
+        valid[1] = 0;
+        valid_cam[0] = 0;
+        valid_cam[1] = 0;
+        new_victim[0].valid = 1'b1;
+        new_victim[0].data = 5;
+        new_victim[0].tag = 10;
+        new_victim[1].valid = 1'b0;
+        new_victim[1].data = 15;
+        new_victim[1].tag = 7;
+        set_index_cam[0] = 0;
+        set_index_cam[1] = 0;
+        set_index[0] = 15;
+        set_index[1] = 15;
+        tag_cam[0] = 0;
+        tag_cam[1] = 0;
+        vic_array_test[0]=new_victim[0];
+        set_index_array_test[0]=set_index[0];
         write_to_vic_test(2'b00,1'b1,vic_array_test[0]);
         write_to_set_index_test(2'b00,1'b1,set_index_array_test[0]);
  		@(posedge clock);
  		`DELAY;
-        display_vic_table_out;
-        display_set_index_table_out;
-        //check_correct_test;
-        check_fired_output2(0,fired_valid2,vic_array_test[0]);
+        //display_vic_table_out;
+        //display_set_index_table_out;
+        check_correct_test;
+        check_fired_output2(0,fired_valid[1],vic_array_test[0]);
  		$display("One Write Passed");
 
         $display("Testing Three Write...");
  		@(negedge clock);
  		reset = 0;
-        valid1 = 1'b1;
-        valid2 = 1'b1;
-        valid_cam1 = 0;
-        valid_cam2 = 0;
-        new_victim1.valid = 1'b1;
-        new_victim1.data = 2;
-        new_victim1.tag = 4;
-        new_victim2.valid = 1'b1;
-        new_victim2.data = 3;
-        new_victim2.tag = 6;
-        set_index_cam1 = 0;
-        set_index_cam2 = 0;
-        set_index1 = 13;
-        set_index2 = 9;
-        tag_cam1 = 0;
-        tag_cam2 = 0;
-        vic_array_test[1]=new_victim1;
-        set_index_array_test[1]=set_index1;
-        vic_array_test[2]=new_victim2;
-        set_index_array_test[2]=set_index2;
+        valid[0] = 1'b1;
+        valid[1] = 1'b1;
+        valid_cam[0] = 0;
+        valid_cam[1] = 0;
+        new_victim[0].valid = 1'b1;
+        new_victim[0].data = 2;
+        new_victim[0].tag = 4;
+        new_victim[1].valid = 1'b1;
+        new_victim[1].data = 3;
+        new_victim[1].tag = 6;
+        set_index_cam[0] = 0;
+        set_index_cam[1] = 0;
+        set_index[0] = 13;
+        set_index[1] = 9;
+        tag_cam[0] = 0;
+        tag_cam[1] = 0;
+        vic_array_test[1]=new_victim[0];
+        set_index_array_test[1]=set_index[0];
+        vic_array_test[2]=new_victim[1];
+        set_index_array_test[2]=set_index[1];
         write_to_vic_test(2'b10,1'b1,vic_array_test[0]);
         write_to_set_index_test(2'b10,1'b1,set_index_array_test[0]);
         write_to_vic_test(2'b01,1'b1,vic_array_test[1]);
@@ -343,35 +345,35 @@ module testbench;
         write_to_set_index_test(2'b00,1'b1,set_index_array_test[2]);
  		@(posedge clock);
  		`DELAY;
-        display_vic_table_out;
-        display_set_index_table_out;
-        //check_correct_test;
-        check_fired_output2(0,fired_valid2,vic_array_test[0]);
+        //display_vic_table_out;
+        //display_set_index_table_out;
+        check_correct_test;
+        check_fired_output2(0,fired_valid[1],vic_array_test[0]);
  		$display("Three Write Passed");
 
         $display("Testing Holding Three Write...");
  		@(negedge clock);
  		reset = 0;
-        valid1 = 1'b0;
-        valid2 = 1'b0;
-        valid_cam1 = 0;
-        valid_cam2 = 0;
-        new_victim1.valid = 1'b0;
-        new_victim1.data = 4;
-        new_victim1.tag = 5;
-        new_victim2.valid = 1'b0;
-        new_victim2.data = 7;
-        new_victim2.tag = 9;
-        set_index_cam1 = 0;
-        set_index_cam2 = 0;
-        set_index1 = 13;
-        set_index2 = 9;
-        tag_cam1 = 0;
-        tag_cam2 = 0;
-        vic_array_test[3]=new_victim1;
-        set_index_array_test[3]=set_index1;
-        vic_array_test[4]=new_victim2;
-        set_index_array_test[4]=set_index2;
+        valid[0] = 1'b0;
+        valid[1] = 1'b0;
+        valid_cam[0] = 0;
+        valid_cam[1] = 0;
+        new_victim[0].valid = 1'b0;
+        new_victim[0].data = 4;
+        new_victim[0].tag = 5;
+        new_victim[1].valid = 1'b0;
+        new_victim[1].data = 7;
+        new_victim[1].tag = 9;
+        set_index_cam[0] = 0;
+        set_index_cam[1] = 0;
+        set_index[0] = 13;
+        set_index[1] = 9;
+        tag_cam[0] = 0;
+        tag_cam[1] = 0;
+        vic_array_test[3]=new_victim[0];
+        set_index_array_test[3]=set_index[0];
+        vic_array_test[4]=new_victim[1];
+        set_index_array_test[4]=set_index[1];
         write_to_vic_test(2'b10,1'b1,vic_array_test[0]);
         write_to_set_index_test(2'b10,1'b1,set_index_array_test[0]);
         write_to_vic_test(2'b01,1'b1,vic_array_test[1]);
@@ -380,10 +382,10 @@ module testbench;
         write_to_set_index_test(2'b00,1'b1,set_index_array_test[2]);
  		@(posedge clock);
  		`DELAY;
-        display_vic_table_out;
-        display_set_index_table_out;
-        //check_correct_test;
-        check_fired_output2(0,fired_valid2,vic_array_test[0]);
+        //display_vic_table_out;
+        //display_set_index_table_out;
+        check_correct_test;
+        check_fired_output2(0,fired_valid[1],vic_array_test[0]);
  		$display("Holding Three Write Passed");
         
         // $display("Testing Three Write...");
@@ -419,24 +421,24 @@ module testbench;
         $display("Testing Four Write...");
  		@(negedge clock);
  		reset = 0;
-        valid1 = 0;
-        valid2 = 1'b1;
-        valid_cam1 = 0;
-        valid_cam2 = 0;
-        new_victim1.valid = 1'b0;
-        new_victim1.data = 10;
-        new_victim1.tag = 14;
-        new_victim2.valid = 1'b1;
-        new_victim2.data = 4;
-        new_victim2.tag = 8;
-        set_index_cam1 = 0;
-        set_index_cam2 = 0;
-        set_index1 = 10;
-        set_index2 = 12;
-        tag_cam1 = 0;
-        tag_cam2 = 0;
-        vic_array_test[5]=new_victim2;
-        set_index_array_test[5]=set_index2;
+        valid[0] = 0;
+        valid[1] = 1'b1;
+        valid_cam[0] = 0;
+        valid_cam[1] = 0;
+        new_victim[0].valid = 1'b0;
+        new_victim[0].data = 10;
+        new_victim[0].tag = 14;
+        new_victim[1].valid = 1'b1;
+        new_victim[1].data = 4;
+        new_victim[1].tag = 8;
+        set_index_cam[0] = 0;
+        set_index_cam[1] = 0;
+        set_index[0] = 10;
+        set_index[1] = 12;
+        tag_cam[0] = 0;
+        tag_cam[1] = 0;
+        vic_array_test[5]=new_victim[1];
+        set_index_array_test[5]=set_index[1];
         write_to_vic_test(2'b11,1'b1,vic_array_test[0]);
         write_to_set_index_test(2'b11,1'b1,set_index_array_test[0]);
         write_to_vic_test(2'b10,1'b1,vic_array_test[1]);
@@ -447,10 +449,10 @@ module testbench;
         write_to_set_index_test(2'b00,1'b1,set_index_array_test[5]);
  		@(posedge clock);
  		`DELAY;
-        display_vic_table_out;
-        display_set_index_table_out;
-        //check_correct_test;
-        check_fired_output2(0,fired_valid2,vic_array_test[0]);
+        //display_vic_table_out;
+        //display_set_index_table_out;
+        check_correct_test;
+        check_fired_output2(0,fired_valid[1],vic_array_test[0]);
  		$display("Four Write Passed");
 
         // $display("Testing Fiering Out 1...");
@@ -538,26 +540,26 @@ module testbench;
         $display("Testing CAM...");
  		@(negedge clock);
  		reset = 0;
-        valid1 = 1'b1;
-        valid2 = 1'b1;
-        valid_cam1 = 1'b1;
-        valid_cam2 = 1'b1;
-        new_victim1.valid = 1'b1;
-        new_victim1.data = 6;
-        new_victim1.tag = 12;
-        new_victim2.valid = 1'b0;
-        new_victim2.data = 7;
-        new_victim2.tag = 13;
-        set_index_cam1 = 5;
-        set_index_cam2 = 2;
-        set_index1 = 18;
-        set_index2 = 17;
-        tag_cam1 = 4;
-        tag_cam2 = 12;
-        vic_array_test[6]=new_victim1;
-        set_index_array_test[6]=set_index1;
-        vic_array_test[7]=new_victim2;
-        set_index_array_test[7]=set_index2;
+        valid[0] = 1'b1;
+        valid[1] = 1'b1;
+        valid_cam[0] = 1'b1;
+        valid_cam[1] = 1'b1;
+        new_victim[0].valid = 1'b1;
+        new_victim[0].data = 6;
+        new_victim[0].tag = 12;
+        new_victim[1].valid = 1'b0;
+        new_victim[1].data = 7;
+        new_victim[1].tag = 13;
+        set_index_cam[0] = 5;
+        set_index_cam[1] = 2;
+        set_index[0] = 18;
+        set_index[1] = 17;
+        tag_cam[0] = 4;
+        tag_cam[1] = 12;
+        vic_array_test[6]=new_victim[0];
+        set_index_array_test[6]=set_index[0];
+        vic_array_test[7]=new_victim[1];
+        set_index_array_test[7]=set_index[1];
         write_to_vic_test(2'b11,1'b1,vic_array_test[2]);
         write_to_set_index_test(2'b11,1'b1,set_index_array_test[2]);
         write_to_vic_test(2'b10,1'b1,vic_array_test[5]);
@@ -567,30 +569,28 @@ module testbench;
         write_to_vic_test(2'b00,1'b1,vic_array_test[7]);
         write_to_set_index_test(2'b00,1'b1,set_index_array_test[7]);
         `DELAY;
-        $display("Our out valid1: %b our output1:         %d", out_valid1, out_victim1.data);
-        $display("correct out valid1: %b correct output1: %d", 1'b1, vic_array_test[1].data);
-        $display("Our out valid2: %b our output2:       %d", out_valid2, out_victim2.data);
-        $display("correct out valid2: %b correct output2: %d", 1'b0, vic_array_test[0].data);
+        // $display("Our out valid1: %b our output1:         %d", out_valid1, out_victim1.data);
+        // $display("correct out valid1: %b correct output1: %d", 1'b1, vic_array_test[1].data);
+        // $display("Our out valid2: %b our output2:       %d", out_valid2, out_victim2.data);
+        // $display("correct out valid2: %b correct output2: %d", 1'b0, vic_array_test[0].data);
         $display("+++++++++++++++++++++++++++++++++++++++++++");
  		@(posedge clock);
  		`DELAY;
         display_vic_table_out;
         display_set_index_table_out;
-        //check_correct_test;
-        //check_fired_output(1,fired_valid,vic_array_test[0]);
-        //check_cam_output1(1,out_valid1,vic_array_test[1]);
-        //check_cam_output2(1,out_valid2,vic_array_test[4]);
-        //check_fired_output1(0,fired_valid1,vic_array_test[1]);
-        //check_fired_output2(0,fired_valid2,vic_array_test[0]);
-        //check_cam_output2(0,out_valid2,out_victim2);
-        $display("Our fired valid1: %b our fired output1:         %b", fired_valid1, fired_victim1);
-        $display("correct fired valid1: %b correct fired output1: %b", 1'b0, vic_array_test[0]);
-        $display("Our fired valid2: %b our fired output2:         %b", fired_valid2, fired_victim2);
-        $display("correct fired valid2: %b correct fired output2: %b", 1'b1, vic_array_test[0]);
-        $display("Our out valid1: %b our output1:         %d", out_valid1, out_victim1.data);
-        $display("correct out valid1: %b correct output1: %d", 1'b1, vic_array_test[1].data);
-        $display("Our out valid2: %b our output2:       %d", out_valid2, out_victim2.data);
-        $display("correct out valid2: %b correct output2: %d", 1'b0, vic_array_test[0].data);
+        check_correct_test;
+        check_cam_output1(1'b1,out_valid[0],vic_array_test[1]);
+        check_cam_output2(0,out_valid[1],vic_array_test[4]);
+        check_fired_output1(0,fired_valid[0],vic_array_test[1]);
+        check_fired_output2(1'b1,fired_valid[1],vic_array_test[0]);
+        // $display("Our fired valid1: %b our fired output1:         %b", fired_valid[0], fired_victim[0]);
+        // $display("correct fired valid1: %b correct fired output1: %b", 1'b0, vic_array_test[0]);
+        // $display("Our fired valid2: %b our fired output2:         %b", fired_valid[1], fired_victim[1]);
+        // $display("correct fired valid2: %b correct fired output2: %b", 1'b1, vic_array_test[0]);
+        // $display("Our out valid1: %b our output1:         %d", out_valid[0], out_victim[0].data);
+        // $display("correct out valid1: %b correct output1: %d", 1'b1, vic_array_test[1].data);
+        // $display("Our out valid2: %b our output2:       %d", out_valid[1], out_victim[1].data);
+        // $display("correct out valid2: %b correct output2: %d", 1'b0, vic_array_test[0].data);
  		$display("CAM Passed"); 
 
         // @(posedge clock);
