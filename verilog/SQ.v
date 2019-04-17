@@ -166,7 +166,7 @@ module SQ(
 		if (rd_en) begin
 
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
-				load_req[i] = (addr_rd == addr_next[i]) & (addr_ready_next[i]) & (i <= ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next));
+				load_req[i] = (addr_rd == addr_next[i]) & (addr_ready_next[i]) & (i < ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next));
 			end
 		end else begin
 			load_req = 0;
