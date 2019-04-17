@@ -17,7 +17,7 @@ elaborate icache
 set design_name icache
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 2.5
+set CLK_PERIOD 6
 
 
 
