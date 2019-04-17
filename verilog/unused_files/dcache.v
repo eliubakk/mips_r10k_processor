@@ -243,7 +243,7 @@ module dcache(clock, reset,
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
                                       !fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
 
-  assign proc2Dmem_addr = send_request? proc2Dcache_rd_addr[0] : 64'b0;
+  assign proc2Dmem_addr = send_request? mem_req_queue[send_req_ptr].req.address : 64'b0;
   assign proc2Dmem_command = send_request? BUS_LOAD :
                                            BUS_NONE;
   
