@@ -1410,7 +1410,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   assign psel_enable = ex_co_valid_inst[0] | ex_co_valid_inst[1] | mem_co_valid_inst | done | ex_co_valid_inst[4]  | ex_co_valid_inst[FU_ST_IDX]; // ask the use of wor
   //priority encoder to select the results of the execution stage to put in cdb
   //Mult has the priority
-  psel_generic #(`NUM_FU_TOTAL, 1) psel(
+  psel_generic #(.WIDTH(`NUM_FU_TOTAL), .NUM_REQS(1)) psel(
 		.req({ ex_co_done, ex_co_valid_inst[FU_ST_IDX], ex_co_valid_inst[4], mem_co_valid_inst, ex_co_valid_inst[1:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
 		.gnt({co_selected[3], co_selected[FU_ST_IDX], co_selected[4], co_selected[2:0]}),

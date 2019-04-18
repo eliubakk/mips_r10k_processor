@@ -1,7 +1,7 @@
 `include "../../sys_defs.vh"
 module psel_generic(req, en, gnt_bus, gnt);
-	parameter WIDTH = 16; //number of grant lines that can be high at once.
-	parameter NUM_REQS = 3; //number of req lines arbitrating over
+	parameter WIDTH = 6; //number of grant lines that can be high at once.
+	parameter NUM_REQS = 1; //number of req lines arbitrating over
 	input [WIDTH-1:0] req;
 	input en;
 	output wire [(WIDTH*NUM_REQS)-1:0] gnt_bus;

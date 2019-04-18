@@ -167,10 +167,11 @@ dve_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_pr
 dve:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
 
-syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v
+syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
 	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
 	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
-	$(VCS_PIPE) $(PIPELINE_NAME).vg ../../$^ $(LIB) -o $@
+	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
+	mv $@ ../../.
 
 #syn_simv:	$(SYNFILES) $(TESTBENCH)
 #	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
