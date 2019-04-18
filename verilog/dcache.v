@@ -140,7 +140,7 @@ module dcache(clock, reset,
   logic [(`NUM_FIFO-1):0][(`NUM_FIFO_SIZE_BITS-1):0] fifo_tail, fifo_tail_next;
   logic [(`NUM_FIFO-1):0] fifo_busy, fifo_busy_next;
   logic [(`NUM_FIFO-2):0] fifo_lru, fifo_lru_next;
-  logic [($clog(`NUM_FIFO-1)-1):0] next_lru_idx;
+  logic [($clog2(`NUM_FIFO-1)-1):0] next_lru_idx;
   logic [(`NUM_FIFO_BITS-1):0] fill_fifo_idx;
   logic [(`NUM_FIFO_BITS-1):0] temp_lru_idx;
   logic [(`NUM_FIFO_BITS-1):0] acc;
@@ -151,7 +151,7 @@ module dcache(clock, reset,
   logic [($clog2(`MEM_BUFFER_SIZE)-1):0] send_req_ptr, send_req_ptr_next;
   logic [($clog2(`MEM_BUFFER_SIZE)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
 
-  logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][[(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_addr_table_in;
+  logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_addr_table_in;
   logic [(RD_PORTS-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_cam_tags;
   logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][(RD_PORTS-1):0] fifo_cam_hits;
   wor   [(RD_PORTS-1):0][(`NUM_FIFO-1):0] fifo_num_to_encode;
@@ -297,7 +297,7 @@ module dcache(clock, reset,
     //allocate new fifo
     for(int i = 0; i < RD_PORTS; i += 1) begin
       if(!fifo_hit_num_valid[i] & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
-        mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[ig][63:3], 3'b0};
+        mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[i][63:3], 3'b0};
         mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
         mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
         mem_req_queue_next[mem_req_queue_tail_next].req_done = 1'b0;
@@ -310,7 +310,7 @@ module dcache(clock, reset,
         next_lru_idx = 0;
         acc = `NUM_FIFO / 2;
 
-        for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
+        for (int i = 0; i < `NUM_FIFO_BITS; ++i) begin
           fifo_lru_next[next_lru_idx] = ~fifo_lru_next[next_lru_idx];
           if (~fifo_lru_next[next_lru_idx]) begin
             fill_fifo_idx += acc;
@@ -338,7 +338,7 @@ module dcache(clock, reset,
         acc = `NUM_FIFO / 2;
         temp_lru_idx = `NUM_FIFO / 2;
 
-        for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
+        for (int i = 0; i < `NUM_FIFO_BITS; ++i) begin
           if (fifo_hit_num[i] >= temp_lru_idx) begin
             fifo_lru_next[next_lru_idx] = 1'b0;
             next_lru_idx = (2 * next_lru_idx) + 2;
