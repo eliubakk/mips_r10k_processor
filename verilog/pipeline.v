@@ -1038,9 +1038,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
   always_comb begin
     if (id_inst_out.inst.valid_inst) begin
-      assign  id_inst_out.T = fr_free_reg_T;
+      id_inst_out.T = fr_free_reg_T;
     end else begin
-      assign  id_inst_out.T = `DUMMY_REG;
+      id_inst_out.T = `DUMMY_REG;
     end
   end
   // if (fr_read_en) assign id_inst_out.T = fr_free_reg_T;
