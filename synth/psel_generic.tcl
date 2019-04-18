@@ -25,7 +25,7 @@ set design_name psel_generic
 ##############################################
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 3
+set CLK_PERIOD 1.2
 
 
 
