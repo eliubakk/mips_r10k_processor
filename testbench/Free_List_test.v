@@ -5,6 +5,16 @@
 
 module testbench;
 
+	initial
+	begin
+		$finish;
+	end
+
+endmodule
+
+/*
+module testbench;
+
 	// parameters
 
 	parameter ONE = 1'b1;
@@ -428,3 +438,4 @@ module testbench;
 
 
 endmodule
+*/
