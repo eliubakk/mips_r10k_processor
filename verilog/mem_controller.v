@@ -26,7 +26,8 @@ module mem_controller(clock, reset,
                         mem2proc_response, mem2proc_data, mem2proc_tag,
                         Dmem2proc_response, Dmem2proc_data, Dmem2proc_tag,
                        // `ifdef DEBUG state, next_state, `endif
-                        Imem2proc_response, Imem2proc_data, Imem2proc_tag);
+                        Imem2proc_response, Imem2proc_data, Imem2proc_tag,
+                        proc2mem_command, proc2mem_addr, proc2mem_data);
 
     input clock;
     input reset;
@@ -48,6 +49,9 @@ module mem_controller(clock, reset,
     output logic [3:0]  Imem2proc_response;
     output logic [63:0] Imem2proc_data;       
     output logic [3:0]  Imem2proc_tag;
+    output logic [1:0] proc2mem_command;
+    output logic [63:0] proc2mem_addr;
+    output logic [63:0] proc2mem_data;
     // `ifdef DEBUG
     // output    ts_state state;
     // output    ts_state next_state;
