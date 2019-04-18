@@ -126,11 +126,11 @@ module pipeline (
   // Output from the branch predictor
   logic   bp_output;
 
-	logic		[`BH_SIZE-1:0]				gshare_ght_out;
+	/*logic		[`BH_SIZE-1:0]				gshare_ght_out;
 	logic		[2**(`BH_SIZE)-1:0]			gshare_pht_out;
 	OBQ_ROW_T 	[`OBQ_SIZE-1:0]				obq_out;
 	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_head_out;
-	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_tail_out;
+	logic 		[$clog2(`OBQ_SIZE)-1:0] 		obq_tail_out;*/
 	logic 		[`BTB_ROW-1:0]				btb_valid_out;
 	logic		[`BTB_ROW-1:0]	[`TAG_SIZE-1:0]		btb_tag_out;
 	logic		[`BTB_ROW-1:0]	[`TARGET_SIZE-1:0]	btb_target_address_out;
@@ -492,10 +492,6 @@ logic tag_in_lq;
 	BR_SIG		if12_branch_inst;
 
 // Fetch 2(BP) outputs
-	logic [63:0]	if2_fetch_NPC_out;
-	logic [31:0]	if2_IR_out;
-	logic [63:0]	if2_PC_reg;
-	logic		if2_valid_inst_out;
 	BR_SIG		if2_branch_inst;
 
 	logic 		if2_bp_NPC_valid;
@@ -506,14 +502,6 @@ BR_SIG if_branch_inst;
 BR_SIG if_id_branch_inst;
 BR_SIG id_branch_inst;
 BR_SIG id_di_branch_inst;
-BR_SIG di_branch_inst;
-BR_SIG di_is_branch_inst;
-BR_SIG is_branch_inst;
-BR_SIG is_ex_branch_inst;
-BR_SIG ex_branch_inst;
-BR_SIG ex_co_branch_inst;
-BR_SIG co_branch_inst;
-BR_SIG co_ret_branch_inst;
 BR_SIG ret_branch_inst;
 
 logic [63:0] if_PC_reg;
