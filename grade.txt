@@ -1,6 +1,6 @@
 Checking for correctness
 Checking for correct memory...
-	add.program.out 			FAILED
+	add.program.out 			PASSED
 	b.program.out 			PASSED
 	branch1.program.out 			PASSED
 	branch2.program.out 			PASSED
@@ -31,6 +31,7 @@ Checking for correct memory...
 	parallel.program.out 			PASSED
 	parsort.program.out 			FAILED
 	saxpy.program.out 			FAILED
+	simple_ld_st.program.out 			FAILED
 	simple_load_store.program.out 			FAILED
 	simple_mult.program.out 			PASSED
 	simple.program.out 			PASSED
@@ -41,7 +42,7 @@ Checking for correct memory...
 	test_branch_4.program.out 			PASSED
 	test_long_add.program.out 			PASSED
 	test_raw_10.program.out 			PASSED
-	test_raw_11.program.out 			FAILED
+	test_raw_11.program.out 			PASSED
 	test_raw_12.program.out 			FAILED
 	test_raw_1.program.out 			PASSED
 	test_raw_2.program.out 			PASSED
@@ -57,12 +58,13 @@ Checking for correct memory...
 	test_waw_3.program.out 			PASSED
 	test_waw_4.program.out 			PASSED
 	test_waw_5.program.out 			PASSED
-PASSED: 39/57
+PASSED: 41/58
 Checking for correct writeback...
+	add.writeback.out 			PASSED
 	branch1.writeback.out 			PASSED
 	branch2.writeback.out 			PASSED
 	branch.writeback.out 			PASSED
-	br.writeback.out 			FAILED
+	br.writeback.out 			PASSED
 	btest1.writeback.out 			PASSED
 	btest2.writeback.out 			PASSED
 	b.writeback.out 			PASSED
@@ -89,6 +91,7 @@ Checking for correct writeback...
 	parallel.writeback.out 			PASSED
 	parsort.writeback.out 			FAILED
 	saxpy.writeback.out 			FAILED
+	simple_ld_st.writeback.out 			FAILED
 	simple_load_store.writeback.out 			FAILED
 	simple_mult.writeback.out 			PASSED
 	simple.writeback.out 			PASSED
@@ -99,8 +102,8 @@ Checking for correct writeback...
 	test_branch_4.writeback.out 			PASSED
 	test_long_add.writeback.out 			PASSED
 	test_raw_10.writeback.out 			PASSED
-	test_raw_11.writeback.out 			FAILED
-	test_raw_12.writeback.out 			FAILED
+	test_raw_11.writeback.out 			PASSED
+	test_raw_12.writeback.out 			PASSED
 	test_raw_1.writeback.out 			PASSED
 	test_raw_2.writeback.out 			PASSED
 	test_raw_3.writeback.out 			PASSED
@@ -115,5 +118,5 @@ Checking for correct writeback...
 	test_waw_3.writeback.out 			PASSED
 	test_waw_4.writeback.out 			PASSED
 	test_waw_5.writeback.out 			PASSED
-PASSED: 43/57
+PASSED: 46/58
 

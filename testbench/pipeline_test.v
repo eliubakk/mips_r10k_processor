@@ -8,11 +8,12 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-`ifdef PIPELINE
-`include "sys_defs.vh"
-`else
+// `ifdef PIPELINE
+// `include "sys_defs.vh"
+// `else
+// `include "../../sys_defs.vh"
+// `endif
 `include "../../sys_defs.vh"
-`endif
 
 extern void print_header(string str);
 extern void print_cycles(int valid);
