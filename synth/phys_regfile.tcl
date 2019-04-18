@@ -22,7 +22,7 @@ set design_name phys_regfile
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 6.5
+set CLK_PERIOD 3
 #SUPERSCALAR
 #set CLK_PERIOD 10
 
