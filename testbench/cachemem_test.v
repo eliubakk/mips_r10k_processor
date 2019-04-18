@@ -3,7 +3,19 @@
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
+`define NUM_RAND_ITER 500
 
+module testbench;
+
+	initial
+	begin
+		$finish;
+	end
+
+
+endmodule
+
+/*
 module testbench;
 
 	// parameters
@@ -112,7 +124,7 @@ module testbench;
 		end
 	endtask
 
-	/*
+	
 	task print_cam_inputs;
 		begin
 			$display("CAM STUFF-----------------------------------------------------------------------------");
@@ -126,7 +138,7 @@ module testbench;
 			$display("--------------------------------------------------------------------------------------");
 		end
 	endtask
-	*/
+	
 
 	task print_bst;
 		begin
@@ -893,3 +905,4 @@ module testbench;
 
 
 endmodule
+*/
