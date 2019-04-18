@@ -139,19 +139,27 @@ module dcache(clock, reset,
   logic [(`NUM_FIFO-1):0][5:0] fetch_stride, fetch_stride_next;
   logic [(`NUM_FIFO-1):0][(`NUM_FIFO_SIZE_BITS-1):0] fifo_tail, fifo_tail_next;
   logic [(`NUM_FIFO-1):0] fifo_busy, fifo_busy_next;
+  logic [(`NUM_FIFO-1):0] fifo_sel_req, fifo_sel_gnt;
+  logic [(`NUM_FIFO_BITS-1):0] fifo_sel_num;
+  logic fifo_sel_num_valid;
   logic [(`NUM_FIFO-2):0] fifo_lru, fifo_lru_next;
-  logic [($clog(`NUM_FIFO-1)-1):0] next_lru_idx;
+  logic [($clog2(`NUM_FIFO-1)-1):0] next_lru_idx;
   logic [(`NUM_FIFO_BITS-1):0] fill_fifo_idx;
   logic [(`NUM_FIFO_BITS-1):0] temp_lru_idx;
   logic [(`NUM_FIFO_BITS-1):0] acc;
   logic [63:0] next_rd_addr;
 
   DCACHE_MEM_REQ_T [(`MEM_BUFFER_SIZE-1):0] mem_req_queue, mem_req_queue_next;
-  logic [($clog2(`MEM_BUFFER_SIZE)-1):0] mem_req_queue_tail, mem_req_queue_tail_next;
-  logic [($clog2(`MEM_BUFFER_SIZE)-1):0] send_req_ptr, send_req_ptr_next;
-  logic [($clog2(`MEM_BUFFER_SIZE)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
+  logic [$clog2(`MEM_BUFFER_SIZE):0] mem_req_queue_tail, mem_req_queue_tail_next;
+  logic [$clog2(`MEM_BUFFER_SIZE):0] send_req_ptr, send_req_ptr_next;
+  logic [$clog2(`MEM_BUFFER_SIZE):0] mem_waiting_ptr, mem_waiting_ptr_next;
 
-  logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][[(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_addr_table_in;
+  logic [(`MEM_BUFFER_SIZE-1):0][0:0][63:0] mem_queue_cam_table_in;
+  logic [(RD_PORTS-1):0][63:0] mem_queue_cam_tags;
+  logic [(`MEM_BUFFER_SIZE-1):0][0:0][(RD_PORTS-1):0] mem_queue_cam_hits;
+  logic [(RD_PORTS-1):0][(`MEM_BUFFER_SIZE-1):0] mem_queue_hits;
+
+  logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_addr_table_in;
   logic [(RD_PORTS-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_cam_tags;
   logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][(RD_PORTS-1):0] fifo_cam_hits;
   wor   [(RD_PORTS-1):0][(`NUM_FIFO-1):0] fifo_num_to_encode;
@@ -177,21 +185,57 @@ module dcache(clock, reset,
         assign fifo_num_to_encode[kg][ig] = (fifo_cam_hits[ig][jg][kg] & fifo[ig][jg].valid);
       end
     end
+    assign fifo_sel_req[ig] = fifo_busy[ig] & (fifo_tail[ig] < `FIFO_SIZE); 
+  end
+
+  for(ig = 0; ig < `MEM_BUFFER_SIZE; ig += 1) begin
+    assign mem_queue_cam_table_in[ig][0] = mem_req_queue[ig].req.address;
+    for(jg = 0; jg < RD_PORTS; jg += 1) begin
+      assign mem_queue_hits[jg][ig] = mem_queue_cam_hits[ig][0][jg] & mem_req_queue[ig].req.valid;
+    end
   end
 
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
     assign fifo_cam_tags[ig] = {cache_rd_miss_tag[ig], cache_rd_miss_idx[ig]};
+    assign mem_queue_cam_tags[ig] = proc2Dcache_rd_addr[ig];
   end
 
   CAM #(.LENGTH(`NUM_FIFO),
       .WIDTH(`FIFO_SIZE),
       .NUM_TAGS(RD_PORTS),
       .TAG_SIZE((`NUM_SET_BITS+`NUM_TAG_BITS))) 
-  cam0(
+   fifo_cam(
     .enable(cache_rd_miss_valid),
     .tags(fifo_cam_tags),
     .table_in(fifo_addr_table_in),
     .hits(fifo_cam_hits)
+  );
+
+  CAM #(.LENGTH(`MEM_BUFFER_SIZE),
+      .WIDTH(1),
+      .NUM_TAGS(RD_PORTS),
+      .TAG_SIZE(64)) 
+  mem_queue_cam(
+    .enable(rd_en),
+    .tags(mem_queue_cam_tags),
+    .table_in(mem_queue_cam_table_in),
+    .hits(mem_queue_cam_hits)
+  );
+
+  psel_rotating #(.WIDTH(`NUM_FIFO)) 
+  fifo_psel(
+    .clock(clock),
+    .reset(reset),
+    .req(fifo_sel_req),
+    .en((mem_req_queue_tail < `MEM_BUFFER_SIZE)),
+    .gnt(fifo_sel_gnt)
+  );
+
+  encoder #(.WIDTH(`NUM_FIFO)) 
+  fifo_sel_enc(
+    .in(fifo_sel_gnt),
+    .out(fifo_sel_num),
+    .valid(fifo_sel_num_valid)
   );
 
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
@@ -243,7 +287,7 @@ module dcache(clock, reset,
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
                                       !fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
 
-  assign proc2Dmem_addr = send_request? proc2Dcache_rd_addr[0] : 64'b0;
+  assign proc2Dmem_addr = send_request? mem_req_queue[send_req_ptr].req.address : 64'b0;
   assign proc2Dmem_command = send_request? BUS_LOAD :
                                            BUS_NONE;
   
@@ -296,8 +340,8 @@ module dcache(clock, reset,
 
     //allocate new fifo
     for(int i = 0; i < RD_PORTS; i += 1) begin
-      if(!fifo_hit_num_valid[i] & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
-        mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[ig][63:3], 3'b0};
+      if(!fifo_hit_num_valid[i] & ~(|mem_queue_hits[i]) & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+        mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[i][63:3], 3'b0};
         mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
         mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
         mem_req_queue_next[mem_req_queue_tail_next].req_done = 1'b0;
@@ -310,7 +354,7 @@ module dcache(clock, reset,
         next_lru_idx = 0;
         acc = `NUM_FIFO / 2;
 
-        for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
+        for (int i = 0; i < `NUM_FIFO_BITS; ++i) begin
           fifo_lru_next[next_lru_idx] = ~fifo_lru_next[next_lru_idx];
           if (~fifo_lru_next[next_lru_idx]) begin
             fill_fifo_idx += acc;
@@ -325,7 +369,6 @@ module dcache(clock, reset,
 
         {fifo_next[fill_fifo_idx][0].tag, fifo_next[fill_fifo_idx][0].idx} = next_rd_addr[31:3];
         fifo_next[fill_fifo_idx][0].data = 64'b0;
-        //fifo_next[fill_fifo_idx][0].Dmem_tag = 4'b0;
         fifo_next[fill_fifo_idx][0].valid = 1'b0;
         fifo_next[fill_fifo_idx][`FIFO_SIZE-1:1] = {(`FIFO_SIZE-1){EMPTY_DCACHE}};
         fetch_stride_next[fill_fifo_idx] = 1;
@@ -338,7 +381,7 @@ module dcache(clock, reset,
         acc = `NUM_FIFO / 2;
         temp_lru_idx = `NUM_FIFO / 2;
 
-        for (int i = 0; i < NUM_FIFO_BITS; ++i) begin
+        for (int i = 0; i < `NUM_FIFO_BITS; ++i) begin
           if (fifo_hit_num[i] >= temp_lru_idx) begin
             fifo_lru_next[next_lru_idx] = 1'b0;
             next_lru_idx = (2 * next_lru_idx) + 2;
@@ -360,6 +403,32 @@ module dcache(clock, reset,
         //fifo_next[fifo_hit_num][`FIFO_SIZE-1:0] = {{(fifo_hit_idx+1){EMPTY_DCACHE}}, fifo[fifo_hit_num][`FIFO_SIZE-1:(fifo_hit_idx+1)]};
       end
     end
+
+    //send prefetch request to mem_req_queue
+    if(!fifo_sel_num_valid & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+      next_rd_addr = {32'b0, 
+                      fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].tag, 
+                      fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].idx, 
+                      3'b0};
+      mem_req_queue_next[mem_req_queue_tail_next].req.address = next_rd_addr;
+      mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
+      mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
+      mem_req_queue_next[mem_req_queue_tail_next].req_done = 1'b0;
+      mem_req_queue_next[mem_req_queue_tail_next].wr_to_cache = 1'b0;
+      mem_req_queue_next[mem_req_queue_tail_next].wr_to_fifo = 1'b1;
+      mem_req_queue_next[mem_req_queue_tail_next].fifo_num = fifo_sel_num;
+      mem_req_queue_next[mem_req_queue_tail_next].fifo_idx = fifo_tail_next[fifo_sel_num];
+      mem_req_queue_tail_next += 1;
+
+      fifo_tail_next[fifo_sel_num] += 1;
+      if(fifo_tail_next[fifo_sel_num] < `FIFO_SIZE) begin
+        next_rd_addr += (fetch_stride_next[fifo_sel_num] << 3);
+        {fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].tag, fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].idx} = next_rd_addr[31:3];
+        fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].data = 64'b0;
+        fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].valid = 1'b0;
+      end
+    end
+
   end
 
   always_ff @(posedge clock) begin

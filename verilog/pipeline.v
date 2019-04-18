@@ -80,9 +80,9 @@ module pipeline (
     // output logic [4:0]       ex_mem_valid_inst,
 
     // Outputs from MEM/COMP Pipeline Register
-      output logic mem_co_valid_inst,   
-      output logic [63:0] mem_co_NPC ,        
-      output logic [31:0] mem_co_IR ,         
+    output logic mem_co_valid_inst,   
+    output logic [63:0] mem_co_NPC ,        
+    output logic [31:0] mem_co_IR ,         
  
     // Outputs from EX/COM Pipeline Register
     output logic [`NUM_FU_TOTAL-1:0][63:0] ex_co_NPC,

@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : vic_cache.tcl                                 */
+#/*   FILE        : psel_rotating.tcl                       */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -15,13 +15,13 @@ set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 #set_dont_touch psel_single_WIDTH16
 #set_dont_touch CAM_NUM_TAG1
 #set_dont_touch encoder
-set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/psel_rotating.v" $misc_files]
+#set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/misc/psel_rotating.v" "../../verilog/misc/psel_single.v"]
 elaborate psel_rotating
 set design_name psel_rotating
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 1.8
+set CLK_PERIOD 3
 
 
 
