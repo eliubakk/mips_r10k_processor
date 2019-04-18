@@ -61,6 +61,10 @@ module Map_Table(
 
 	always_comb begin
 		next_map_table = branch_incorrect? map_check_point : map_table;
+		T1[0] = `DUMMY_REG;
+		T2[0] = `DUMMY_REG;
+		T_old[0] = `DUMMY_REG;
+
 		if(~branch_incorrect) begin
 			// Commit Stage first
 			for (int i = 0; i < `NUM_GEN_REG-1; i += 1) begin

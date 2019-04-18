@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : BP.tcl                                  */
+#/*   FILE        : mem_stage.tcl                           */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -12,12 +12,14 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/OBQ.v" "../../verilog/RAS.v" "../../verilog/GSHARE.v" "../../verilog/BTB.v" "../../verilog/BP.v" $misc_files]
-elaborate BP
-set design_name BP
+analyze -f sverilog [concat "../../verilog/mem_stage.v" $misc_files]
+elaborate mem_stage
+set design_name mem_stage
 set clock_name clock
 set reset_name reset
-#set CLK_PERIOD 5
+#SINGLESCALAR
+set CLK_PERIOD 6.5
+#SUPERSCALAR
 set CLK_PERIOD 10
 
 

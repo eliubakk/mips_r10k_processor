@@ -18,19 +18,32 @@ suppress_message {"VER-130"}
 #/***********************************************************/
 lappend search_path ../
 
-set cache_module [getenv CACHE_NAME]
+#set cache_module [getenv CACHE_NAME]
+#set module_ddc [getenv PIPELINE_LIBS]
+set lib_dir [getenv LIB_DIR]
+set modules [getenv PIPELINE_MODULES]
 
-read_file -f ddc [list ${cache_module}.ddc]
-set_dont_touch ${cache_module}
+read_file -f ddc [glob "../${lib_dir}/*.ddc"]
+foreach module ${modules} {
+ #read_file -f ddc [list "../${lib_dir}/${module}.ddc"]
+ set_dont_touch ${module} 
+}
 
-set headers [getenv HEADERS]
-set sources [getenv PIPEFILES]
+# read_file -f ddc [list ${MODULE_DDC}]
 
-read_file -f sverilog [list ${headers} ${sources}]
-set design_name [getenv PIPELINE_NAME]
-set clock_name [getenv CLOCK_NET_NAME]
-set reset_name [getenv RESET_NET_NAME]
-set CLK_PERIOD [getenv CLOCK_PERIOD]
+#set headers [getenv HEADERS]
+#set sources [getenv PIPEFILES]
+
+set pipeline_name [getenv PIPELINE_NAME]
+analyze -f sverilog [list "../../verilog/${pipeline_name}.v"]
+elaborate ${pipeline_name}
+set design_name ${pipeline_name}
+set clock_name clock
+set reset_name reset
+set CLK_PERIOD 10
+#set clock_name [getenv CLOCK_NET_NAME]
+#set reset_name [getenv RESET_NET_NAME]
+#set CLK_PERIOD [getenv CLOCK_PERIOD]
 
 set SYN_DIR ./
 

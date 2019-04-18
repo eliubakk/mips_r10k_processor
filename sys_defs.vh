@@ -71,6 +71,7 @@ const MEM_REQ_T EMPTY_MEM_REQ =
 
 typedef struct packed {
   MEM_REQ_T req;
+  logic req_done;
   logic wr_to_cache;
   logic wr_to_fifo;
   logic [(`NUM_FIFO_BITS-1):0] fifo_num;
@@ -80,6 +81,7 @@ typedef struct packed {
 const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
 {
   EMPTY_MEM_REQ,
+  1'b0,
   1'b0,
   1'b0,
   {`NUM_FIFO_BITS{1'b0}},
