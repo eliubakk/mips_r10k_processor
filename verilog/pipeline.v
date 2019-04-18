@@ -432,7 +432,7 @@ logic tag_in_lq;
     .ex_data(ex_store_data),
     .ex_data_en(ex_store_data_valid),
 
-    .rt_en(retire_is_store_next),
+    .rt_en(retire_is_store),
 
     .data_rd(sq_data_out),
     .rd_valid(sq_data_valid), // checks for if data that exists is valid
@@ -1568,7 +1568,7 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
      .ex_mem_rega(mem_data),
      .ex_mem_alu_result(mem_addr), 
      .ex_mem_rd_mem(ex_co_rd_mem[FU_LD_IDX]),
-     .ex_mem_wr_mem(retire_is_store_next ),
+     .ex_mem_wr_mem(retire_is_store ),
      .Dmem2proc_data(Dmem2proc_data),
      .Dmem2proc_tag(Dmem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
