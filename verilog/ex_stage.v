@@ -356,7 +356,7 @@ module ex_stage(
   // );  
   
 
-  mult mult0 (// Inputs)                 //********MULT************
+  pipe_mult mult0 (// Inputs)                 //********MULT************
     .clock(clock),
     .reset(reset),
 	  .mcand(opa_mux_out[3]),

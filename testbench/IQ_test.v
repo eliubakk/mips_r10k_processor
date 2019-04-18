@@ -257,9 +257,9 @@ module testbench;
 	
 
 		// Fetch when the queue is full
-	
+/*	
 		$display("Testing Fetch when the queue is full");
-		for(i=0; i<`IQ_SIZE-1; ++i) begin
+		for(i=0; i<`IQ_SIZE-2; ++i) begin
 			@(negedge clock);
 			fetch_valid 		= ONE;
 			dispatch_no_hazard 	= ZERO;
@@ -335,7 +335,7 @@ module testbench;
 			assert((if_inst_out.valid_inst == 1) & (if_inst_out.npc == 4) & (if_inst_out.ir == 4*256)) else #1 exit_on_error;
 
 		$display("@@@ Fetch and Decode sametime when queue is full Passed");
-	
+*/	
 	
 			
 		// Flush when branch_prediction is incorrect

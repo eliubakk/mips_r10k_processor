@@ -101,7 +101,7 @@ module IQ(
 					if_inst = inst_queue[0];*/
 				end else begin
 					if_inst		 = inst_queue[0];
-					for (int i=0; i< tail-1; i=i+1) begin
+					for (int i=0; i< `IQ_SIZE; i=i+1) begin
 						next_inst_queue[i] = inst_queue[i+1];
 					end
 					next_inst_queue[tail-1]  = if_inst_in; 

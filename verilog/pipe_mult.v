@@ -5,7 +5,7 @@
 // This module instantiates 8 pipeline stages as an array of submodules.
 `define PIPE_DEPTH 4
 `include "../../sys_defs.vh"
-module mult(
+module pipe_mult(
 				input clock, reset,
 				input [63:0] mcand, mplier,
 				input start,

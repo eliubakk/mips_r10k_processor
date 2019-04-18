@@ -62,8 +62,8 @@ MODULES_VG = $(foreach module,$(MODULES),$(SYN_DIR)/$(module)/%.vg)
 MISC_MODULES_VG = $(foreach module,$(MISC_MODULES),$(SYN_DIR)/$(module)/%.vg)
 PIPELINE_SYN_FILES = $(foreach module,$(MODULES) $(MISC_MODULES),$(SYN_DIR)/$(module)/$(module).vg)
 PIPELINE_VG = $(SYN_DIR)/$(PIPELINE_NAME)/%.vg
-PIPELINE_MODULES = $(MODULES) $(MISC_MODULES)
-PIPELINE_LIBS = $(foreach module,$(PIPELINE_MODULES),../S(LIB_DIR)/$(module).ddc)
+PIPELINE_MODULES = $(foreach module,$(MODULES) $(MISC_MODULES),$(module))
+#PIPELINE_LIBS = $(foreach module,$(PIPELINE_MODULES),../$(LIB_DIR)/$(module).ddc)
 
 MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MODULES_VG))
 MISC_MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MISC_MODULES_VG))
@@ -71,7 +71,7 @@ MISC_MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MISC_MODULES_VG))
 export PIPELINE_NAME
 export LIB_DIR
 export PIPELINE_MODULES
-export PIPELINE_LIBS
+#export PIPELINE_LIBS
 
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
@@ -83,7 +83,7 @@ $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 $(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
-	dc_shell-t -f ../$*.tcl | tee $*_synth.out
+	dc_shell-t -f ../$*.tcl | tee $*_synth.out && \
 	mkdir -p ../$(LIB_DIR) && \
 	cp -f $*.ddc ../$(LIB_DIR)
 
