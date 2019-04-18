@@ -17,7 +17,7 @@ elaborate Free_List
 set design_name Free_List
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 2.5
+set CLK_PERIOD 2.0
 
 
 
