@@ -338,15 +338,42 @@ logic branch_valid_disp;  //branch_valid_disp
 
 logic tag_in_lq;
 
-  assign proc2mem_command = (proc2Dmem_command == BUS_NONE) ? proc2Imem_command : proc2Dmem_command;
-  assign proc2mem_addr = (proc2Dmem_command == BUS_NONE) ? proc2Imem_addr : proc2Dmem_addr;
-  assign Dmem2proc_response = (proc2Dmem_command == BUS_NONE) ? 0 : mem2proc_response;
-  assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
-  assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
-  assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
+  mem_controller memory(
+    .clock(clock), 
+    .reset(reset), 
+    
+    //inputs
+    .proc2Dmem_command(proc2Dmem_command),
+    .proc2Dmem_addr(proc2Dmem_addr), 
+    .proc2Dmem_data(proc2Dmem_data),
+    .proc2Imem_command(proc2Imem_command),
+    .proc2Imem_addr(proc2Imem_addr), 
+    .proc2Imem_data(proc2Imem_data),
+    .mem2proc_response(mem2proc_response), 
+    .mem2proc_data(mem2proc_data),
+    .mem2proc_tag(mem2proc_tag),
 
-  assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
-  assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
+    //outputs
+    .Dmem2proc_response(Dmem2proc_response),
+    .Dmem2proc_data(Dmem2proc_data),
+    .Dmem2proc_tag(Dmem2proc_tag),
+    .Imem2proc_response(Imem2proc_response),
+    .Imem2proc_data(Imem2proc_data), 
+    .Imem2proc_tag(Imem2proc_tag),
+    .proc2mem_command(proc2mem_command), 
+    .proc2mem_addr(proc2mem_addr), 
+    .proc2mem_data(proc2mem_data)
+  );
+
+  // assign proc2mem_command = (proc2Dmem_command == BUS_NONE) ? proc2Imem_command : proc2Dmem_command;
+  // assign proc2mem_addr = (proc2Dmem_command == BUS_NONE) ? proc2Imem_addr : proc2Dmem_addr;
+  // assign Dmem2proc_response = (proc2Dmem_command == BUS_NONE) ? 0 : mem2proc_response;
+  // assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
+  // assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
+  // assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
+
+  // assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
+  // assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
   // assign Dmem2proc_tag = (proc2Dmem_command == BUS_LOAD) ? mem2proc_tag : 0;
 
 	icache inst_memory(
