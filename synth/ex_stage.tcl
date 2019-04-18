@@ -12,15 +12,15 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/ex_stage.v" $misc_files]
+analyze -f sverilog [concat "../../verilog/ex_stage.v" "../../verilog/pipe_mult.v" "../../verilog/mult_stage.v" $misc_files]
 elaborate ex_stage
 set design_name ex_stage
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 6.5
+set CLK_PERIOD 7.0
 #SUPERSCALAR
-set CLK_PERIOD 10
+#set CLK_PERIOD 10
 
 
 
