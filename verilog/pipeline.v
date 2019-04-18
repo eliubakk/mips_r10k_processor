@@ -118,12 +118,13 @@ module pipeline (
   parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX, FU_ST_IDX};
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
-  // Pipeline register enables
-  // logic         if_id_enable, RS_enable, is_pr_enable, CDB_enable, ROB_enable, co_re_enable, co_ret_enable, dispatch_en, branch_not_taken;
-  // logic [4:0]   is_ex_enable, ex_co_enable;
-  logic fr_read_en;
-  logic [`NUM_FU_TOTAL-1:0] issue_stall;
-  // Output from the branch predictor
+ 
+// --------------------------Fetch1 signals  
+
+
+// -------------------------Fetch2 signals
+
+// Output from the branch predictor
   logic   bp_output;
 
 	/*logic		[`BH_SIZE-1:0]				gshare_ght_out;
@@ -138,14 +139,14 @@ module pipeline (
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_head_out;
 	logic 		[$clog2(`RAS_SIZE) - 1:0] 		ras_tail_out;
 
- // Instruction queue
+ // -------------------------------Instruction queue
  	INST_Q	[`IQ_SIZE-1:0] 		inst_queue_out;
 	logic	[$clog2(`IQ_SIZE):0] 	inst_queue_entry;
 	logic				inst_queue_full;
 	INST_Q				if_inst_in, if_id_inst_out;
 
 
-
+// -----------------------------------Decode stage
   
   // Outputs from ID stage
   logic [63:0]  id_rega_out;
@@ -159,6 +160,8 @@ module pipeline (
 	PHYS_REG 		T2; // Output for Dispatch and goes to RS
   PHYS_REG    T_old;	// Output for Dispatch and goes to ROB
 
+// --------------------------------Dispatch stage
+
   // outputs of ID/DI stage
   RS_ROW_T id_di_inst_in;
   GEN_REG id_di_rega;
@@ -167,12 +170,20 @@ module pipeline (
   logic dispatch_no_hazard;
   logic ROB_enable;
 
+ // Pipeline register enables
+  logic fr_read_en;
+  logic [`NUM_FU_TOTAL-1:0] issue_stall;
+
+//-----------------------------------Issue stage
+
   // outputs from dispatch stage
   RS_ROW_T [(`RS_SIZE - 1):0]		rs_table_out;             // for debugging
   logic   [$clog2(`RS_SIZE):0] rs_free_rows_next_out;
   wand								rs_full;
  // RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next;
-  
+ 
+// ---------------------------------Ex stage
+ 
   //Outputs from IS/EX Pipeline Register
   RS_ROW_T [`NUM_FU_TOTAL-1:0] issue_reg;
   logic [`NUM_FU_TOTAL-1:0][63:0] is_ex_T1_value;
@@ -190,31 +201,12 @@ module pipeline (
   logic [`NUM_FU_TOTAL-1:0]				ex_reg_valid;
   
  RS_ROW_T [3:0] ex_mult_reg; // multiplicationn registers
-//   // Outputs from EX/MEM Pipeline Register
-//   logic   PHYS_REG [4:0] ex_mem_dest_reg_idx;//Physical register index[T]
-//   logic   [4:0]      ex_mem_rd_mem;
-//   logic   [4:0]      ex_mem_wr_mem;
-//   logic   [4:0]      ex_mem_halt;
-//   logic   [4:0]      ex_mem_illegal;
-//   logic  [4:0][63:0] ex_mem_rega;
-//   logic  [3:0][63:0] ex_mem_alu_result;
-//   logic              ex_mem_take_branch;
+
+// ------------------------------------Mem stage
 
   // // Outputs from MEM-Stage
    logic [63:0] mem_result_out;
    logic        mem_stall_out;
-
-  // Outputs from EX/COM Pipeline Register
-  FU_REG              ex_co_halt;
-  FU_REG              ex_co_illegal;
-  logic  [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_co_dest_reg_idx;
-  logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_alu_result;
-  logic               ex_co_take_branch;
-  logic               ex_co_done;
-  FU_REG              ex_co_wr_mem;  
-  FU_REG              ex_co_rd_mem;
-  logic [63:0] ex_co_rega, ex_co_rega_st;
-  logic [1:0] [$clog2(`SQ_SIZE) - 1:0] ex_co_sq_idx; // index 0 is for store, index 1 is for load
 
 // Outputs from MEM/COM Pipeline Register
   logic  mem_co_halt;
@@ -230,6 +222,24 @@ module pipeline (
   logic mem_co_valid_inst_comb;   
   logic [63:0] mem_co_NPC_comb;        
   logic [31:0] mem_co_IR_comb;    
+
+ // // Outputs from MEM/WB Pipeline Register
+ logic stall_struc;
+
+
+// ---------------------------------Complete stage
+
+  // Outputs from EX/COM Pipeline Register
+  FU_REG              ex_co_halt;
+  FU_REG              ex_co_illegal;
+  logic  [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_co_dest_reg_idx;
+  logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_alu_result;
+  logic               ex_co_take_branch;
+  logic               ex_co_done;
+  FU_REG              ex_co_wr_mem;  
+  FU_REG              ex_co_rd_mem;
+  logic [63:0] ex_co_rega, ex_co_rega_st;
+  logic [1:0] [$clog2(`SQ_SIZE) - 1:0] ex_co_sq_idx; // index 0 is for store, index 1 is for load
 
 
   //Outputs from the complete stage
@@ -251,6 +261,8 @@ module pipeline (
   logic co_ret_branch_valid;
   logic co_ret_branch_prediction;
 
+// -----------------------------------Retire stage
+
   // Outputs from COM/RETIRE Pipeline Register    //
   logic         co_ret_halt;
   logic         co_ret_illegal;
@@ -261,11 +273,10 @@ module pipeline (
   logic [31:0]  co_ret_IR;
 
 logic branch_valid_disp;  //branch_valid_disp
-  //outputs from the ROB
-  //PHYS_REG                    rob_fl_arch_Told;
-  //PHYS_REG                    rob_arch_retire_reg;
-  //logic                       arch_fr_enable;
-  ROB_ROW_T rob_retire_out;
+  
+// Retire signals from ROB
+
+ROB_ROW_T rob_retire_out;
   logic [$clog2(`ROB_SIZE):0] rob_free_rows_next_out;
   logic							          rob_full_out;
   ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out;
@@ -277,6 +288,24 @@ logic branch_valid_disp;  //branch_valid_disp
   logic [$clog2(`FL_SIZE):0]  fr_num_free_entries; 
 	logic fr_empty; 
   PHYS_REG fr_free_reg_T;
+
+  
+   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
+  logic	       retire_inst_busy;
+  logic [63:0] retire_reg_wr_data;
+  logic  [5:0] retire_reg_wr_idx;
+  logic        retire_reg_wr_en;
+  logic [63:0] retire_reg_NPC;
+  logic  [5:0] retire_reg_phys;;
+	logic head_halt;
+  logic rob_retire_out_halt;
+  logic rob_retire_out_take_branch;
+  logic rob_retire_out_T_new; 
+  logic rob_retire_out_T_old; 	
+  logic [31:0] rob_retire_opcode;
+ 
+
+// ------------------------------Signals from modules
 
   //Outputs from the arch map
   PHYS_REG [`NUM_GEN_REG-1:0] arch_table;
@@ -293,29 +322,7 @@ logic branch_valid_disp;  //branch_valid_disp
   PHYS_REG [`FL_SIZE - 1:0]   free_list_check;
   logic [$clog2(`FL_SIZE):0]  tail_check;
   logic fr_wr_en;
-  
-  // // Outputs from MEM/WB Pipeline Register
-  // logic         mem_wb_halt;
-  // logic         mem_wb_illegal;
-  // logic   [4:0] mem_wb_dest_reg_idx;
-  // logic  [63:0] mem_wb_result;
-  // logic         mem_wb_take_branch;
-  logic stall_struc;
-
-  // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  logic	       retire_inst_busy;
-  logic [63:0] retire_reg_wr_data;
-  logic  [5:0] retire_reg_wr_idx;
-  logic        retire_reg_wr_en;
-  logic [63:0] retire_reg_NPC;
-  logic  [5:0] retire_reg_phys;;
-	logic head_halt;
-  logic rob_retire_out_halt;
-  logic rob_retire_out_take_branch;
-  logic rob_retire_out_T_new; 
-  logic rob_retire_out_T_old; 	
-  logic [31:0] rob_retire_opcode;
-  // Memory interface/arbiter wires
+ // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr;
   logic [1:0]  proc2Dmem_command, proc2Imem_command;
   logic [3:0]  Dmem2proc_response, Imem2proc_response;
@@ -516,8 +523,8 @@ logic [$clog2(`OBQ_SIZE)-1 : 0] ex_co_branch_index, co_branch_index;
 logic [63:0]	ex_co_branch_target, co_branch_target;
 
 logic if_fetch_valid_inst_out;
-
 logic if_stage_dispatch_en;
+
 assign if_stage_dispatch_en = !inst_queue_full;
 
  if_stage if_stage_0 (
@@ -541,63 +548,6 @@ assign if_stage_dispatch_en = !inst_queue_full;
     .proc2Imem_addr(proc2Icache_addr),
     .if_valid_inst_out(if1_valid_inst_out)
   );
-
-// Small decoder for branch predictor
-// We may divide the branch predictor and fetch stage
-	always_comb begin
-		// Initial value
-		if1_branch_inst.en = 1'b0;
-		if1_branch_inst.cond = 1'b0;
-		if1_branch_inst.direct = 1'b0;
-		if1_branch_inst.ret = 1'b0;
-		if1_branch_inst.pc = 64'h0;
-		if1_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
-		if1_branch_inst.prediction = 0;
-
-		if(if1_valid_inst_out) begin // 
-			if1_branch_inst.pc = if1_PC_reg; // Save current PC
-			case (if1_IR_out[31:26])
-				//COND & DIRECT
-				`BEQ_INST, `BNE_INST, `BLE_INST, `BLT_INST, `BGE_INST, `BGT_INST, `BLBC_INST, `BLBS_INST : begin
-					if1_branch_inst.en = 1'b1;
-					if1_branch_inst.cond = 1'b1;
-					if1_branch_inst.direct = 1'b1;
-					if1_branch_inst.ret = 1'b0;
-				end
-				//UNCOND & DIRECT
-				`BR_INST, `BSR_INST : begin
-					if1_branch_inst.en = 1'b1;
-					if1_branch_inst.cond = 1'b0;
-					if1_branch_inst.direct = 1'b1;
-					if1_branch_inst.ret = 1'b0;
-				end
-				// UNCOND & INDIRECT
-				`JSR_GRP : begin
-					case (if1_IR_out[20:19])
-					// NOT RETURN
-						`JMP_INST, `JSR_INST, `JSR_CO_INST : begin
-							if1_branch_inst.en = 1'b1;
-							if1_branch_inst.cond = 1'b0;
-							if1_branch_inst.direct = 1'b0;
-							if1_branch_inst.ret = 1'b0;
-						end
-					// RETURN
-						`RET_INST : begin
-							if1_branch_inst.en = 1'b1;
-							if1_branch_inst.cond = 1'b0;
-							if1_branch_inst.direct = 1'b0;
-							if1_branch_inst.ret = 1'b1;
-						end
-					endcase
-				end			
-
-			endcase	
-		end
-
-
-	end
-
-
 // Branch predictor prediction evaluation
 //1. Direct Cond : target PC incorrect or Prediction incorrect
 //2. Direct Uncond : target PC incorrect
@@ -631,47 +581,23 @@ assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
 //
 ////////////////////////////////////////////////////////////////////////
 
+  // synopsys sync_set_reset "reset"
 always_ff @(posedge clock) begin
 	if( reset | branch_not_taken | if2_bp_NPC_valid) begin
 		if12_fetch_NPC_out     		<= `SD 64'h0;
 		if12_IR_out        		<= `SD `NOOP_INST;
 		if12_valid_inst_out 		<= `SD `FALSE;
 		if12_PC_reg			<= `SD 64'h0;
-	/*	if12_branch_inst.en 		<= `SD 1'b0;
-		if12_branch_inst.cond 		<= `SD 1'b0;
-		if12_branch_inst.direct 	<= `SD 1'b0;
-		if12_branch_inst.ret		<= `SD 1'b0;
-		if12_branch_inst.pc 		<= `SD 64'h0;
-		if12_branch_inst.pred_pc	<= `SD 64'h0;
-		if12_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-		if12_branch_inst.prediction 	<= `SD 0;*/
-
 	end else if(if1_valid_inst_out) begin
 		if12_fetch_NPC_out		<= `SD if1_fetch_NPC_out;
 		if12_IR_out			<= `SD if1_IR_out;
 		if12_valid_inst_out		<= `SD if1_valid_inst_out;
 		if12_PC_reg			<= `SD if1_PC_reg;
-		//if12_branch_inst		<= `SD if1_branch_inst;
-	end /*else if(inst_queue_full) begin
-		if12_fetch_NPC_out		<= `SD if12_fetch_NPC_out;
-		if12_IR_out			<= `SD if12_IR_out;
-		if12_valid_inst_out		<= `SD if12_valid_inst_out;
-		if12_PC_reg			<= `SD if12_PC_reg;
-		//if12_branch_inst		<= `SD if12_branch_inst;
-	
-	end*/ else begin
+	end else begin
 		if12_fetch_NPC_out        	<= `SD 64'h0;
 		if12_IR_out        		<= `SD `NOOP_INST;
 		if12_valid_inst_out 		<= `SD `FALSE;
 		if12_PC_reg			<= `SD 64'h0;
-		/*if12_branch_inst.en 		<= `SD 1'b0;
-		if12_branch_inst.cond 		<= `SD 1'b0;
-		if12_branch_inst.direct 	<= `SD 1'b0;
-		if12_branch_inst.ret		<= `SD 1'b0;
-		if12_branch_inst.pc 		<= `SD 64'h0;
-		if12_branch_inst.pred_pc	<= `SD 64'h0;
-		if12_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-		if12_branch_inst.prediction 	<= `SD 0;*/
 	end
 end
 ///////////////////////////////////////////////////////////////////////////////////
@@ -726,7 +652,21 @@ end
 							if12_branch_inst.direct = 1'b0;
 							if12_branch_inst.ret = 1'b1;
 						end
+						default : begin
+							if12_branch_inst.en = 1'b0;
+							if12_branch_inst.cond = 1'b0;
+							if12_branch_inst.direct = 1'b0;
+							if12_branch_inst.ret = 1'b0;
+
+						end	
 					endcase
+				end
+				default : begin
+							if12_branch_inst.en = 1'b0;
+							if12_branch_inst.cond = 1'b0;
+							if12_branch_inst.direct = 1'b0;
+							if12_branch_inst.ret = 1'b0;
+
 				end			
 
 			endcase	
@@ -783,8 +723,6 @@ end
   // Determine the next pc (from Fetch unit or from BP)
 	assign if_NPC_out =  if12_fetch_NPC_out;
 	assign if_branch_inst.pred_pc = if2_bp_NPC;
-	//assign if_bp_NPC_valid = 1'b0;// Should remove this, chk4
-	//assign if_branch_inst.prediction = 1'b0;	// Should remove this, chk5
 
 // Other signals
 	assign if_IR_out = if12_IR_out;
@@ -801,6 +739,7 @@ end
 //Branch signals
 
 
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if( reset | branch_not_taken) begin
 			if_bp_NPC_valid <= `SD 1'b0;
@@ -857,66 +796,7 @@ end
 
 
 
-  //////////////////////////////////////////////////
-  //                                              //
-  //            IF/ID Pipeline Register           //
-  //                                              //
-  //////////////////////////////////////////////////
- /* 
-assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out); 
-//assign if_id_enable = (dispatch_no_hazard && Icache_valid_out); 
-  // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if(reset | branch_not_taken) begin
-      if_id_NPC        <= `SD 0;
-      if_id_IR         <= `SD `NOOP_INST;
-      if_id_valid_inst <= `SD `FALSE;
-     
-	if_id_branch_inst.en 		<= `SD 1'b0;
-	if_id_branch_inst.cond 		<= `SD 1'b0;
-	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.ret		<= `SD 1'b0;
-	if_id_branch_inst.pc 		<= `SD 64'h0;
-	if_id_branch_inst.pred_pc	<= `SD 64'h0;
-	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	if_id_branch_inst.prediction 	<= `SD 0;
-	//if_id_branch_inst.taken 	<= `SD 0;
-
-
- 
-    end else if(if_id_enable) begin
-      if_id_NPC        <= `SD if_NPC_out;
-      if_id_IR         <= `SD if_IR_out;
-      if_id_valid_inst <= `SD if_valid_inst_out;
-      if_id_branch_inst	<= `SD if_branch_inst;
-
-    end else if (!dispatch_no_hazard) begin // Freeze the register if there is dispatch hazard
-      if_id_NPC        <= `SD if_id_NPC;
-      if_id_IR         <= `SD if_id_IR;
-      if_id_valid_inst <= `SD if_id_valid_inst;
-	
-	if_id_branch_inst	<= `SD if_id_branch_inst;
-
-    end else begin
-      if_id_NPC        <= `SD 0;
-      if_id_IR         <= `SD `NOOP_INST;
-      if_id_valid_inst <= `SD `FALSE;
-
-	if_id_branch_inst.en 		<= `SD 1'b0;
-	if_id_branch_inst.cond 		<= `SD 1'b0;
-	if_id_branch_inst.direct 	<= `SD 1'b0;
-	if_id_branch_inst.ret	 	<= `SD 1'b0;
-	if_id_branch_inst.pc 		<= `SD 64'h0;
-	if_id_branch_inst.pred_pc	<= `SD 64'h0;
-	if_id_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	if_id_branch_inst.prediction 	<= `SD 0;
-	//if_id_branch_inst.taken 	<= `SD 0;
-
-
-    end
-  end
-  */
-  //////////////////////////////////////////////////
+ //////////////////////////////////////////////////
   //                                              //
   //                  ID-Stage                    //
   //                                              //
@@ -926,17 +806,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .reset(reset),
     .if_id_IR(if_id_IR),
     .if_id_valid_inst(if_id_valid_inst),
-    // .if_id_valid_inst(if_valid_inst_out),
-    // .retire_reg_wr_en(retire_reg_wr_en),
-    // .retire_reg_wr_idx(retire_reg_wr_idx),
-    // .retire_reg_wr_data(wb_reg_wr_data_out),
-
+   
     // Outputs
-    //.id_ra_value_out(id_rega_out),
-    //.id_rb_value_out(id_regb_out),
-    .id_opa_select_out(id_inst_out.inst.opa_select),
+   .id_opa_select_out(id_inst_out.inst.opa_select),
     .id_opb_select_out(id_inst_out.inst.opb_select),
-    //.id_dest_reg_idx_out(id_inst_out.inst.dest_reg),
     .id_alu_func_out(id_inst_out.inst.alu_func),
     .id_fu_name_out(id_inst_out.inst.fu_name),
     .id_rd_mem_out(id_inst_out.inst.rd_mem),
@@ -992,10 +865,9 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .T_new(rob_retire_out.T_new),
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
     .id_no_dest_reg(id_no_dest_reg), // enabled when dispatched instruction is branch
-    // inputs for branch misprediction
+    
+	// inputs for branch misprediction
     .branch_incorrect(branch_not_taken),
-    //.free_check_point(free_list_check),
-    //.tail_check_point(tail_check),
 
     `ifdef DEBUG
     .free_list_out(fr_rs_rob_T),
@@ -1007,32 +879,15 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     .free_reg(fr_free_reg_T) // Output for Dispatch for other modules
   );
 
- // Update the free list check point when the instruction is branch
-// assign free_list_in = ;
- //assign tail_in = ;
   
 
-  //Instantiating the freelist check_point
- /* Free_List_Check flc(
-    .clock(clock),
-    .enable(enable),
-    .free_list_in(free_list_in),
-    .tail_in(tail_in),
-
-    .free_list_check(free_list_check),
-
-    .tail_check(tail_check)
-  );*/
-
-  always_comb begin
+   always_comb begin
     if (id_inst_out.inst.valid_inst) begin
       id_inst_out.T = fr_free_reg_T;
     end else begin
       id_inst_out.T = `DUMMY_REG;
     end
   end
-  // if (fr_read_en) assign id_inst_out.T = fr_free_reg_T;
-  // else            assign id_inst_out.T = `DUMMY_REG;
   
   //For ROB
   assign id_inst_out.inst_opcode = if_id_IR;
@@ -1050,18 +905,10 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
 
   assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0) | (sq_hazard)); 
-//always_ff @(posedge clock) begin
-  //assign dispatch_no_hazard =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0)); 
   assign dispatch_no_hazard = dispatch_no_hazard_comb; // CHECK THIS CAUSE OF CONFLICT
-/*always_ff @(posedge clock) begin
 
-	dispatch_no_hazard <= `SD  dispatch_no_hazard_comb;  
-	//dispatch_no_hazard_RS <= `SD dispatch_no_hazard;
-	end
-*/
 	assign id_di_enable = (if_id_valid_inst); 
   //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
-  //assign id_di_enable = if_valid_inst_out;
 	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
       if (reset | branch_not_taken) begin
@@ -1080,7 +927,6 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	id_di_branch_inst.pred_pc	<= `SD 64'h0;
 	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	id_di_branch_inst.prediction 	<= `SD 0;
-	//id_di_branch_inst.taken 	<= `SD 0;
 
 
       end else if(id_di_enable) begin // Update the value
@@ -1093,16 +939,6 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 
 	id_di_branch_inst <= `SD if_id_branch_inst;
 
-    /* end else if(!dispatch_no_hazard) begin // Freeze current value
-        id_di_rega    <= `SD id_di_rega;
-        id_di_regb    <= `SD id_di_regb;
-        id_di_inst_in <= `SD id_di_inst_in;
-        id_di_NPC     <= `SD id_di_NPC;
-        id_di_IR      <= `SD id_di_IR;
-        id_di_valid_inst  <=`SD id_di_valid_inst;
-
-	id_di_branch_inst <= `SD if_id_branch_inst;
-*/
      end else  begin
         id_di_rega    <= `SD 0;
         id_di_regb    <= `SD 0;
@@ -1119,7 +955,6 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
 	id_di_branch_inst.pred_pc	<= `SD 64'h0;
 	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
 	id_di_branch_inst.prediction 	<= `SD 0;
-	//id_di_branch_inst.taken 	<= `SD 0;
 
 
 	end
@@ -1141,9 +976,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   assign sq_hazard = (dispatch_is_store & sq_full);
 
   assign issue_stall = ~is_ex_enable;
-  //assign dispatch_en= ~((free_rows_next == 0) | fr_empty | rob_full_out); 
   assign dispatch_en = dispatch_no_hazard & id_di_valid_inst; 
-   //assign RS_enable= (dispatch_en && if_id_valid_inst);
   assign ROB_enable = id_inst_out.inst.valid_inst;
   assign RS_enable = id_di_valid_inst;
 	 RS #(.FU_NAME_VAL(FU_NAME_VAL),
@@ -1177,41 +1010,7 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
       rs_table_out_inst_valid_inst[i] = rs_table_out[i].inst.valid_inst;
     end
   end
-  
-  //////////////////////////////////////////////////
-  //                                              //
-  //                  ISSUE/EX-Stage              //
-  //                                              //
-  //////////////////////////////////////////////////
-
-
-  // synopsys sync_set_reset "reset"
-  // always_ff @(posedge clock) begin
-  //   if(reset) begin
-  //     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-  //       issue_reg[i] <= `SD EMPTY_ROW;
-  //     end
-  //   end else if(is_ex_enable) begin
-  //     issue_reg <= `SD issue_next;
-  //   end
-  // end
-
-/*  genvar ig;
-  for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
-    assign issue_reg_tags[ig][0] = issue_next[ig].T1[$clog2(`NUM_PHYS_REG)-1:0];
-    assign issue_reg_tags[ig][1] = issue_next[ig].T2[$clog2(`NUM_PHYS_REG)-1:0];
-    assign issue_reg_npc[ig] = issue_next[ig].npc;
-    assign issue_reg_inst_opcode[ig] = issue_next[ig].inst_opcode;
-    assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
-  end*/
-  //Instantiating the physical register
-   // Note: Decode signals for load-lock/store-conditional and "get CPU ID"
-  //  instructions (id_{ldl,stc}_mem_out, id_cpuid_out) are not connected
-  //  to anything because the provided EX and MEM stages do not implement
-  //  these instructions.  You will have to implement these instructions
-  //  if you plan to do a multicore project.
-  // change execution stage module(mult)
-
+ 
   //////////////////////////////////////////////////
   //                                              //
   //            IS/EX Pipeline Register           //
@@ -1219,8 +1018,6 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
   //////////////////////////////////////////////////
   always_comb begin
     for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-    	//is_ex_enable[i] = (issue_reg[i].inst.valid_inst & ex_co_enable[i]);
-    	//is_ex_enable[i] = ex_co_enable[i];
       is_ex_enable[i] = (~issue_reg[i].inst.valid_inst | (issue_reg[i].inst.valid_inst & ex_co_enable[i])); // always enabled - Original stuff
     end
   end
@@ -1254,19 +1051,6 @@ assign if_id_enable = (dispatch_no_hazard && if_valid_inst_out);
     assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
   end
 
-/*genvar ip; // Output of physreg
-  for(ip = 0; ip < `NUM_FU_TOTAL; ip += 1) begin
-       if(ip == 3) begin
-		 assign ex_reg_valid[3] =  ex_mult_reg[3].inst.valid_inst;
-		 assign ex_reg_tags[3] = ex_mult_reg[3].T[$clog2(`NUM_PHYS_REG)-1:0];
-
-
-	end else begin
-		assign ex_reg_valid[ip] = issue_reg[ip].inst.valid_inst;
-       		assign ex_reg_tags[ip] = issue_reg[ip].T1[$clog2(`NUM_PHYS_REG)-1:0];
-  	end
-end*/
-
 // Multiplication : Write after execution 
  assign is_pr_enable = 1;
   phys_regfile regf_0 (
@@ -1285,8 +1069,6 @@ end*/
  
 genvar ik;
   for(ik = 0; ik < `NUM_FU_TOTAL; ++ik) begin
-	//assign is_ex_T1_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][0] : 0;
-	//assign is_ex_T2_value[ik] = reset? 0 : issue_reg[ik].inst.valid_inst ? pr_tags_values[ik][1] : 0;  
 	assign is_ex_T1_value[ik] = (reset) ? 0 : pr_tags_values[ik][0];
 	assign is_ex_T2_value[ik] = (reset) ? 0 : pr_tags_values[ik][1];  
 end
@@ -1295,18 +1077,10 @@ ex_stage ex_stage_0 (
     // Inputs
     .clock(clock),
     .reset(reset), 
-    //.id_ex_IR(id_ex_IR),
     .issue_reg(issue_reg),
     .T1_value(is_ex_T1_value),
     .T2_value(is_ex_T2_value),
-    // .id_ex_rega(id_ex_rega),
-    // .id_ex_regb(id_ex_regb),
-    // .id_ex_opa_select(id_ex_opa_select),
-    // .id_ex_opb_select(id_ex_opb_select),
-    // .id_ex_alu_func(id_ex_alu_func),
-    // .id_ex_cond_branch(id_ex_cond_branch),
-    // .id_ex_uncond_branch(id_ex_uncond_branch),
-
+    
     // Outputs
     .ex_alu_result_out(ex_alu_result_out),
    
@@ -1318,6 +1092,7 @@ ex_stage ex_stage_0 (
 // multiplication output is pipelined... We should directly use mult output as
 // a register.
 
+  // synopsys sync_set_reset "reset"
 always_ff @(posedge clock) begin
 	if(reset | branch_not_taken) begin
 		for(integer i=0 ; i<3; ++i) begin
@@ -1434,6 +1209,7 @@ end
     // ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
   end // always
 
+  // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
       ex_co_sq_idx[0] <= `SD 0;
@@ -1449,6 +1225,7 @@ end
     end
   end
 
+  // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
      // ex_co_done <= `SD 0;
@@ -1492,45 +1269,6 @@ end
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
   assign lq_pop_en = tag_in_lq;
   // assign lq_mem_tag = Dmem2proc_response;
-
-
-// //////////////////////////////////////////////////
-//   //                                              //
-//   //           EX/MEM Pipeline Register           //
-//   //                                              //
-//   //////////////////////////////////////////////////
-//   assign ex_mem_enable = 1'b1; // always enabled
-//   // synopsys sync_set_reset "reset"
-//   always_ff @(posedge clock) begin
-//     if (reset | branch_not_taken) begin
-//       ex_mem_NPC          <= `SD 0;
-//       ex_mem_IR           <= `SD `NOOP_INST;
-//       ex_mem_dest_reg_idx <= `SD `ZERO_REG;
-//       ex_mem_rd_mem       <= `SD 0;
-//       ex_mem_wr_mem       <= `SD 0;
-//       ex_mem_halt         <= `SD 0;
-//       ex_mem_illegal      <= `SD 0;
-//       ex_mem_valid_inst   <= `SD 0;
-//       ex_mem_rega         <= `SD 0;
-//       ex_mem_alu_result   <= `SD 0;
-//      // ex_mem_take_branch  <= `SD 0;
-//     end else begin
-//       if (ex_mem_enable)   begin
-//       // these are forwarded directly from ID/EX latches
-//       ex_mem_NPC          <= `SD ex_co_NPC[2];
-//       ex_mem_IR           <= `SD ex_co_IR[2];
-//       ex_mem_dest_reg_idx <= `SD ex_co_dest_reg_idx[2];
-//       ex_mem_rd_mem       <= `SD ex_co_rd_mem[2];
-//       ex_mem_wr_mem       <= `SD ex_co_wr_mem[2];
-//       ex_mem_halt         <= `SD ex_co_halt[2];
-//       ex_mem_illegal      <= `SD ex_co_illegal[2];
-//       ex_mem_valid_inst   <= `SD ex_co_valid_inst[2];
-//       ex_mem_rega         <= `SD ex_co_rega;
-//       // these are results of EX stage
-//       ex_mem_alu_result   <= `SD ex_alu_result_out[2];
-//       //ex_mem_take_branch  <= `SD ex_take_branch_out
-//     end // if
-//    end
 
 //   //////////////////////////////////////////////////
 //   //                                              //
@@ -1577,10 +1315,6 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
 
 assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & ex_co_wr_mem[2])) & (ex_co_valid_inst[2]) ;
 
-//assign stall_struc= (ex_co_rd_mem[2] & ~ex_co_wr_mem[2]);//   for (i=0; i<5; i=i+1) begin
-//     if ()
-//   end
-
 
 
   //////////////////////////////////////////////////
@@ -1607,7 +1341,9 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   
   
   assign mem_co_enable= ((~mem_co_valid_inst) | (mem_co_valid_inst  & co_selected[FU_LD_IDX]));
-  always_ff @(posedge clock) begin
+ 
+  // synopsys sync_set_reset "reset"
+ always_ff @(posedge clock) begin
     if (reset | branch_not_taken ) begin
       mem_co_valid_inst   <= `SD 0;
       mem_co_NPC          <= `SD 0;
@@ -1763,26 +1499,6 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   );
 
 
-// wb_stage wb_stage_0 (
-//     // Inputs
-//     .clock(clock),
-//     .reset(reset),
-//     .retire_reg_NPC(ex_co_NPC_selected),
-//     .mem_wb_result(co_reg_wr_data_out),
-//     .mem_wb_dest_reg_idx(co_reg_wr_idx_out),
-//     .mem_wb_take_branch(ex_co_take_branch_selected),
-//     .mem_wb_valid_inst(ex_co_valid_inst_selected),
-
-//     // Outputs
-//     .reg_wr_data_out(co_reg_wr_data_out),
-//     .reg_wr_idx_out(co_reg_wr_idx_out),
-//     .reg_wr_en_out(co_reg_wr_en_out)
-//   );
-
-
-
-
-
 
 //  Things to do
 
@@ -1831,13 +1547,9 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
    assign branch_valid_disp = (id_inst_out.inst.fu_name ==  FU_BR) ? 1:0 ;
 // This should be the same as id_di_branch_inst.en;   
 
-  //  genvar i;
-  //  for (i=0; i< `ROB_SIZE; i=i+1) begin
-  //     if (ROB_table_out[i].branch_valid) begin
-  //       take_branch_reg = ex_co_take_branch;
-  //       break;
-  //     end
-  always_ff @(posedge clock) begin
+
+  // synopsys sync_set_reset "reset"
+ always_ff @(posedge clock) begin
     if(reset | branch_not_taken) begin
       retire_is_store_next <= `SD 0;
     end else begin
@@ -1905,6 +1617,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   
 // FF between complete and retire
 
+  // synopsys sync_set_reset "reset"
 always_ff @ (posedge clock) begin
 	if(reset | branch_not_taken) begin
 		retire_inst_busy <= `SD 0;
@@ -1982,27 +1695,5 @@ assign arch_enable = rob_retire_out.busy & !branch_not_taken;
 
   	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
  );
-
-
-  //////////////////////////////////////////////////
-  //                                              //
-  //                  WB-Stage                    //
-  //                                              //
-  //////////////////////////////////////////////////
-  // wb_stage wb_stage_0 (
-  //   // Inputs
-  //   .clock(clock),
-  //   .reset(reset),
-  //   .retire_reg_NPC(mem_wb_NPC),
-  //   .mem_wb_result(mem_wb_result),
-  //   .mem_wb_dest_reg_idx(mem_wb_dest_reg_idx),
-  //   .mem_wb_take_branch(mem_wb_take_branch),
-  //   .mem_wb_valid_inst(mem_wb_valid_inst),
-
-  //   // Outputs
-  //   .reg_wr_data_out(retire_reg_wr_data),
-  //   .reg_wr_idx_out(retire_reg_wr_idx),
-  //   .reg_wr_en_out(retire_reg_wr_en)
-  // );
 
 endmodule  // module verisimple
