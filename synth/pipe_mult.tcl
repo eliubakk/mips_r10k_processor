@@ -18,7 +18,7 @@ set design_name pipe_mult
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 6.5
+set CLK_PERIOD 6.7
 #SUPERSCALAR
 #set CLK_PERIOD 10
 
