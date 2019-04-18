@@ -20,7 +20,7 @@ module ROB(
 		//: Replaced with id_branch_inst
 		input BR_SIG		id_branch_inst,		//***Heewoo
 		input [`SS_SIZE-1:0][4:0]	wr_idx,
-		input [`SS_SIZE-1:0][31:0]	npc,
+		input [`SS_SIZE-1:0][63:0]	npc,
 		input [63:0] co_alu_result,
 
 		// OUTPUTS

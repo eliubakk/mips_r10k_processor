@@ -40,6 +40,9 @@ module pipeline (
     output logic	pipeline_branch_pred_correct,
     
 
+    output logic	       retire_inst_busy,
+    output logic [63:0] retire_reg_NPC,
+
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
     // the final values in memory
@@ -291,11 +294,11 @@ ROB_ROW_T rob_retire_out;
 
   
    // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  logic	       retire_inst_busy;
-  logic [63:0] retire_reg_wr_data;
+  //logic	       retire_inst_busy;
+//  logic [63:0] retire_reg_NPC;
+logic [63:0] retire_reg_wr_data;
   logic  [5:0] retire_reg_wr_idx;
   logic        retire_reg_wr_en;
-  logic [63:0] retire_reg_NPC;
   logic  [5:0] retire_reg_phys;;
 	logic head_halt;
   logic rob_retire_out_halt;
@@ -538,8 +541,8 @@ assign if_stage_dispatch_en = !inst_queue_full;
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_stage_dispatch_en),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
     .co_ret_branch_valid(ret_branch_inst.en),
-    .if_bp_NPC(if2_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
-    .if_bp_NPC_valid(if2_bp_NPC_valid),
+    .if_bp_NPC(if_bp_NPC),					// If BP prediction is valid, then next PC is updated pc from BP
+    .if_bp_NPC_valid(if_bp_NPC_valid),
 
     // Outputs
     .if_NPC_out(if1_fetch_NPC_out), 
@@ -686,13 +689,13 @@ end
 		.if_cond_branch(if12_branch_inst.cond),
 		.if_direct_branch(if12_branch_inst.direct),
 		.if_return_branch(if12_branch_inst.ret), 
-		.if_pc_in(if12_PC_reg),
+		.if_pc_in(if12_PC_reg[31:0]),
 
 		.rt_en_branch(ret_branch_inst.en),			//Get value from retire_inst_busy
 		.rt_cond_branch(ret_branch_inst.cond),			
 		.rt_direct_branch(ret_branch_inst.direct),		 
 		.rt_return_branch(ret_branch_inst.ret),
-		.rt_pc(ret_branch_inst.pc),
+		.rt_pc(ret_branch_inst.pc[31:0]),
 		.rt_branch_taken(rob_retire_out_take_branch),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
 		.rt_calculated_pc(retire_reg_NPC),			// This is not come from ret_branc_inst 
@@ -738,7 +741,10 @@ end
 
 //Branch signals
 
+	assign if_bp_NPC_valid = if2_bp_NPC_valid;
+	assign if_bp_NPC = {if12_PC_reg[63:32], if2_bp_NPC};
 
+/*
   // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if( reset | branch_not_taken) begin
@@ -755,7 +761,7 @@ end
 			if_bp_NPC	<= `SD 64'h0;
 		end
 	end
-
+*/
   //////////////////////////////////////////////////////////////////////////////
   //									      //
   //	Instruction queue to decouple Structural hazard stalling and Fetch.   //
@@ -1057,9 +1063,9 @@ end
     .rd_idx(issue_reg_tags),
     .rd_out(pr_tags_values),
 
-    `ifdef DEBUG
+   
    	.phys_registers_out(phys_reg),
-    `endif
+    
     .wr_clk(clock),
     .wr_en({1'b0, ex_co_valid_inst[4:3], mem_co_valid_inst, ex_co_valid_inst[1:0]}),
     .wr_idx({{$clog2(`NUM_PHYS_REG){1'b1}}, ex_co_dest_reg_idx[4:3], mem_co_dest_reg_idx, ex_co_dest_reg_idx[1:0]}),
@@ -1412,6 +1418,23 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 	);
   
     always_comb begin
+	  co_NPC_selected             =    0 ;
+          co_IR_selected              =   `NOOP_INST;
+          co_halt_selected            =    0;
+          co_illegal_selected         =    0;
+          co_valid_inst_selected      =    0;
+          co_reg_wr_idx_out           =   `DUMMY_REG;
+          co_take_branch_selected     =    0;
+          co_alu_result_selected      =    0;
+          co_branch_valid             =    0; 
+	 co_branch_valid = 1'b0;
+	 co_take_branch_selected = 1'b0;
+	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+	 co_branch_target = 32'h0;
+
+
+
+
       if (|co_selected == 1) begin
         for (integer i=0; i< `NUM_FU_TOTAL; i=i+1) begin
           if(co_selected[i]==1) begin
