@@ -1498,7 +1498,7 @@ end
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
   assign lq_load_in.mem_response = Dmem2proc_response;
 
-  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & ex_co_rd_mem[FU_LD_IDX];
+  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & !sq_data_not_found & ex_co_rd_mem[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
@@ -1552,6 +1552,9 @@ end
   
  logic [63:0] mem_addr, mem_data;
  
+logic mem_co_stall;
+assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
+
   // accessing priorities for the memory
   assign mem_addr=  (proc2Dmem_command == BUS_STORE) ? sq_head_address : ex_co_alu_result[FU_LD_IDX];
   assign mem_data=  (proc2Dmem_command == BUS_STORE) ? sq_head_data : 0;
@@ -1597,13 +1600,17 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //           mem/co stage                   //
   //                                              //
   //////////////////////////////////////////////////
-  assign mem_co_valid_inst_comb= (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst & lq_pop_en; 
-  assign mem_co_NPC_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
-  assign mem_co_IR_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
-  assign mem_co_halt_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
-  assign mem_co_illegal_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
-  assign mem_co_dest_reg_idx_comb= (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
-  assign mem_co_alu_result_comb = (sq_data_valid & ex_co_valid_inst[FU_LD_IDX]) ? sq_data_out : mem2proc_data; // lq_load_out.alu_result;
+
+  logic mem_co_comb;
+  assign mem_co_comb = sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
+
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst & lq_pop_en; 
+  assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
+  assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
+  assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
+  assign mem_co_illegal_comb = mem_co_comb ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
+  assign mem_co_dest_reg_idx_comb= mem_co_comb ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
+  assign mem_co_alu_result_comb = mem_co_comb ? sq_data_out : mem2proc_data; // lq_load_out.alu_result;
   
 
   
@@ -1621,7 +1628,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
       mem_co_illegal      <= `SD 0;
       mem_co_dest_reg_idx <= `SD `DUMMY_REG;
       mem_co_alu_result   <= `SD 64'b0;
-    end else if (mem_co_enable) begin
+    end else if (mem_co_enable & ~mem_co_stall) begin
       mem_co_valid_inst   <= `SD mem_co_valid_inst_comb ;
       mem_co_NPC          <= `SD mem_co_NPC_comb;
       mem_co_IR           <= `SD mem_co_IR_comb;
@@ -1637,6 +1644,24 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
     //   mem_co_illegal      <= `SD ex_co_illegal[2];
     //   mem_co_dest_reg_idx <= `SD mem_dest_reg_idx_out;
     //   mem_co_alu_result   <= `SD mem_result_out;   
+     end else if (mem_co_stall) begin
+      mem_co_valid_inst   <= `SD mem_co_valid_inst;
+      mem_co_NPC          <= `SD mem_co_NPC;
+      mem_co_IR           <= `SD mem_co_IR;
+      mem_co_halt         <= `SD mem_co_halt;
+      mem_co_illegal      <= `SD mem_co_illegal;
+      mem_co_dest_reg_idx <= `SD mem_co_dest_reg_idx;
+      mem_co_alu_result   <= `SD mem_co_alu_result;
+      
+      
+     end else begin
+      mem_co_valid_inst   <= `SD 0;
+      mem_co_NPC          <= `SD 0;
+      mem_co_IR           <= `SD `NOOP_INST;
+      mem_co_halt         <= `SD 0;
+      mem_co_illegal      <= `SD 0;
+      mem_co_dest_reg_idx <= `SD `DUMMY_REG;
+      mem_co_alu_result   <= `SD 64'b0;
      end
   end
   

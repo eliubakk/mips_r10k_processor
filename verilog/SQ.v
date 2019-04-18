@@ -176,20 +176,20 @@ module SQ(
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
-				addr[i] <= 0;
-				addr_ready[i] <= 0;
-				data[i] <= 0;
-				data_ready[i] <= 0;
+				addr[i] <= `SD 0;
+				addr_ready[i] <= `SD 0;
+				data[i] <= `SD 0;
+				data_ready[i] <= `SD 0;
 			end
-			head <= 0;
-			tail <= 0;
+			head <= `SD 0;
+			tail <= `SD 0;
 		end else begin
-			addr <= addr_next;
-			addr_ready <= addr_ready_next;
-			data <= data_next;
-			data_ready <= data_ready_next;
-			head <= head_next;
-			tail <= tail_next;
+			addr <= `SD addr_next;
+			addr_ready <= `SD addr_ready_next;
+			data <= `SD data_next;
+			data_ready <= `SD data_ready_next;
+			head <= `SD head_next;
+			tail <= `SD tail_next;
 		end
 	end
 
