@@ -151,6 +151,11 @@ module dcache(clock, reset,
   logic [($clog2(`MEM_BUFFER_SIZE)-1):0] send_req_ptr, send_req_ptr_next;
   logic [($clog2(`MEM_BUFFER_SIZE)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
 
+  logic [(`MEM_BUFFER_SIZE-1):0][0:0][63:0] mem_queue_cam_table_in;
+  logic [(RD_PORTS-1):0][63:0] mem_queue_cam_tags;
+  logic [(`MEM_BUFFER_SIZE-1):0][0:0][(RD_PORTS-1):0] mem_queue_cam_hits;
+  logic [(RD_PORTS-1):0][(`MEM_BUFFER_SIZE-1):0] mem_queue_hits;
+
   logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_addr_table_in;
   logic [(RD_PORTS-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] fifo_cam_tags;
   logic [(`NUM_FIFO-1):0][(`FIFO_SIZE-1):0][(RD_PORTS-1):0] fifo_cam_hits;
@@ -179,19 +184,38 @@ module dcache(clock, reset,
     end
   end
 
+  for(ig = 0; ig < `MEM_BUFFER_SIZE; ig += 1) begin
+    assign mem_queue_cam_table_in[ig][0] = mem_req_queue[ig].req.address;
+    for(jg = 0; jg < RD_PORTS; jg += 1) begin
+      assign mem_queue_hits[jg][ig] = mem_queue_cam_hits[ig][0][jg] & mem_req_queue[ig].req.valid;
+    end
+  end
+
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
     assign fifo_cam_tags[ig] = {cache_rd_miss_tag[ig], cache_rd_miss_idx[ig]};
+    assign mem_queue_cam_tags[ig] = proc2Dcache_rd_addr[ig];
   end
 
   CAM #(.LENGTH(`NUM_FIFO),
       .WIDTH(`FIFO_SIZE),
       .NUM_TAGS(RD_PORTS),
       .TAG_SIZE((`NUM_SET_BITS+`NUM_TAG_BITS))) 
-  cam0(
+   fifo_cam(
     .enable(cache_rd_miss_valid),
     .tags(fifo_cam_tags),
     .table_in(fifo_addr_table_in),
     .hits(fifo_cam_hits)
+  );
+
+  CAM #(.LENGTH(`MEM_BUFFER_SIZE),
+      .WIDTH(1),
+      .NUM_TAGS(RD_PORTS),
+      .TAG_SIZE(64)) 
+  mem_queue_cam(
+    .enable(rd_en),
+    .tags(mem_queue_cam_tags),
+    .table_in(mem_queue_cam_table_in),
+    .hits(mem_queue_cam_hits)
   );
 
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
@@ -296,7 +320,7 @@ module dcache(clock, reset,
 
     //allocate new fifo
     for(int i = 0; i < RD_PORTS; i += 1) begin
-      if(!fifo_hit_num_valid[i] & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+      if(!fifo_hit_num_valid[i] & ~(|mem_queue_hits[i]) & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
         mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[i][63:3], 3'b0};
         mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
         mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
