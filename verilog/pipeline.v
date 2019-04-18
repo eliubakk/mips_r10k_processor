@@ -698,7 +698,7 @@ end
 		.rt_pc(ret_branch_inst.pc[31:0]),
 		.rt_branch_taken(rob_retire_out_take_branch),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
-		.rt_calculated_pc(retire_reg_NPC),			// This is not come from ret_branc_inst 
+		.rt_calculated_pc(retire_reg_NPC[31:0]),			// This is not come from ret_branc_inst 
 		.rt_branch_index(ret_branch_inst.br_idx),		
 
 		// outputs 
@@ -1424,9 +1424,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
           co_illegal_selected         =    0;
           co_valid_inst_selected      =    0;
           co_reg_wr_idx_out           =   `DUMMY_REG;
-          co_take_branch_selected     =    0;
           co_alu_result_selected      =    0;
-          co_branch_valid             =    0; 
 	 co_branch_valid = 1'b0;
 	 co_take_branch_selected = 1'b0;
 	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
@@ -1445,9 +1443,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               co_illegal_selected           =    mem_co_illegal;
               co_valid_inst_selected        =    mem_co_valid_inst;
               co_reg_wr_idx_out             =    mem_co_dest_reg_idx;
-              co_take_branch_selected       =    1'b0;
               co_alu_result_selected        =    mem_co_alu_result;
-              co_branch_valid               =    1'b0;
 
               co_branch_valid = 1'b0;
               co_take_branch_selected = 1'b0;
@@ -1461,7 +1457,6 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
                         co_illegal_selected           =    ex_co_illegal[i];
                         co_valid_inst_selected        =    ex_co_valid_inst[i];
                         co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
-                        // co_take_branch_selected       =    ex_co_take_branch[i];
                         co_alu_result_selected        =    ex_co_alu_result[i];
                         if(i == 4) begin // For branch
                           co_branch_valid = ex_co_valid_inst[4];
@@ -1484,11 +1479,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
           co_illegal_selected         =    0;
           co_valid_inst_selected      =    0;
           co_reg_wr_idx_out           =   `DUMMY_REG;
-          co_take_branch_selected     =    0;
           co_alu_result_selected      =    0;
-          co_branch_valid             =    0; 
-
-
 	 co_branch_valid = 1'b0;
 	 co_take_branch_selected = 1'b0;
 	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
