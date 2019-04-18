@@ -49,7 +49,9 @@ module psel_rotating(clock, reset, req, en,
                 psel_gnt_out <= `SD 0;
             `endif
         end else begin
-            count <= `SD (count == (WIDTH-1))? 0 : count+1;
+            if(en) begin
+                count <= `SD (count == (WIDTH-1))? 0 : count+1;
+            end
             `ifdef DEBUG
                 psel_req_out <= `SD psel_req;
                 psel_gnt_out <= `SD psel_gnt;
