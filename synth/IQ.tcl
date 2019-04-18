@@ -17,7 +17,7 @@ elaborate IQ
 set design_name IQ
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 3
+set CLK_PERIOD 2.1
 
 
 
