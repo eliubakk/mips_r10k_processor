@@ -5,7 +5,7 @@
 module vic_cache(clock, reset,
               vic_idx, vic, vic_valid, 
               rd_en, rd_idx, rd_tag,
-              evicted_vic, evicted valid,
+              evicted_vic, evicted_valid,
               rd_vic, rd_valid, vic_queue_out);
     parameter NUM_WAYS = 4;
     parameter RD_PORTS = 1;
@@ -30,7 +30,7 @@ module vic_cache(clock, reset,
 
     typedef struct packed {
         CACHE_LINE_T line;
-        logic idx [(`NUM_SET_BITS-1):0];
+        logic [(`NUM_SET_BITS-1):0] idx;
     } VIC_CACHE_T;
 
     const VIC_CACHE_T EMPTY_VIC_CACHE = 
@@ -56,7 +56,7 @@ module vic_cache(clock, reset,
     output VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out;
 
     //internal storage variables
-    logic VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue, vic_queue_next;
+    VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue, vic_queue_next;
     logic [`NUM_VIC_BITS:0] vic_queue_tail, vic_queue_tail_next;
     
     //rd cam variables
@@ -105,7 +105,7 @@ module vic_cache(clock, reset,
 
         assign rd_vic[ig] = vic_queue[rd_vic_idx[ig]];
     end
-    assign rd_valid = vic_hit_idx_valid;
+    assign rd_valid = rd_vic_idx_valid;
 
     //update logic
     always_comb begin
@@ -118,9 +118,12 @@ module vic_cache(clock, reset,
         end
        
         //calculate shift values based on rd hits (remove from vic_queue)
-        for(int i = `VIC_SIZE-1; i > 0; --i) begin
-            vic_num_shift[i] = BIT_COUNT_LUT[vic_queue_hits[i:0]];       
-        end
+        //for(int i = `VIC_SIZE-1; i > 0; --i) begin
+        //    vic_num_shift[i] = BIT_COUNT_LUT[vic_queue_hits[i:0]];       
+        //end
+        vic_num_shift[3] = BIT_COUNT_LUT[vic_queue_hits[3:0]];
+        vic_num_shift[2] = BIT_COUNT_LUT[vic_queue_hits[2:0]];
+        vic_num_shift[1] = BIT_COUNT_LUT[vic_queue_hits[1:0]];
         vic_num_shift[0] = vic_queue_hits[0];
         vic_queue_tail_next -= vic_num_shift[`VIC_SIZE-1];
 
