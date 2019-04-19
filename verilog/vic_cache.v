@@ -4,53 +4,87 @@
     parameter NUM_WAYS = 4;
     parameter NUM_SETS = (32/NUM_WAYS);
     parameter RD_PORTS = 1;
+    parameter WR_PORTS = 1;
     `define NUM_SET_BITS $clog2(NUM_SETS)
     `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
     typedef struct packed {
-    logic [63:0] data;
-    logic [(`NUM_TAG_BITS-1):0] tag;
-    logic valid;
-    //logic dirty;
+        logic [63:0] data;
+        logic [(`NUM_TAG_BITS-1):0] tag;
+        logic valid;
+        logic dirty;
     } CACHE_LINE_T;
 
     typedef struct packed {
-    CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
-    } CACHE_SET_T;
+        CACHE_LINE_T line;
+        logic idx [(`NUM_SET_BITS-1):0];
+    } VIC_CACHE_T;
 
-module vic_cache(clock, reset, valid, valid_cam, new_victim,
-                set_index_cam, set_index, tag_cam,
-                vic_table_out, set_index_table_out, fired_victim,
-                out_victim, fired_valid, out_valid);
+// module vic_cache(clock, reset, valid, valid_cam, new_victim,
+//                 set_index_cam, set_index, tag_cam,
+//                 vic_table_out, set_index_table_out, fired_victim,
+//                 out_victim, fired_valid, out_valid);
 
+module vic_cache(clock, reset,
+              vic_idx, vic, vic_valid, 
+              rd_en, rd_idx, rd_tag,
+              evicted_vic, evicted valid,
+              rd_vic, rd_valid, vic_queue_out);
+    
     input clock;
     input reset;
-    input [1:0] valid;//cacheline input
-    input [1:0] valid_cam;//for camming
-    input CACHE_LINE_T  [1:0] new_victim;// i don't do anything with new_victim.valid
-    input [1:0] [(`NUM_SET_BITS - 1):0] set_index_cam;
-    input [1:0] [(`NUM_SET_BITS - 1):0] set_index;
-    input [1:0] [(`NUM_TAG_BITS - 1):0] tag_cam;
+    input [(WR_PORTS-1):0][(`NUM_SET_BITS-1):0] vic_idx;
+    input CACHE_LINE_T [(WR_PORTS-1):0] vic;
+    input [(WR_PORTS-1):0] vic_valid;
+    input [(RD_PORTS-1):0] rd_en;
+    input [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] rd_idx;
+    input [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] rd_tag;
 
-    output CACHE_LINE_T [3:0]	 vic_table_out;
-    output logic [3:0][`NUM_SET_BITS:0] set_index_table_out;//index + 1bit for busy
-    output CACHE_LINE_T  [1:0] fired_victim;
-    output CACHE_LINE_T  [1:0] out_victim;
-    output logic [1:0]              fired_valid;
-    output logic [1:0]             out_valid;
 
-    CACHE_LINE_T [3:0]	         vic_table_next;
-    logic [3:0][`NUM_SET_BITS:0] set_index_table_next;
-    logic [1:0][3:0]                  vic_table_hits;                   
-    logic [1:0][3:0]                  set_index_table_hits;
-    logic [1:0][1:0]                  index_table;
-    logic [3:0][`NUM_SET_BITS-1:0] set_index_table_temp;
-    logic [3:0][`NUM_TAG_BITS-1:0] vic_table_out_temp;
-    CACHE_LINE_T  [1:0] fired_victim_next;
-    logic [1:0]             fired_valid_next;
-    logic [1:0]             out_valid_next;
-    logic [1:0]        num_valids;
-    CACHE_LINE_T [1:0] out_victim_next;
+    output VIC_CACHE_T [(WR_PORTS-1):0] evicted_vic;
+    output logic [(WR_PORTS-1):0] evicted_valid;
+    output VIC_CACHE_T [(RD_PORTS-1):0] rd_vic;
+    output logic [(RD_PORTS-1):0] rd_valid;
+    output VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out;
+
+    logic VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue, vic_queue_next;
+    logic [`NUM_VIC_BITS:0] vic_queue_tail, vic_queue_tail_next;
+    
+    logic [(`VIC_SIZE-1):0][0:0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] vic_queue_cam_table_in;
+    logic [(`RD_PORTS-1):0][(`NUM_SET_BITS+`NUM_TAG_BITS-1):0] vic_queue_cam_tags;
+    logic [(`VIC_SIZE-1):0][0:0][(`RD_PORTS-1):0] vic_cam_hits;
+    logic [(`RD_PORTS-1):0][(`VIC_SIZE-1):0] vic_hits
+    logic [(`RD_PORTS-1):0][`NUM_VIC_BITS:0] vic_hit_idx;
+
+
+    // input clock;
+    // input reset;
+    // input [1:0] valid;//cacheline input
+    // input [1:0] valid_cam;//for camming
+    // input CACHE_LINE_T  [1:0] new_victim;// i don't do anything with new_victim.valid
+    // input [1:0] [(`NUM_SET_BITS - 1):0] set_index_cam;
+    // input [1:0] [(`NUM_SET_BITS - 1):0] set_index;
+    // input [1:0] [(`NUM_TAG_BITS - 1):0] tag_cam;
+
+    // output CACHE_LINE_T [3:0]	 vic_table_out;
+    // output logic [3:0][`NUM_SET_BITS:0] set_index_table_out;//index + 1bit for busy
+    // output CACHE_LINE_T  [1:0] fired_victim;
+    // output CACHE_LINE_T  [1:0] out_victim;
+    // output logic [1:0]              fired_valid;
+    // output logic [1:0]             out_valid;
+
+    // CACHE_LINE_T [3:0]	         vic_table_next;
+    // logic [3:0][`NUM_SET_BITS:0] set_index_table_next;
+    // logic [1:0][3:0]                  vic_table_hits;                   
+    // logic [1:0][3:0]                  set_index_table_hits;
+    // logic [1:0][1:0]                  index_table;
+    // logic [3:0][`NUM_SET_BITS-1:0] set_index_table_temp;
+    // logic [3:0][`NUM_TAG_BITS-1:0] vic_table_out_temp;
+    // CACHE_LINE_T  [1:0] fired_victim_next;
+    // logic [1:0]             fired_valid_next;
+    // logic [1:0]             out_valid_next;
+    // logic [1:0]        num_valids;
+    // CACHE_LINE_T [1:0] out_victim_next;
 
     assign fired_victim_next [0] = vic_table_out[2];
     assign fired_victim_next [1] = vic_table_out[3];
