@@ -171,7 +171,7 @@ syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DI
 	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
 	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
 	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
-	mv $@ ../../.
+	mv ** ../../.
 
 #syn_simv:	$(SYNFILES) $(TESTBENCH)
 #	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
