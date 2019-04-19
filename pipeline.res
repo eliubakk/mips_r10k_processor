@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Fri Apr 19 14:01:09 2019
+Date   : Fri Apr 19 16:03:04 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -627,10 +627,9 @@ Resource Sharing Report for design IQ in file ../../verilog/IQ.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
-| r94      | DW01_cmp2    | width=5    |               | gte_47               |
-| r96      | DW01_dec     | width=6    |               | sub_107              |
-| r98      | DW01_sub     | width=5    |               | sub_116_aco          |
-| r100     | DW01_inc     | width=5    |               | add_121              |
+| r82      | DW01_inc     | width=5    |               | add_74               |
+| r84      | DW01_sub     | width=5    |               | sub_132_aco          |
+| r86      | DW01_cmp2    | width=5    |               | gte_133              |
 ===============================================================================
 
 

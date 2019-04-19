@@ -790,7 +790,7 @@ end
 		.inst_queue_out(inst_queue_out),
 		.inst_queue_entry(inst_queue_entry),
 		`endif
-		.inst_queue_full(inst_queue_full),
+		.inst_queue_full_out(inst_queue_full),
 		.if_inst_out(if_id_inst_out)
 	);
 
