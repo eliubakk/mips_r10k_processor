@@ -2,7 +2,19 @@
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
+`define NUM_RAND_ITER 500
+
 module testbench;
+
+	initial
+	begin
+		$finish;
+	end
+
+
+endmodule
+
+/*module testbench;
     //inputs
     logic clock;
     logic reset;
@@ -321,4 +333,4 @@ module testbench;
 
         $finish;
     end
-endmodule
+endmodule*/
