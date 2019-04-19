@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Fri Apr 19 16:12:30 2019
+Date   : Fri Apr 19 18:58:11 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -519,20 +519,20 @@ Implementation Report
 |                    |                  | Current            | Set            |
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
-| genblk5[1].genblk1[0].encode_issue/sub_9                   |                |
-|                    | DW01_dec         | cla                |                |
-| genblk5[0].genblk1[1].encode_issue/sub_9                   |                |
-|                    | DW01_dec         | cla                |                |
-| genblk5[0].genblk1[0].encode_issue/sub_9                   |                |
+| genblk5[3].genblk1[0].encode_issue/sub_9                   |                |
 |                    | DW01_dec         | cla                |                |
 | genblk5[4].genblk1[0].encode_issue/sub_9                   |                |
 |                    | DW01_dec         | cla                |                |
-| genblk5[2].genblk1[0].encode_issue/sub_9                   |                |
-|                    | DW01_dec         | cla                |                |
-| genblk5[3].genblk1[0].encode_issue/sub_9                   |                |
+| genblk5[1].genblk1[0].encode_issue/sub_9                   |                |
 |                    | DW01_dec         | cla                |                |
 | genblk7[0].encode_dispatch/sub_9      |                    |                |
-|                    | DW01_dec         | rpl                |                |
+|                    | DW01_dec         | cla                |                |
+| genblk5[0].genblk1[0].encode_issue/sub_9                   |                |
+|                    | DW01_dec         | cla                |                |
+| genblk5[0].genblk1[1].encode_issue/sub_9                   |                |
+|                    | DW01_dec         | cla                |                |
+| genblk5[2].genblk1[0].encode_issue/sub_9                   |                |
+|                    | DW01_dec         | cla                |                |
 ===============================================================================
 
  
