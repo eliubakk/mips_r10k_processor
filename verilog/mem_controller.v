@@ -48,9 +48,9 @@ module mem_controller(clock, reset,
     logic  [63:0] Imem2proc_data_next;
     logic  [63:0] Imem2proc_tag_next;
 
-    logic  [3:0]  proc2mem_command_next;
-    logic  [63:0] proc2mem_addr_next;       
-    logic  [3:0]  proc2mem_data_next;    
+    //logic  [3:0]  proc2mem_command_next;
+    //logic  [63:0] proc2mem_addr_next;       
+    //logic  [3:0]  proc2mem_data_next;    
 
     ts_state state;
     ts_state next_state;
@@ -67,9 +67,9 @@ module mem_controller(clock, reset,
         Dmem2proc_response_next = Dmem2proc_response;
         Imem2proc_response_next = Imem2proc_response;
 
-        proc2mem_command_next = proc2mem_command;
-        proc2mem_addr_next = proc2mem_addr;
-        proc2mem_data_next = proc2mem_data;
+        //proc2mem_command_next = proc2mem_command;
+        //proc2mem_addr_next = proc2mem_addr;
+        //proc2mem_data_next = proc2mem_data;
 
         case(state)
             IDLE: begin
@@ -116,9 +116,9 @@ module mem_controller(clock, reset,
             Imem2proc_response <= `SD 0;
             Imem2proc_data <= `SD 0;
             Imem2proc_tag <= `SD 0;
-            proc2mem_command <= `SD 0;
-            proc2mem_addr <= `SD 0;
-            proc2mem_data <= `SD 0;
+            //proc2mem_command <= `SD 0;
+            //proc2mem_addr <= `SD 0;
+            //proc2mem_data <= `SD 0;
         end else begin
             state 	   <= `SD next_state;
             Dmem2proc_response <= `SD Dmem2proc_response_next;
@@ -127,9 +127,9 @@ module mem_controller(clock, reset,
             Imem2proc_response <= `SD Imem2proc_response_next;
             Imem2proc_data <= `SD Imem2proc_data_next;
             Imem2proc_tag <= `SD Imem2proc_tag_next;
-            proc2mem_command <= `SD proc2mem_command_next;
-            proc2mem_addr <= `SD proc2mem_addr_next;
-            proc2mem_data <= `SD proc2mem_data_next;
+            //proc2mem_command <= `SD proc2mem_command_next;
+            //proc2mem_addr <= `SD proc2mem_addr_next;
+            //proc2mem_data <= `SD proc2mem_data_next;
         end
     end
 

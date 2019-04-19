@@ -5,7 +5,8 @@ module dcache(clock, reset,
               rd_en, proc2Dcache_rd_addr,
               wr_en, proc2Dcache_wr_addr, proc2Dcache_wr_data,
               Dmem2proc_response, Dmem2proc_data, Dmem2proc_tag,
-              Dcache_data_out, Dcache_valid_out,
+              Dcache_rd_data_out, Dcache_rd_valid_out,
+              Dcache_rd_miss_addr_out, Dcache_rd_miss_data_out, Dcache_rd_miss_valid_out,
               proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data);
   parameter NUM_WAYS = 4;
   parameter RD_PORTS = 1;
@@ -61,8 +62,11 @@ module dcache(clock, reset,
   //  OUTPUTS  //
   ///////////////
   //to mem_stage
-  output logic [(RD_PORTS-1):0][63:0] Dcache_data_out; // value is memory[proc2Dcache_addr]
-  output logic [(RD_PORTS-1):0] Dcache_valid_out; // when this is high
+  output logic [(RD_PORTS-1):0][63:0] Dcache_rd_data_out; // value is memory[proc2Dcache_rd_addr]
+  output logic [(RD_PORTS-1):0] Dcache_rd_valid_out; // when this is high
+  output logic [63:0] Dcache_rd_miss_addr_out;
+  output logic [63:0] Dcache_rd_miss_data_out; // value is memory[proc2Dcache_rd_addr]
+  output logic Dcache_rd_miss_valid_out; 
 
   //to main memory
   output logic [1:0]  proc2Dmem_command;
@@ -280,8 +284,8 @@ module dcache(clock, reset,
     //requested rd
     assign cache_rd_en[ig] = rd_en[ig];
     assign {cache_rd_tag[ig], cache_rd_idx[ig]} = proc2Dcache_rd_addr[ig][31:3];
-    assign Dcache_data_out[ig] = cache_rd_data[ig];
-    assign Dcache_valid_out[ig] = cache_rd_valid[ig];
+    assign Dcache_rd_data_out[ig] = cache_rd_data[ig];
+    assign Dcache_rd_valid_out[ig] = cache_rd_valid[ig];
   end
 
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
@@ -297,6 +301,8 @@ module dcache(clock, reset,
   assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = mem_req_queue[mem_waiting_ptr-1].req.address[31:3];
   assign cache_wr_dirty[RD_PORTS+WR_PORTS] = 1'b0;
   assign cache_wr_data[RD_PORTS+WR_PORTS] = mem_rd_data;
+  assign Dcache_rd_miss_addr_out = mem_req_queue[mem_waiting_ptr-1].req.address;
+  assign Dcache_rd_miss_data_out = mem_rd_data;
 
   assign update_mem_tag = send_request? (Dmem2proc_response != 0) : 1'b0;
 
@@ -451,7 +457,6 @@ module dcache(clock, reset,
       send_req_ptr    <= `SD 0;
       mem_waiting_ptr <= `SD 0;
       cache_wr_en[RD_PORTS+WR_PORTS] <= `SD 1'b0;
-      cache_wr_data[RD_PORTS+WR_PORTS] <= `SD 64'b0;
       mem_rd_data <= `SD 64'b0;
     end else begin
       fifo <= `SD fifo_next;
@@ -469,9 +474,11 @@ module dcache(clock, reset,
       if(mem_done) begin
         mem_rd_data <= `SD Dmem2proc_data;
         cache_wr_en[RD_PORTS+WR_PORTS] <= `SD mem_req_queue[mem_waiting_ptr].wr_to_cache;
+        Dcache_rd_miss_valid_out <= `SD mem_req_queue[mem_waiting_ptr].wr_to_cache;
       end else begin
         mem_rd_data <= `SD 64'b0;
         cache_wr_en[RD_PORTS+WR_PORTS] <= `SD 1'b0;
+        Dcache_rd_miss_valid_out <= `SD 1'b0;
       end
     end
   end
