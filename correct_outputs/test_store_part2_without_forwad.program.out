@@ -22,23 +22,32 @@ VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 40420402205f000a : 4630267774069833738
-@@@ mem[    8] = 0000000000000555 : 1365
+@@@ mem[    0] = 207f1000205f0004 : 2341607923985088516
+@@@ mem[    8] = b4430000209f0003 : 12989225750813933571
+@@@ mem[   16] = 47ff041fb4630008 : 5187869829970984968
+@@@ mem[   24] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   32] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   40] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   48] = a4a3000047ff041f : 11863325844631913503
+@@@ mem[   56] = 00000555a4e30008 : 5865396699144
+@@@
+@@@ mem[ 4096] = 0000000000000004 : 4
+@@@ mem[ 4104] = 0000000000001000 : 4096
 @@@
 @@@
-@@                  1820 : System halted
+@@                  8320 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  15 cycles / 2 instrs = 7.500000 CPI
+@@  80 cycles / 15 instrs = 5.333333 CPI
 @@
-@@  420.00 ns total time to execute
+@@  2370.00 ns total time to execute
 @@
 
 $finish called from file "testbench/testbench.v", line 257.
-$finish at simulation time                 2820
+$finish at simulation time                 9320
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 282000 ps
-CPU Time:      0.240 seconds;       Data structure size:   0.2Mb
-Fri Apr 19 12:40:20 2019
+Time: 932000 ps
+CPU Time:      0.220 seconds;       Data structure size:   0.2Mb
+Fri Apr 19 12:40:04 2019

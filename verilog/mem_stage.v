@@ -15,10 +15,11 @@
 module mem_stage(
     input         clock,              // system clock
     input         reset,              // system reset
-    input  [63:0] ex_mem_rega,        // regA value from reg file (store data)
-    input  [63:0] ex_mem_alu_result,  // incoming ALU result from EX
-    input         ex_mem_rd_mem,      // read memory? (from decoder)
-    input         ex_mem_wr_mem,      // write memory? (from decoder)
+    input         rd_mem,      // read memory? (from decoder)
+    input  [63:0] rd_addr,        // regA value from reg file (store data)
+    input         wr_mem,      // write memory? (from decoder)
+    input  [63:0] wr_addr,
+    input  [63:0] wr_data,  // incoming ALU result from EX
     input  [63:0] Dmem2proc_data,
     input   [3:0] Dmem2proc_tag, Dmem2proc_response,
     input         sq_data_not_found,   // store addresses in the store queue not calculated
@@ -26,38 +27,50 @@ module mem_stage(
 
     output [63:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
     output        mem_stall_out,
+    output [63:0] mem_rd_miss_addr_out,
+    output [63:0] mem_rd_miss_data_out,
+    output logic  mem_rd_miss_valid_out,
     output [1:0] proc2Dmem_command,
     output [63:0] proc2Dmem_addr,      // Address sent to data-memory
     output [63:0] proc2Dmem_data      // Data sent to data-memory
-                );
+  );
 
-  logic [3:0] mem_waiting_tag;
+  logic [63:0] Dcache_data_out;
+  logic Dcache_valid_out;
 
-  // Determine the command that must be sent to mem
-  assign proc2Dmem_command =  (mem_waiting_tag != 0) ?  BUS_NONE :
-                              ex_mem_wr_mem  ? BUS_STORE :
-                              ex_mem_rd_mem & ~sq_data_not_found & ~sq_data_valid  ? BUS_LOAD :
-                              BUS_NONE;
-
-  // The memory address is calculated by the ALU
-  assign proc2Dmem_data = ex_mem_rega;
-
-  assign proc2Dmem_addr = ex_mem_alu_result;
+  // // Determine the command that must be sent to mem
+  // assign proc2Dmem_command =  (mem_waiting_tag != 0) ?  BUS_NONE :
+  //                             ex_mem_wr_mem  ? BUS_STORE :
+  //                             ex_mem_rd_mem & ~sq_data_not_found & ~sq_data_valid  ? BUS_LOAD :
+  //                             BUS_NONE;
 
   // Assign the result-out for next stage
-  assign mem_result_out = (ex_mem_rd_mem) ? Dmem2proc_data : ex_mem_alu_result;
+  assign mem_result_out = (rd_mem) ? Dcache_data_out :
+                                     rd_addr;
 
-  assign mem_stall_out =  (ex_mem_rd_mem && ((mem_waiting_tag!=Dmem2proc_tag) || (Dmem2proc_tag==0))) |
-              (ex_mem_wr_mem && (Dmem2proc_response==0));
+  assign mem_stall_out =  (rd_mem && ~Dcache_valid_out);
 
-  wire write_enable =  ex_mem_rd_mem && 
-            ((mem_waiting_tag==0) || (mem_waiting_tag==Dmem2proc_tag));
+  
+  dcache dcache0(
+    .clock(clock),
+    .reset(reset),
+    .rd_en(rd_mem & (~sq_data_valid & ~sq_data_not_found)),
+    .proc2Dcache_rd_addr(rd_addr),
+    .wr_en(wr_mem),
+    .proc2Dcache_wr_addr(wr_addr),
+    .proc2Dcache_wr_data(wr_data),
+    .Dmem2proc_response(Dmem2proc_response),
+    .Dmem2proc_data(Dmem2proc_data),
+    .Dmem2proc_tag(Dmem2proc_tag),
 
-  // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock)
-    if(reset)
-      mem_waiting_tag <= `SD 0;
-    else if(write_enable)
-      mem_waiting_tag <= `SD Dmem2proc_response;
+    .Dcache_rd_data_out(Dcache_data_out),
+    .Dcache_rd_valid_out(Dcache_valid_out),
+    .Dcache_rd_miss_addr_out(mem_rd_miss_addr_out),
+    .Dcache_rd_miss_data_out(mem_rd_miss_data_out),
+    .Dcache_rd_miss_valid_out(mem_rd_miss_valid_out),
+    .proc2Dmem_command(proc2Dmem_command),
+    .proc2Dmem_addr(proc2Dmem_addr),
+    .proc2Dmem_data(proc2Dmem_data)
+  );
 
 endmodule // module mem_stage
