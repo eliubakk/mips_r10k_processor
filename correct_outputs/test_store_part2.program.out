@@ -1,6 +1,6 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 19 12:39 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 19 12:40 2019
 VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@
@@ -22,28 +22,33 @@ VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 207f0000205f0000 : 2341590331799044096
-@@@ mem[    8] = 404305a5209f0001 : 4630551048642035713
-@@@ mem[   16] = 40840403f4a00007 : 4648845130388733959
-@@@ mem[   24] = 4d64040b4063040a : 5576586684962898954
-@@@ mem[   32] = 000005554d6b040c : 5863929218060
-@@@ mem[   40] = 0000055540440402 : 5863708558338
-@@@ mem[   48] = 0000055540430404 : 5863708492804
+@@@ mem[    0] = 207f1000205f0004 : 2341607923985088516
+@@@ mem[    8] = b4430000209f0003 : 12989225750813933571
+@@@ mem[   16] = a4830000b4630008 : 11854318647195664392
+@@@ mem[   24] = 47ff041fa4c30008 : 5187869829708840968
+@@@ mem[   32] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   40] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   48] = 47ff041f47ff041f : 5187869828152493087
+@@@ mem[   56] = a4a3000047ff041f : 11863325844631913503
+@@@ mem[   64] = 00000555a4e30008 : 5865396699144
+@@@
+@@@ mem[ 4096] = 0000000000000004 : 4
+@@@ mem[ 4104] = 0000000000001000 : 4096
 @@@
 @@@
-@@                  3820 : System halted
+@@                  9320 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  35 cycles / 6 instrs = 5.833333 CPI
+@@  90 cycles / 17 instrs = 5.294118 CPI
 @@
-@@  1020.00 ns total time to execute
+@@  2670.00 ns total time to execute
 @@
 
 $finish called from file "testbench/testbench.v", line 257.
-$finish at simulation time                 4820
+$finish at simulation time                10320
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 482000 ps
+Time: 1032000 ps
 CPU Time:      0.230 seconds;       Data structure size:   0.2Mb
-Fri Apr 19 12:39:04 2019
+Fri Apr 19 12:40:01 2019
