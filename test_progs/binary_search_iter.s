@@ -55,59 +55,53 @@
 	  L_DATA:			# this is where the locals and temps end up at run-time
 	  .text
 _divide:
-	# BeginFunc 64
+	# BeginFunc 56
 	  subq		$r30, 16, $r30	# decrement sp to make space to save ra, fp
 	  stq		$r15, 16($r30)	# save fp
 	  stq		$r26, 8($r30)	# save ra
 	  addq		$r30, 16, $r15	# set up new fp
-	  subq		$r30, 64, $r30	# decrement sp to make space for locals/temps
+	  subq		$r30, 56, $r30	# decrement sp to make space for locals/temps
+	# result = a
+	  ldq		$r3, 8($r15)	# fill a to $r3 from $r15+8
+	  stq		$r3, -24($r15)	# spill result from $r3 to $r15-24
+__L0:
 	# _tmp0 = 0
 	  lda		$r3, 0		# load (signed) int constant value 0 into $r3
 	  stq		$r3, -32($r15)	# spill _tmp0 from $r3 to $r15-32
-	# result = _tmp0
-	  ldq		$r3, -32($r15)	# fill _tmp0 to $r3 from $r15-32
-	  stq		$r3, -24($r15)	# spill result from $r3 to $r15-24
-	# _tmp1 = 0
-	  lda		$r3, 0		# load (signed) int constant value 0 into $r3
+	# _tmp1 = _tmp0 < result
+	  ldq		$r1, -32($r15)	# fill _tmp0 to $r1 from $r15-32
+	  ldq		$r2, -24($r15)	# fill result to $r2 from $r15-24
+	  cmplt		$r1, $r2, $r3	# perform the ALU op
 	  stq		$r3, -40($r15)	# spill _tmp1 from $r3 to $r15-40
-	# i = _tmp1
-	  ldq		$r3, -40($r15)	# fill _tmp1 to $r3 from $r15-40
-	  stq		$r3, -16($r15)	# spill i from $r3 to $r15-16
-__L0:
-	# _tmp2 = i <= a
-	  ldq		$r1, -16($r15)	# fill i to $r1 from $r15-16
+	# IfZ _tmp1 Goto __L1
+	  ldq		$r1, -40($r15)	# fill _tmp1 to $r1 from $r15-40
+	  blbc		$r1, __L1	# branch if _tmp1 is zero
+	# _tmp2 = b * result
+	  ldq		$r1, 16($r15)	# fill b to $r1 from $r15+16
+	  ldq		$r2, -24($r15)	# fill result to $r2 from $r15-24
+	  mulq		$r1, $r2, $r3	# perform the ALU op
+	  stq		$r3, -56($r15)	# spill _tmp2 from $r3 to $r15-56
+	# val = _tmp2
+	  ldq		$r3, -56($r15)	# fill _tmp2 to $r3 from $r15-56
+	  stq		$r3, -48($r15)	# spill val from $r3 to $r15-48
+	# _tmp3 = val <= a
+	  ldq		$r1, -48($r15)	# fill val to $r1 from $r15-48
 	  ldq		$r2, 8($r15)	# fill a to $r2 from $r15+8
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -48($r15)	# spill _tmp2 from $r3 to $r15-48
-	# IfZ _tmp2 Goto __L1
-	  ldq		$r1, -48($r15)	# fill _tmp2 to $r1 from $r15-48
-	  blbc		$r1, __L1	# branch if _tmp2 is zero
-	# _tmp3 = i * b
-	  ldq		$r1, -16($r15)	# fill i to $r1 from $r15-16
-	  ldq		$r2, 16($r15)	# fill b to $r2 from $r15+16
-	  mulq		$r1, $r2, $r3	# perform the ALU op
 	  stq		$r3, -64($r15)	# spill _tmp3 from $r3 to $r15-64
-	# val = _tmp3
-	  ldq		$r3, -64($r15)	# fill _tmp3 to $r3 from $r15-64
-	  stq		$r3, -56($r15)	# spill val from $r3 to $r15-56
-	# _tmp4 = val ^~ a
-	  ldq		$r1, -56($r15)	# fill val to $r1 from $r15-56
-	  ldq		$r2, 8($r15)	# fill a to $r2 from $r15+8
-	  eqv		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -72($r15)	# spill _tmp4 from $r3 to $r15-72
-	# IfZ _tmp4 Goto __L2
-	  ldq		$r1, -72($r15)	# fill _tmp4 to $r1 from $r15-72
-	  blbc		$r1, __L2	# branch if _tmp4 is zero
-	# result = i
-	  ldq		$r3, -16($r15)	# fill i to $r3 from $r15-16
+	# IfZ _tmp3 Goto __L2
+	  ldq		$r1, -64($r15)	# fill _tmp3 to $r1 from $r15-64
+	  blbc		$r1, __L2	# branch if _tmp3 is zero
+	# result = val
+	  ldq		$r3, -48($r15)	# fill val to $r3 from $r15-48
 	  stq		$r3, -24($r15)	# spill result from $r3 to $r15-24
 	# Goto __L1
 	  br		__L1		# unconditional branch
 __L2:
-	# i += 1
-	  ldq		$r3, -16($r15)	# fill i to $r3 from $r15-16
-	  addq		$r3, 1, $r3	# perform the ALU op
-	  stq		$r3, -16($r15)	# spill i from $r3 to $r15-16
+	# result -= 1
+	  ldq		$r3, -24($r15)	# fill result to $r3 from $r15-24
+	  subq		$r3, 1, $r3	# perform the ALU op
+	  stq		$r3, -24($r15)	# spill result from $r3 to $r15-24
 	# Goto __L0
 	  br		__L0		# unconditional branch
 __L1:
@@ -132,100 +126,100 @@ _search_for:
 	  addq		$r30, 16, $r15	# set up new fp
 	  lda		$r2, 264	# stack frame size
 	  subq		$r30, $r2, $r30	# decrement sp to make space for locals/temps
-	# _tmp5 = 0
+	# _tmp4 = 0
 	  lda		$r3, 0		# load (signed) int constant value 0 into $r3
-	  stq		$r3, -40($r15)	# spill _tmp5 from $r3 to $r15-40
-	# start = _tmp5
-	  ldq		$r3, -40($r15)	# fill _tmp5 to $r3 from $r15-40
+	  stq		$r3, -40($r15)	# spill _tmp4 from $r3 to $r15-40
+	# start = _tmp4
+	  ldq		$r3, -40($r15)	# fill _tmp4 to $r3 from $r15-40
 	  stq		$r3, -16($r15)	# spill start from $r3 to $r15-16
 	# end = size
 	  ldq		$r3, 24($r15)	# fill size to $r3 from $r15+24
 	  stq		$r3, -24($r15)	# spill end from $r3 to $r15-24
 __L3:
-	# _tmp6 = start < end
+	# _tmp5 = start < end
 	  ldq		$r1, -16($r15)	# fill start to $r1 from $r15-16
 	  ldq		$r2, -24($r15)	# fill end to $r2 from $r15-24
 	  cmplt		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -48($r15)	# spill _tmp6 from $r3 to $r15-48
-	# IfZ _tmp6 Goto __L4
-	  ldq		$r1, -48($r15)	# fill _tmp6 to $r1 from $r15-48
-	  blbc		$r1, __L4	# branch if _tmp6 is zero
-	# _tmp7 = end + start
+	  stq		$r3, -48($r15)	# spill _tmp5 from $r3 to $r15-48
+	# IfZ _tmp5 Goto __L4
+	  ldq		$r1, -48($r15)	# fill _tmp5 to $r1 from $r15-48
+	  blbc		$r1, __L4	# branch if _tmp5 is zero
+	# _tmp6 = end + start
 	  ldq		$r1, -24($r15)	# fill end to $r1 from $r15-24
 	  ldq		$r2, -16($r15)	# fill start to $r2 from $r15-16
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -56($r15)	# spill _tmp7 from $r3 to $r15-56
-	# _tmp8 = 2
+	  stq		$r3, -56($r15)	# spill _tmp6 from $r3 to $r15-56
+	# _tmp7 = 2
 	  lda		$r3, 2		# load (signed) int constant value 2 into $r3
-	  stq		$r3, -64($r15)	# spill _tmp8 from $r3 to $r15-64
-	# PushParam _tmp8
-	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -64($r15)	# fill _tmp8 to $r1 from $r15-64
-	  stq		$r1, 8($r30)	# copy param value to stack
+	  stq		$r3, -64($r15)	# spill _tmp7 from $r3 to $r15-64
 	# PushParam _tmp7
 	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -56($r15)	# fill _tmp7 to $r1 from $r15-56
+	  ldq		$r1, -64($r15)	# fill _tmp7 to $r1 from $r15-64
 	  stq		$r1, 8($r30)	# copy param value to stack
-	# _tmp9 = LCall _divide
+	# PushParam _tmp6
+	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
+	  ldq		$r1, -56($r15)	# fill _tmp6 to $r1 from $r15-56
+	  stq		$r1, 8($r30)	# copy param value to stack
+	# _tmp8 = LCall _divide
 	  bsr		$r26, _divide	# branch to function
 	  mov		$r0, $r3	# copy function return value from $v0
-	  stq		$r3, -72($r15)	# spill _tmp9 from $r3 to $r15-72
+	  stq		$r3, -72($r15)	# spill _tmp8 from $r3 to $r15-72
 	# PopParams 16
 	  addq		$r30, 16, $r30	# pop params off stack
-	# mid = _tmp9
-	  ldq		$r3, -72($r15)	# fill _tmp9 to $r3 from $r15-72
+	# mid = _tmp8
+	  ldq		$r3, -72($r15)	# fill _tmp8 to $r3 from $r15-72
 	  stq		$r3, -32($r15)	# spill mid from $r3 to $r15-32
-	# _tmp10 = mid < ZERO
+	# _tmp9 = mid < ZERO
 	  ldq		$r1, -32($r15)	# fill mid to $r1 from $r15-32
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -80($r15)	# spill _tmp10 from $r3 to $r15-80
-	# _tmp11 = *(array + -8)
+	  stq		$r3, -80($r15)	# spill _tmp9 from $r3 to $r15-80
+	# _tmp10 = *(array + -8)
 	  ldq		$r1, 16($r15)	# fill array to $r1 from $r15+16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -88($r15)	# spill _tmp11 from $r3 to $r15-88
-	# _tmp12 = _tmp11 <= mid
-	  ldq		$r1, -88($r15)	# fill _tmp11 to $r1 from $r15-88
+	  stq		$r3, -88($r15)	# spill _tmp10 from $r3 to $r15-88
+	# _tmp11 = _tmp10 <= mid
+	  ldq		$r1, -88($r15)	# fill _tmp10 to $r1 from $r15-88
 	  ldq		$r2, -32($r15)	# fill mid to $r2 from $r15-32
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -96($r15)	# spill _tmp12 from $r3 to $r15-96
-	# _tmp13 = _tmp10 || _tmp12
-	  ldq		$r1, -80($r15)	# fill _tmp10 to $r1 from $r15-80
-	  ldq		$r2, -96($r15)	# fill _tmp12 to $r2 from $r15-96
+	  stq		$r3, -96($r15)	# spill _tmp11 from $r3 to $r15-96
+	# _tmp12 = _tmp9 || _tmp11
+	  ldq		$r1, -80($r15)	# fill _tmp9 to $r1 from $r15-80
+	  ldq		$r2, -96($r15)	# fill _tmp11 to $r2 from $r15-96
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -104($r15)	# spill _tmp13 from $r3 to $r15-104
-	# IfZ _tmp13 Goto __L5
-	  ldq		$r1, -104($r15)	# fill _tmp13 to $r1 from $r15-104
-	  blbc		$r1, __L5	# branch if _tmp13 is zero
+	  stq		$r3, -104($r15)	# spill _tmp12 from $r3 to $r15-104
+	# IfZ _tmp12 Goto __L5
+	  ldq		$r1, -104($r15)	# fill _tmp12 to $r1 from $r15-104
+	  blbc		$r1, __L5	# branch if _tmp12 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L5:
-	# _tmp14 = mid << 3
+	# _tmp13 = mid << 3
 	  ldq		$r1, -32($r15)	# fill mid to $r1 from $r15-32
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -112($r15)	# spill _tmp14 from $r3 to $r15-112
-	# _tmp15 = array + _tmp14
+	  stq		$r3, -112($r15)	# spill _tmp13 from $r3 to $r15-112
+	# _tmp14 = array + _tmp13
 	  ldq		$r1, 16($r15)	# fill array to $r1 from $r15+16
-	  ldq		$r2, -112($r15)	# fill _tmp14 to $r2 from $r15-112
+	  ldq		$r2, -112($r15)	# fill _tmp13 to $r2 from $r15-112
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -120($r15)	# spill _tmp15 from $r3 to $r15-120
-	# _tmp16 = *(_tmp15)
-	  ldq		$r1, -120($r15)	# fill _tmp15 to $r1 from $r15-120
+	  stq		$r3, -120($r15)	# spill _tmp14 from $r3 to $r15-120
+	# _tmp15 = *(_tmp14)
+	  ldq		$r1, -120($r15)	# fill _tmp14 to $r1 from $r15-120
 	  ldq		$r3, 0($r1)	# load with offset
-	  stq		$r3, -128($r15)	# spill _tmp16 from $r3 to $r15-128
-	# _tmp17 = _tmp16 ^~ val
-	  ldq		$r1, -128($r15)	# fill _tmp16 to $r1 from $r15-128
+	  stq		$r3, -128($r15)	# spill _tmp15 from $r3 to $r15-128
+	# _tmp16 = _tmp15 ^~ val
+	  ldq		$r1, -128($r15)	# fill _tmp15 to $r1 from $r15-128
 	  ldq		$r2, 8($r15)	# fill val to $r2 from $r15+8
 	  eqv		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -136($r15)	# spill _tmp17 from $r3 to $r15-136
-	# IfZ _tmp17 Goto __L6
-	  ldq		$r1, -136($r15)	# fill _tmp17 to $r1 from $r15-136
-	  blbc		$r1, __L6	# branch if _tmp17 is zero
-	# _tmp18 = true
+	  stq		$r3, -136($r15)	# spill _tmp16 from $r3 to $r15-136
+	# IfZ _tmp16 Goto __L6
+	  ldq		$r1, -136($r15)	# fill _tmp16 to $r1 from $r15-136
+	  blbc		$r1, __L6	# branch if _tmp16 is zero
+	# _tmp17 = true
 	  mov		1, $r3		# load constant value 1 into $r3
-	  stq		$r3, -144($r15)	# spill _tmp18 from $r3 to $r15-144
-	# Return _tmp18
-	  ldq		$r3, -144($r15)	# fill _tmp18 to $r3 from $r15-144
+	  stq		$r3, -144($r15)	# spill _tmp17 from $r3 to $r15-144
+	# Return _tmp17
+	  ldq		$r3, -144($r15)	# fill _tmp17 to $r3 from $r15-144
 	  mov		$r3, $r0		# assign return value into $v0
 	  mov		$r15, $r30	# pop callee frame off stack
 	  ldq		$r26, -8($r15)	# restore saved ra
@@ -234,52 +228,52 @@ __L5:
 	# Goto __L7
 	  br		__L7		# unconditional branch
 __L6:
-	# _tmp19 = mid < ZERO
+	# _tmp18 = mid < ZERO
 	  ldq		$r1, -32($r15)	# fill mid to $r1 from $r15-32
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -152($r15)	# spill _tmp19 from $r3 to $r15-152
-	# _tmp20 = *(array + -8)
+	  stq		$r3, -152($r15)	# spill _tmp18 from $r3 to $r15-152
+	# _tmp19 = *(array + -8)
 	  ldq		$r1, 16($r15)	# fill array to $r1 from $r15+16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -160($r15)	# spill _tmp20 from $r3 to $r15-160
-	# _tmp21 = _tmp20 <= mid
-	  ldq		$r1, -160($r15)	# fill _tmp20 to $r1 from $r15-160
+	  stq		$r3, -160($r15)	# spill _tmp19 from $r3 to $r15-160
+	# _tmp20 = _tmp19 <= mid
+	  ldq		$r1, -160($r15)	# fill _tmp19 to $r1 from $r15-160
 	  ldq		$r2, -32($r15)	# fill mid to $r2 from $r15-32
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -168($r15)	# spill _tmp21 from $r3 to $r15-168
-	# _tmp22 = _tmp19 || _tmp21
-	  ldq		$r1, -152($r15)	# fill _tmp19 to $r1 from $r15-152
-	  ldq		$r2, -168($r15)	# fill _tmp21 to $r2 from $r15-168
+	  stq		$r3, -168($r15)	# spill _tmp20 from $r3 to $r15-168
+	# _tmp21 = _tmp18 || _tmp20
+	  ldq		$r1, -152($r15)	# fill _tmp18 to $r1 from $r15-152
+	  ldq		$r2, -168($r15)	# fill _tmp20 to $r2 from $r15-168
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -176($r15)	# spill _tmp22 from $r3 to $r15-176
-	# IfZ _tmp22 Goto __L8
-	  ldq		$r1, -176($r15)	# fill _tmp22 to $r1 from $r15-176
-	  blbc		$r1, __L8	# branch if _tmp22 is zero
+	  stq		$r3, -176($r15)	# spill _tmp21 from $r3 to $r15-176
+	# IfZ _tmp21 Goto __L8
+	  ldq		$r1, -176($r15)	# fill _tmp21 to $r1 from $r15-176
+	  blbc		$r1, __L8	# branch if _tmp21 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L8:
-	# _tmp23 = mid << 3
+	# _tmp22 = mid << 3
 	  ldq		$r1, -32($r15)	# fill mid to $r1 from $r15-32
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -184($r15)	# spill _tmp23 from $r3 to $r15-184
-	# _tmp24 = array + _tmp23
+	  stq		$r3, -184($r15)	# spill _tmp22 from $r3 to $r15-184
+	# _tmp23 = array + _tmp22
 	  ldq		$r1, 16($r15)	# fill array to $r1 from $r15+16
-	  ldq		$r2, -184($r15)	# fill _tmp23 to $r2 from $r15-184
+	  ldq		$r2, -184($r15)	# fill _tmp22 to $r2 from $r15-184
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -192($r15)	# spill _tmp24 from $r3 to $r15-192
-	# _tmp25 = *(_tmp24)
-	  ldq		$r1, -192($r15)	# fill _tmp24 to $r1 from $r15-192
+	  stq		$r3, -192($r15)	# spill _tmp23 from $r3 to $r15-192
+	# _tmp24 = *(_tmp23)
+	  ldq		$r1, -192($r15)	# fill _tmp23 to $r1 from $r15-192
 	  ldq		$r3, 0($r1)	# load with offset
-	  stq		$r3, -200($r15)	# spill _tmp25 from $r3 to $r15-200
-	# _tmp26 = val < _tmp25
+	  stq		$r3, -200($r15)	# spill _tmp24 from $r3 to $r15-200
+	# _tmp25 = val < _tmp24
 	  ldq		$r1, 8($r15)	# fill val to $r1 from $r15+8
-	  ldq		$r2, -200($r15)	# fill _tmp25 to $r2 from $r15-200
+	  ldq		$r2, -200($r15)	# fill _tmp24 to $r2 from $r15-200
 	  cmplt		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -208($r15)	# spill _tmp26 from $r3 to $r15-208
-	# IfZ _tmp26 Goto __L9
-	  ldq		$r1, -208($r15)	# fill _tmp26 to $r1 from $r15-208
-	  blbc		$r1, __L9	# branch if _tmp26 is zero
+	  stq		$r3, -208($r15)	# spill _tmp25 from $r3 to $r15-208
+	# IfZ _tmp25 Goto __L9
+	  ldq		$r1, -208($r15)	# fill _tmp25 to $r1 from $r15-208
+	  blbc		$r1, __L9	# branch if _tmp25 is zero
 	# end = mid
 	  ldq		$r3, -32($r15)	# fill mid to $r3 from $r15-32
 	  stq		$r3, -24($r15)	# spill end from $r3 to $r15-24
@@ -294,51 +288,51 @@ __L7:
 	# Goto __L3
 	  br		__L3		# unconditional branch
 __L4:
-	# _tmp27 = mid < ZERO
+	# _tmp26 = mid < ZERO
 	  ldq		$r1, -32($r15)	# fill mid to $r1 from $r15-32
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -216($r15)	# spill _tmp27 from $r3 to $r15-216
-	# _tmp28 = *(array + -8)
+	  stq		$r3, -216($r15)	# spill _tmp26 from $r3 to $r15-216
+	# _tmp27 = *(array + -8)
 	  ldq		$r1, 16($r15)	# fill array to $r1 from $r15+16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -224($r15)	# spill _tmp28 from $r3 to $r15-224
-	# _tmp29 = _tmp28 <= mid
-	  ldq		$r1, -224($r15)	# fill _tmp28 to $r1 from $r15-224
+	  stq		$r3, -224($r15)	# spill _tmp27 from $r3 to $r15-224
+	# _tmp28 = _tmp27 <= mid
+	  ldq		$r1, -224($r15)	# fill _tmp27 to $r1 from $r15-224
 	  ldq		$r2, -32($r15)	# fill mid to $r2 from $r15-32
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -232($r15)	# spill _tmp29 from $r3 to $r15-232
-	# _tmp30 = _tmp27 || _tmp29
-	  ldq		$r1, -216($r15)	# fill _tmp27 to $r1 from $r15-216
-	  ldq		$r2, -232($r15)	# fill _tmp29 to $r2 from $r15-232
+	  stq		$r3, -232($r15)	# spill _tmp28 from $r3 to $r15-232
+	# _tmp29 = _tmp26 || _tmp28
+	  ldq		$r1, -216($r15)	# fill _tmp26 to $r1 from $r15-216
+	  ldq		$r2, -232($r15)	# fill _tmp28 to $r2 from $r15-232
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -240($r15)	# spill _tmp30 from $r3 to $r15-240
-	# IfZ _tmp30 Goto __L11
-	  ldq		$r1, -240($r15)	# fill _tmp30 to $r1 from $r15-240
-	  blbc		$r1, __L11	# branch if _tmp30 is zero
+	  stq		$r3, -240($r15)	# spill _tmp29 from $r3 to $r15-240
+	# IfZ _tmp29 Goto __L11
+	  ldq		$r1, -240($r15)	# fill _tmp29 to $r1 from $r15-240
+	  blbc		$r1, __L11	# branch if _tmp29 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L11:
-	# _tmp31 = mid << 3
+	# _tmp30 = mid << 3
 	  ldq		$r1, -32($r15)	# fill mid to $r1 from $r15-32
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -248($r15)	# spill _tmp31 from $r3 to $r15-248
-	# _tmp32 = array + _tmp31
+	  stq		$r3, -248($r15)	# spill _tmp30 from $r3 to $r15-248
+	# _tmp31 = array + _tmp30
 	  ldq		$r1, 16($r15)	# fill array to $r1 from $r15+16
-	  ldq		$r2, -248($r15)	# fill _tmp31 to $r2 from $r15-248
+	  ldq		$r2, -248($r15)	# fill _tmp30 to $r2 from $r15-248
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -256($r15)	# spill _tmp32 from $r3 to $r15-256
-	# _tmp33 = *(_tmp32)
-	  ldq		$r1, -256($r15)	# fill _tmp32 to $r1 from $r15-256
+	  stq		$r3, -256($r15)	# spill _tmp31 from $r3 to $r15-256
+	# _tmp32 = *(_tmp31)
+	  ldq		$r1, -256($r15)	# fill _tmp31 to $r1 from $r15-256
 	  ldq		$r3, 0($r1)	# load with offset
-	  stq		$r3, -264($r15)	# spill _tmp33 from $r3 to $r15-264
-	# _tmp34 = _tmp33 ^~ val
-	  ldq		$r1, -264($r15)	# fill _tmp33 to $r1 from $r15-264
+	  stq		$r3, -264($r15)	# spill _tmp32 from $r3 to $r15-264
+	# _tmp33 = _tmp32 ^~ val
+	  ldq		$r1, -264($r15)	# fill _tmp32 to $r1 from $r15-264
 	  ldq		$r2, 8($r15)	# fill val to $r2 from $r15+8
 	  eqv		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -272($r15)	# spill _tmp34 from $r3 to $r15-272
-	# Return _tmp34
-	  ldq		$r3, -272($r15)	# fill _tmp34 to $r3 from $r15-272
+	  stq		$r3, -272($r15)	# spill _tmp33 from $r3 to $r15-272
+	# Return _tmp33
+	  ldq		$r3, -272($r15)	# fill _tmp33 to $r3 from $r15-272
 	  mov		$r3, $r0		# assign return value into $v0
 	  mov		$r15, $r30	# pop callee frame off stack
 	  ldq		$r26, -8($r15)	# restore saved ra
@@ -358,481 +352,481 @@ main:
 	  addq		$r30, 16, $r15	# set up new fp
 	  lda		$r2, 696	# stack frame size
 	  subq		$r30, $r2, $r30	# decrement sp to make space for locals/temps
-	# _tmp35 = 8
+	# _tmp34 = 8
 	  lda		$r3, 8		# load (signed) int constant value 8 into $r3
-	  stq		$r3, -48($r15)	# spill _tmp35 from $r3 to $r15-48
-	# size = _tmp35
-	  ldq		$r3, -48($r15)	# fill _tmp35 to $r3 from $r15-48
+	  stq		$r3, -48($r15)	# spill _tmp34 from $r3 to $r15-48
+	# size = _tmp34
+	  ldq		$r3, -48($r15)	# fill _tmp34 to $r3 from $r15-48
 	  stq		$r3, -32($r15)	# spill size from $r3 to $r15-32
-	# _tmp36 = size < ZERO
+	# _tmp35 = size < ZERO
 	  ldq		$r1, -32($r15)	# fill size to $r1 from $r15-32
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -56($r15)	# spill _tmp36 from $r3 to $r15-56
-	# IfZ _tmp36 Goto __L12
-	  ldq		$r1, -56($r15)	# fill _tmp36 to $r1 from $r15-56
-	  blbc		$r1, __L12	# branch if _tmp36 is zero
+	  stq		$r3, -56($r15)	# spill _tmp35 from $r3 to $r15-56
+	# IfZ _tmp35 Goto __L12
+	  ldq		$r1, -56($r15)	# fill _tmp35 to $r1 from $r15-56
+	  blbc		$r1, __L12	# branch if _tmp35 is zero
 	# Throw Exception: Array size is <= 0
 	  call_pal	0xDECAF		# (exception: Array size is <= 0)
 	  call_pal	0x555		# (halt)
 __L12:
-	# _tmp37 = size + 1
+	# _tmp36 = size + 1
 	  ldq		$r1, -32($r15)	# fill size to $r1 from $r15-32
 	  addq		$r1, 1, $r3	# perform the ALU op
-	  stq		$r3, -64($r15)	# spill _tmp37 from $r3 to $r15-64
-	# PushParam _tmp37
+	  stq		$r3, -64($r15)	# spill _tmp36 from $r3 to $r15-64
+	# PushParam _tmp36
 	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -64($r15)	# fill _tmp37 to $r1 from $r15-64
+	  ldq		$r1, -64($r15)	# fill _tmp36 to $r1 from $r15-64
 	  stq		$r1, 8($r30)	# copy param value to stack
-	# _tmp38 = LCall __Alloc
+	# _tmp37 = LCall __Alloc
 	  bsr		$r26, __Alloc	# branch to function
 	  mov		$r0, $r3	# copy function return value from $v0
-	  stq		$r3, -72($r15)	# spill _tmp38 from $r3 to $r15-72
+	  stq		$r3, -72($r15)	# spill _tmp37 from $r3 to $r15-72
 	# PopParams 8
 	  addq		$r30, 8, $r30	# pop params off stack
-	# *(_tmp38) = size
+	# *(_tmp37) = size
 	  ldq		$r1, -32($r15)	# fill size to $r1 from $r15-32
-	  ldq		$r3, -72($r15)	# fill _tmp38 to $r3 from $r15-72
+	  ldq		$r3, -72($r15)	# fill _tmp37 to $r3 from $r15-72
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp39 = _tmp38 + 8
-	  ldq		$r1, -72($r15)	# fill _tmp38 to $r1 from $r15-72
+	# _tmp38 = _tmp37 + 8
+	  ldq		$r1, -72($r15)	# fill _tmp37 to $r1 from $r15-72
 	  addq		$r1, 8, $r3	# perform the ALU op
-	  stq		$r3, -80($r15)	# spill _tmp39 from $r3 to $r15-80
-	# array = _tmp39
-	  ldq		$r3, -80($r15)	# fill _tmp39 to $r3 from $r15-80
+	  stq		$r3, -80($r15)	# spill _tmp38 from $r3 to $r15-80
+	# array = _tmp38
+	  ldq		$r3, -80($r15)	# fill _tmp38 to $r3 from $r15-80
 	  stq		$r3, -16($r15)	# spill array from $r3 to $r15-16
-	# _tmp40 = 0
+	# _tmp39 = 0
 	  lda		$r3, 0		# load (signed) int constant value 0 into $r3
-	  stq		$r3, -88($r15)	# spill _tmp40 from $r3 to $r15-88
-	# _tmp41 = _tmp40 < ZERO
-	  ldq		$r1, -88($r15)	# fill _tmp40 to $r1 from $r15-88
+	  stq		$r3, -88($r15)	# spill _tmp39 from $r3 to $r15-88
+	# _tmp40 = _tmp39 < ZERO
+	  ldq		$r1, -88($r15)	# fill _tmp39 to $r1 from $r15-88
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -96($r15)	# spill _tmp41 from $r3 to $r15-96
-	# _tmp42 = *(array + -8)
+	  stq		$r3, -96($r15)	# spill _tmp40 from $r3 to $r15-96
+	# _tmp41 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -104($r15)	# spill _tmp42 from $r3 to $r15-104
-	# _tmp43 = _tmp42 <= _tmp40
-	  ldq		$r1, -104($r15)	# fill _tmp42 to $r1 from $r15-104
-	  ldq		$r2, -88($r15)	# fill _tmp40 to $r2 from $r15-88
+	  stq		$r3, -104($r15)	# spill _tmp41 from $r3 to $r15-104
+	# _tmp42 = _tmp41 <= _tmp39
+	  ldq		$r1, -104($r15)	# fill _tmp41 to $r1 from $r15-104
+	  ldq		$r2, -88($r15)	# fill _tmp39 to $r2 from $r15-88
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -112($r15)	# spill _tmp43 from $r3 to $r15-112
-	# _tmp44 = _tmp41 || _tmp43
-	  ldq		$r1, -96($r15)	# fill _tmp41 to $r1 from $r15-96
-	  ldq		$r2, -112($r15)	# fill _tmp43 to $r2 from $r15-112
+	  stq		$r3, -112($r15)	# spill _tmp42 from $r3 to $r15-112
+	# _tmp43 = _tmp40 || _tmp42
+	  ldq		$r1, -96($r15)	# fill _tmp40 to $r1 from $r15-96
+	  ldq		$r2, -112($r15)	# fill _tmp42 to $r2 from $r15-112
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -120($r15)	# spill _tmp44 from $r3 to $r15-120
-	# IfZ _tmp44 Goto __L13
-	  ldq		$r1, -120($r15)	# fill _tmp44 to $r1 from $r15-120
-	  blbc		$r1, __L13	# branch if _tmp44 is zero
+	  stq		$r3, -120($r15)	# spill _tmp43 from $r3 to $r15-120
+	# IfZ _tmp43 Goto __L13
+	  ldq		$r1, -120($r15)	# fill _tmp43 to $r1 from $r15-120
+	  blbc		$r1, __L13	# branch if _tmp43 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L13:
-	# _tmp45 = _tmp40 << 3
-	  ldq		$r1, -88($r15)	# fill _tmp40 to $r1 from $r15-88
+	# _tmp44 = _tmp39 << 3
+	  ldq		$r1, -88($r15)	# fill _tmp39 to $r1 from $r15-88
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -128($r15)	# spill _tmp45 from $r3 to $r15-128
-	# _tmp46 = array + _tmp45
+	  stq		$r3, -128($r15)	# spill _tmp44 from $r3 to $r15-128
+	# _tmp45 = array + _tmp44
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -128($r15)	# fill _tmp45 to $r2 from $r15-128
+	  ldq		$r2, -128($r15)	# fill _tmp44 to $r2 from $r15-128
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -136($r15)	# spill _tmp46 from $r3 to $r15-136
+	  stq		$r3, -136($r15)	# spill _tmp45 from $r3 to $r15-136
+	# _tmp46 = 1
+	  lda		$r3, 1		# load (signed) int constant value 1 into $r3
+	  stq		$r3, -144($r15)	# spill _tmp46 from $r3 to $r15-144
+	# *(_tmp45) = _tmp46
+	  ldq		$r1, -144($r15)	# fill _tmp46 to $r1 from $r15-144
+	  ldq		$r3, -136($r15)	# fill _tmp45 to $r3 from $r15-136
+	  stq		$r1, 0($r3)	# store with offset
 	# _tmp47 = 1
 	  lda		$r3, 1		# load (signed) int constant value 1 into $r3
-	  stq		$r3, -144($r15)	# spill _tmp47 from $r3 to $r15-144
-	# *(_tmp46) = _tmp47
-	  ldq		$r1, -144($r15)	# fill _tmp47 to $r1 from $r15-144
-	  ldq		$r3, -136($r15)	# fill _tmp46 to $r3 from $r15-136
-	  stq		$r1, 0($r3)	# store with offset
-	# _tmp48 = 1
-	  lda		$r3, 1		# load (signed) int constant value 1 into $r3
-	  stq		$r3, -152($r15)	# spill _tmp48 from $r3 to $r15-152
-	# _tmp49 = _tmp48 < ZERO
-	  ldq		$r1, -152($r15)	# fill _tmp48 to $r1 from $r15-152
+	  stq		$r3, -152($r15)	# spill _tmp47 from $r3 to $r15-152
+	# _tmp48 = _tmp47 < ZERO
+	  ldq		$r1, -152($r15)	# fill _tmp47 to $r1 from $r15-152
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -160($r15)	# spill _tmp49 from $r3 to $r15-160
-	# _tmp50 = *(array + -8)
+	  stq		$r3, -160($r15)	# spill _tmp48 from $r3 to $r15-160
+	# _tmp49 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -168($r15)	# spill _tmp50 from $r3 to $r15-168
-	# _tmp51 = _tmp50 <= _tmp48
-	  ldq		$r1, -168($r15)	# fill _tmp50 to $r1 from $r15-168
-	  ldq		$r2, -152($r15)	# fill _tmp48 to $r2 from $r15-152
+	  stq		$r3, -168($r15)	# spill _tmp49 from $r3 to $r15-168
+	# _tmp50 = _tmp49 <= _tmp47
+	  ldq		$r1, -168($r15)	# fill _tmp49 to $r1 from $r15-168
+	  ldq		$r2, -152($r15)	# fill _tmp47 to $r2 from $r15-152
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -176($r15)	# spill _tmp51 from $r3 to $r15-176
-	# _tmp52 = _tmp49 || _tmp51
-	  ldq		$r1, -160($r15)	# fill _tmp49 to $r1 from $r15-160
-	  ldq		$r2, -176($r15)	# fill _tmp51 to $r2 from $r15-176
+	  stq		$r3, -176($r15)	# spill _tmp50 from $r3 to $r15-176
+	# _tmp51 = _tmp48 || _tmp50
+	  ldq		$r1, -160($r15)	# fill _tmp48 to $r1 from $r15-160
+	  ldq		$r2, -176($r15)	# fill _tmp50 to $r2 from $r15-176
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -184($r15)	# spill _tmp52 from $r3 to $r15-184
-	# IfZ _tmp52 Goto __L14
-	  ldq		$r1, -184($r15)	# fill _tmp52 to $r1 from $r15-184
-	  blbc		$r1, __L14	# branch if _tmp52 is zero
+	  stq		$r3, -184($r15)	# spill _tmp51 from $r3 to $r15-184
+	# IfZ _tmp51 Goto __L14
+	  ldq		$r1, -184($r15)	# fill _tmp51 to $r1 from $r15-184
+	  blbc		$r1, __L14	# branch if _tmp51 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L14:
-	# _tmp53 = _tmp48 << 3
-	  ldq		$r1, -152($r15)	# fill _tmp48 to $r1 from $r15-152
+	# _tmp52 = _tmp47 << 3
+	  ldq		$r1, -152($r15)	# fill _tmp47 to $r1 from $r15-152
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -192($r15)	# spill _tmp53 from $r3 to $r15-192
-	# _tmp54 = array + _tmp53
+	  stq		$r3, -192($r15)	# spill _tmp52 from $r3 to $r15-192
+	# _tmp53 = array + _tmp52
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -192($r15)	# fill _tmp53 to $r2 from $r15-192
+	  ldq		$r2, -192($r15)	# fill _tmp52 to $r2 from $r15-192
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -200($r15)	# spill _tmp54 from $r3 to $r15-200
-	# _tmp55 = 3
+	  stq		$r3, -200($r15)	# spill _tmp53 from $r3 to $r15-200
+	# _tmp54 = 3
 	  lda		$r3, 3		# load (signed) int constant value 3 into $r3
-	  stq		$r3, -208($r15)	# spill _tmp55 from $r3 to $r15-208
-	# *(_tmp54) = _tmp55
-	  ldq		$r1, -208($r15)	# fill _tmp55 to $r1 from $r15-208
-	  ldq		$r3, -200($r15)	# fill _tmp54 to $r3 from $r15-200
+	  stq		$r3, -208($r15)	# spill _tmp54 from $r3 to $r15-208
+	# *(_tmp53) = _tmp54
+	  ldq		$r1, -208($r15)	# fill _tmp54 to $r1 from $r15-208
+	  ldq		$r3, -200($r15)	# fill _tmp53 to $r3 from $r15-200
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp56 = 2
+	# _tmp55 = 2
 	  lda		$r3, 2		# load (signed) int constant value 2 into $r3
-	  stq		$r3, -216($r15)	# spill _tmp56 from $r3 to $r15-216
-	# _tmp57 = _tmp56 < ZERO
-	  ldq		$r1, -216($r15)	# fill _tmp56 to $r1 from $r15-216
+	  stq		$r3, -216($r15)	# spill _tmp55 from $r3 to $r15-216
+	# _tmp56 = _tmp55 < ZERO
+	  ldq		$r1, -216($r15)	# fill _tmp55 to $r1 from $r15-216
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -224($r15)	# spill _tmp57 from $r3 to $r15-224
-	# _tmp58 = *(array + -8)
+	  stq		$r3, -224($r15)	# spill _tmp56 from $r3 to $r15-224
+	# _tmp57 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -232($r15)	# spill _tmp58 from $r3 to $r15-232
-	# _tmp59 = _tmp58 <= _tmp56
-	  ldq		$r1, -232($r15)	# fill _tmp58 to $r1 from $r15-232
-	  ldq		$r2, -216($r15)	# fill _tmp56 to $r2 from $r15-216
+	  stq		$r3, -232($r15)	# spill _tmp57 from $r3 to $r15-232
+	# _tmp58 = _tmp57 <= _tmp55
+	  ldq		$r1, -232($r15)	# fill _tmp57 to $r1 from $r15-232
+	  ldq		$r2, -216($r15)	# fill _tmp55 to $r2 from $r15-216
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -240($r15)	# spill _tmp59 from $r3 to $r15-240
-	# _tmp60 = _tmp57 || _tmp59
-	  ldq		$r1, -224($r15)	# fill _tmp57 to $r1 from $r15-224
-	  ldq		$r2, -240($r15)	# fill _tmp59 to $r2 from $r15-240
+	  stq		$r3, -240($r15)	# spill _tmp58 from $r3 to $r15-240
+	# _tmp59 = _tmp56 || _tmp58
+	  ldq		$r1, -224($r15)	# fill _tmp56 to $r1 from $r15-224
+	  ldq		$r2, -240($r15)	# fill _tmp58 to $r2 from $r15-240
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -248($r15)	# spill _tmp60 from $r3 to $r15-248
-	# IfZ _tmp60 Goto __L15
-	  ldq		$r1, -248($r15)	# fill _tmp60 to $r1 from $r15-248
-	  blbc		$r1, __L15	# branch if _tmp60 is zero
+	  stq		$r3, -248($r15)	# spill _tmp59 from $r3 to $r15-248
+	# IfZ _tmp59 Goto __L15
+	  ldq		$r1, -248($r15)	# fill _tmp59 to $r1 from $r15-248
+	  blbc		$r1, __L15	# branch if _tmp59 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L15:
-	# _tmp61 = _tmp56 << 3
-	  ldq		$r1, -216($r15)	# fill _tmp56 to $r1 from $r15-216
+	# _tmp60 = _tmp55 << 3
+	  ldq		$r1, -216($r15)	# fill _tmp55 to $r1 from $r15-216
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -256($r15)	# spill _tmp61 from $r3 to $r15-256
-	# _tmp62 = array + _tmp61
+	  stq		$r3, -256($r15)	# spill _tmp60 from $r3 to $r15-256
+	# _tmp61 = array + _tmp60
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -256($r15)	# fill _tmp61 to $r2 from $r15-256
+	  ldq		$r2, -256($r15)	# fill _tmp60 to $r2 from $r15-256
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -264($r15)	# spill _tmp62 from $r3 to $r15-264
-	# _tmp63 = 4
+	  stq		$r3, -264($r15)	# spill _tmp61 from $r3 to $r15-264
+	# _tmp62 = 4
 	  lda		$r3, 4		# load (signed) int constant value 4 into $r3
-	  stq		$r3, -272($r15)	# spill _tmp63 from $r3 to $r15-272
-	# *(_tmp62) = _tmp63
-	  ldq		$r1, -272($r15)	# fill _tmp63 to $r1 from $r15-272
-	  ldq		$r3, -264($r15)	# fill _tmp62 to $r3 from $r15-264
+	  stq		$r3, -272($r15)	# spill _tmp62 from $r3 to $r15-272
+	# *(_tmp61) = _tmp62
+	  ldq		$r1, -272($r15)	# fill _tmp62 to $r1 from $r15-272
+	  ldq		$r3, -264($r15)	# fill _tmp61 to $r3 from $r15-264
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp64 = 3
+	# _tmp63 = 3
 	  lda		$r3, 3		# load (signed) int constant value 3 into $r3
-	  stq		$r3, -280($r15)	# spill _tmp64 from $r3 to $r15-280
-	# _tmp65 = _tmp64 < ZERO
-	  ldq		$r1, -280($r15)	# fill _tmp64 to $r1 from $r15-280
+	  stq		$r3, -280($r15)	# spill _tmp63 from $r3 to $r15-280
+	# _tmp64 = _tmp63 < ZERO
+	  ldq		$r1, -280($r15)	# fill _tmp63 to $r1 from $r15-280
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -288($r15)	# spill _tmp65 from $r3 to $r15-288
-	# _tmp66 = *(array + -8)
+	  stq		$r3, -288($r15)	# spill _tmp64 from $r3 to $r15-288
+	# _tmp65 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -296($r15)	# spill _tmp66 from $r3 to $r15-296
-	# _tmp67 = _tmp66 <= _tmp64
-	  ldq		$r1, -296($r15)	# fill _tmp66 to $r1 from $r15-296
-	  ldq		$r2, -280($r15)	# fill _tmp64 to $r2 from $r15-280
+	  stq		$r3, -296($r15)	# spill _tmp65 from $r3 to $r15-296
+	# _tmp66 = _tmp65 <= _tmp63
+	  ldq		$r1, -296($r15)	# fill _tmp65 to $r1 from $r15-296
+	  ldq		$r2, -280($r15)	# fill _tmp63 to $r2 from $r15-280
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -304($r15)	# spill _tmp67 from $r3 to $r15-304
-	# _tmp68 = _tmp65 || _tmp67
-	  ldq		$r1, -288($r15)	# fill _tmp65 to $r1 from $r15-288
-	  ldq		$r2, -304($r15)	# fill _tmp67 to $r2 from $r15-304
+	  stq		$r3, -304($r15)	# spill _tmp66 from $r3 to $r15-304
+	# _tmp67 = _tmp64 || _tmp66
+	  ldq		$r1, -288($r15)	# fill _tmp64 to $r1 from $r15-288
+	  ldq		$r2, -304($r15)	# fill _tmp66 to $r2 from $r15-304
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -312($r15)	# spill _tmp68 from $r3 to $r15-312
-	# IfZ _tmp68 Goto __L16
-	  ldq		$r1, -312($r15)	# fill _tmp68 to $r1 from $r15-312
-	  blbc		$r1, __L16	# branch if _tmp68 is zero
+	  stq		$r3, -312($r15)	# spill _tmp67 from $r3 to $r15-312
+	# IfZ _tmp67 Goto __L16
+	  ldq		$r1, -312($r15)	# fill _tmp67 to $r1 from $r15-312
+	  blbc		$r1, __L16	# branch if _tmp67 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L16:
-	# _tmp69 = _tmp64 << 3
-	  ldq		$r1, -280($r15)	# fill _tmp64 to $r1 from $r15-280
+	# _tmp68 = _tmp63 << 3
+	  ldq		$r1, -280($r15)	# fill _tmp63 to $r1 from $r15-280
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -320($r15)	# spill _tmp69 from $r3 to $r15-320
-	# _tmp70 = array + _tmp69
+	  stq		$r3, -320($r15)	# spill _tmp68 from $r3 to $r15-320
+	# _tmp69 = array + _tmp68
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -320($r15)	# fill _tmp69 to $r2 from $r15-320
+	  ldq		$r2, -320($r15)	# fill _tmp68 to $r2 from $r15-320
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -328($r15)	# spill _tmp70 from $r3 to $r15-328
+	  stq		$r3, -328($r15)	# spill _tmp69 from $r3 to $r15-328
+	# _tmp70 = 4
+	  lda		$r3, 4		# load (signed) int constant value 4 into $r3
+	  stq		$r3, -336($r15)	# spill _tmp70 from $r3 to $r15-336
+	# *(_tmp69) = _tmp70
+	  ldq		$r1, -336($r15)	# fill _tmp70 to $r1 from $r15-336
+	  ldq		$r3, -328($r15)	# fill _tmp69 to $r3 from $r15-328
+	  stq		$r1, 0($r3)	# store with offset
 	# _tmp71 = 4
 	  lda		$r3, 4		# load (signed) int constant value 4 into $r3
-	  stq		$r3, -336($r15)	# spill _tmp71 from $r3 to $r15-336
-	# *(_tmp70) = _tmp71
-	  ldq		$r1, -336($r15)	# fill _tmp71 to $r1 from $r15-336
-	  ldq		$r3, -328($r15)	# fill _tmp70 to $r3 from $r15-328
-	  stq		$r1, 0($r3)	# store with offset
-	# _tmp72 = 4
-	  lda		$r3, 4		# load (signed) int constant value 4 into $r3
-	  stq		$r3, -344($r15)	# spill _tmp72 from $r3 to $r15-344
-	# _tmp73 = _tmp72 < ZERO
-	  ldq		$r1, -344($r15)	# fill _tmp72 to $r1 from $r15-344
+	  stq		$r3, -344($r15)	# spill _tmp71 from $r3 to $r15-344
+	# _tmp72 = _tmp71 < ZERO
+	  ldq		$r1, -344($r15)	# fill _tmp71 to $r1 from $r15-344
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -352($r15)	# spill _tmp73 from $r3 to $r15-352
-	# _tmp74 = *(array + -8)
+	  stq		$r3, -352($r15)	# spill _tmp72 from $r3 to $r15-352
+	# _tmp73 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -360($r15)	# spill _tmp74 from $r3 to $r15-360
-	# _tmp75 = _tmp74 <= _tmp72
-	  ldq		$r1, -360($r15)	# fill _tmp74 to $r1 from $r15-360
-	  ldq		$r2, -344($r15)	# fill _tmp72 to $r2 from $r15-344
+	  stq		$r3, -360($r15)	# spill _tmp73 from $r3 to $r15-360
+	# _tmp74 = _tmp73 <= _tmp71
+	  ldq		$r1, -360($r15)	# fill _tmp73 to $r1 from $r15-360
+	  ldq		$r2, -344($r15)	# fill _tmp71 to $r2 from $r15-344
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -368($r15)	# spill _tmp75 from $r3 to $r15-368
-	# _tmp76 = _tmp73 || _tmp75
-	  ldq		$r1, -352($r15)	# fill _tmp73 to $r1 from $r15-352
-	  ldq		$r2, -368($r15)	# fill _tmp75 to $r2 from $r15-368
+	  stq		$r3, -368($r15)	# spill _tmp74 from $r3 to $r15-368
+	# _tmp75 = _tmp72 || _tmp74
+	  ldq		$r1, -352($r15)	# fill _tmp72 to $r1 from $r15-352
+	  ldq		$r2, -368($r15)	# fill _tmp74 to $r2 from $r15-368
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -376($r15)	# spill _tmp76 from $r3 to $r15-376
-	# IfZ _tmp76 Goto __L17
-	  ldq		$r1, -376($r15)	# fill _tmp76 to $r1 from $r15-376
-	  blbc		$r1, __L17	# branch if _tmp76 is zero
+	  stq		$r3, -376($r15)	# spill _tmp75 from $r3 to $r15-376
+	# IfZ _tmp75 Goto __L17
+	  ldq		$r1, -376($r15)	# fill _tmp75 to $r1 from $r15-376
+	  blbc		$r1, __L17	# branch if _tmp75 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L17:
-	# _tmp77 = _tmp72 << 3
-	  ldq		$r1, -344($r15)	# fill _tmp72 to $r1 from $r15-344
+	# _tmp76 = _tmp71 << 3
+	  ldq		$r1, -344($r15)	# fill _tmp71 to $r1 from $r15-344
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -384($r15)	# spill _tmp77 from $r3 to $r15-384
-	# _tmp78 = array + _tmp77
+	  stq		$r3, -384($r15)	# spill _tmp76 from $r3 to $r15-384
+	# _tmp77 = array + _tmp76
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -384($r15)	# fill _tmp77 to $r2 from $r15-384
+	  ldq		$r2, -384($r15)	# fill _tmp76 to $r2 from $r15-384
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -392($r15)	# spill _tmp78 from $r3 to $r15-392
-	# _tmp79 = 8
+	  stq		$r3, -392($r15)	# spill _tmp77 from $r3 to $r15-392
+	# _tmp78 = 8
 	  lda		$r3, 8		# load (signed) int constant value 8 into $r3
-	  stq		$r3, -400($r15)	# spill _tmp79 from $r3 to $r15-400
-	# *(_tmp78) = _tmp79
-	  ldq		$r1, -400($r15)	# fill _tmp79 to $r1 from $r15-400
-	  ldq		$r3, -392($r15)	# fill _tmp78 to $r3 from $r15-392
+	  stq		$r3, -400($r15)	# spill _tmp78 from $r3 to $r15-400
+	# *(_tmp77) = _tmp78
+	  ldq		$r1, -400($r15)	# fill _tmp78 to $r1 from $r15-400
+	  ldq		$r3, -392($r15)	# fill _tmp77 to $r3 from $r15-392
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp80 = 5
+	# _tmp79 = 5
 	  lda		$r3, 5		# load (signed) int constant value 5 into $r3
-	  stq		$r3, -408($r15)	# spill _tmp80 from $r3 to $r15-408
-	# _tmp81 = _tmp80 < ZERO
-	  ldq		$r1, -408($r15)	# fill _tmp80 to $r1 from $r15-408
+	  stq		$r3, -408($r15)	# spill _tmp79 from $r3 to $r15-408
+	# _tmp80 = _tmp79 < ZERO
+	  ldq		$r1, -408($r15)	# fill _tmp79 to $r1 from $r15-408
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -416($r15)	# spill _tmp81 from $r3 to $r15-416
-	# _tmp82 = *(array + -8)
+	  stq		$r3, -416($r15)	# spill _tmp80 from $r3 to $r15-416
+	# _tmp81 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -424($r15)	# spill _tmp82 from $r3 to $r15-424
-	# _tmp83 = _tmp82 <= _tmp80
-	  ldq		$r1, -424($r15)	# fill _tmp82 to $r1 from $r15-424
-	  ldq		$r2, -408($r15)	# fill _tmp80 to $r2 from $r15-408
+	  stq		$r3, -424($r15)	# spill _tmp81 from $r3 to $r15-424
+	# _tmp82 = _tmp81 <= _tmp79
+	  ldq		$r1, -424($r15)	# fill _tmp81 to $r1 from $r15-424
+	  ldq		$r2, -408($r15)	# fill _tmp79 to $r2 from $r15-408
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -432($r15)	# spill _tmp83 from $r3 to $r15-432
-	# _tmp84 = _tmp81 || _tmp83
-	  ldq		$r1, -416($r15)	# fill _tmp81 to $r1 from $r15-416
-	  ldq		$r2, -432($r15)	# fill _tmp83 to $r2 from $r15-432
+	  stq		$r3, -432($r15)	# spill _tmp82 from $r3 to $r15-432
+	# _tmp83 = _tmp80 || _tmp82
+	  ldq		$r1, -416($r15)	# fill _tmp80 to $r1 from $r15-416
+	  ldq		$r2, -432($r15)	# fill _tmp82 to $r2 from $r15-432
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -440($r15)	# spill _tmp84 from $r3 to $r15-440
-	# IfZ _tmp84 Goto __L18
-	  ldq		$r1, -440($r15)	# fill _tmp84 to $r1 from $r15-440
-	  blbc		$r1, __L18	# branch if _tmp84 is zero
+	  stq		$r3, -440($r15)	# spill _tmp83 from $r3 to $r15-440
+	# IfZ _tmp83 Goto __L18
+	  ldq		$r1, -440($r15)	# fill _tmp83 to $r1 from $r15-440
+	  blbc		$r1, __L18	# branch if _tmp83 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L18:
-	# _tmp85 = _tmp80 << 3
-	  ldq		$r1, -408($r15)	# fill _tmp80 to $r1 from $r15-408
+	# _tmp84 = _tmp79 << 3
+	  ldq		$r1, -408($r15)	# fill _tmp79 to $r1 from $r15-408
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -448($r15)	# spill _tmp85 from $r3 to $r15-448
-	# _tmp86 = array + _tmp85
+	  stq		$r3, -448($r15)	# spill _tmp84 from $r3 to $r15-448
+	# _tmp85 = array + _tmp84
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -448($r15)	# fill _tmp85 to $r2 from $r15-448
+	  ldq		$r2, -448($r15)	# fill _tmp84 to $r2 from $r15-448
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -456($r15)	# spill _tmp86 from $r3 to $r15-456
-	# _tmp87 = 69
+	  stq		$r3, -456($r15)	# spill _tmp85 from $r3 to $r15-456
+	# _tmp86 = 69
 	  lda		$r3, 69		# load (signed) int constant value 69 into $r3
-	  stq		$r3, -464($r15)	# spill _tmp87 from $r3 to $r15-464
-	# *(_tmp86) = _tmp87
-	  ldq		$r1, -464($r15)	# fill _tmp87 to $r1 from $r15-464
-	  ldq		$r3, -456($r15)	# fill _tmp86 to $r3 from $r15-456
+	  stq		$r3, -464($r15)	# spill _tmp86 from $r3 to $r15-464
+	# *(_tmp85) = _tmp86
+	  ldq		$r1, -464($r15)	# fill _tmp86 to $r1 from $r15-464
+	  ldq		$r3, -456($r15)	# fill _tmp85 to $r3 from $r15-456
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp88 = 6
+	# _tmp87 = 6
 	  lda		$r3, 6		# load (signed) int constant value 6 into $r3
-	  stq		$r3, -472($r15)	# spill _tmp88 from $r3 to $r15-472
-	# _tmp89 = _tmp88 < ZERO
-	  ldq		$r1, -472($r15)	# fill _tmp88 to $r1 from $r15-472
+	  stq		$r3, -472($r15)	# spill _tmp87 from $r3 to $r15-472
+	# _tmp88 = _tmp87 < ZERO
+	  ldq		$r1, -472($r15)	# fill _tmp87 to $r1 from $r15-472
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -480($r15)	# spill _tmp89 from $r3 to $r15-480
-	# _tmp90 = *(array + -8)
+	  stq		$r3, -480($r15)	# spill _tmp88 from $r3 to $r15-480
+	# _tmp89 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -488($r15)	# spill _tmp90 from $r3 to $r15-488
-	# _tmp91 = _tmp90 <= _tmp88
-	  ldq		$r1, -488($r15)	# fill _tmp90 to $r1 from $r15-488
-	  ldq		$r2, -472($r15)	# fill _tmp88 to $r2 from $r15-472
+	  stq		$r3, -488($r15)	# spill _tmp89 from $r3 to $r15-488
+	# _tmp90 = _tmp89 <= _tmp87
+	  ldq		$r1, -488($r15)	# fill _tmp89 to $r1 from $r15-488
+	  ldq		$r2, -472($r15)	# fill _tmp87 to $r2 from $r15-472
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -496($r15)	# spill _tmp91 from $r3 to $r15-496
-	# _tmp92 = _tmp89 || _tmp91
-	  ldq		$r1, -480($r15)	# fill _tmp89 to $r1 from $r15-480
-	  ldq		$r2, -496($r15)	# fill _tmp91 to $r2 from $r15-496
+	  stq		$r3, -496($r15)	# spill _tmp90 from $r3 to $r15-496
+	# _tmp91 = _tmp88 || _tmp90
+	  ldq		$r1, -480($r15)	# fill _tmp88 to $r1 from $r15-480
+	  ldq		$r2, -496($r15)	# fill _tmp90 to $r2 from $r15-496
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -504($r15)	# spill _tmp92 from $r3 to $r15-504
-	# IfZ _tmp92 Goto __L19
-	  ldq		$r1, -504($r15)	# fill _tmp92 to $r1 from $r15-504
-	  blbc		$r1, __L19	# branch if _tmp92 is zero
+	  stq		$r3, -504($r15)	# spill _tmp91 from $r3 to $r15-504
+	# IfZ _tmp91 Goto __L19
+	  ldq		$r1, -504($r15)	# fill _tmp91 to $r1 from $r15-504
+	  blbc		$r1, __L19	# branch if _tmp91 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L19:
-	# _tmp93 = _tmp88 << 3
-	  ldq		$r1, -472($r15)	# fill _tmp88 to $r1 from $r15-472
+	# _tmp92 = _tmp87 << 3
+	  ldq		$r1, -472($r15)	# fill _tmp87 to $r1 from $r15-472
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -512($r15)	# spill _tmp93 from $r3 to $r15-512
-	# _tmp94 = array + _tmp93
+	  stq		$r3, -512($r15)	# spill _tmp92 from $r3 to $r15-512
+	# _tmp93 = array + _tmp92
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -512($r15)	# fill _tmp93 to $r2 from $r15-512
+	  ldq		$r2, -512($r15)	# fill _tmp92 to $r2 from $r15-512
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -520($r15)	# spill _tmp94 from $r3 to $r15-520
-	# _tmp95 = 69
+	  stq		$r3, -520($r15)	# spill _tmp93 from $r3 to $r15-520
+	# _tmp94 = 69
 	  lda		$r3, 69		# load (signed) int constant value 69 into $r3
-	  stq		$r3, -528($r15)	# spill _tmp95 from $r3 to $r15-528
-	# *(_tmp94) = _tmp95
-	  ldq		$r1, -528($r15)	# fill _tmp95 to $r1 from $r15-528
-	  ldq		$r3, -520($r15)	# fill _tmp94 to $r3 from $r15-520
+	  stq		$r3, -528($r15)	# spill _tmp94 from $r3 to $r15-528
+	# *(_tmp93) = _tmp94
+	  ldq		$r1, -528($r15)	# fill _tmp94 to $r1 from $r15-528
+	  ldq		$r3, -520($r15)	# fill _tmp93 to $r3 from $r15-520
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp96 = 7
+	# _tmp95 = 7
 	  lda		$r3, 7		# load (signed) int constant value 7 into $r3
-	  stq		$r3, -536($r15)	# spill _tmp96 from $r3 to $r15-536
-	# _tmp97 = _tmp96 < ZERO
-	  ldq		$r1, -536($r15)	# fill _tmp96 to $r1 from $r15-536
+	  stq		$r3, -536($r15)	# spill _tmp95 from $r3 to $r15-536
+	# _tmp96 = _tmp95 < ZERO
+	  ldq		$r1, -536($r15)	# fill _tmp95 to $r1 from $r15-536
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -544($r15)	# spill _tmp97 from $r3 to $r15-544
-	# _tmp98 = *(array + -8)
+	  stq		$r3, -544($r15)	# spill _tmp96 from $r3 to $r15-544
+	# _tmp97 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -552($r15)	# spill _tmp98 from $r3 to $r15-552
-	# _tmp99 = _tmp98 <= _tmp96
-	  ldq		$r1, -552($r15)	# fill _tmp98 to $r1 from $r15-552
-	  ldq		$r2, -536($r15)	# fill _tmp96 to $r2 from $r15-536
+	  stq		$r3, -552($r15)	# spill _tmp97 from $r3 to $r15-552
+	# _tmp98 = _tmp97 <= _tmp95
+	  ldq		$r1, -552($r15)	# fill _tmp97 to $r1 from $r15-552
+	  ldq		$r2, -536($r15)	# fill _tmp95 to $r2 from $r15-536
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -560($r15)	# spill _tmp99 from $r3 to $r15-560
-	# _tmp100 = _tmp97 || _tmp99
-	  ldq		$r1, -544($r15)	# fill _tmp97 to $r1 from $r15-544
-	  ldq		$r2, -560($r15)	# fill _tmp99 to $r2 from $r15-560
+	  stq		$r3, -560($r15)	# spill _tmp98 from $r3 to $r15-560
+	# _tmp99 = _tmp96 || _tmp98
+	  ldq		$r1, -544($r15)	# fill _tmp96 to $r1 from $r15-544
+	  ldq		$r2, -560($r15)	# fill _tmp98 to $r2 from $r15-560
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -568($r15)	# spill _tmp100 from $r3 to $r15-568
-	# IfZ _tmp100 Goto __L20
-	  ldq		$r1, -568($r15)	# fill _tmp100 to $r1 from $r15-568
-	  blbc		$r1, __L20	# branch if _tmp100 is zero
+	  stq		$r3, -568($r15)	# spill _tmp99 from $r3 to $r15-568
+	# IfZ _tmp99 Goto __L20
+	  ldq		$r1, -568($r15)	# fill _tmp99 to $r1 from $r15-568
+	  blbc		$r1, __L20	# branch if _tmp99 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L20:
-	# _tmp101 = _tmp96 << 3
-	  ldq		$r1, -536($r15)	# fill _tmp96 to $r1 from $r15-536
+	# _tmp100 = _tmp95 << 3
+	  ldq		$r1, -536($r15)	# fill _tmp95 to $r1 from $r15-536
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -576($r15)	# spill _tmp101 from $r3 to $r15-576
-	# _tmp102 = array + _tmp101
+	  stq		$r3, -576($r15)	# spill _tmp100 from $r3 to $r15-576
+	# _tmp101 = array + _tmp100
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -576($r15)	# fill _tmp101 to $r2 from $r15-576
+	  ldq		$r2, -576($r15)	# fill _tmp100 to $r2 from $r15-576
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -584($r15)	# spill _tmp102 from $r3 to $r15-584
-	# _tmp103 = 69
+	  stq		$r3, -584($r15)	# spill _tmp101 from $r3 to $r15-584
+	# _tmp102 = 69
 	  lda		$r3, 69		# load (signed) int constant value 69 into $r3
-	  stq		$r3, -592($r15)	# spill _tmp103 from $r3 to $r15-592
-	# *(_tmp102) = _tmp103
-	  ldq		$r1, -592($r15)	# fill _tmp103 to $r1 from $r15-592
-	  ldq		$r3, -584($r15)	# fill _tmp102 to $r3 from $r15-584
+	  stq		$r3, -592($r15)	# spill _tmp102 from $r3 to $r15-592
+	# *(_tmp101) = _tmp102
+	  ldq		$r1, -592($r15)	# fill _tmp102 to $r1 from $r15-592
+	  ldq		$r3, -584($r15)	# fill _tmp101 to $r3 from $r15-584
 	  stq		$r1, 0($r3)	# store with offset
-	# _tmp104 = 0
+	# _tmp103 = 0
 	  lda		$r3, 0		# load (signed) int constant value 0 into $r3
-	  stq		$r3, -600($r15)	# spill _tmp104 from $r3 to $r15-600
-	# i = _tmp104
-	  ldq		$r3, -600($r15)	# fill _tmp104 to $r3 from $r15-600
+	  stq		$r3, -600($r15)	# spill _tmp103 from $r3 to $r15-600
+	# i = _tmp103
+	  ldq		$r3, -600($r15)	# fill _tmp103 to $r3 from $r15-600
 	  stq		$r3, -24($r15)	# spill i from $r3 to $r15-24
 __L21:
-	# _tmp105 = i < size
+	# _tmp104 = i < size
 	  ldq		$r1, -24($r15)	# fill i to $r1 from $r15-24
 	  ldq		$r2, -32($r15)	# fill size to $r2 from $r15-32
 	  cmplt		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -608($r15)	# spill _tmp105 from $r3 to $r15-608
-	# IfZ _tmp105 Goto __L22
-	  ldq		$r1, -608($r15)	# fill _tmp105 to $r1 from $r15-608
-	  blbc		$r1, __L22	# branch if _tmp105 is zero
-	# _tmp106 = i < ZERO
+	  stq		$r3, -608($r15)	# spill _tmp104 from $r3 to $r15-608
+	# IfZ _tmp104 Goto __L22
+	  ldq		$r1, -608($r15)	# fill _tmp104 to $r1 from $r15-608
+	  blbc		$r1, __L22	# branch if _tmp104 is zero
+	# _tmp105 = i < ZERO
 	  ldq		$r1, -24($r15)	# fill i to $r1 from $r15-24
 	  cmplt		$r1, $r31, $r3	# perform the ALU op
-	  stq		$r3, -616($r15)	# spill _tmp106 from $r3 to $r15-616
-	# _tmp107 = *(array + -8)
+	  stq		$r3, -616($r15)	# spill _tmp105 from $r3 to $r15-616
+	# _tmp106 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -624($r15)	# spill _tmp107 from $r3 to $r15-624
-	# _tmp108 = _tmp107 <= i
-	  ldq		$r1, -624($r15)	# fill _tmp107 to $r1 from $r15-624
+	  stq		$r3, -624($r15)	# spill _tmp106 from $r3 to $r15-624
+	# _tmp107 = _tmp106 <= i
+	  ldq		$r1, -624($r15)	# fill _tmp106 to $r1 from $r15-624
 	  ldq		$r2, -24($r15)	# fill i to $r2 from $r15-24
 	  cmple		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -632($r15)	# spill _tmp108 from $r3 to $r15-632
-	# _tmp109 = _tmp106 || _tmp108
-	  ldq		$r1, -616($r15)	# fill _tmp106 to $r1 from $r15-616
-	  ldq		$r2, -632($r15)	# fill _tmp108 to $r2 from $r15-632
+	  stq		$r3, -632($r15)	# spill _tmp107 from $r3 to $r15-632
+	# _tmp108 = _tmp105 || _tmp107
+	  ldq		$r1, -616($r15)	# fill _tmp105 to $r1 from $r15-616
+	  ldq		$r2, -632($r15)	# fill _tmp107 to $r2 from $r15-632
 	  bis		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -640($r15)	# spill _tmp109 from $r3 to $r15-640
-	# IfZ _tmp109 Goto __L23
-	  ldq		$r1, -640($r15)	# fill _tmp109 to $r1 from $r15-640
-	  blbc		$r1, __L23	# branch if _tmp109 is zero
+	  stq		$r3, -640($r15)	# spill _tmp108 from $r3 to $r15-640
+	# IfZ _tmp108 Goto __L23
+	  ldq		$r1, -640($r15)	# fill _tmp108 to $r1 from $r15-640
+	  blbc		$r1, __L23	# branch if _tmp108 is zero
 	# Throw Exception: Array subscript out of bounds
 	  call_pal	0xDECAF		# (exception: Array subscript out of bounds)
 	  call_pal	0x555		# (halt)
 __L23:
-	# _tmp110 = i << 3
+	# _tmp109 = i << 3
 	  ldq		$r1, -24($r15)	# fill i to $r1 from $r15-24
 	  sll		$r1, 3, $r3	# perform the ALU op
-	  stq		$r3, -648($r15)	# spill _tmp110 from $r3 to $r15-648
-	# _tmp111 = array + _tmp110
+	  stq		$r3, -648($r15)	# spill _tmp109 from $r3 to $r15-648
+	# _tmp110 = array + _tmp109
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
-	  ldq		$r2, -648($r15)	# fill _tmp110 to $r2 from $r15-648
+	  ldq		$r2, -648($r15)	# fill _tmp109 to $r2 from $r15-648
 	  addq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -656($r15)	# spill _tmp111 from $r3 to $r15-656
-	# _tmp112 = *(_tmp111)
-	  ldq		$r1, -656($r15)	# fill _tmp111 to $r1 from $r15-656
+	  stq		$r3, -656($r15)	# spill _tmp110 from $r3 to $r15-656
+	# _tmp111 = *(_tmp110)
+	  ldq		$r1, -656($r15)	# fill _tmp110 to $r1 from $r15-656
 	  ldq		$r3, 0($r1)	# load with offset
-	  stq		$r3, -664($r15)	# spill _tmp112 from $r3 to $r15-664
-	# _tmp113 = 1
+	  stq		$r3, -664($r15)	# spill _tmp111 from $r3 to $r15-664
+	# _tmp112 = 1
 	  lda		$r3, 1		# load (signed) int constant value 1 into $r3
-	  stq		$r3, -672($r15)	# spill _tmp113 from $r3 to $r15-672
-	# _tmp114 = size - _tmp113
+	  stq		$r3, -672($r15)	# spill _tmp112 from $r3 to $r15-672
+	# _tmp113 = size - _tmp112
 	  ldq		$r1, -32($r15)	# fill size to $r1 from $r15-32
-	  ldq		$r2, -672($r15)	# fill _tmp113 to $r2 from $r15-672
+	  ldq		$r2, -672($r15)	# fill _tmp112 to $r2 from $r15-672
 	  subq		$r1, $r2, $r3	# perform the ALU op
-	  stq		$r3, -680($r15)	# spill _tmp114 from $r3 to $r15-680
-	# PushParam _tmp114
+	  stq		$r3, -680($r15)	# spill _tmp113 from $r3 to $r15-680
+	# PushParam _tmp113
 	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -680($r15)	# fill _tmp114 to $r1 from $r15-680
+	  ldq		$r1, -680($r15)	# fill _tmp113 to $r1 from $r15-680
 	  stq		$r1, 8($r30)	# copy param value to stack
 	# PushParam array
 	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  stq		$r1, 8($r30)	# copy param value to stack
-	# PushParam _tmp112
+	# PushParam _tmp111
 	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -664($r15)	# fill _tmp112 to $r1 from $r15-664
+	  ldq		$r1, -664($r15)	# fill _tmp111 to $r1 from $r15-664
 	  stq		$r1, 8($r30)	# copy param value to stack
-	# _tmp115 = LCall _search_for
+	# _tmp114 = LCall _search_for
 	  bsr		$r26, _search_for	# branch to function
 	  mov		$r0, $r3	# copy function return value from $v0
-	  stq		$r3, -688($r15)	# spill _tmp115 from $r3 to $r15-688
+	  stq		$r3, -688($r15)	# spill _tmp114 from $r3 to $r15-688
 	# PopParams 24
 	  addq		$r30, 24, $r30	# pop params off stack
-	# found = _tmp115
-	  ldq		$r3, -688($r15)	# fill _tmp115 to $r3 from $r15-688
+	# found = _tmp114
+	  ldq		$r3, -688($r15)	# fill _tmp114 to $r3 from $r15-688
 	  stq		$r3, -40($r15)	# spill found from $r3 to $r15-40
 	# i += 1
 	  ldq		$r3, -24($r15)	# fill i to $r3 from $r15-24
@@ -841,25 +835,25 @@ __L23:
 	# Goto __L21
 	  br		__L21		# unconditional branch
 __L22:
-	# _tmp116 = *(array + -8)
+	# _tmp115 = *(array + -8)
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  ldq		$r3, -8($r1)	# load with offset
-	  stq		$r3, -696($r15)	# spill _tmp116 from $r3 to $r15-696
-	# _tmp116 += 1
-	  ldq		$r3, -696($r15)	# fill _tmp116 to $r3 from $r15-696
+	  stq		$r3, -696($r15)	# spill _tmp115 from $r3 to $r15-696
+	# _tmp115 += 1
+	  ldq		$r3, -696($r15)	# fill _tmp115 to $r3 from $r15-696
 	  addq		$r3, 1, $r3	# perform the ALU op
-	  stq		$r3, -696($r15)	# spill _tmp116 from $r3 to $r15-696
-	# _tmp117 = array - 8
+	  stq		$r3, -696($r15)	# spill _tmp115 from $r3 to $r15-696
+	# _tmp116 = array - 8
 	  ldq		$r1, -16($r15)	# fill array to $r1 from $r15-16
 	  subq		$r1, 8, $r3	# perform the ALU op
-	  stq		$r3, -704($r15)	# spill _tmp117 from $r3 to $r15-704
-	# PushParam _tmp117
-	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -704($r15)	# fill _tmp117 to $r1 from $r15-704
-	  stq		$r1, 8($r30)	# copy param value to stack
+	  stq		$r3, -704($r15)	# spill _tmp116 from $r3 to $r15-704
 	# PushParam _tmp116
 	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
-	  ldq		$r1, -696($r15)	# fill _tmp116 to $r1 from $r15-696
+	  ldq		$r1, -704($r15)	# fill _tmp116 to $r1 from $r15-704
+	  stq		$r1, 8($r30)	# copy param value to stack
+	# PushParam _tmp115
+	  subq		$r30, 8, $r30	# decrement stack ptr to make space for param
+	  ldq		$r1, -696($r15)	# fill _tmp115 to $r1 from $r15-696
 	  stq		$r1, 8($r30)	# copy param value to stack
 	# LCall __Free
 	  bsr		$r26, __Free	# branch to function
