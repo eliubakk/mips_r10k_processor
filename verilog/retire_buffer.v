@@ -6,34 +6,7 @@ module retire_buffer(clock, reset,
               full);
 	parameter NUM_WAYS = 4;
 	parameter WR_PORTS = 1;
-
-	`define NUM_SET_BITS $clog2(32/NUM_WAYS)
-	`define NUM_TAG_BITS (13-`NUM_SET_BITS)
-
-	typedef struct packed {
-		logic [63:0] data;
-		logic [(`NUM_TAG_BITS-1):0] tag;
-		logic valid;
-		logic dirty;
-	} CACHE_LINE_T;
-
-	typedef struct packed {
-		CACHE_LINE_T line;
-		logic [(`NUM_SET_BITS-1):0] idx;
-	} VIC_CACHE_T;
-
-	typedef struct packed {
-		logic [63:0] address;
-		logic [63:0] data;
-		logic valid;
-	} RETIRE_BUF_T;
-
-	const RETIRE_BUF_T EMPTY_RETIRE_BUF =
-	{
-		64'b0,
-		64'b0,
-		1'b0
-	};
+	`include "../../cache_defs.vh"
 
 	//inputs
 	input clock, reset;

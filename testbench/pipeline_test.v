@@ -28,9 +28,8 @@ extern void print_membus(int proc2mem_command, int mem2proc_response,
 extern void print_close();
 
 
-`define NUM_SETS (32/4)
-`define NUM_SET_BITS $clog2(`NUM_SETS)
-`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
+//`define NUM_WAYS 4
+`include "../../cache_defs.vh"
 
 // typedef struct packed {
 //	logic [63:0] data;
@@ -298,7 +297,7 @@ module testbench;
     begin
 
 	for (int i = 0; i < `NUM_SETS; ++i) begin
-		for (int j = 0; j < `NUM_DCACHE_WAYS; ++j) begin
+		for (int j = 0; j < `NUM_WAYS; ++j) begin
 			set_idx = i;
 			//$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
 			//$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
@@ -438,9 +437,9 @@ module testbench;
     end
 	`SD;
 	 // display_stages;
-	 //if (clock_count == 20000) begin
-	 //  $finish;
-	 //end
+	 if (clock_count == 20000) begin
+	   $finish;
+	 end
   end 
 
   // Count the number of branch instructions and correctly predicted branches

@@ -9,58 +9,13 @@ module dcache(clock, reset,
               Dcache_rd_miss_addr_out, Dcache_rd_miss_data_out, Dcache_rd_miss_valid_out,
               proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data,
               evicted, evicted_valid, sets_out);
-  parameter NUM_WAYS = `NUM_DCACHE_WAYS;
+  parameter NUM_WAYS = 4;
   parameter RD_PORTS = 1;
   parameter WR_PORTS = 1;
 
-  `define NUM_SET_BITS $clog2(32/NUM_WAYS)
-  `define NUM_TAG_BITS (13-`NUM_SET_BITS)
-
-  typedef struct packed {
-    logic [63:0] data;
-    logic [(`NUM_TAG_BITS-1):0] tag;
-    logic valid;
-    logic dirty;
-  } CACHE_LINE_T;
-
-  const CACHE_LINE_T EMPTY_CACHE_LINE = 
-  {
-    64'b0,
-    {`NUM_TAG_BITS{1'b0}},
-    1'b0,
-    1'b0
-  };
-
-  typedef struct packed {
-    CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
-  } CACHE_SET_T;
-
-  typedef struct packed {
-    logic [`NUM_TAG_BITS-1:0] tag;
-    logic [`NUM_SET_BITS-1:0] idx;
-    logic [63:0] data;
-    logic valid;
-  } DCACHE_FIFO_T;
-
-  const DCACHE_FIFO_T EMPTY_DCACHE =
-  {
-    {`NUM_TAG_BITS{1'b0}},
-    {`NUM_SET_BITS{1'b0}},
-    64'b0,
-    1'b0
-  };
-
-  typedef struct packed {
-    CACHE_LINE_T line;
-    logic [(`NUM_SET_BITS-1):0] idx;
-  } VIC_CACHE_T;
-
-  const VIC_CACHE_T EMPTY_VIC_CACHE = 
-  {
-    EMPTY_CACHE_LINE,
-    {`NUM_SET_BITS{1'b0}}
-  };
-
+  `define NUM_WAYS NUM_WAYS
+  `include "../../cache_defs.vh"
+  
   input clock, reset;
 
   //////////////
