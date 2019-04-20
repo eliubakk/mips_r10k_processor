@@ -406,9 +406,9 @@ module testbench;
     end
 	`SD;
 	 // display_stages;
-	//  if (clock_count == 100) begin
-	// 	$finish;
-	// end
+	 if (clock_count == 10000) begin
+	 	$finish;
+	 end
   end 
 
   // Count the number of branch instructions and correctly predicted branches
