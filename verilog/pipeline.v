@@ -11,6 +11,26 @@
 `define DEBUG
 `define SD #1
 
+`define NUM_SETS (32/`NUM_DCACHE_WAYS)
+`define NUM_SET_BITS $clog2(`NUM_SETS)
+`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
+
+typedef struct packed {
+	logic [63:0] data;
+	logic [(`NUM_TAG_BITS - 1):0] tag;
+	logic valid;
+	logic dirty;
+} CACHE_LINE_T;
+
+  typedef struct packed {
+    CACHE_LINE_T [(`NUM_DCACHE_WAYS-1):0] cache_lines;
+  } CACHE_SET_T;
+
+  typedef struct packed {
+    CACHE_LINE_T line;
+    logic [(`NUM_SET_BITS-1):0] idx;
+  } VIC_CACHE_T;
+
 module pipeline (
     //input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
     //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
@@ -81,6 +101,9 @@ module pipeline (
     // output logic [4:0][63:0] ex_mem_NPC,
     // output logic [4:0] ex_mem_IR,
     // output logic [4:0]       ex_mem_valid_inst,
+
+
+	output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
 
     // Outputs from MEM/COMP Pipeline Register
     output logic mem_co_valid_inst,   
@@ -1367,6 +1390,7 @@ assign lq_pop_en = ~mem_co_stall;
      .sq_data_valid(sq_data_valid),           // adddress not found
      
      // Outputs
+     .sets_out(dcache_data),
      .mem_result_out(mem_result_out),
      .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),
