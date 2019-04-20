@@ -3,7 +3,11 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
+<<<<<<< HEAD
 Date   : Fri Apr 19 23:51:58 2019
+=======
+Date   : Thu Apr 18 20:55:15 2019
+>>>>>>> parent of 0760f9f... correct writeback and mem out after synth
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v

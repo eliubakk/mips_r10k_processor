@@ -23,9 +23,9 @@ module phys_regfile(
   
   logic[`NUM_PHYS_REG-1:0][63:0] phys_registers;   // 64, 64-bit Physical Registers
 
-  //`ifdef DEBUG
+  `ifdef DEBUG
   	assign phys_registers_out = phys_registers;
-  //`endif
+  `endif
 
   genvar ig, jg;
   for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
