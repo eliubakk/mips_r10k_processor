@@ -71,8 +71,8 @@ Checking for correct writeback...
 	branch.writeback.out 			PASSED
 	branch1.writeback.out 			PASSED
 	branch2.writeback.out 			PASSED
-	btest1.writeback.out 			FAILED
-	btest2.writeback.out 			FAILED
+	btest1.writeback.out 			PASSED
+	btest2.writeback.out 			PASSED
 	copy.writeback.out 			PASSED
 	copy_long.writeback.out 			PASSED
 	evens.writeback.out 			PASSED
@@ -84,7 +84,7 @@ Checking for correct writeback...
 	heewoo.writeback.out 			PASSED
 	hw.writeback.out 			PASSED
 	insertion.writeback.out 			FAILED
-	mult.writeback.out 			FAILED
+	mult.writeback.out 			PASSED
 	mult1.writeback.out 			PASSED
 	mult2.writeback.out 			PASSED
 	mult_no_lsq.writeback.out 			PASSED
@@ -104,7 +104,7 @@ Checking for correct writeback...
 	st.writeback.out 			PASSED
 	test_branch_1.writeback.out 			PASSED
 	test_branch_2.writeback.out 			PASSED
-	test_branch_3.writeback.out 			FAILED
+	test_branch_3.writeback.out 			PASSED
 	test_branch_4.writeback.out 			PASSED
 	test_long_add.writeback.out 			PASSED
 	test_raw_1.writeback.out 			PASSED
@@ -127,4 +127,4 @@ Checking for correct writeback...
 	test_waw_3.writeback.out 			PASSED
 	test_waw_4.writeback.out 			PASSED
 	test_waw_5.writeback.out 			PASSED
-PASSED 48/62
+PASSED 52/62
