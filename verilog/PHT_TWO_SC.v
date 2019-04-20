@@ -89,7 +89,7 @@ module PHT_TWO_SC(
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			for(i=0; i<`PHT_ROW;++i) begin
-				pht[i]	<= `SD 2'b0; // Initialized to strongly not taken
+				pht[i]	<= `SD 2'b01; // Initialized to weakly not taken
 			end
 		end else begin
 			pht	<= `SD  next_pht;
