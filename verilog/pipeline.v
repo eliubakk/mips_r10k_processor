@@ -210,6 +210,7 @@ module pipeline (
   // // Outputs from MEM-Stage
    logic [63:0] mem_result_out;
    logic        mem_stall_out;
+   logic        mem_rd_stall;
 
 // Outputs from MEM/COM Pipeline Register
   logic  mem_co_halt;
@@ -521,7 +522,7 @@ logic tag_in_lq;
   logic lq_read_valid;
   logic lq_full;
 
-  assign lq_pop_en = mem_stall_out;
+  //assign lq_pop_en = mem_stall_out;
 
   LQ load_queue(
     .clock(clock),
@@ -1326,7 +1327,7 @@ end
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
   assign lq_load_in.data = 64'b0;
   assign lq_load_in.data_valid = 1'b0;
-  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_stall_out;
+  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_rd_stall;
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
@@ -1341,6 +1342,7 @@ end
    
 logic mem_co_stall;
 assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
+assign lq_pop_en = ~mem_co_stall;
   
   mem_stage mem_stage_0 (// Inputs
      .clock(clock),
@@ -1359,6 +1361,7 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
      
      // Outputs
      .mem_result_out(mem_result_out),
+     .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),
      .mem_rd_miss_addr_out (lq_miss_addr),
      .mem_rd_miss_data_out (lq_miss_data),
@@ -1372,8 +1375,8 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
   );
 
   wire [5:0] mem_dest_reg_idx_out =
-             mem_stall_out ? `DUMMY_REG : ex_co_dest_reg_idx[2];
-  wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_stall_out;
+             mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[2];
+  wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_rd_stall;
 
 assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & ex_co_wr_mem[2])) & (ex_co_valid_inst[2]) ;
 
@@ -1386,7 +1389,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //////////////////////////////////////////////////
 
   logic mem_co_comb;
-  assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_stall_out);
+  assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
   assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.data_valid; 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
@@ -1395,7 +1398,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   assign mem_co_illegal_comb = mem_co_comb ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
   assign mem_co_dest_reg_idx_comb= mem_co_comb ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
   assign mem_co_alu_result_comb = (ex_co_valid_inst[FU_LD_IDX] & sq_data_valid) ? sq_data_out :
-                                  (ex_co_valid_inst[FU_LD_IDX] & ~mem_stall_out) ? mem_result_out : lq_load_out.data; 
+                                  (ex_co_valid_inst[FU_LD_IDX] & ~mem_rd_stall) ? mem_result_out : lq_load_out.data; 
 
 
   

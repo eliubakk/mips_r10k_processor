@@ -484,7 +484,7 @@ module dcache(clock, reset,
     end
 
     //send prefetch request to mem_req_queue
-    if(!fifo_sel_num_valid & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+    if(fifo_sel_num_valid & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
       next_rd_addr = {32'b0, 
                       fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].tag, 
                       fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].idx, 

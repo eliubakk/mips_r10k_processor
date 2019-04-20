@@ -43,6 +43,7 @@ module mem_stage(
     input         sq_data_valid,       //address not found for forwarding
 
     output [63:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
+    output        mem_rd_stall,
     output        mem_stall_out,
     output [63:0] mem_rd_miss_addr_out,
     output [63:0] mem_rd_miss_data_out,
@@ -73,7 +74,8 @@ module mem_stage(
   assign mem_result_out = (rd_mem) ? Dcache_data_out :
                                      rd_addr;
 
-  assign mem_stall_out =  (rd_mem && ~Dcache_valid_out) & ret_buf_full;
+  assign mem_rd_stall = (rd_mem && ~Dcache_valid_out);
+  assign mem_stall_out = ret_buf_full;
 
   
   dcache dcache0(
