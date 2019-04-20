@@ -12,27 +12,8 @@
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
 
-
-  `define NUM_SETS (32/`NUM_DCACHE_WAYS)
-  `define NUM_SET_BITS $clog2(`NUM_SETS)
-  `define NUM_TAG_BITS (13-`NUM_SET_BITS)
-`ifndef PIPELINE
-  typedef struct packed {
-    logic [63:0] data;
-    logic [(`NUM_TAG_BITS-1):0] tag;
-    logic valid;
-    logic dirty;
-  } CACHE_LINE_T;
-
-  typedef struct packed {
-    CACHE_LINE_T [(`NUM_DCACHE_WAYS-1):0] cache_lines;
-  } CACHE_SET_T;
-
-  typedef struct packed {
-    CACHE_LINE_T line;
-    logic [(`NUM_SET_BITS-1):0] idx;
-  } VIC_CACHE_T;
-`endif
+`define NUM_WAYS 4
+`include "../../cache_defs.vh"
 
 module mem_stage(
     input         clock,              // system clock
@@ -112,7 +93,7 @@ module mem_stage(
   );
 
   retire_buffer #(
-  .NUM_WAYS(`NUM_DCACHE_WAYS),
+  .NUM_WAYS(`NUM_WAYS),
   .WR_PORTS(3))
   rb0(
     // inputs
