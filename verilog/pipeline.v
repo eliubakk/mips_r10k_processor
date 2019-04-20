@@ -316,12 +316,13 @@ logic branch_valid_disp;  //branch_valid_disp
   logic rob_retire_out_T_old; 	
   logic [31:0] rob_retire_opcode;
   // Memory interface/arbiter wires
-  logic [63:0] proc2Dmem_addr, proc2Imem_addr;
-  logic [1:0]  proc2Dmem_command, proc2Imem_command;
-  logic [3:0]  Dmem2proc_response, Imem2proc_response;
+  logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
+  logic [63:0] proc2Rmem_data;
+  logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
+  logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
   logic [3:0]  Dmem2proc_tag, Imem2proc_tag;
-
+  
   // Icache wires
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
@@ -349,6 +350,9 @@ logic tag_in_lq;
     .proc2Imem_command(proc2Imem_command),
     .proc2Imem_addr(proc2Imem_addr), 
     .proc2Imem_data(64'b0),
+    .proc2Rmem_command (proc2Rmem_command),
+    .proc2Rmem_addr    (proc2Rmem_addr),
+    .proc2Rmem_data    (proc2Rmem_data),
     .mem2proc_response(mem2proc_response), 
     .mem2proc_data(mem2proc_data),
     .mem2proc_tag(mem2proc_tag),
@@ -360,6 +364,7 @@ logic tag_in_lq;
     .Imem2proc_response(Imem2proc_response),
     .Imem2proc_data(Imem2proc_data), 
     .Imem2proc_tag(Imem2proc_tag),
+    .Rmem2proc_response(Rmem2proc_response),
     .proc2mem_command(proc2mem_command), 
     .proc2mem_addr(proc2mem_addr), 
     .proc2mem_data(proc2mem_data)
@@ -1594,6 +1599,7 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
      .Dmem2proc_data(Dmem2proc_data),
      .Dmem2proc_tag(Dmem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
+     .Rmem2proc_response   (Rmem2proc_response),
      .sq_data_not_found(sq_data_not_found),   // addresses in store are not ready
      .sq_data_valid(sq_data_valid),           // adddress not found
      
@@ -1605,7 +1611,10 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
      .mem_rd_miss_valid_out(lq_miss_valid),
      .proc2Dmem_command(proc2Dmem_command),
      .proc2Dmem_addr(proc2Dmem_addr),
-     .proc2Dmem_data(proc2Dmem_data)
+     .proc2Dmem_data(proc2Dmem_data),
+     .proc2Rmem_command    (proc2Rmem_command),
+     .proc2Rmem_addr       (proc2Rmem_addr),
+     .proc2Rmem_data       (proc2Rmem_data)
   );
 
   wire [5:0] mem_dest_reg_idx_out =

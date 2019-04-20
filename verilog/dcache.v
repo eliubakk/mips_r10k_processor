@@ -23,6 +23,14 @@ module dcache(clock, reset,
     logic dirty;
   } CACHE_LINE_T;
 
+  const CACHE_LINE_T EMPTY_CACHE_LINE = 
+  {
+    64'b0,
+    {`NUM_TAG_BITS{1'b0}},
+    1'b0,
+    1'b0
+  };
+
   typedef struct packed {
     CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
   } CACHE_SET_T;
@@ -411,7 +419,7 @@ module dcache(clock, reset,
 
     //allocate new fifo
     for(int i = 0; i < RD_PORTS; i += 1) begin
-      if(~vic_rd_valid[ig] & !fifo_hit_num_valid[i] & ~(|mem_queue_hits[i]) & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+      if(~vic_rd_valid[i] & !fifo_hit_num_valid[i] & ~(|mem_queue_hits[i]) & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
         mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[i][63:3], 3'b0};
         mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
         mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
