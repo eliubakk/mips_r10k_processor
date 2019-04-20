@@ -1,6 +1,6 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 19 12:38 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 20 14:55 2019
 VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@
 @@
@@ -40,24 +40,27 @@ VCD+ Writer N-2017.12-SP2-1_Full64 Copyright (c) 1991-2017 by Synopsys Inc.
 @@@ mem[  120] = 0000000000000009 : 9
 @@@ mem[  128] = 0000000000000003 : 3
 @@@ mem[  136] = 207f1000205f0004 : 2341607923985088516
-@@@ mem[  144] = a4830004a4830000 : 11854318664109195264
-@@@ mem[  152] = b4430004b4430000 : 12989225770470801408
+@@@ mem[  144] = a4830008a4830000 : 11854318681289064448
+@@@ mem[  152] = b4430008b4430000 : 12989225787650670592
 @@@ mem[  160] = 00000555a4830000 : 5865390407680
 @@@
+@@@ mem[ 4096] = 0000000000000004 : 4
+@@@ mem[ 4104] = 0000000000000004 : 4
 @@@
-@@                  2720 : System halted
+@@@
+@@                  4820 : System halted
 @@
-@@@ System halted on memory error
+@@@ System halted on HALT instruction
 @@@
 @@
-@@  24 cycles / 4 instrs = 6.000000 CPI
+@@  45 cycles / 8 instrs = 5.625000 CPI
 @@
-@@  690.00 ns total time to execute
+@@  1320.00 ns total time to execute
 @@
 
 $finish called from file "testbench/testbench.v", line 257.
-$finish at simulation time                 3720
+$finish at simulation time                 5820
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 372000 ps
-CPU Time:      0.220 seconds;       Data structure size:   0.2Mb
-Fri Apr 19 12:38:48 2019
+Time: 582000 ps
+CPU Time:      0.280 seconds;       Data structure size:   0.2Mb
+Sat Apr 20 14:55:02 2019
