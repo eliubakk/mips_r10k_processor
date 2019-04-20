@@ -83,9 +83,9 @@ module pipeline (
     // output logic [4:0]       ex_mem_valid_inst,
 
     // Outputs from MEM/COMP Pipeline Register
-    output logic mem_co_valid_inst,   
-    output logic [63:0] mem_co_NPC ,        
-    output logic [31:0] mem_co_IR ,         
+      output logic mem_co_valid_inst,   
+      output logic [63:0] mem_co_NPC ,        
+      output logic [31:0] mem_co_IR ,         
  
     // Outputs from EX/COM Pipeline Register
     output logic [`NUM_FU_TOTAL-1:0][63:0] ex_co_NPC,
@@ -348,42 +348,15 @@ logic [63:0] retire_reg_wr_data;
 
 logic tag_in_lq;
 
-  mem_controller memory(
-    .clock(clock), 
-    .reset(reset), 
+  assign proc2mem_command = (proc2Dmem_command == BUS_NONE) ? proc2Imem_command : proc2Dmem_command;
+  assign proc2mem_addr = (proc2Dmem_command == BUS_NONE) ? proc2Imem_addr : proc2Dmem_addr;
+  assign Dmem2proc_response = (proc2Dmem_command == BUS_NONE) ? 0 : mem2proc_response;
+  assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
+  assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
+  assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
 
-    //inputs
-    .proc2Dmem_command(proc2Dmem_command),
-    .proc2Dmem_addr(proc2Dmem_addr), 
-    .proc2Dmem_data(proc2Dmem_data),
-    .proc2Imem_command(proc2Imem_command),
-    .proc2Imem_addr(proc2Imem_addr), 
-    .proc2Imem_data(64'b0),
-    .mem2proc_response(mem2proc_response), 
-    .mem2proc_data(mem2proc_data),
-    .mem2proc_tag(mem2proc_tag),
-
-    //outputs
-    .Dmem2proc_response(Dmem2proc_response),
-    .Dmem2proc_data(Dmem2proc_data),
-    .Dmem2proc_tag(Dmem2proc_tag),
-    .Imem2proc_response(Imem2proc_response),
-    .Imem2proc_data(Imem2proc_data), 
-    .Imem2proc_tag(Imem2proc_tag),
-    .proc2mem_command(proc2mem_command), 
-    .proc2mem_addr(proc2mem_addr), 
-    .proc2mem_data(proc2mem_data)
-  );
-
-  // assign proc2mem_command = (proc2Dmem_command == BUS_NONE) ? proc2Imem_command : proc2Dmem_command;
-  // assign proc2mem_addr = (proc2Dmem_command == BUS_NONE) ? proc2Imem_addr : proc2Dmem_addr;
-  // assign Dmem2proc_response = (proc2Dmem_command == BUS_NONE) ? 0 : mem2proc_response;
-  // assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
-  // assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
-  // assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
-
-  // assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
-  // assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
+  assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
+  assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
   // assign Dmem2proc_tag = (proc2Dmem_command == BUS_LOAD) ? mem2proc_tag : 0;
 
 	icache inst_memory(
@@ -469,7 +442,7 @@ logic tag_in_lq;
     .ex_data(ex_store_data),
     .ex_data_en(ex_store_data_valid),
 
-    .rt_en(retire_is_store_next),
+    .rt_en(retire_is_store),
 
     .data_rd(sq_data_out),
     .rd_valid(sq_data_valid), // checks for if data that exists is valid
@@ -486,15 +459,12 @@ logic tag_in_lq;
   LQ_ROW_T lq_load_in;
   logic lq_write_en;
   logic lq_pop_en;
-  logic [63:0] lq_miss_data;
-  logic [63:0] lq_miss_addr;
-  logic lq_miss_valid;
+
+  logic [3:0] lq_mem_tag;
 
   LQ_ROW_T lq_load_out;
   logic lq_read_valid;
   logic lq_full;
-
-  assign lq_pop_en = mem_stall_out;
 
   LQ load_queue(
     .clock(clock),
@@ -503,10 +473,10 @@ logic tag_in_lq;
     .load_in(lq_load_in),
     .write_en(lq_write_en),
     .pop_en(lq_pop_en),
-    .lq_miss_data(lq_miss_data),
-    .lq_miss_addr(lq_miss_addr),
-    .lq_miss_valid(lq_miss_valid),
 
+    .mem_tag(mem2proc_tag),
+
+    .tag_found(tag_in_lq),
     .load_out(lq_load_out),
     .read_valid(lq_read_valid),
     .full(lq_full)
@@ -1297,13 +1267,13 @@ end
   assign lq_load_in.illegal = ex_co_illegal[FU_LD_IDX];
   assign lq_load_in.dest_reg = ex_co_dest_reg_idx[FU_LD_IDX];
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
-  assign lq_load_in.data = 64'b0;
-  assign lq_load_in.data_valid = 1'b0;
-  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_stall_out;
+  assign lq_load_in.mem_response = Dmem2proc_response;
+
+  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & !sq_data_not_found & ex_co_rd_mem[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
-  // assign lq_pop_en = ~mem_stall_out; // tag_in_lq;
+  assign lq_pop_en = tag_in_lq;
   // assign lq_mem_tag = Dmem2proc_response;
 
 //   //////////////////////////////////////////////////
@@ -1311,18 +1281,26 @@ end
 //   //                 MEM-Stage                    //
 //   //                                              //
 //   //////////////////////////////////////////////////
-   
+  
+ logic [63:0] mem_addr, mem_data;
+ 
 logic mem_co_stall;
 assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
+
+  // accessing priorities for the memory
+  assign mem_addr=  (proc2Dmem_command == BUS_STORE) ? sq_head_address : ex_co_alu_result[FU_LD_IDX];
+  assign mem_data=  (proc2Dmem_command == BUS_STORE) ? sq_head_data : 0;
+  
+  
+  
   
   mem_stage mem_stage_0 (// Inputs
      .clock(clock),
      .reset(reset),
-     .rd_mem(ex_co_rd_mem[FU_LD_IDX]),
-     .rd_addr(ex_co_alu_result[FU_LD_IDX]), 
-     .wr_mem(retire_is_store_next),
-     .wr_addr(sq_head_address),
-     .wr_data(sq_head_data),
+     .ex_mem_rega(mem_data),
+     .ex_mem_alu_result(mem_addr), 
+     .ex_mem_rd_mem(ex_co_rd_mem[FU_LD_IDX]),
+     .ex_mem_wr_mem(retire_is_store ),
      .Dmem2proc_data(Dmem2proc_data),
      .Dmem2proc_tag(Dmem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
@@ -1332,13 +1310,10 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
      // Outputs
      .mem_result_out(mem_result_out),
      .mem_stall_out(mem_stall_out),
-     .mem_rd_miss_addr_out (lq_miss_addr),
-     .mem_rd_miss_data_out (lq_miss_data),
-     .mem_rd_miss_valid_out(lq_miss_valid),
      .proc2Dmem_command(proc2Dmem_command),
      .proc2Dmem_addr(proc2Dmem_addr),
-     .proc2Dmem_data(proc2Dmem_data)
-  );
+     .proc2Dmem_data(proc2mem_data)
+            );
 
   wire [5:0] mem_dest_reg_idx_out =
              mem_stall_out ? `DUMMY_REG : ex_co_dest_reg_idx[2];
@@ -1348,27 +1323,22 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 
 
 
-  //////////////////////////////////////////////////_
+  //////////////////////////////////////////////////
   //                                              //
   //           mem/co stage                   //
   //                                              //
   //////////////////////////////////////////////////
 
   logic mem_co_comb;
-  assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_stall_out);
+  assign mem_co_comb = sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.data_valid; 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst & lq_pop_en; 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
   assign mem_co_illegal_comb = mem_co_comb ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
   assign mem_co_dest_reg_idx_comb= mem_co_comb ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
-  assign mem_co_alu_result_comb = (ex_co_valid_inst[FU_LD_IDX] & sq_data_valid) ? sq_data_out :
-                                  (ex_co_valid_inst[FU_LD_IDX] & ~mem_stall_out) ? mem_result_out : lq_load_out.data; 
-
-
-  
-                                   // mem2proc_data; // lq_load_out.alu_result;
+  assign mem_co_alu_result_comb = mem_co_comb ? sq_data_out : mem2proc_data; // lq_load_out.alu_result;
   
 
   
@@ -1741,3 +1711,4 @@ assign arch_enable = rob_retire_out.busy & !branch_not_taken;
  );
 
 endmodule  // module verisimple
+
