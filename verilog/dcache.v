@@ -106,9 +106,9 @@ module dcache(clock, reset,
   //////////////
   //instantiate cachemem module
   //cache memory inputs    
-  logic [RD_PORTS:0] cache_rd_en;
-  logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_idx;
-  logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
+  logic [(RD_PORTS-1):0] cache_rd_en;
+  logic [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] cache_rd_idx;
+  logic [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
 
   logic [(WR_PORTS+RD_PORTS):0] cache_wr_en;
   logic [(WR_PORTS+RD_PORTS):0][(`NUM_SET_BITS-1):0] cache_wr_idx;
@@ -117,11 +117,11 @@ module dcache(clock, reset,
   logic [(WR_PORTS+RD_PORTS):0] cache_wr_dirty;
 
   //cache memory outputs
-  logic [RD_PORTS:0][63:0] cache_rd_data;
-  logic [RD_PORTS:0] cache_rd_valid;
-  logic [RD_PORTS:0][(`NUM_SET_BITS-1):0] cache_rd_miss_idx;
-  logic [RD_PORTS:0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
-  logic [RD_PORTS:0] cache_rd_miss_valid;
+  logic [(RD_PORTS-1):0][63:0] cache_rd_data;
+  logic [(RD_PORTS-1):0] cache_rd_valid;
+  logic [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] cache_rd_miss_idx;
+  logic [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
+  logic [(RD_PORTS-1):0] cache_rd_miss_valid;
 
   logic [(WR_PORTS+RD_PORTS):0][(`NUM_SET_BITS-1):0] cache_wr_miss_idx;
   logic [(WR_PORTS+RD_PORTS):0][(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
@@ -362,7 +362,8 @@ module dcache(clock, reset,
   //assign vic_rd_tag = {cache_rd_tag, cache_wr_tag};
 
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
-                                      !fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
+                                         (send_req_ptr < mem_req_queue_tail);
+                                      //!fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
 
   assign proc2Dmem_addr = send_request? mem_req_queue[send_req_ptr].req.address : 64'b0;
   assign proc2Dmem_command = send_request? BUS_LOAD :

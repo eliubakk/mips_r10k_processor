@@ -65,12 +65,12 @@ module vic_cache(clock, reset,
     logic [(`VIC_SIZE-1):0][0:0][(RD_PORTS-1):0] vic_cam_hits;
     logic [(RD_PORTS-1):0][(`VIC_SIZE-1):0] rd_vic_hits;
     wor   [(`VIC_SIZE-1):0] vic_queue_hits;
-    logic [(RD_PORTS-1):0][`NUM_VIC_BITS:0] rd_vic_idx;
+    logic [(RD_PORTS-1):0][(`NUM_VIC_BITS-1):0] rd_vic_idx;
     logic [(RD_PORTS-1):0] rd_vic_idx_valid;
 
     //update logic variables
-    logic [(`VIC_SIZE-1):0][`NUM_VIC_BITS:0] vic_num_shift;
-    logic [`NUM_VIC_BITS:0] num_evict;
+    logic [(`VIC_SIZE-1):0][(`NUM_VIC_BITS-1):0] vic_num_shift;
+    logic [(`NUM_VIC_BITS-1):0] num_evict;
 
     //assign rd CAM variables
     genvar ig, jg;

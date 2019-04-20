@@ -33,7 +33,7 @@ module LQ(
     for (ig = 0; ig < `LQ_SIZE; ++ig) begin
 	// change the hit to check if address from bits 63:0 matches so that
 	// addresses of each block match as a hit
-        assign addr_hits[ig] = (load_queue[ig].alu_result[63:3] == lq_miss_addr[63:3]) & (load_queue[ig].valid_inst) & lq_miss_valid; 
+        assign addr_hits[ig] = (load_queue[ig].alu_result == lq_miss_addr) & (load_queue[ig].valid_inst) & lq_miss_valid; 
     end
 
     // assign tag_found = |mem_tag_hits;
@@ -56,11 +56,7 @@ module LQ(
 
         for(int i = 0; i < `LQ_SIZE; ++i) begin
             if(addr_hits[i]) begin
-		if (load_queue[i].alu_result[2]) begin
-			load_queue_next[i].data = lq_miss_data[63:32];
-		end else begin
-			load_queue_next[i].data = lq_miss_data[31:0];
-		end
+                load_queue_next[i].data = lq_miss_data;
                 load_queue_next[i].data_valid = 1'b1;
             end
         end
