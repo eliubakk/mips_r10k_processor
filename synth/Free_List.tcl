@@ -17,7 +17,7 @@ elaborate Free_List
 set design_name Free_List
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 2.5
+set CLK_PERIOD 2.0
 
 
 
@@ -119,7 +119,7 @@ if {  $dc_shell_status != [list] } {
   uniquify
   ungroup -all -flatten
   redirect $chk_file { check_design }
-  compile -map_effort high
+  compile -map_effort medium
   write -hier -format verilog -output $netlist_file $design_name
   write -hier -format ddc -output $ddc_file $design_name
   redirect $rep_file { report_design -nosplit }

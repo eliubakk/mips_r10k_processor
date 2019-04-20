@@ -17,7 +17,7 @@ elaborate Map_Table
 set design_name Map_Table
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 2
+set CLK_PERIOD 1.9
 
 
 
@@ -119,7 +119,7 @@ if {  $dc_shell_status != [list] } {
   uniquify
   ungroup -all -flatten
   redirect $chk_file { check_design }
-  compile -map_effort high
+  compile -map_effort medium
   write -hier -format verilog -output $netlist_file $design_name
   write -hier -format ddc -output $ddc_file $design_name
   redirect $rep_file { report_design -nosplit }

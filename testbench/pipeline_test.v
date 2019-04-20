@@ -59,6 +59,9 @@ module testbench;
   logic	[31:0]	branch_inst_count;
   logic [31:0]  branch_pred_count;
 
+  logic		retire_inst_busy;
+  logic	[63:0]  retire_reg_NPC;
+
   logic [63:0] if_NPC_out;
   logic [31:0] if_IR_out;
   logic        if_valid_inst_out;
@@ -141,6 +144,9 @@ module testbench;
     .pipeline_commit_phys_from_arch(pipeline_commit_phys_from_arch),
     .pipeline_branch_en(pipeline_branch_en),
     .pipeline_branch_pred_correct(pipeline_branch_pred_correct),
+
+    .retire_inst_busy(retire_inst_busy),
+    .retire_reg_NPC(retire_reg_NPC),
 
     .if_NPC_out(if_NPC_out),
     .if_IR_out(if_IR_out),
@@ -286,324 +292,6 @@ module testbench;
 	$display("@@@");
     end
   endtask  // task show_mem_with_decimal
-
-  task display_RS_table;
-
-		begin
-				$display("**********************************************************\n");
-				$display("------------------------RS TABLE----------------------------\n");
-
-			$display("issue_reg");
-			for (int i = 0; i < 5; ++i) begin
-				$display("issue_reg[%d].inst.valid_inst: %b", i, pipeline_0.issue_reg[i].inst.valid_inst);
-				$display("ex_co_enable[%d]: %b", i, pipeline_0.ex_co_enable[i]);
-			end
-
-
-			$display("issue_idx_valid_shift");
-			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("issue_idx_valid_shifted[%d] = %b", i, pipeline_0.RS0.issue_idx_valid_shifted[i]);
-			end 
-			$display("issue_idx_valid");
-			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("issue_idx_valid[%d]: %b", i, pipeline_0.RS0.issue_idx_valid[i]);
-			end
-
-			for(integer i=0;i<`RS_SIZE;i=i+1) begin
-				$display("RS_Row = %d,  busy = %d, Function = %d, T = %7.0b T1 = %7.0b, T2 = %7.0b, npc:%h, opcode:%h ", i, rs_table_out[i].busy, rs_table_out[i].inst.fu_name,rs_table_out[i].T, rs_table_out[i].T1, rs_table_out[i].T2, rs_table_out[i].npc, rs_table_out[i].inst_opcode);
-			end
-			$display("*******************************************************************\n");
-
-		end
-	endtask
-
-  task display_arch_table;
-		begin
-			$display("-----------Archtecture Map Table-----------");
-			$display("T_old : %d, T_new : %d, T_new is updated Arch value", pipeline_0.rob_retire_out.T_old[5:0], pipeline_0.rob_retire_out.T_new[5:0]); 
-			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
-				$display("Reg:%d, busy: %b, Phys Reg : %d", k, arch_table[k][6], arch_table[k][5:0]); 
-			end
-			$display("------------------------------------------\n");	
-		end
-	endtask
-  task display_map_table;
-		begin
-			$display("-----------Map Table-----------");
-			$display("T_old : %d, T1 : %d, T2 : %d",pipeline_0.T_old, pipeline_0.id_inst_out.T1, pipeline_0.id_inst_out.T2);
-			for(integer k=0;k<`NUM_GEN_REG;k=k+1) begin
-				$display("Reg:%d, pluas: %b, Phys Reg : %d", k, pipeline_0.map_table_out[k][6],pipeline_0.map_table_out[k][5:0]); 
-			end
-			$display("------------------------------------------\n");	
-		end
-	endtask
-
-
-  task display_ROB_table;
-		begin
-		//	@(posedge clock);
-		//	#2;
-				$display("**********************************************************\n");
-				$display("------------------------ROB TABLE----------------------------\n");
-
-			$display("INPUTS");
-			$display("T_old_in: %d T_new_in: %d CDB_tag_in: %d CAM_en: %b dispatch_en: %b branch_not_taken: %b", pipeline_0.T_old, pipeline_0.fr_rs_rob_T, pipeline_0.CDB_tag_out, pipeline_0.CDB_enable, pipeline_0.dispatch_en, pipeline_0.branch_not_taken);
-			$display("OUTPUTS");
-			$display("rob_retire.T_old: %d rob_retire.T_new: %d rob_retire.busy: %b rob_free_rows_next: %d rob_full: %b tail: %d head: %d", pipeline_0.rob_retire_out.T_old, pipeline_0.rob_retire_out.T_new, pipeline_0.rob_retire_out.busy, pipeline_0.rob_free_rows_next_out, pipeline_0.rob_full_out, pipeline_0.rob_tail_out, pipeline_0.rob_head_out);
-			for(integer i=0;i<`ROB_SIZE;i=i+1) begin
-				$display("ROB_Row = %d,  busy = %d, halt = %d, branch : %b, NPC = %h, wr_idx:%d, T_new = %7.0b T_old = %7.0b ", i, pipeline_0.ROB_table_out[i].busy, pipeline_0.ROB_table_out[i].halt, pipeline_0.ROB_table_out[i].branch_inst.en, pipeline_0.ROB_table_out[i].npc, pipeline_0.ROB_table_out[i].wr_idx, pipeline_0.ROB_table_out[i].T_new, pipeline_0.ROB_table_out[i].T_old);
-			end
-				//$display("T free = %7.0b T arch = %7.0b tail= %d head= %d T_out_valid = %b ROB full = %b, ROB free entries = %d",T_free, T_arch, tail_reg, head_reg, T_out_valid, rob_full, rob_free_entries);
-			$display("*******************************************************************\n");
-
-		end
-	endtask
-
- /* task display_free_list_table;
-		input	PHYS_REG [`NUM_PHYS_REG-1:0] list;
-		begin
-    $display("**********************************************************\n");
-				$display("------------------------Freelist TABLE----------------------------\n");
-			for (integer i = 0; i < `NUM_PHYS_REG; ++i) begin
-				$display("i = %d tag: %d", i, list[i]);
-        $display("*******************************************************************\n");
-			end	
-		end
-	endtask
-*/
-
-
- 	task display_free_list_table;
-		begin
-			$display("\n----------------------------Freelist Table----------------------------\n");
-			$display("Free_list_out : %d, Free_list_size : %d, Free_list_tail : %d", pipeline_0.fr_free_reg_T, `FL_SIZE, pipeline_0.fr_tail_out);
-			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
-				$display("%dth line : %d", i, pipeline_0.fr_rs_rob_T[i]);
-			end
-		
-
-			$display("/n-------------------Freelist Checkpoint Table-----------/n");
-			$display("Check_point_size : %d, Check_point_tail : %d",`FL_SIZE, pipeline_0.f0.tail_check_point);
-			for (integer i = 0; i<`ROB_SIZE+2; ++i) begin
-				$display("%dth line : %d", i, pipeline_0.f0.free_check_point[i]);
-			end
-		end
-
-	endtask
-	task display_inst;
-		input DECODED_INST _inst_in;
-		begin
-			$display("\t\topa_select: %d opb_select: %d dest_reg_sel: %d alu_func: %d fu_name: %d", _inst_in.opa_select, _inst_in.opb_select, _inst_in.dest_reg, _inst_in.alu_func, _inst_in.fu_name);
-			$display("\t\trd_mem: %b wr_mem: %b ldl_mem: %b stc_mem: %b cond_branch: %b uncond_branch: %b halt: %b cpuid: %d illegal: %b valid_inst: %b", _inst_in.rd_mem, _inst_in.wr_mem, _inst_in.ldl_mem, _inst_in.stc_mem, _inst_in.cond_branch, _inst_in.uncond_branch, _inst_in.halt, _inst_in.cpuid, _inst_in.illegal, _inst_in.valid_inst);
-		end 
-	endtask
-
-	task display_memory;
-		begin
-			$display("\nmain memory---------------------------------------------------------------");
-			$display("mem input : proc2mem_command:%h, proc2mem_addr:%h, proc2mem_data:%h", proc2mem_command, proc2mem_addr, proc2mem_data);
-			$display("mem_output : mem2proc_response:%h, mem2proc_data:%h, mem2proc_tag:%h", mem2proc_response, mem2proc_data, mem2proc_tag);
-			$display("Memory array for first 20 rows");
-			for(int p=0;p<20;p++) begin
-				$display(" row %d : %h",p, memory.unified_memory[p][63:0]);
-			end
-		end
-	endtask
-
-	task display_phys_reg;
-		begin
-			$display("\n Physical register files-------------------------------------");
-      for(int p = 0; p < `NUM_FU_TOTAL; p += 1) begin
-			 $display("FU: %d rda_idx %b, rda_out: %d, rdb_idx: %b, rdb_out: %d, wr_en: %b, wr_idx: %b, wr_data: %d", p, pipeline_0.issue_reg_tags[p][0], pipeline_0.pr_tags_values[p][0], pipeline_0.issue_reg_tags[p][1], pipeline_0.pr_tags_values[p][0], pipeline_0.ex_co_valid_inst[p], pipeline_0.ex_co_dest_reg_idx[p], pipeline_0.ex_co_alu_result[p]);
-			end
-      for(int p=0;p<64;p++) begin
-				$display("%dth phys reg value : %h", p, pipeline_0.phys_reg[p]);
-				
-			end	
-		end
-	endtask
-
-	// task display_icache;
-	// 	begin
-	// 		$display("\n\n\n-----------------------------------------------------Instruction Cache (Start)----------------------------------------------");
-
-	// 		$display("Inputs");
-	// 		$display("proc2Icache_addr: %h Imem2proc_response: %d Imem2proc_data: %h Imem2proc_tag: %d", pipeline_0.inst_memory.proc2Icache_addr, pipeline_0.inst_memory.Imem2proc_response, pipeline_0.inst_memory.Imem2proc_data, pipeline_0.inst_memory.Imem2proc_tag);
-	// 		$display("Outputs");
-	// 		$display("Icache_data_out: %h Icache_valid_out: %b proc2Imem_command: %d proc2Imem_addr: %h", pipeline_0.inst_memory.Icache_data_out, pipeline_0.inst_memory.Icache_valid_out, pipeline_0.inst_memory.proc2Imem_command, pipeline_0.inst_memory.proc2Imem_addr);
-
-	// 		$display("\n-------------------------------------------------------Icache Controller (End)----------------------------------");
-
-	// 		for (int i = 0; i < `NUM_SETS; ++i) begin
-	// 			$display("SET: %d", i);
-	// 			for (int j = 0; j < `NUM_WAYS; ++j) begin
-	// 				$display("\t\t\tidx: %d data: %d tag: %d valid: %b dirty: %b", j, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].data, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].tag, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].valid, pipeline_0.inst_memory.memory.sets[i].cache_lines[j].dirty);
-	// 			end
-	// 		end
-
-	// 		$display("\n\n\n-----------------------------------------------------Instruction Cache (End)----------------------------------------------");
-	// 	end
-	// endtask
-
-	task display_cache;
-		begin
-			/*
-			$display("\nCache memory---------------------------------------------------------------------");
-			$display("inputs");
-			$display("wr1_en: %b wr1_idx: %h wr1_tag: %h wr1_data %h rd1_idx: %h rd1_tag: %h", pipeline_0.Icache_wr_en, pipeline_0.Icache_wr_idx, pipeline_0.Icache_wr_tag, pipeline_0.mem2proc_data, pipeline_0.Icache_rd_idx, pipeline_0.Icache_rd_tag);
-			$display("outputs");
-			$display("rd1_data: %d rd1_valid: %b", pipeline_0.cachemem_data, pipeline_0.cachemem_valid);
-			$display("----------------------------------Cache Memory------------------------------------");
-			*/
-/*			for (int p = 0; p < 32; ++p) begin
-				$display("data[%d] = %h tags[%d] = %h valids[%d] = %b", p, pipeline_0.cachememory.data[p], p, pipeline_0.cachememory.tags[p], p, pipeline_0.cachememory.valids[p]);
-			end
-*//*
-			for (int i = 0 ; i < `NUM_SETS; ++i) begin
-				$display("Set: %d", i);
-				for (int j = 0; j < `NUM_WAYS; ++j) begin
-					$display("idx: %d data: %d tag: %d valid: %b dirty: %b", i, pipeline_0.cachememory.sets[i].cache_lines[j].data, pipeline_0.cachememory.sets[i].cache_lines[j].tag, pipeline_0.cachememory.sets[i].cache_lines[j].valid, pipeline_0.cachememory.sets[i].cache_lines[j].dirty);
-				end
-			end
-			$display("----------------------------------------------------------------------------------");
-*/
-		end
-	endtask
-
-
-	task display_if_stage;
-		begin
-			$display("\nif_stage---------------------------------------------------------------------");
-			$display("inputs");
-			$display("co_ret_valid_inst: %b co_ret_take_branch: %b co_ret_target_pc: %d Imem2proc_data: %h Imem_valid: %b dispatch_en: %b co_ret_branch_valid: %b", pipeline_0.co_ret_valid_inst, pipeline_0.co_ret_take_branch, pipeline_0.co_ret_result, pipeline_0.Icache_data_out, pipeline_0.Icache_valid_out, pipeline_0.dispatch_en, pipeline_0.co_ret_branch_valid);
-			$display("outputs");
-			$display("if_NPC_out: %d, if_IR_out: %h proc2Imem_addr: %h if_valid_inst_out: %d", pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.proc2Icache_addr, pipeline_0.if_valid_inst_out);
-		end
-	endtask
-
-	task display_if_id;
-		begin
-			$display("\nif_id pipeline registers---------------------------------------------------");
-			$display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_id_NPC, pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
-		end
-	endtask
-
-	task display_id_stage;
-		begin
-  	$display("\n id pipeline registers---------------------------------------------------");
-      
-			// $display("if_id_enable: %b if_id_NPC: %d if_id_IR: %h if_id_valid_inst: %b", pipeline_0.dispatch_en, pipeline_0.if_NPC_out, pipeline_0.if_IR_out, pipeline_0.if_valid_inst_out);
-      $display("if_id_IR: %h if_id_valid_inst: %b", pipeline_0.if_id_IR, pipeline_0.if_id_valid_inst);
-      $display("id_opa_select_out: %d id_opb_select_out: %d", pipeline_0.id_inst_out.inst.opa_select, pipeline_0.id_inst_out.inst.opb_select);
-      $display("id_alu_func_out: %d id_fu_name_out: %d", pipeline_0.id_inst_out.inst.alu_func, pipeline_0.id_inst_out.inst.fu_name);
-      $display("id_rd_mem_out: %d id_wr_mem_out: %d id_ldl_mem_out: %d id_stc_mem_out: %d", pipeline_0.id_inst_out.inst.rd_mem, pipeline_0.id_inst_out.inst.wr_mem, pipeline_0.id_inst_out.inst.ldl_mem, pipeline_0.id_inst_out.inst.stc_mem);
-      $display("id_cond_branch_out: %b id_uncond_branch_out: %b id_halt_out: %b id_cpuid_out: %d id_illegal_out: %b", pipeline_0.id_inst_out.inst.cond_branch, pipeline_0.id_inst_out.inst.uncond_branch, pipeline_0.id_inst_out.inst.halt, pipeline_0.id_inst_out.inst.cpuid, pipeline_0.id_inst_out.inst.illegal);
-      $display("id_valid_inst_out: %b", pipeline_0.id_inst_out.inst.valid_inst);
-      $display("ra_idx: %d rb_idx: %d rdest_idx: %d", pipeline_0.id_ra_idx, pipeline_0.id_rb_idx, pipeline_0.id_rdest_idx);
-      
-   		end
-	endtask
-
-	task display_id_di;
-		begin
-			$display("\n id_di pipeline registers---------------------------------------------");
-			$display("id_di_enable: %b, dispatch_no_hazard: %b, if_valid_inst_out : %b", pipeline_0.id_di_enable, pipeline_0.dispatch_no_hazard, pipeline_0.if_valid_inst_out);
-			$display("id_di_rega: %d, id_di_regb: %d, id_di_inst_in: %h", pipeline_0.id_di_rega, pipeline_0.id_di_regb, pipeline_0.id_di_inst_in); 			
-			$display("id_di_NPC: %d, id_di_IR: %h, id_di_valid_inst: %b",pipeline_0.id_di_NPC, pipeline_0.id_di_IR, pipeline_0.id_di_valid_inst );
-
-		end
-	endtask
-
-
-	task display_di_issue;
-		begin
-			$display("\n di_issue stage---------------------------------------------------------");
-			$display("issue_stall: %b dispatch_en: %b branch_not_taken: %b RS_enable: %b", pipeline_0.issue_stall, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.RS_enable);
-			$display("\n RESERVATION STATION INPUT WIRES---------------------------------------");
-			//$display("enable: %b CAM_en: %b CAM_in: %d dispatch_valid: %b branch_not_taken: %b issue_stall: %b", pipeline_0.RS_enable, pipeline_0.CDB_enable, pipeline_0.CDB_in, pipeline_0.dispatch_en, pipeline_0.branch_not_taken, pipeline_0.issue_stall);
-			$display("\n INST GOING INTO RS");
-			display_inst(pipeline_0.id_di_inst_in);
-		end
-	endtask
-
-	task display_issue_ex;
-		begin
-			$display("\n issue execute pipeline registers-----------------------------------------");
-			$display("issue_reg:");
-			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				$display("\t\tissue_reg[%d] T = %d T1 = %d T2 = %d busy: %b inst_opcode: %h npc: %d", i, pipeline_0.issue_reg[i].T, pipeline_0.issue_reg[i].T1, pipeline_0.issue_reg[i].T2, pipeline_0.issue_reg[i].busy, pipeline_0.issue_reg[i].inst_opcode, pipeline_0.issue_reg[i].npc);
-			end
-			$display("issue_reg WIRES (those that are assigned");
-			for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-				//$display("\t\ti = %d issue_reg_T1 = %d issue_reg_T2 = %d issue_reg_inst_opcode = %h", i, pipeline_0.issue_reg_T1[i], pipeline_0.issue_reg_T2[i], pipeline_0.issue_reg_inst_opcode[i]);
-			end
-		end
-	endtask
-
-	task display_is_ex_registers;
-		begin
-			$display("\n issue execute pipeline registers-----------------------------------------");
-			for (int i = 0; i < 5; ++i) begin
-				$display("is_ex_enable[%d]: %b is_ex_T1_value[%d]: %d is_ex_T2_value[%d]: %d", i, pipeline_0.is_ex_enable[i], i, pipeline_0.is_ex_T1_value[i], i, pipeline_0.is_ex_T2_value[i]);
-			end
-		end
-	endtask
-
-	task display_ex;
-		begin
-			$display("\n execute state -------------------------------------------------------");
-			for(int i = 0; i<5 ; ++i) begin
-				$display(" %dth ALU output", i);
-				$display("ex_alu_result_out : %d", pipeline_0.ex_alu_result_out[i]);
-				$display("ex_take_branch_out :%b", pipeline_0.ex_take_branch_out[i]);
-			end
-		end
-	endtask
-
-	task display_ex_co_registers;
-		begin
-			$display("\n execute/complete state registers--------------------------------------");
-			for (int i=0; i<5; ++i) begin
-				$display("%dth registers", i);
-				$display("ex_co_NPC: %d, ex_co_IR: %h, ex_co_dest_reg_idx: %d", pipeline_0.ex_co_NPC[i], pipeline_0.ex_co_IR[i], pipeline_0.ex_co_dest_reg_idx[i]);
-				$display("ex_co_wr_mem: %d, ex_co_halt: %b, ex_co_illegal: %b, ex_co_valid_inst: %b", pipeline_0.ex_co_wr_mem[i], pipeline_0.ex_co_halt[i], pipeline_0.ex_co_illegal[i], pipeline_0.ex_co_valid_inst[i]);
-				$display("ex_co_alu_result: %d", pipeline_0.ex_co_alu_result[i]); 
-
-			end
-			
-			$display("Done and branch signals, ex_co_done: %d, ex_co_taken_branch: %b", pipeline_0.ex_co_done, pipeline_0.ex_co_take_branch);	
-		end
-	endtask
-
-	task display_complete;
-		begin
-			$display("\n complete state--------------------------------------------------");
-			$display("psel_enable: %b, co_branch_prediction: %b, CDB_enable: %b", pipeline_0.psel_enable, pipeline_0.co_branch_prediction, pipeline_0.CDB_enable);
-			$display("CDB output: CDB_tag_out: %d, CDB_en_out: %b, CDB_busy: %b", pipeline_0.CDB_tag_out, pipeline_0.CDB_en_out, pipeline_0.busy);
-
-		end
-	endtask
-
-	task display_co_re_registers;
-		begin
-			$display("\n Complete/Retire pipeline registers----------------------------------------");
-			$display("co_ret_NPC: %h, co_ret_IR: %h, co_ret_halt: %b, co_ret_valid_inst: %b", pipeline_0.co_ret_NPC, pipeline_0.co_ret_IR, pipeline_0.co_ret_halt, pipeline_0.co_ret_valid_inst);
-		end
-	endtask
-
-	task display_IQ;
-		begin
-			$display("\n--------Print Instruction Queue--------");
-			$display("Inst_queue_full? : %b, inst_queue_entry : %d", pipeline_0.inst_queue_full, pipeline_0.inst_queue_entry);
-			$display("Fetched instruction valid : %b, npc : %h, IR : %h", pipeline_0.if_inst_in.valid_inst, pipeline_0.if_inst_in.npc, pipeline_0.if_inst_in.ir);
-			$display("Decoded instruction valid : %b, npc : %h, IR : %h", pipeline_0.if_id_inst_out.valid_inst, pipeline_0.if_id_inst_out.npc, pipeline_0.if_id_inst_out.ir);
-			$display("--------Queue------");
-			for (int i = 0; i < `IQ_SIZE; ++i) begin
-				$display("Index : %d, valid : %b, npc : %h, IR : %h", i, pipeline_0.inst_queue_out[i].valid_inst, pipeline_0.inst_queue_out[i].npc, pipeline_0.inst_queue_out[i].ir);
-			end	
-		end
-	endtask
-
 	task display_stages;
 		begin
 			 if (clock_count == 10000) begin
@@ -793,12 +481,12 @@ module testbench;
             
            // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
           
-            print_stage("|", `NOOP_INST, pipeline_0.retire_reg_NPC[31:0], {31'b0,pipeline_0.retire_inst_busy});
+            print_stage("|", `NOOP_INST, retire_reg_NPC[31:0], {31'b0,retire_inst_busy});
 	end else begin
             //print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
            // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
 
-            print_stage("|", `NOOP_INST, pipeline_0.retire_reg_NPC[31:0], {0});
+            print_stage("|", `NOOP_INST, retire_reg_NPC[31:0], {0});
           end
           print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
                     {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});

@@ -17,17 +17,15 @@ module phys_regfile(
   input [`NUM_FU_TOTAL-1:0]       wr_en, 
   input wr_clk,
 
-  `ifdef DEBUG
     output logic [`NUM_PHYS_REG-1:0][63:0] phys_registers_out,
-  `endif
   output logic [`NUM_FU_TOTAL-1:0][1:0][63:0] rd_out  // read data
 );
   
   logic[`NUM_PHYS_REG-1:0][63:0] phys_registers;   // 64, 64-bit Physical Registers
 
-  `ifdef DEBUG
+  //`ifdef DEBUG
   	assign phys_registers_out = phys_registers;
-  `endif
+  //`endif
 
   genvar ig, jg;
   for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin

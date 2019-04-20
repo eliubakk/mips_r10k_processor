@@ -1,5 +1,5 @@
 #/***********************************************************/
-#/*   FILE        : psel_generic.tcl                        */
+#/*   FILE        : icache.tcl                              */
 #/*   Description : Default Synopsys Design Compiler Script */
 #/*   Usage       : dc_shell -tcl_mode -f default.tcl       */
 #/*   You'll need to minimally set design_name & read files */
@@ -11,21 +11,13 @@
 #/***********************************************************/
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
-
-#############################################
-# the follwoing two lines for RS_test
-analyze -f sverilog [list "../../verilog/misc/psel_generic.v" "../../verilog/misc/psel_single.v"]
-elaborate psel_generic
-set design_name psel_generic
-##############################################
-#the following for psel_generic_test
-#analyze -f sverilog [list "../verilog/psel_generic.v"]
-#elaborate psel_generic
-#set design_name psel_generic
-##############################################
+set misc_files [glob "../../verilog/misc/*"]
+analyze -f sverilog [concat "../../verilog/dcache.v" "../../verilog/vic_cache.v"  "../../verilog/cachemem.v" $misc_files]
+elaborate dcache
+set design_name dcache
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 1.2
+set CLK_PERIOD 6
 
 
 

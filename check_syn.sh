@@ -15,12 +15,8 @@ mkdir $OUTPUT_DIR
 rm -rf $DIFF_DIR
 mkdir $DIFF_DIR
 
-kill_simv() {
-	for pid in `lsof +D . | grep "simv" | awk {'print $2'}` ; 
-	do 
-		kill $pid; 
-	done
-}
+# synthesize the pipeline
+make clean syn_simv
 
 for file in test_progs/*.s;
 do
@@ -34,12 +30,9 @@ do
 	echo "Running $file"
 
 	# run test case
-	make clean simv
-	timeout $TIMEOUT make all
+	# timeout $TIMEOUT make clean all
+	./syn_simv 
 	echo "Saving $file output"
-
-	# kill simv if its still running
-	kill_simv
 	
 	# save the output
 	cp writeback.out $OUTPUT_DIR/$file.writeback.out

@@ -18,9 +18,9 @@ set design_name id_stage
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 6.5
+set CLK_PERIOD 2.0
 #SUPERSCALAR
-set CLK_PERIOD 10
+#set CLK_PERIOD 10
 
 
 
@@ -122,7 +122,7 @@ if {  $dc_shell_status != [list] } {
   uniquify
   ungroup -all -flatten
   redirect $chk_file { check_design }
-  compile -map_effort high
+  compile -map_effort medium
   write -hier -format verilog -output $netlist_file $design_name
   write -hier -format ddc -output $ddc_file $design_name
   redirect $rep_file { report_design -nosplit }
