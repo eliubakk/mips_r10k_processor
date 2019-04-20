@@ -10,12 +10,13 @@
 //                                                                     //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
+`include "../../sys_defs.vh"
 
-`ifndef PIPELINE
+
   `define NUM_SETS (32/`NUM_DCACHE_WAYS)
   `define NUM_SET_BITS $clog2(`NUM_SETS)
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
-
+`ifndef PIPELINE
   typedef struct packed {
     logic [63:0] data;
     logic [(`NUM_TAG_BITS-1):0] tag;
@@ -33,7 +34,6 @@
   } VIC_CACHE_T;
 `endif
 
-`include "../../sys_defs.vh"
 module mem_stage(
     input         clock,              // system clock
     input         reset,              // system reset
