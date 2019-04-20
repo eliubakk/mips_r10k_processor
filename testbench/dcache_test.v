@@ -2,6 +2,9 @@
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
+`define NUM_SET_BITS $clog2(32/NUM_WAYS)
+`define NUM_TAG_BITS (13-`NUM_SET_BITS)
+
 
 module testbench;
     //inputs
