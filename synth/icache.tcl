@@ -13,7 +13,7 @@
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
 
-read_file -f ddc [list "../../synth/libraries/cachemem.ddc"]
+read_file -f ddc [list "../../synth/cachemem/cachemem.ddc"]
 set_dont_touch cachemem
 
 analyze -f sverilog [concat "../../verilog/icache.v" $misc_files]
@@ -21,7 +21,7 @@ elaborate icache
 set design_name icache
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 6
+set CLK_PERIOD 6.5
 
 
 
