@@ -168,7 +168,7 @@ dve:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
 
 syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
-	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
+	make -j $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
 	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
 	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
 	mv ** ../../.
@@ -177,7 +177,7 @@ syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DI
 #	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
 
 syn:	syn_simv
-	./syn_simv | tee syn_program.out
+	./syn_simv | tee syn_program.out	
 
 clean:
 	rm -rvf simv *.daidir csrc vcs.key program.out \
