@@ -53,7 +53,7 @@
 //`define NUM_WR_FIFO 4
 `define NUM_FIFO 8
 `define NUM_DATA_PREFETCH 2
-`define FIFO_SIZE 8
+`define FIFO_SIZE 4
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
