@@ -112,7 +112,7 @@ module mem_stage(
     .Rmem2proc_response(Rmem2proc_response),
 
     // outputs
-    .proc2Rmem_command(proc2Rmem_addr), 
+    .proc2Rmem_command(proc2Rmem_command), 
     .proc2Rmem_addr(proc2Rmem_addr), 
     .proc2Rmem_data(proc2Rmem_data),
     .full(ret_buf_full));
