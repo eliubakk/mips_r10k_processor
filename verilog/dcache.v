@@ -8,8 +8,8 @@ module dcache(clock, reset,
               Dcache_rd_data_out, Dcache_rd_valid_out,
               Dcache_rd_miss_addr_out, Dcache_rd_miss_data_out, Dcache_rd_miss_valid_out,
               proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data,
-              evicted, evicted_valid);
-  parameter NUM_WAYS = 4;
+              evicted, evicted_valid, sets_out);
+  parameter NUM_WAYS = `NUM_DCACHE_WAYS;
   parameter RD_PORTS = 1;
   parameter WR_PORTS = 1;
 
@@ -93,6 +93,8 @@ module dcache(clock, reset,
   output logic [63:0] proc2Dmem_addr;
   output logic [63:0] proc2Dmem_data;
 
+	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out;
+
   //to retirement buffer
   output VIC_CACHE_T [(WR_PORTS+RD_PORTS):0] evicted;
   output logic [(WR_PORTS+RD_PORTS):0] evicted_valid;
@@ -159,6 +161,9 @@ module dcache(clock, reset,
     .wr_dirty(cache_wr_dirty),
 
     //outputs
+
+	.sets_out(sets_out),
+
     .rd_data(cache_rd_data),
     .rd_valid(cache_rd_valid),
     .rd_miss_idx(cache_rd_miss_idx),

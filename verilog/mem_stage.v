@@ -11,7 +11,9 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
-  `define NUM_SET_BITS $clog2(32/4)
+`ifndef PIPELINE
+  `define NUM_SETS (32/`NUM_DCACHE_WAYS)
+  `define NUM_SET_BITS $clog2(`NUM_SETS)
   `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 
   typedef struct packed {
@@ -21,11 +23,15 @@
     logic dirty;
   } CACHE_LINE_T;
 
+  typedef struct packed {
+    CACHE_LINE_T [(`NUM_DCACHE_WAYS-1):0] cache_lines;
+  } CACHE_SET_T;
 
   typedef struct packed {
     CACHE_LINE_T line;
     logic [(`NUM_SET_BITS-1):0] idx;
   } VIC_CACHE_T;
+`endif
 
 `include "../../sys_defs.vh"
 module mem_stage(
@@ -53,7 +59,8 @@ module mem_stage(
     output [63:0] proc2Dmem_data,      // Data sent to data-memory
     output [1:0]  proc2Rmem_command,
     output [63:0] proc2Rmem_addr,      // Address sent to data-memory
-    output [63:0] proc2Rmem_data
+    output [63:0] proc2Rmem_data,
+	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out
   );
 
   logic [63:0] Dcache_data_out;
@@ -90,6 +97,8 @@ module mem_stage(
     .Dmem2proc_data(Dmem2proc_data),
     .Dmem2proc_tag(Dmem2proc_tag),
 
+	.sets_out(sets_out),
+
     .Dcache_rd_data_out(Dcache_data_out),
     .Dcache_rd_valid_out(Dcache_valid_out),
     .Dcache_rd_miss_addr_out(mem_rd_miss_addr_out),
@@ -103,7 +112,7 @@ module mem_stage(
   );
 
   retire_buffer #(
-  .NUM_WAYS(4),
+  .NUM_WAYS(`NUM_DCACHE_WAYS),
   .WR_PORTS(3))
   rb0(
     // inputs

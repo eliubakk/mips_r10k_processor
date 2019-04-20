@@ -13,7 +13,7 @@ module cachemem(clock, reset,
                 rd_miss_idx, rd_miss_tag, rd_miss_valid,
                 wr_miss_idx, wr_miss_tag, wr_miss_valid,
                 vic_idx, victim, victim_valid);
-  parameter NUM_WAYS = 4;
+  parameter NUM_WAYS = `NUM_DCACHE_WAYS;
   parameter RD_PORTS = 2;
   parameter WR_PORTS = 2;
 
