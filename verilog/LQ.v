@@ -59,8 +59,8 @@ module LQ(
             end
         end
         if (pop_en) begin
-            if(load_queue_next[head_next].data_valid) begin
-                load_queue_next[head_next].valid_inst = 1'b0;
+            if(load_queue[head].data_valid) begin
+                load_queue_next[head].valid_inst = 1'b0;
                 ++head_next;
             end
         end

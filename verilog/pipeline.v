@@ -210,6 +210,7 @@ module pipeline (
   // // Outputs from MEM-Stage
    logic [63:0] mem_result_out;
    logic        mem_stall_out;
+   logic        mem_rd_stall;
 
 // Outputs from MEM/COM Pipeline Register
   logic  mem_co_halt;
@@ -325,13 +326,36 @@ logic [63:0] retire_reg_wr_data;
   PHYS_REG [`FL_SIZE - 1:0]   free_list_check;
   logic [$clog2(`FL_SIZE):0]  tail_check;
   logic fr_wr_en;
- // Memory interface/arbiter wires
-  logic [63:0] proc2Dmem_addr, proc2Imem_addr;
-  logic [1:0]  proc2Dmem_command, proc2Imem_command;
-  logic [3:0]  Dmem2proc_response, Imem2proc_response;
+  
+  // // Outputs from MEM/WB Pipeline Register
+  // logic         mem_wb_halt;
+  // logic         mem_wb_illegal;
+  // logic   [4:0] mem_wb_dest_reg_idx;
+  // logic  [63:0] mem_wb_result;
+  // logic         mem_wb_take_branch;
+  logic stall_struc;
+
+  // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
+  logic	       retire_inst_busy;
+  logic [63:0] retire_reg_wr_data;
+  logic  [5:0] retire_reg_wr_idx;
+  logic        retire_reg_wr_en;
+  logic [63:0] retire_reg_NPC;
+  logic  [5:0] retire_reg_phys;;
+	logic head_halt;
+  logic rob_retire_out_halt;
+  logic rob_retire_out_take_branch;
+  logic rob_retire_out_T_new; 
+  logic rob_retire_out_T_old; 	
+  logic [31:0] rob_retire_opcode;
+  // Memory interface/arbiter wires
+  logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
+  logic [63:0] proc2Rmem_data;
+  logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
+  logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
   logic [3:0]  Dmem2proc_tag, Imem2proc_tag;
-
+  
   // Icache wires
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
@@ -359,6 +383,9 @@ logic tag_in_lq;
     .proc2Imem_command(proc2Imem_command),
     .proc2Imem_addr(proc2Imem_addr), 
     .proc2Imem_data(64'b0),
+    .proc2Rmem_command (proc2Rmem_command),
+    .proc2Rmem_addr    (proc2Rmem_addr),
+    .proc2Rmem_data    (proc2Rmem_data),
     .mem2proc_response(mem2proc_response), 
     .mem2proc_data(mem2proc_data),
     .mem2proc_tag(mem2proc_tag),
@@ -370,6 +397,7 @@ logic tag_in_lq;
     .Imem2proc_response(Imem2proc_response),
     .Imem2proc_data(Imem2proc_data), 
     .Imem2proc_tag(Imem2proc_tag),
+    .Rmem2proc_response(Rmem2proc_response),
     .proc2mem_command(proc2mem_command), 
     .proc2mem_addr(proc2mem_addr), 
     .proc2mem_data(proc2mem_data)
@@ -494,7 +522,7 @@ logic tag_in_lq;
   logic lq_read_valid;
   logic lq_full;
 
-  assign lq_pop_en = mem_stall_out;
+  //assign lq_pop_en = mem_stall_out;
 
   LQ load_queue(
     .clock(clock),
@@ -1299,7 +1327,7 @@ end
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
   assign lq_load_in.data = 64'b0;
   assign lq_load_in.data_valid = 1'b0;
-  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_stall_out;
+  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_rd_stall;
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
@@ -1314,6 +1342,7 @@ end
    
 logic mem_co_stall;
 assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
+assign lq_pop_en = ~mem_co_stall;
   
   mem_stage mem_stage_0 (// Inputs
      .clock(clock),
@@ -1326,23 +1355,28 @@ assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
      .Dmem2proc_data(Dmem2proc_data),
      .Dmem2proc_tag(Dmem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
+     .Rmem2proc_response   (Rmem2proc_response),
      .sq_data_not_found(sq_data_not_found),   // addresses in store are not ready
      .sq_data_valid(sq_data_valid),           // adddress not found
      
      // Outputs
      .mem_result_out(mem_result_out),
+     .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),
      .mem_rd_miss_addr_out (lq_miss_addr),
      .mem_rd_miss_data_out (lq_miss_data),
      .mem_rd_miss_valid_out(lq_miss_valid),
      .proc2Dmem_command(proc2Dmem_command),
      .proc2Dmem_addr(proc2Dmem_addr),
-     .proc2Dmem_data(proc2Dmem_data)
+     .proc2Dmem_data(proc2Dmem_data),
+     .proc2Rmem_command    (proc2Rmem_command),
+     .proc2Rmem_addr       (proc2Rmem_addr),
+     .proc2Rmem_data       (proc2Rmem_data)
   );
 
   wire [5:0] mem_dest_reg_idx_out =
-             mem_stall_out ? `DUMMY_REG : ex_co_dest_reg_idx[2];
-  wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_stall_out;
+             mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[2];
+  wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_rd_stall;
 
 assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & ex_co_wr_mem[2])) & (ex_co_valid_inst[2]) ;
 
@@ -1355,7 +1389,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   //////////////////////////////////////////////////
 
   logic mem_co_comb;
-  assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_stall_out);
+  assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
   assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.data_valid; 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
@@ -1364,7 +1398,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   assign mem_co_illegal_comb = mem_co_comb ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
   assign mem_co_dest_reg_idx_comb= mem_co_comb ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
   assign mem_co_alu_result_comb = (ex_co_valid_inst[FU_LD_IDX] & sq_data_valid) ? sq_data_out :
-                                  (ex_co_valid_inst[FU_LD_IDX] & ~mem_stall_out) ? mem_result_out : lq_load_out.data; 
+                                  (ex_co_valid_inst[FU_LD_IDX] & ~mem_rd_stall) ? mem_result_out : lq_load_out.data; 
 
 
   

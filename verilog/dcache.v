@@ -7,7 +7,8 @@ module dcache(clock, reset,
               Dmem2proc_response, Dmem2proc_data, Dmem2proc_tag,
               Dcache_rd_data_out, Dcache_rd_valid_out,
               Dcache_rd_miss_addr_out, Dcache_rd_miss_data_out, Dcache_rd_miss_valid_out,
-              proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data);
+              proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data,
+              evicted, evicted_valid);
   parameter NUM_WAYS = 4;
   parameter RD_PORTS = 1;
   parameter WR_PORTS = 1;
@@ -21,6 +22,14 @@ module dcache(clock, reset,
     logic valid;
     logic dirty;
   } CACHE_LINE_T;
+
+  const CACHE_LINE_T EMPTY_CACHE_LINE = 
+  {
+    64'b0,
+    {`NUM_TAG_BITS{1'b0}},
+    1'b0,
+    1'b0
+  };
 
   typedef struct packed {
     CACHE_LINE_T [(NUM_WAYS-1):0] cache_lines;
@@ -39,6 +48,17 @@ module dcache(clock, reset,
     {`NUM_SET_BITS{1'b0}},
     64'b0,
     1'b0
+  };
+
+  typedef struct packed {
+    CACHE_LINE_T line;
+    logic [(`NUM_SET_BITS-1):0] idx;
+  } VIC_CACHE_T;
+
+  const VIC_CACHE_T EMPTY_VIC_CACHE = 
+  {
+    EMPTY_CACHE_LINE,
+    {`NUM_SET_BITS{1'b0}}
   };
 
   input clock, reset;
@@ -73,6 +93,10 @@ module dcache(clock, reset,
   output logic [63:0] proc2Dmem_addr;
   output logic [63:0] proc2Dmem_data;
 
+  //to retirement buffer
+  output VIC_CACHE_T [(WR_PORTS+RD_PORTS):0] evicted;
+  output logic [(WR_PORTS+RD_PORTS):0] evicted_valid;
+
   ///////////////////////////////////////////////////
   //***********************************************//
   ///////////////////////////////////////////////////
@@ -103,9 +127,21 @@ module dcache(clock, reset,
   logic [(WR_PORTS+RD_PORTS):0][(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
   logic [(WR_PORTS+RD_PORTS):0] cache_wr_miss_valid;
 
+  //victim cache inputs
+  logic [(WR_PORTS+RD_PORTS):0][(`NUM_SET_BITS-1):0] victim_idx;
+  CACHE_LINE_T [(WR_PORTS+RD_PORTS):0] victim;
+  logic [(WR_PORTS+RD_PORTS):0] victim_valid;
+  logic [(WR_PORTS+RD_PORTS-1):0] vic_rd_en;
+  logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_SET_BITS-1):0] vic_rd_idx;
+  logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] vic_rd_tag;
+
+  //victim cache outputs
+  VIC_CACHE_T [(WR_PORTS+RD_PORTS-1):0] vic_rd_out;
+  logic [(WR_PORTS+RD_PORTS-1):0] vic_rd_valid;
+
   cachemem #(
     .NUM_WAYS(NUM_WAYS),
-    .RD_PORTS(RD_PORTS+1),
+    .RD_PORTS(RD_PORTS),
     .WR_PORTS(WR_PORTS+RD_PORTS+1)) 
   memory(
     .clock(clock),
@@ -133,9 +169,32 @@ module dcache(clock, reset,
     .wr_miss_tag(cache_wr_miss_tag),
     .wr_miss_valid(cache_wr_miss_valid),
 
-    .vic_idx(),
-    .victim(),
-    .victim_valid()
+    .vic_idx(victim_idx),
+    .victim(victim),
+    .victim_valid(victim_valid)
+  );
+
+  vic_cache #(
+    .NUM_WAYS(NUM_WAYS),
+    .RD_PORTS(WR_PORTS+RD_PORTS),
+    .WR_PORTS(WR_PORTS+RD_PORTS+1))
+  victim_memory(
+    .clock(clock),
+    .reset(reset),
+
+    //inputsc
+    .vic_idx      (victim_idx),
+    .vic          (victim),
+    .vic_valid    (victim_valid),
+    .rd_en        (vic_rd_en),
+    .rd_idx       (vic_rd_idx),
+    .rd_tag       (vic_rd_tag),
+
+    //outputs
+    .evicted_vic  (evicted),
+    .evicted_valid(evicted_valid),
+    .rd_vic       (vic_rd_out),
+    .rd_valid     (vic_rd_valid)
   );
   
   //Internal variables
@@ -200,7 +259,7 @@ module dcache(clock, reset,
   end
 
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
-    assign fifo_cam_tags[ig] = {cache_rd_miss_tag[ig], cache_rd_miss_idx[ig]};
+    assign fifo_cam_tags[ig] = {cache_rd_tag[ig], cache_rd_idx[ig]};
     assign mem_queue_cam_tags[ig] = proc2Dcache_rd_addr[ig];
   end
 
@@ -209,7 +268,7 @@ module dcache(clock, reset,
       .NUM_TAGS(RD_PORTS),
       .TAG_SIZE((`NUM_SET_BITS+`NUM_TAG_BITS))) 
    fifo_cam(
-    .enable(cache_rd_miss_valid),
+    .enable(cache_rd_en),
     .tags(fifo_cam_tags),
     .table_in(fifo_addr_table_in),
     .hits(fifo_cam_hits)
@@ -271,22 +330,36 @@ module dcache(clock, reset,
     assign {cache_wr_tag[ig], cache_wr_idx[ig]} = proc2Dcache_wr_addr[ig][31:3];
     assign cache_wr_data[ig] = proc2Dcache_wr_data[ig];
     assign cache_wr_dirty[ig] = 1'b1;
+    assign vic_rd_en[WR_PORTS+ig]  = cache_wr_en[ig];
+    assign vic_rd_idx[WR_PORTS+ig] = cache_wr_idx[ig];
+    assign vic_rd_tag[WR_PORTS+ig] = cache_wr_tag[ig];
   end
 
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
-    //wr from fifo if rd miss found
-    assign cache_wr_en[WR_PORTS+ig] = fifo_hit_idx_valid[ig];
-    assign cache_wr_idx[WR_PORTS+ig] = fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].idx;
-    assign cache_wr_tag[WR_PORTS+ig] = fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].tag;
-    assign cache_wr_data[WR_PORTS+ig] = fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].data;
-    assign cache_wr_dirty[WR_PORTS+ig] = 1'b0;
+    //wr from victim cache or fifo if rd miss found
+    assign cache_wr_en[WR_PORTS+ig] = vic_rd_valid[ig] | fifo_hit_idx_valid[ig];
+    assign cache_wr_idx[WR_PORTS+ig] = vic_rd_valid[ig]? vic_rd_out[ig].idx :
+                                                         fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].idx;
+    assign cache_wr_tag[WR_PORTS+ig] = vic_rd_valid[ig]? vic_rd_out[ig].line.tag :
+                                                         fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].tag;
+    assign cache_wr_data[WR_PORTS+ig] = vic_rd_valid[ig]? vic_rd_out[ig].line.data :
+                                                          fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].data;
+    assign cache_wr_dirty[WR_PORTS+ig] = vic_rd_valid[ig]? vic_rd_out[ig].line.dirty :
+                                                           1'b0;
 
     //requested rd
     assign cache_rd_en[ig] = rd_en[ig];
     assign {cache_rd_tag[ig], cache_rd_idx[ig]} = proc2Dcache_rd_addr[ig][31:3];
     assign Dcache_rd_data_out[ig] = cache_rd_data[ig];
     assign Dcache_rd_valid_out[ig] = cache_rd_valid[ig];
+    assign vic_rd_en[ig]  = cache_rd_en[ig];
+    assign vic_rd_idx[ig] = cache_rd_idx[ig];
+    assign vic_rd_tag[ig] = cache_rd_tag[ig];
   end
+
+  //assign vic_rd_en  = {cache_rd_en, cache_wr_en};
+  //assign vic_rd_idx = {cache_rd_idx, cache_wr_idx};
+  //assign vic_rd_tag = {cache_rd_tag, cache_wr_tag};
 
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
                                       !fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
@@ -346,7 +419,7 @@ module dcache(clock, reset,
 
     //allocate new fifo
     for(int i = 0; i < RD_PORTS; i += 1) begin
-      if(!fifo_hit_num_valid[i] & ~(|mem_queue_hits[i]) & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+      if(~vic_rd_valid[i] & !fifo_hit_num_valid[i] & ~(|mem_queue_hits[i]) & cache_rd_miss_valid[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
         mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[i][63:3], 3'b0};
         mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
         mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
@@ -411,7 +484,7 @@ module dcache(clock, reset,
     end
 
     //send prefetch request to mem_req_queue
-    if(!fifo_sel_num_valid & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
+    if(fifo_sel_num_valid & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
       next_rd_addr = {32'b0, 
                       fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].tag, 
                       fifo_next[fifo_sel_num][fifo_tail_next[fifo_sel_num]].idx, 

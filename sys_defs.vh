@@ -42,6 +42,9 @@
 // cache parameters/defines
 `define INST_BUFFER_LEN 6
 `define NUM_INST_PREFETCH 4
+`define VIC_SIZE 4
+`define RETIRE_SIZE 8
+`define NUM_VIC_BITS $clog2(`VIC_SIZE)
 //`define NUM_WAYS 4
 //`define NUM_SETS (32 / `NUM_WAYS)
 //`define NUM_SET_BITS $clog2(`NUM_SETS)
