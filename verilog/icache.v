@@ -131,14 +131,14 @@ module icache(clock, reset,
   //Instantiate CAM to check for requested address in queue
   genvar ig, jg;
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
-    assign cam_tags_in[ig] = PC_in[ig];
+    assign cam_tags_in[ig] = {PC_in[ig][63:3], 3'b0};
   end
   for(ig = RD_PORTS; ig < (RD_PORTS+`NUM_INST_PREFETCH); ig += 1) begin
     assign cam_tags_in[ig] = PC_in_Plus[ig-RD_PORTS];
   end
 
   for(ig = 0; ig < `INST_BUFFER_LEN; ig += 1) begin
-    assign cam_table_in[ig][0] = PC_queue[ig].address;
+    assign cam_table_in[ig][0] = {PC_queue[ig].address[63:3], 3'b0};
     for(jg = 0; jg < RD_PORTS; jg += 1) begin
       assign PC_in_hits[jg][ig] = PC_cam_hits[ig][0][jg] & (ig < PC_queue_tail);
     end
@@ -182,7 +182,7 @@ module icache(clock, reset,
 
   assign unanswered_miss = send_request? (Imem2proc_response == 0) :
                            (PC_queue_tail == 0) & changed_addr? cache_rd_en[0] & ~cache_rd_valid[0] : 
-                                                              PC_queue_tail > send_req_ptr;//cache_rd_en[RD_PORTS+1] & ~cache_rd_valid[RD_PORTS+1];
+                                                                cache_rd_en[RD_PORTS+1] & ~cache_rd_valid[RD_PORTS+1];
 
   assign proc2Imem_addr = send_request? PC_queue[send_req_ptr].address :
                                         64'b0;
@@ -192,7 +192,7 @@ module icache(clock, reset,
   assign mem_done = (PC_queue[mem_waiting_ptr].mem_tag == Imem2proc_tag) &&
                               (PC_queue[mem_waiting_ptr].mem_tag != 0);
 
-  assign {cache_wr_tag, cache_wr_idx} = PC_queue[mem_waiting_ptr-1].address[31:3];
+  //assign {cache_wr_tag, cache_wr_idx} = PC_queue[mem_waiting_ptr-1].address[31:3];
 
   assign update_mem_tag = send_request? (Imem2proc_response != 0) : 1'b0; 
 
@@ -224,10 +224,11 @@ module icache(clock, reset,
 
     for(int i = 0; i < RD_PORTS; i += 1) begin
       if(~(|PC_in_hits[i]) & ~cache_rd_valid[i] & ~send_request) begin
-	PC_queue_tail_next = 0;
-	send_req_ptr_next = 0;
-	mem_waiting_ptr_next = 0;
+      	PC_queue_tail_next = 0;
+      	send_req_ptr_next = 0;
+      	mem_waiting_ptr_next = 0;
         PC_queue_next[PC_queue_tail_next].address = {PC_in[i][63:3], 3'b0};
+        PC_queue_next[PC_queue_tail_next].mem_tag = 4'b0;
         PC_queue_next[PC_queue_tail_next].valid = 1'b1;
         PC_queue_tail_next += 1;
       end
@@ -235,6 +236,7 @@ module icache(clock, reset,
     for(int i = 0; i < `NUM_INST_PREFETCH; i += 1) begin
       if(~(|PC_in_Plus_hits[i]) & changed_addr & (PC_queue_tail_next < `INST_BUFFER_LEN)) begin
         PC_queue_next[PC_queue_tail_next].address = PC_in_Plus[i];
+        PC_queue_next[PC_queue_tail_next].mem_tag = 4'b0;
         PC_queue_next[PC_queue_tail_next].valid = 1'b1;
         PC_queue_tail_next += 1;
       end
@@ -254,6 +256,7 @@ module icache(clock, reset,
       mem_waiting_ptr <= `SD 0;
       cache_wr_en     <= `SD 1'b0;
       cache_wr_data   <= `SD 64'b0;
+      {cache_wr_tag, cache_wr_idx} <= `SD 29'b0;
     end else begin
       last_PC_in      <= `SD PC_in;
       send_request    <= `SD unanswered_miss;
@@ -264,9 +267,11 @@ module icache(clock, reset,
       if(mem_done) begin
         cache_wr_en   <= `SD 1'b1;
         cache_wr_data <= `SD Imem2proc_data;
+        {cache_wr_tag, cache_wr_idx} <= `SD PC_queue[0].address[31:3];
       end else begin
         cache_wr_en   <= `SD 1'b0;
         cache_wr_data <= `SD 64'b0;
+        {cache_wr_tag, cache_wr_idx} <= `SD 29'b0;
       end
     end
   end
