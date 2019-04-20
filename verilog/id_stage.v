@@ -253,7 +253,7 @@ module id_stage(
 
         output ALU_OPA_SELECT id_opa_select_out,    // ALU opa mux select (ALU_OPA_xxx *)
         output ALU_OPB_SELECT id_opb_select_out,    // ALU opb mux select (ALU_OPB_xxx *)
-
+        output DEST_REG_SEL id_dest_reg_select_out,
         //output logic  [4:0] id_dest_reg_idx_out,  // destination (writeback) register index
         // (ZERO_REG if no writeback)
         output ALU_FUNC     id_alu_func_out,      // ALU function select (ALU_xxx *)
@@ -272,7 +272,7 @@ module id_stage(
         output GEN_REG ra_idx, rb_idx, rdest_idx       //for giving input for the maptable                                // counted for CPI calculations?
             );
    
-  DEST_REG_SEL dest_reg_select;
+  //DEST_REG_SEL dest_reg_select;
 
   // instruction fields read from IF/ID pipeline register
   // assign id_ra_idx = rda_idx;   // inst operand A register index
@@ -306,12 +306,13 @@ module id_stage(
     // Outputs
     .opa_select(id_opa_select_out),
     .opb_select(id_opb_select_out),
+    .dest_reg(id_dest_reg_select_out),
     .alu_func(id_alu_func_out),
     .ra_idx(ra_idx),
     .rb_idx(rb_idx),
     .rdest_idx(rdest_idx),
     .fu_name(id_fu_name_out),
-    .dest_reg(dest_reg_select),
+    //.dest_reg(dest_reg_select),
     .rd_mem(id_rd_mem_out),
     .wr_mem(id_wr_mem_out),
     .ldl_mem(id_ldl_mem_out),

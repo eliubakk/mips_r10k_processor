@@ -238,6 +238,9 @@ module pipeline (
   FU_REG              ex_co_illegal;
   logic  [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_co_dest_reg_idx;
   logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_alu_result;
+  logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_br_disp;
+  logic  [63:0]       ex_co_br_wr_data;
+  logic               ex_co_unconditional_branch;
   logic               ex_co_take_branch;
   logic               ex_co_done;
   FU_REG              ex_co_wr_mem;  
@@ -872,8 +875,9 @@ end
     .if_id_valid_inst(if_id_valid_inst),
    
     // Outputs
-   .id_opa_select_out(id_inst_out.inst.opa_select),
+    .id_opa_select_out(id_inst_out.inst.opa_select),
     .id_opb_select_out(id_inst_out.inst.opb_select),
+    .id_dest_reg_select_out(id_inst_out.inst.dest_reg),
     .id_alu_func_out(id_inst_out.inst.alu_func),
     .id_fu_name_out(id_inst_out.inst.fu_name),
     .id_rd_mem_out(id_inst_out.inst.rd_mem),
@@ -1127,7 +1131,7 @@ end
     .wr_clk(clock),
     .wr_en({1'b0, ex_co_valid_inst[4:3], mem_co_valid_inst, ex_co_valid_inst[1:0]}),
     .wr_idx({{$clog2(`NUM_PHYS_REG){1'b1}}, ex_co_dest_reg_idx[4:3], mem_co_dest_reg_idx, ex_co_dest_reg_idx[1:0]}),
-    .wr_data({64'b0, ex_co_alu_result[4], ex_alu_result_out[3], mem_co_alu_result, ex_co_alu_result[1:0]})
+    .wr_data({64'b0, ex_co_br_wr_data, ex_alu_result_out[3], mem_co_alu_result, ex_co_alu_result[1:0]})
   );
 
  
@@ -1147,7 +1151,6 @@ ex_stage ex_stage_0 (
     
     // Outputs
     .ex_alu_result_out(ex_alu_result_out),
-   
     .ex_take_branch_out(ex_take_branch_out),
     .done(done)
   );
@@ -1256,7 +1259,7 @@ end
 	
 	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
-          		ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
+          	ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
        			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
  		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
  		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[2].inst.wr_mem;
@@ -1264,7 +1267,7 @@ end
        			ex_co_illegal[3]      <= `SD ex_mult_reg[2].inst.illegal;
        			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
-     		       ex_co_alu_result[3]   <= `SD ex_alu_result_out[3]; 
+     		     ex_co_alu_result[3]   <= `SD ex_alu_result_out[3]; 
                 // ex_co_sq_idx      <= `SD issue_reg[i].sq_idx;
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
@@ -1299,6 +1302,8 @@ end
      // ex_c0_wr_mem <= `SD 0;
       ex_co_take_branch  <= `SD 0;
       ex_co_branch_index <= `SD {$clog2(`OBQ_SIZE){0}};
+      ex_co_unconditional_branch <= `SD 0;
+      ex_co_br_wr_data <= `SD 64'b0;
       ex_co_branch_target <= `SD 0;
     end
     if(ex_co_enable[4]) begin
@@ -1307,6 +1312,8 @@ end
       //ex_co_wr_mem <= `SD 0;
       ex_co_take_branch  <= `SD ex_take_branch_out;
       ex_co_branch_index <= `SD issue_reg[4].br_idx;
+      ex_co_unconditional_branch <= `SD issue_reg[4].inst.uncond_branch;
+      ex_co_br_wr_data <= `SD (issue_reg[4].inst.uncond_branch)? issue_reg[4].npc : ex_co_alu_result[4];
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end
     if (ex_co_enable[5]) begin

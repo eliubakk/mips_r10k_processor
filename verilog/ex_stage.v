@@ -106,7 +106,6 @@ module ex_stage(
     input [`NUM_FU_TOTAL-1:0][63:0]  T2_value,
     
     output logic [`NUM_FU_TOTAL-1:0][63:0]  ex_alu_result_out,   // ALU0 result
-    
    
 		output logic done,
    
