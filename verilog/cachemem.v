@@ -36,6 +36,9 @@ module cachemem(clock, reset,
   parameter RD_PORTS = 1;
   parameter WR_PORTS = 3;
 
+//`define NUM_WAYS NUM_WAYS
+//`include "../../cache_defs.vh"
+
     input clock, reset;
   
   //read inputs
