@@ -13,8 +13,8 @@ module testbench;
 
 
 endmodule
-
-/*`include "../../sys_defs.vh"
+/*
+`include "../../sys_defs.vh"
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
