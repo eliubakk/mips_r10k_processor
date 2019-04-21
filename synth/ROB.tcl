@@ -18,7 +18,7 @@ set design_name ROB
 set clock_name clock
 set reset_name reset
 ##SINGLESCALAR
-set CLK_PERIOD 5.7
+set CLK_PERIOD 5.9
 ##SUPERSCALAR
 #set CLK_PERIOD 9
 
