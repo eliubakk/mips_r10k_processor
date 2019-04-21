@@ -12,12 +12,17 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat "../../verilog/dcache.v" "../../verilog/vic_cache.v"  "../../verilog/cachemem.v" $misc_files]
+#analyze -f sverilog [concat "../../verilog/dcache.v" "../../verilog/vic_cache.v"  "../../verilog/cachemem.v" $misc_files]
+read_file -f ddc [list "../../synth/cachemem/cachemem.ddc"]
+set_dont_touch cachemem
+read_file -f ddc [list "../../synth/vic_cache/vic_cache.ddc"]
+set_dont_touch vic_cache
+analyze -f sverilog [concat "../../verilog/dcache.v" $misc_files]
 elaborate dcache
 set design_name dcache
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 10
+set CLK_PERIOD 12
 
 
 

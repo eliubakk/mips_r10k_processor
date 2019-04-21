@@ -8,8 +8,8 @@ module vic_cache(clock, reset,
               evicted_vic, evicted_valid,
               rd_vic, rd_valid, vic_queue_out);
     parameter NUM_WAYS = 4;
-    parameter RD_PORTS = 1;
-    parameter WR_PORTS = 1;
+    parameter RD_PORTS = 2;
+    parameter WR_PORTS = 3;
     `define NUM_SET_BITS $clog2(32/NUM_WAYS)
     `define NUM_TAG_BITS (13-`NUM_SET_BITS)
 

@@ -68,9 +68,9 @@ module icache(clock, reset,
   logic cache_wr_miss_valid;
 
   cachemem #(
-    .NUM_WAYS_MEM(4),
-    .RD_PORTS_MEM(RD_PORTS+2),
-    .WR_PORTS_MEM(1)) 
+    .NUM_WAYS(4),
+    .RD_PORTS(RD_PORTS+2),
+    .WR_PORTS(1)) 
   memory(
     .clock(clock),
     .reset(reset),
