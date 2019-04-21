@@ -1,6 +1,5 @@
 `include "../../sys_defs.vh"
 `define DEBUG
-`define sq_index_t ($clog2(`SQ_SIZE) - 1)
 
 module SQ(
 	input clock,
@@ -9,7 +8,7 @@ module SQ(
 	// read signals
 	input rd_en, // load queue wants to read data at an address in SQ
 	input [31:0] addr_rd, // the address the load queue wants to read
-	input [`sq_index_t:0] ld_pos, // the tail of the sq at the time the load was dispatched
+	input SQ_INDEX_T ld_pos, // the tail of the sq at the time the load was dispatched
 
 	// dispatch signals
 	input dispatch_en, // 1 when a store is getting dispatched
@@ -20,7 +19,7 @@ module SQ(
 	
 	// execute signals
 	input ex_en, // 1 when a store is being executed
-	input [`sq_index_t:0] ex_index, // the index/tag of the store that is being executed
+	input SQ_INDEX_T ex_index, // the index/tag of the store that is being executed
 	input [31:0] ex_addr, // the address calculated during execute
 	input ex_addr_en, // 1 if want to use ex_addr for the address (direct vs indirect store)
 	input [63:0] ex_data, // the data calculated during execute
@@ -31,11 +30,11 @@ module SQ(
 	// input [`index_t:0] rt_index, // the index/tag of the store that is being retired
 
 	`ifdef DEBUG
-	output logic [`SQ_SIZE - 1:0] [31:0] addr_out,
-	output logic [`SQ_SIZE - 1:0] addr_ready_out,
-	output logic [`SQ_SIZE - 1:0] [63:0] data_out,
-	output logic [`SQ_SIZE - 1:0] data_ready_out,
-	output logic [`sq_index_t:0] head_out,
+	output logic [`SQ_SIZE-1:0] [31:0] addr_out,
+	output logic [`SQ_SIZE-1:0] addr_ready_out,
+	output logic [`SQ_SIZE-1:0] [63:0] data_out,
+	output logic [`SQ_SIZE-1:0] data_ready_out,
+	output SQ_INDEX_T head_out,
 	`endif
 
 	// read outputs
@@ -47,37 +46,37 @@ module SQ(
 	output logic store_data_stall,
 
 	// general outputs
-	output logic [`sq_index_t:0] tail_out, // the index of the store being dispatched
+	output SQ_INDEX_T tail_out, // the index of the store being dispatched
 	output logic full
 );
 
 	// internal data
-	logic [`SQ_SIZE - 1:0] [31:0] addr;
-	logic [`SQ_SIZE - 1:0] [31:0] addr_next;
+	logic [`SQ_SIZE-1:0] [31:0] addr;
+	logic [`SQ_SIZE-1:0] [31:0] addr_next;
 
-	logic [`SQ_SIZE - 1:0] addr_ready;
-	logic [`SQ_SIZE - 1:0] addr_ready_next;
+	logic [`SQ_SIZE-1:0] addr_ready;
+	logic [`SQ_SIZE-1:0] addr_ready_next;
 
-	logic [`SQ_SIZE - 1:0] [63:0] data;
-	logic [`SQ_SIZE - 1:0] [63:0] data_next;
+	logic [`SQ_SIZE-1:0] [63:0] data;
+	logic [`SQ_SIZE-1:0] [63:0] data_next;
 
-	logic [`SQ_SIZE - 1:0] data_ready;
-	logic [`SQ_SIZE - 1:0] data_ready_next;
+	logic [`SQ_SIZE-1:0] data_ready;
+	logic [`SQ_SIZE-1:0] data_ready_next;
 
-	logic [`sq_index_t:0] head;
-	logic [`sq_index_t:0] head_next;
+	SQ_INDEX_T head;
+	SQ_INDEX_T head_next;
 
-	logic [`sq_index_t:0] tail;
-	logic [`sq_index_t:0] tail_next;
+	SQ_INDEX_T tail;
+	SQ_INDEX_T tail_next;
 
 	
 	logic addr_rd_ready;
 
-	logic [`SQ_SIZE - 1:0] stall_req;
+	logic [`SQ_SIZE-1:0] stall_req;
 
-	logic [`SQ_SIZE - 1:0] load_req;
-	logic [`SQ_SIZE - 1:0] load_gnt;
-	logic [`sq_index_t:0] data_rd_idx;
+	logic [`SQ_SIZE-1:0] load_req;
+	logic [`SQ_SIZE-1:0] load_gnt;
+	SQ_INDEX_T data_rd_idx;
 
 	psel_generic #(
 		.WIDTH(`SQ_SIZE),
