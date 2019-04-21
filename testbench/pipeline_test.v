@@ -294,7 +294,7 @@ module testbench;
   endtask  // task show_mem_with_decimal
 	task display_stages;
 		begin
-			 if (clock_count == 10000) begin
+			 if (clock_count == 1000) begin
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
@@ -306,7 +306,7 @@ module testbench;
 			//display_memory;
 			//display_cache;
 			//display_if_stage;
-		//	 display_if_id;
+		 	$display("pc:%h", if_NPC_out);
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
@@ -405,10 +405,10 @@ module testbench;
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
 	`SD;
-	 // display_stages;
-	 if (clock_count == 5000) begin
-	   $finish;
-	 end
+	 display_stages;
+	// if (clock_count == 5000) begin
+	 //  $finish;
+	// end
   end 
 
   // Count the number of branch instructions and correctly predicted branches
