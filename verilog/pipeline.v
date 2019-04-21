@@ -487,7 +487,7 @@ logic tag_in_lq;
   // Store Queue Module
   SQ store_queue(
     .clock(clock),
-    .reset(reset),
+    .reset(reset | branch_not_taken),
 
     .rd_en(load_wants_store),
     .addr_rd(load_rd_addr),
@@ -535,7 +535,7 @@ logic tag_in_lq;
 
   LQ load_queue(
     .clock(clock),
-    .reset(reset),
+    .reset(reset | branch_not_taken),
 
     .load_in(lq_load_in),
     .write_en(lq_write_en),
@@ -1323,7 +1323,7 @@ end
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end
     if (ex_co_enable[5]) begin
-      ex_co_rega_st <= `SD is_ex_T1_value[5];
+      ex_co_rega_st <= `SD is_ex_T1_value[FU_ST_IDX];
     end
 		//ex_co_done <= `SD 0;
 

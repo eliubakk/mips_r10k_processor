@@ -59,6 +59,7 @@
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
 `define MEM_BUFFER_SIZE 10
+`define MEM_BUFFER_SIZE_BITS $clog2(`MEM_BUFFER_SIZE)
 
 typedef struct packed {
   logic [63:0] address;
