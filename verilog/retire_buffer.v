@@ -5,7 +5,7 @@ module retire_buffer(clock, reset,
               proc2Rmem_command, proc2Rmem_addr, proc2Rmem_data,
               full);
 	parameter NUM_WAYS = 4;
-	parameter WR_PORTS = 1;
+	parameter WR_PORTS = 3;
 
 	`define NUM_SET_BITS $clog2(32/NUM_WAYS)
 	`define NUM_TAG_BITS (13-`NUM_SET_BITS)
