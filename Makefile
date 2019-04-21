@@ -65,6 +65,8 @@ PIPELINE_VG = $(SYN_DIR)/$(PIPELINE_NAME)/%.vg
 PIPELINE_MODULES = $(foreach module,$(MODULES) $(MISC_MODULES),$(module))
 #PIPELINE_LIBS = $(foreach module,$(PIPELINE_MODULES),../$(LIB_DIR)/$(module).ddc)
 
+VISTESTBENCH = 
+
 MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MODULES_VG))
 MISC_MODULES_VG_NO_PIPE = $(filter-out $(PIPELINE_NAME).vg,$(MISC_MODULES_VG))
 
@@ -173,6 +175,15 @@ syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DI
 	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
 	mv ** ../../.
 
+
+vis_simv:	$(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/visual_testbench.v $(TEST_DIR)/visual_c_hooks.c
+	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
+	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
+	$(VCS_PIPE) -lncurses $(patsubst %,../../%,$^) -o vis_simv &&\
+	mv -f * ../../. && cd ../.. && \
+	./vis_simv
+
+
 #syn_simv:	$(SYNFILES) $(TESTBENCH)
 #	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
 
@@ -182,7 +193,7 @@ syn:	syn_simv
 clean:
 	rm -rvf simv *.daidir csrc vcs.key program.out \
 	  syn_simv* syn_simv.daidir syn_program.out \
-          dve *.vpd *.vcd *.dump ucli.key *.out
+          dve *.vpd *.vcd *.dump ucli.key *.out vis_simv*
 
 nuke:	clean
 	rm -rvf *.vg *.rep *.db *.chk *.log *.out *.ddc *.svf *.sv *.mr *.res *.pvl *.syn DVEfiles/

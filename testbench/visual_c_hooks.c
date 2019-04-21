@@ -16,6 +16,9 @@
 #define NUM_HISTORY     256
 #define NUM_ARF         32
 #define NUM_STAGES      5
+#define NUM_ROB         128
+#define NUM_FREE         48
+#define NUM_RS         128
 #define NOOP_INST       0x47ff041f
 #define NUM_REG_GROUPS  8
 
@@ -62,12 +65,19 @@ WINDOW *pipe_win;
 WINDOW *if_win;
 WINDOW *if_id_win;
 WINDOW *id_win;
-WINDOW *id_ex_win;
-WINDOW *ex_win;
-WINDOW *ex_mem_win;
-WINDOW *mem_win;
-WINDOW *mem_wb_win;
-WINDOW *wb_win;
+WINDOW *ROB_win;
+//WINDOW *id_ex_win;
+//WINDOW *ex_win;
+WINDOW *free_win;
+//WINDOW *ex_mem_win;
+//WINDOW *ex_co_win;
+WINDOW *RS_win;
+//WINDOW *mem_win;
+WINDOW *mem_co_win;
+//WINDOW *mem_wb_win;
+WINDOW *co_ret_win;
+//WINDOW *wb_win;
+WINDOW *ret_win;
 WINDOW *arf_win;
 WINDOW *misc_win;
 
@@ -77,12 +87,19 @@ int num_misc_regs;
 int num_if_regs = 0;
 int num_if_id_regs = 0;
 int num_id_regs = 0;
-int num_id_ex_regs = 0;
-int num_ex_regs = 0;
-int num_ex_mem_regs = 0;
-int num_mem_regs = 0;
-int num_mem_wb_regs = 0;
-int num_wb_regs = 0;
+//int num_id_ex_regs = 0;
+int num_ROB_regs = 0;
+//int num_ex_regs = 0;
+int num_free_regs = 0;
+// int num_ex_mem_regs = 0;
+//int num_ex_co_regs = 0;
+int num_RS_regs = 0;
+//int num_mem_regs = 0;
+int num_mem_co_regs = 0;
+// int num_mem_wb_regs = 0;
+int num_co_ret_regs = 0;
+// int num_wb_regs = 0;
+int num_ret_regs = 0;
 char readbuffer[1024];
 char **timebuffer;
 char **cycles;
@@ -92,23 +109,37 @@ char **inst_contents;
 char ***if_contents;
 char ***if_id_contents;
 char ***id_contents;
-char ***id_ex_contents;
-char ***ex_contents;
-char ***ex_mem_contents;
-char ***mem_contents;
-char ***mem_wb_contents;
-char ***wb_contents;
+// char ***id_ex_contents;
+char ***ROB_contents;
+//char ***ex_contents;
+char ***free_contents;
+//char ***ex_mem_contents;
+// char ***ex_co_contents;
+char ***RS_contents;
+// char ***mem_contents;
+char ***mem_co_contents;
+// char ***mem_wb_contents;
+char ***co_ret_contents;
+// char ***wb_contents;
+char ***ret_contents;
 char **arf_contents;
 char ***misc_contents;
 char **if_reg_names;
 char **if_id_reg_names;
 char **id_reg_names;
-char **id_ex_reg_names;
-char **ex_reg_names;
-char **ex_mem_reg_names;
-char **mem_reg_names;
-char **mem_wb_reg_names;
-char **wb_reg_names;
+// char **id_ex_reg_names;
+char **ROB_reg_names;
+//char **ex_reg_names;
+char **free_reg_names;
+// char **ex_mem_reg_names;
+// char **ex_co_reg_names;
+char **RS_reg_names;
+// char **mem_reg_names;
+char **mem_co_reg_names;
+// char **mem_wb_reg_names;
+char **co_ret_reg_names;
+// char **wb_reg_names;
+char **ret_reg_names;
 char **misc_reg_names;
 
 char *get_opcode_str(int inst, int valid_inst);
@@ -225,8 +256,8 @@ void setup_gui(FILE *fp){
 
   //instantiate the title window at top of screen
   title_win = create_newwin(3,COLS,0,0,4);
-  mvwprintw(title_win,1,1,"SIMULATION INTERFACE V1");
-  mvwprintw(title_win,1,COLS-22,"BEN KEMPKE/JOSH SMITH");
+  mvwprintw(title_win,1,1,"GROUP10 470");
+  mvwprintw(title_win,1,COLS-22,"SHAME");
   wrefresh(title_win);
 
   //instantiate time window at right hand side of screen
@@ -264,9 +295,9 @@ void setup_gui(FILE *fp){
   wattron(pipe_win,A_UNDERLINE);
   mvwprintw(pipe_win,1,pipe_width-2,"IF");
   mvwprintw(pipe_win,1,2*pipe_width-2,"ID");
-  mvwprintw(pipe_win,1,3*pipe_width-2,"EX");
-  mvwprintw(pipe_win,1,4*pipe_width-3,"MEM");
-  mvwprintw(pipe_win,1,5*pipe_width-3,"WB");
+  mvwprintw(pipe_win,1,3*pipe_width-2,"DI");//id-di
+  mvwprintw(pipe_win,1,4*pipe_width-3,"IS");//issue_next_inst_opcode
+  mvwprintw(pipe_win,1,5*pipe_width-3,"EX");//issue_reg_inst_opcode
   wattroff(pipe_win,A_UNDERLINE);
   wrefresh(pipe_win);
 
@@ -286,35 +317,74 @@ void setup_gui(FILE *fp){
   wrefresh(id_win);
 
   //instantiate a window to visualize ID/EX signals
-  id_ex_win = create_newwin((num_id_ex_regs+2),30,8,60,5);
-  mvwprintw(id_ex_win,0,12,"ID/EX");
-  wrefresh(id_ex_win);
+  // id_ex_win = create_newwin((num_id_ex_regs+2),30,8,60,5);
+  // mvwprintw(id_ex_win,0,12,"ID/EX");
+  // wrefresh(id_ex_win);
+  ROB_win = create_newwin((num_ROB_regs/8+3),80,8,60,5);
+  mvwprintw(ROB_win,0,25,"ROB Table");
+  mvwprintw(ROB_win,1,1,"T_new");
+  mvwprintw(ROB_win,1,8,"T_old");
+  mvwprintw(ROB_win,1,15,"busy");
+  mvwprintw(ROB_win,1,21,"halt");
+  mvwprintw(ROB_win,1,30,"opcode");
+  mvwprintw(ROB_win,1,40,"take_branch");
+  mvwprintw(ROB_win,1,53,"wr_idx");
+  mvwprintw(ROB_win,1,67,"npc");
+  wrefresh(ROB_win);
 
   //instantiate a window to visualize EX stage
-  ex_win = create_newwin((num_ex_regs+2),30,8,90,5);
-  mvwprintw(ex_win,0,10,"EX STAGE");
-  wrefresh(ex_win);
+  // ex_win = create_newwin((num_ex_regs+2),70,8,140,5);
+  // mvwprintw(ex_win,0,10,"EX STAGE");
+  // wrefresh(ex_win);
+  free_win = create_newwin((num_free_regs+3),30,8,140,5);
+  mvwprintw(free_win,0,10,"FREE LIST");
+  mvwprintw(free_win,1,1,"Entry");
+  mvwprintw(free_win,1,9,"PHYS_REG");
+  wrefresh(free_win);
 
   //instantiate a window to visualize EX/MEM
-  ex_mem_win = create_newwin((num_ex_mem_regs+2),30,LINES-7-(num_ex_mem_regs+2),0,5);
-  mvwprintw(ex_mem_win,0,12,"EX/MEM");
-  wrefresh(ex_mem_win);
+  // ex_mem_win = create_newwin((num_ex_mem_regs+2),30,LINES-7-(num_ex_mem_regs+2),0,5);
+  // mvwprintw(ex_mem_win,0,12,"EX/MEM");
+  // wrefresh(ex_mem_win);
+  // ex_co_win = create_newwin((num_ex_co_regs+2),30,LINES-13-(num_ex_co_regs+2),0,5);
+  // mvwprintw(ex_co_win,0,12,"EX/CO");
+  // wrefresh(ex_co_win);
+  RS_win = create_newwin((num_RS_regs/8+3),67,32,0,5);
+  mvwprintw(RS_win,0,25,"RS Table");
+  mvwprintw(RS_win,1,2,"T");
+  mvwprintw(RS_win,1,6,"T1");
+  mvwprintw(RS_win,1,11,"T2");
+  mvwprintw(RS_win,1,15,"busy");
+  mvwprintw(RS_win,1,22,"inst_opcode");
+  mvwprintw(RS_win,1,39,"npc");
+  mvwprintw(RS_win,1,52,"sq_idx");
+  mvwprintw(RS_win,1,60,"br_idx");
+  wrefresh(RS_win);
 
   //instantiate a window to visualize MEM stage
-  mem_win = create_newwin((num_mem_regs+2),30,LINES-7-(num_mem_regs+2),30,5);
-  mvwprintw(mem_win,0,10,"MEM STAGE");
-  wrefresh(mem_win);
+  // mem_win = create_newwin((num_mem_regs+2),30,LINES-7-(num_mem_regs+2),30,5);
+  // mvwprintw(mem_win,0,10,"MEM STAGE");
+  // wrefresh(mem_win);
+  mem_co_win = create_newwin((num_mem_co_regs+2),30,LINES-7-(num_mem_co_regs+2),30,5);
+  mvwprintw(mem_co_win,0,10,"MEM/CO");
+  wrefresh(mem_co_win);
 
   //instantiate a window to visualize MEM/WB
-  mem_wb_win = create_newwin((num_mem_wb_regs+2),30,LINES-7-(num_mem_wb_regs+2),60,5);
-  mvwprintw(mem_wb_win,0,12,"MEM/WB");
-  wrefresh(mem_wb_win);
+  // mem_wb_win = create_newwin((num_mem_wb_regs+2),30,LINES-7-(num_mem_wb_regs+2),60,5);
+  // mvwprintw(mem_wb_win,0,12,"MEM/WB");
+  // wrefresh(mem_wb_win);
+  co_ret_win = create_newwin((num_co_ret_regs+2),30,LINES-7-(num_co_ret_regs+2),60,5);
+  mvwprintw(co_ret_win,0,12,"CO/RET");
+  wrefresh(co_ret_win);
 
 
   //instantiate a window to visualize WB stage
-  wb_win = create_newwin((num_wb_regs+2),30,LINES-7-(num_wb_regs+2),90,5);
-  mvwprintw(wb_win,0,10,"WB STAGE");
-  wrefresh(wb_win);
+  // wb_win = create_newwin((num_wb_regs+2),30,LINES-7-(num_wb_regs+2),90,5);
+  // mvwprintw(wb_win,0,10,"WB STAGE");
+  // wrefresh(wb_win);
+  ret_win = create_newwin((num_ret_regs+2),30,LINES-7-(num_ret_regs+2),90,5);
+  mvwprintw(ret_win,0,10,"RET STAGE");
+  wrefresh(ret_win);
 
   //instantiate an instructional window to help out the user some
   instr_win = create_newwin(7,30,LINES-7,0,5);
@@ -435,70 +505,151 @@ void parsedata(int history_num_in){
 
 
   // Handle updating the ID/EX window
-  for(i=0;i<num_id_ex_regs;i++){
-    if (strcmp(id_ex_contents[history_num_in][i],
-                id_ex_contents[old_history_num_in][i]))
-      wattron(id_ex_win, A_REVERSE);
+  // for(i=0;i<num_id_ex_regs;i++){
+  //   if (strcmp(id_ex_contents[history_num_in][i],
+  //               id_ex_contents[old_history_num_in][i]))
+  //     wattron(id_ex_win, A_REVERSE);
+  //   else
+  //     wattroff(id_ex_win, A_REVERSE);
+  //   mvwaddstr(id_ex_win,i+1,strlen(id_ex_reg_names[i])+3,id_ex_contents[history_num_in][i]);
+  // }
+  // wrefresh(id_ex_win);
+
+  int j;
+  int k;
+  for(i=0;i<num_ROB_regs;i++){
+    j = i<8  ? 0 : 
+        i<16 ? 1 :
+        i<24 ? 2 :
+        i<32 ? 3 :
+        i<40 ? 4 :
+        i<48 ? 5 :
+        i<56 ? 6 : 
+        i<64 ? 7 :
+        i<72 ? 8 :
+        i<80 ? 9 :
+        i<88 ? 10 :
+        i<96 ? 11 :
+        i<104 ? 12 :
+        i<112 ? 13 :
+        i<120 ? 14 :
+        i<128 ? 15 : 16;
+
+    k = i%8==0 ? 1 : 
+        i%8==1 ? 8 :
+        i%8==2 ? 15 :
+        i%8==3 ? 21 :
+        i%8==4 ? 28 :
+        i%8==5 ? 43 :
+        i%8==6 ? 53 :
+        i%8==7 ? 61 : 70;
+    if (strcmp(ROB_contents[history_num_in][i],
+                ROB_contents[old_history_num_in][i]))
+      wattron(ROB_win, A_REVERSE);
     else
-      wattroff(id_ex_win, A_REVERSE);
-    mvwaddstr(id_ex_win,i+1,strlen(id_ex_reg_names[i])+3,id_ex_contents[history_num_in][i]);
+      wattroff(ROB_win, A_REVERSE);
+    mvwaddstr(ROB_win,j+2,2+k,ROB_contents[history_num_in][i]);
   }
-  wrefresh(id_ex_win);
+  wrefresh(ROB_win);
+
 
   // Handle updating the EX window
-  for(i=0;i<num_ex_regs;i++){
-    if (strcmp(ex_contents[history_num_in][i],
-                ex_contents[old_history_num_in][i]))
-      wattron(ex_win, A_REVERSE);
+  // for(i=0;i<num_ex_regs;i++){
+  //   if (strcmp(ex_contents[history_num_in][i],
+  //               ex_contents[old_history_num_in][i]))
+  //     wattron(ex_win, A_REVERSE);
+  //   else
+  //     wattroff(ex_win, A_REVERSE);
+  //   mvwaddstr(ex_win,i+1,strlen(ex_reg_names[i])+3,ex_contents[history_num_in][i]);
+  // }
+  // wrefresh(ex_win);
+  for(i=0;i<num_free_regs;i++){
+    if (strcmp(free_contents[history_num_in][i],
+                free_contents[old_history_num_in][i]))
+      wattron(free_win, A_REVERSE);
     else
-      wattroff(ex_win, A_REVERSE);
-    mvwaddstr(ex_win,i+1,strlen(ex_reg_names[i])+3,ex_contents[history_num_in][i]);
+      wattroff(free_win, A_REVERSE);
+    mvwaddstr(free_win,i+2,12,free_contents[history_num_in][i]);
   }
-  wrefresh(ex_win);
+  wrefresh(free_win);
 
   // Handle updating the EX/MEM window
-  for(i=0;i<num_ex_mem_regs;i++){
-    if (strcmp(ex_mem_contents[history_num_in][i],
-                ex_mem_contents[old_history_num_in][i]))
-      wattron(ex_mem_win, A_REVERSE);
+  // for(i=0;i<num_ex_co_regs;i++){
+  //   if (strcmp(ex_co_contents[history_num_in][i],
+  //               ex_co_contents[old_history_num_in][i]))
+  //     wattron(ex_co_win, A_REVERSE);
+  //   else
+  //     wattroff(ex_co_win, A_REVERSE);
+  //   mvwaddstr(ex_co_win,i+1,strlen(ex_co_reg_names[i])+3,ex_co_contents[history_num_in][i]);
+  // }
+  // wrefresh(ex_co_win);
+  for(i=0;i<num_RS_regs;i++){
+    j = i<8  ? 0 : 
+        i<16 ? 1 :
+        i<24 ? 2 :
+        i<32 ? 3 :
+        i<40 ? 4 :
+        i<48 ? 5 :
+        i<56 ? 6 : 
+        i<64 ? 7 :
+        i<72 ? 8 :
+        i<80 ? 9 :
+        i<88 ? 10 :
+        i<96 ? 11 :
+        i<104 ? 12 :
+        i<112 ? 13 :
+        i<120 ? 14 :
+        i<128 ? 15 : 16;
+
+    k = i%8==0 ? 0 : 
+        i%8==1 ? 4 :
+        i%8==2 ? 9 :
+        i%8==3 ? 14 :
+        i%8==4 ? 21 :
+        i%8==5 ? 33 :
+        i%8==6 ? 53 :
+        i%8==7 ? 60 : 61;
+    if (strcmp(RS_contents[history_num_in][i],
+                RS_contents[old_history_num_in][i]))
+      wattron(RS_win, A_REVERSE);
     else
-      wattroff(ex_mem_win, A_REVERSE);
-    mvwaddstr(ex_mem_win,i+1,strlen(ex_mem_reg_names[i])+3,ex_mem_contents[history_num_in][i]);
+      wattroff(RS_win, A_REVERSE);
+    mvwaddstr(RS_win,j+2,2+k,RS_contents[history_num_in][i]);
   }
-  wrefresh(ex_mem_win);
+  wrefresh(RS_win);
 
   // Handle updating the MEM window
-  for(i=0;i<num_mem_regs;i++){
-    if (strcmp(mem_contents[history_num_in][i],
-                mem_contents[old_history_num_in][i]))
-      wattron(mem_win, A_REVERSE);
+  for(i=0;i<num_mem_co_regs;i++){
+    if (strcmp(mem_co_contents[history_num_in][i],
+                mem_co_contents[old_history_num_in][i]))
+      wattron(mem_co_win, A_REVERSE);
     else
-      wattroff(mem_win, A_REVERSE);
-    mvwaddstr(mem_win,i+1,strlen(mem_reg_names[i])+3,mem_contents[history_num_in][i]);
+      wattroff(mem_co_win, A_REVERSE);
+    mvwaddstr(mem_co_win,i+1,strlen(mem_co_reg_names[i])+3,mem_co_contents[history_num_in][i]);
   }
-  wrefresh(mem_win);
+  wrefresh(mem_co_win);
 
   // Handle updating the MEM/WB window
-  for(i=0;i<num_mem_wb_regs;i++){
-    if (strcmp(mem_wb_contents[history_num_in][i],
-                mem_wb_contents[old_history_num_in][i]))
-      wattron(mem_wb_win, A_REVERSE);
+  for(i=0;i<num_co_ret_regs;i++){
+    if (strcmp(co_ret_contents[history_num_in][i],
+                co_ret_contents[old_history_num_in][i]))
+      wattron(co_ret_win, A_REVERSE);
     else
-      wattroff(mem_wb_win, A_REVERSE);
-    mvwaddstr(mem_wb_win,i+1,strlen(mem_wb_reg_names[i])+3,mem_wb_contents[history_num_in][i]);
+      wattroff(co_ret_win, A_REVERSE);
+    mvwaddstr(co_ret_win,i+1,strlen(co_ret_reg_names[i])+3,co_ret_contents[history_num_in][i]);
   }
-  wrefresh(mem_wb_win);
+  wrefresh(co_ret_win);
 
   // Handle updating the WB window
-  for(i=0;i<num_wb_regs;i++){
-    if (strcmp(wb_contents[history_num_in][i],
-                wb_contents[old_history_num_in][i]))
-      wattron(wb_win, A_REVERSE);
+  for(i=0;i<num_ret_regs;i++){
+    if (strcmp(ret_contents[history_num_in][i],
+                ret_contents[old_history_num_in][i]))
+      wattron(ret_win, A_REVERSE);
     else
-      wattroff(wb_win, A_REVERSE);
-    mvwaddstr(wb_win,i+1,strlen(wb_reg_names[i])+3,wb_contents[history_num_in][i]);
+      wattroff(ret_win, A_REVERSE);
+    mvwaddstr(ret_win,i+1,strlen(ret_reg_names[i])+3,ret_contents[history_num_in][i]);
   }
-  wrefresh(wb_win);
+  wrefresh(ret_win);
 
   // Handle updating the misc. window
   int row=1,col=1;
@@ -536,12 +687,19 @@ int processinput(){
   static int if_reg_num = 0;
   static int if_id_reg_num = 0;
   static int id_reg_num = 0;
-  static int id_ex_reg_num = 0;
-  static int ex_reg_num = 0;
-  static int ex_mem_reg_num = 0;
-  static int mem_reg_num = 0;
-  static int mem_wb_reg_num = 0;
-  static int wb_reg_num = 0;
+  //static int id_ex_reg_num = 0;
+  static int ROB_reg_num = 0;
+  // static int ex_reg_num = 0;
+  static int free_reg_num = 0;
+  // static int ex_mem_reg_num = 0;
+  //static int ex_co_reg_num = 0;
+  static int RS_reg_num = 0;
+  // static int mem_reg_num = 0;
+  static int mem_co_reg_num = 0;
+  // static int mem_wb_reg_num = 0;
+  static int co_ret_reg_num = 0;
+  // static int wb_reg_num = 0;
+  static int ret_reg_num = 0;
   static int misc_reg_num = 0;
   int tmp_len;
   char name_buf[32];
@@ -637,97 +795,171 @@ int processinput(){
 
     // If this is the first time we've seen the register,
     // add name and data to arrays
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, id_ex_reg_num, id_ex_contents, id_ex_reg_names);
+    //   mvwaddstr(id_ex_win,id_ex_reg_num+1,1,id_ex_reg_names[id_ex_reg_num]);
+    //   waddstr(id_ex_win, ": ");
+    //   wrefresh(id_ex_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(id_ex_contents[history_num][id_ex_reg_num],val_buf);
+    // }
+
+    // id_ex_reg_num++;
     if (!setup_registers) {
-      parse_register(readbuffer, id_ex_reg_num, id_ex_contents, id_ex_reg_names);
-      mvwaddstr(id_ex_win,id_ex_reg_num+1,1,id_ex_reg_names[id_ex_reg_num]);
-      waddstr(id_ex_win, ": ");
-      wrefresh(id_ex_win);
+      parse1_register(readbuffer, ROB_reg_num, ROB_contents);
+      wrefresh(ROB_win);
     } else {
-      sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
-      strcpy(id_ex_contents[history_num][id_ex_reg_num],val_buf);
+    sscanf(readbuffer,"%*c %d:%s",&tmp_len,val_buf);
+    strcpy(ROB_contents[history_num][ROB_reg_num],val_buf);
     }
 
-    id_ex_reg_num++;
+    ROB_reg_num++;
   }else if(strncmp(readbuffer,"e",1) == 0){
     // We are getting an EX register
 
     // If this is the first time we've seen the register,
     // add name and data to arrays
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, ex_reg_num, ex_contents, ex_reg_names);
+    //   mvwaddstr(ex_win,ex_reg_num+1,1,ex_reg_names[ex_reg_num]);
+    //   waddstr(ex_win, ": ");
+    //   wrefresh(ex_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(ex_contents[history_num][ex_reg_num],val_buf);
+    // }
+
+    // ex_reg_num++;
     if (!setup_registers) {
-      parse_register(readbuffer, ex_reg_num, ex_contents, ex_reg_names);
-      mvwaddstr(ex_win,ex_reg_num+1,1,ex_reg_names[ex_reg_num]);
-      waddstr(ex_win, ": ");
-      wrefresh(ex_win);
+      parse_register(readbuffer, free_reg_num, free_contents, free_reg_names);
+      mvwaddstr(free_win,free_reg_num+2,1,free_reg_names[free_reg_num]);
+      waddstr(free_win, " ");
+      wrefresh(free_win);
     } else {
       sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
-      strcpy(ex_contents[history_num][ex_reg_num],val_buf);
+      strcpy(free_contents[history_num][free_reg_num],val_buf);
     }
 
-    ex_reg_num++;
+    free_reg_num++;
   }else if(strncmp(readbuffer,"i",1) == 0){
     // We are getting an EX/MEM register
 
     // If this is the first time we've seen the register,
     // add name and data to arrays
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, ex_mem_reg_num, ex_mem_contents, ex_mem_reg_names);
+    //   mvwaddstr(ex_mem_win,ex_mem_reg_num+1,1,ex_mem_reg_names[ex_mem_reg_num]);
+    //   waddstr(ex_mem_win, ": ");
+    //   wrefresh(ex_mem_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(ex_mem_contents[history_num][ex_mem_reg_num],val_buf);
+    // }
+
+    // ex_mem_reg_num++;
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, ex_co_reg_num, ex_co_contents, ex_co_reg_names);
+    //   mvwaddstr(ex_co_win,ex_co_reg_num+1,1,ex_co_reg_names[ex_co_reg_num]);
+    //   waddstr(ex_co_win, ": ");
+    //   wrefresh(ex_co_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(ex_co_contents[history_num][ex_co_reg_num],val_buf);
+    // }
+
+    // ex_co_reg_num++;
     if (!setup_registers) {
-      parse_register(readbuffer, ex_mem_reg_num, ex_mem_contents, ex_mem_reg_names);
-      mvwaddstr(ex_mem_win,ex_mem_reg_num+1,1,ex_mem_reg_names[ex_mem_reg_num]);
-      waddstr(ex_mem_win, ": ");
-      wrefresh(ex_mem_win);
+      parse1_register(readbuffer, RS_reg_num, RS_contents);
+      wrefresh(RS_win);
     } else {
-      sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
-      strcpy(ex_mem_contents[history_num][ex_mem_reg_num],val_buf);
+    sscanf(readbuffer,"%*c %d:%s",&tmp_len,val_buf);
+    strcpy(RS_contents[history_num][RS_reg_num],val_buf);
     }
 
-    ex_mem_reg_num++;
+    RS_reg_num++;
+
   }else if(strncmp(readbuffer,"m",1) == 0){
     // We are getting a MEM register
 
     // If this is the first time we've seen the register,
     // add name and data to arrays
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, mem_reg_num, mem_contents, mem_reg_names);
+    //   mvwaddstr(mem_win,mem_reg_num+1,1,mem_reg_names[mem_reg_num]);
+    //   waddstr(mem_win, ": ");
+    //   wrefresh(mem_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(mem_contents[history_num][mem_reg_num],val_buf);
+    // }
+
+    // mem_reg_num++;
     if (!setup_registers) {
-      parse_register(readbuffer, mem_reg_num, mem_contents, mem_reg_names);
-      mvwaddstr(mem_win,mem_reg_num+1,1,mem_reg_names[mem_reg_num]);
-      waddstr(mem_win, ": ");
-      wrefresh(mem_win);
+      parse_register(readbuffer, mem_co_reg_num, mem_co_contents, mem_co_reg_names);
+      mvwaddstr(mem_co_win,mem_co_reg_num+1,1,mem_co_reg_names[mem_co_reg_num]);
+      waddstr(mem_co_win, ": ");
+      wrefresh(mem_co_win);
     } else {
       sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
-      strcpy(mem_contents[history_num][mem_reg_num],val_buf);
+      strcpy(mem_co_contents[history_num][mem_co_reg_num],val_buf);
     }
 
-    mem_reg_num++;
+    mem_co_reg_num++;
   }else if(strncmp(readbuffer,"j",1) == 0){
     // We are getting an MEM/WB register
 
     // If this is the first time we've seen the register,
     // add name and data to arrays
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, mem_wb_reg_num, mem_wb_contents, mem_wb_reg_names);
+    //   mvwaddstr(mem_wb_win,mem_wb_reg_num+1,1,mem_wb_reg_names[mem_wb_reg_num]);
+    //   waddstr(mem_wb_win, ": ");
+    //   wrefresh(mem_wb_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(mem_wb_contents[history_num][mem_wb_reg_num],val_buf);
+    // }
+
+    // mem_wb_reg_num++;
     if (!setup_registers) {
-      parse_register(readbuffer, mem_wb_reg_num, mem_wb_contents, mem_wb_reg_names);
-      mvwaddstr(mem_wb_win,mem_wb_reg_num+1,1,mem_wb_reg_names[mem_wb_reg_num]);
-      waddstr(mem_wb_win, ": ");
-      wrefresh(mem_wb_win);
+      parse_register(readbuffer, co_ret_reg_num, co_ret_contents, co_ret_reg_names);
+      mvwaddstr(co_ret_win,co_ret_reg_num+1,1,co_ret_reg_names[co_ret_reg_num]);
+      waddstr(co_ret_win, ": ");
+      wrefresh(co_ret_win);
     } else {
       sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
-      strcpy(mem_wb_contents[history_num][mem_wb_reg_num],val_buf);
+      strcpy(co_ret_contents[history_num][co_ret_reg_num],val_buf);
     }
 
-    mem_wb_reg_num++;
+    co_ret_reg_num++;
   }else if(strncmp(readbuffer,"w",1) == 0){
     // We are getting a WB register
 
     // If this is the first time we've seen the register,
     // add name and data to arrays
+    // if (!setup_registers) {
+    //   parse_register(readbuffer, wb_reg_num, wb_contents, wb_reg_names);
+    //   mvwaddstr(wb_win,wb_reg_num+1,1,wb_reg_names[wb_reg_num]);
+    //   waddstr(wb_win, ": ");
+    //   wrefresh(wb_win);
+    // } else {
+    //   sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
+    //   strcpy(wb_contents[history_num][wb_reg_num],val_buf);
+    // }
+
+    // wb_reg_num++;
     if (!setup_registers) {
-      parse_register(readbuffer, wb_reg_num, wb_contents, wb_reg_names);
-      mvwaddstr(wb_win,wb_reg_num+1,1,wb_reg_names[wb_reg_num]);
-      waddstr(wb_win, ": ");
-      wrefresh(wb_win);
+      parse_register(readbuffer, ret_reg_num, ret_contents, ret_reg_names);
+      mvwaddstr(ret_win,ret_reg_num+1,1,ret_reg_names[ret_reg_num]);
+      waddstr(ret_win, ": ");
+      wrefresh(ret_win);
     } else {
       sscanf(readbuffer,"%*c%s %d:%s",name_buf,&tmp_len,val_buf);
-      strcpy(wb_contents[history_num][wb_reg_num],val_buf);
+      strcpy(ret_contents[history_num][ret_reg_num],val_buf);
     }
 
-    wb_reg_num++;
+    ret_reg_num++;
   }else if(strncmp(readbuffer,"v",1) == 0){
 
     //we are processing misc register/wire data
@@ -754,12 +986,19 @@ int processinput(){
     if_reg_num = 0;
     if_id_reg_num = 0;
     id_reg_num = 0;
-    id_ex_reg_num = 0;
-    ex_reg_num = 0;
-    ex_mem_reg_num = 0;
-    mem_reg_num = 0;
-    mem_wb_reg_num = 0;
-    wb_reg_num = 0;
+    //id_ex_reg_num = 0;
+    ROB_reg_num = 0;
+    // ex_reg_num = 0;
+    free_reg_num = 0;
+    // ex_mem_reg_num = 0;
+    //ex_co_reg_num = 0;
+    RS_reg_num = 0;
+    // mem_reg_num = 0;
+    mem_co_reg_num = 0;
+    // mem_wb_reg_num = 0;
+    co_ret_reg_num = 0;
+    // wb_reg_num = 0;
+    ret_reg_num = 0;
     misc_reg_num = 0;
 
     //update the simulator time, this won't change with 'b's
@@ -773,8 +1012,11 @@ int processinput(){
 }
 
 //this initializes a ncurses window and sets up the arrays for exchanging reg information
-void initcurses(int if_regs, int if_id_regs, int id_regs, int id_ex_regs, int ex_regs,
-                int ex_mem_regs, int mem_regs, int mem_wb_regs, int wb_regs,
+// void initcurses(int if_regs, int if_id_regs, int id_regs, int id_ex_regs, int ex_regs,
+//                 int ex_mem_regs, int mem_regs, int mem_wb_regs, int wb_regs,
+//                 int misc_regs){
+  void initcurses(int if_regs, int if_id_regs, int id_regs, int ROB_regs, int free_regs,
+                int RS_regs, int mem_co_regs, int co_ret_regs, int ret_regs,
                 int misc_regs){
   int nbytes;
   int ready_val;
@@ -785,12 +1027,19 @@ void initcurses(int if_regs, int if_id_regs, int id_regs, int id_ex_regs, int ex
   num_if_regs = if_regs;
   num_if_id_regs = if_id_regs;
   num_id_regs = id_regs;
-  num_id_ex_regs = id_ex_regs;
-  num_ex_regs = ex_regs;
-  num_ex_mem_regs = ex_mem_regs;
-  num_mem_regs = mem_regs;
-  num_mem_wb_regs = mem_wb_regs;
-  num_wb_regs = wb_regs;
+  //num_id_ex_regs = id_ex_regs;
+  num_ROB_regs = ROB_regs;
+  //num_ex_regs = ex_regs;
+  num_free_regs = free_regs;
+  // num_ex_mem_regs = ex_mem_regs;
+  //num_ex_co_regs = ex_co_regs;
+  num_RS_regs = RS_regs;
+  // num_mem_regs = mem_regs;
+  num_mem_co_regs = mem_co_regs;
+  // num_mem_wb_regs = mem_wb_regs;
+  num_co_ret_regs = co_ret_regs;
+  // num_wb_regs = wb_regs;
+  num_ret_regs = ret_regs;
   pid_t childpid;
   pipe(readpipe);
   pipe(writepipe);
@@ -809,12 +1058,19 @@ void initcurses(int if_regs, int if_id_regs, int id_regs, int id_ex_regs, int ex
     if_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
     if_id_contents    = (char***) malloc(NUM_HISTORY*sizeof(char**));
     id_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
-    id_ex_contents    = (char***) malloc(NUM_HISTORY*sizeof(char**));
-    ex_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
-    ex_mem_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
-    mem_contents      = (char***) malloc(NUM_HISTORY*sizeof(char**));
-    mem_wb_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
-    wb_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    //id_ex_contents    = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    ROB_contents     = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    //ex_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    free_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    // ex_mem_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    //ex_co_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    RS_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    // mem_contents      = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    mem_co_contents      = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    // mem_wb_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    co_ret_contents   = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    // wb_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
+    ret_contents       = (char***) malloc(NUM_HISTORY*sizeof(char**));
     misc_contents     = (char***) malloc(NUM_HISTORY*sizeof(char**));
     timebuffer        = (char**) malloc(NUM_HISTORY*sizeof(char*));
     cycles            = (char**) malloc(NUM_HISTORY*sizeof(char*));
@@ -825,12 +1081,19 @@ void initcurses(int if_regs, int if_id_regs, int id_regs, int id_ex_regs, int ex
     if_reg_names      = (char**) malloc(num_if_regs*sizeof(char*));
     if_id_reg_names   = (char**) malloc(num_if_id_regs*sizeof(char*));
     id_reg_names      = (char**) malloc(num_id_regs*sizeof(char*));
-    id_ex_reg_names   = (char**) malloc(num_id_ex_regs*sizeof(char*));
-    ex_reg_names      = (char**) malloc(num_ex_regs*sizeof(char*));
-    ex_mem_reg_names  = (char**) malloc(num_ex_mem_regs*sizeof(char*));
-    mem_reg_names     = (char**) malloc(num_mem_regs*sizeof(char*));
-    mem_wb_reg_names  = (char**) malloc(num_mem_wb_regs*sizeof(char*));
-    wb_reg_names      = (char**) malloc(num_wb_regs*sizeof(char*));
+    //id_ex_reg_names   = (char**) malloc(num_id_ex_regs*sizeof(char*));
+    ROB_reg_names     = (char**) malloc(num_ROB_regs*sizeof(char*));
+    // ex_reg_names      = (char**) malloc(num_ex_regs*sizeof(char*));
+    free_reg_names      = (char**) malloc(num_free_regs*sizeof(char*));
+    // ex_mem_reg_names  = (char**) malloc(num_ex_mem_regs*sizeof(char*));
+    //ex_co_reg_names  = (char**) malloc(num_ex_co_regs*sizeof(char*));
+    RS_reg_names  = (char**) malloc(num_RS_regs*sizeof(char*));
+    // mem_reg_names     = (char**) malloc(num_mem_regs*sizeof(char*));
+    mem_co_reg_names     = (char**) malloc(num_mem_co_regs*sizeof(char*));
+    // mem_wb_reg_names  = (char**) malloc(num_mem_wb_regs*sizeof(char*));
+    co_ret_reg_names  = (char**) malloc(num_co_ret_regs*sizeof(char*));
+    // wb_reg_names      = (char**) malloc(num_wb_regs*sizeof(char*));
+    ret_reg_names      = (char**) malloc(num_ret_regs*sizeof(char*));
     misc_reg_names    = (char**) malloc(num_misc_regs*sizeof(char*));
 
     int j=0;
@@ -842,12 +1105,19 @@ void initcurses(int if_regs, int if_id_regs, int id_regs, int id_ex_regs, int ex
       if_contents[i]      = (char**) malloc(num_if_regs*sizeof(char*));
       if_id_contents[i]   = (char**) malloc(num_if_id_regs*sizeof(char*));
       id_contents[i]      = (char**) malloc(num_id_regs*sizeof(char*));
-      id_ex_contents[i]   = (char**) malloc(num_id_ex_regs*sizeof(char*));
-      ex_contents[i]      = (char**) malloc(num_ex_regs*sizeof(char*));
-      ex_mem_contents[i]  = (char**) malloc(num_ex_mem_regs*sizeof(char*));
-      mem_contents[i]     = (char**) malloc(num_mem_regs*sizeof(char*));
-      mem_wb_contents[i]  = (char**) malloc(num_mem_wb_regs*sizeof(char*));
-      wb_contents[i]      = (char**) malloc(num_wb_regs*sizeof(char*));
+      //id_ex_contents[i]   = (char**) malloc(num_id_ex_regs*sizeof(char*));
+      ROB_contents[i]     = (char**) malloc(num_ROB_regs*sizeof(char*));
+      // ex_contents[i]      = (char**) malloc(num_ex_regs*sizeof(char*));
+      free_contents[i]      = (char**) malloc(free_regs*sizeof(char*));
+      // ex_mem_contents[i]  = (char**) malloc(num_ex_mem_regs*sizeof(char*));
+      //ex_co_contents[i]  = (char**) malloc(num_ex_co_regs*sizeof(char*));
+      RS_contents[i]  = (char**) malloc(num_RS_regs*sizeof(char*));
+      // mem_contents[i]     = (char**) malloc(num_mem_regs*sizeof(char*));
+      mem_co_contents[i]     = (char**) malloc(num_mem_co_regs*sizeof(char*));
+      //mem_wb_contents[i]  = (char**) malloc(num_mem_wb_regs*sizeof(char*));
+      co_ret_contents[i]     = (char**) malloc(num_co_ret_regs*sizeof(char*));
+      // wb_contents[i]      = (char**) malloc(num_wb_regs*sizeof(char*));
+      ret_contents[i]      = (char**) malloc(num_ret_regs*sizeof(char*));
       misc_contents[i]    = (char**) malloc(num_misc_regs*sizeof(char*));
     }
     setup_gui(fp);
@@ -1231,6 +1501,19 @@ char *get_opcode_str(int inst, int valid_inst)
 
 // Function to parse register $display() from testbench and add to
 // names/contents arrays
+
+void parse1_register(char *readbuf, int reg_num, char*** contents) {
+  char val_buf[32];
+  int tmp_len;
+
+  sscanf(readbuf,"%*c %d:%s",&tmp_len,val_buf);
+  int i=0;
+  for (;i<NUM_HISTORY;i++){
+    contents[i][reg_num] = (char*) malloc((tmp_len+1)*sizeof(char));
+  }
+  strcpy(contents[history_num][reg_num],val_buf);
+}
+
 void parse_register(char *readbuf, int reg_num, char*** contents, char** reg_names) {
   char name_buf[32];
   char val_buf[32];
