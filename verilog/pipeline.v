@@ -127,6 +127,7 @@ module pipeline (
   parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX, FU_ST_IDX};
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
+
  
 // --------------------------Fetch1 signals  
 
@@ -929,6 +930,8 @@ end
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
 	assign id_no_dest_reg = (id_rdest_idx == `ZERO_REG );
+
+    assign free_list_out = fr_rs_rob_T;
 
   Free_List f0(
     // INPUTS
