@@ -1349,9 +1349,10 @@ end
   assign lq_load_in.illegal = ex_co_illegal[FU_LD_IDX];
   assign lq_load_in.dest_reg = ex_co_dest_reg_idx[FU_LD_IDX];
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
-  assign lq_load_in.data = mem_rd_stall? 64'b0 : mem_result_out;
-  assign lq_load_in.data_valid = ~mem_rd_stall;
-  assign lq_write_en = (ex_co_valid_inst[FU_LD_IDX] & (mem_rd_stall | mem_co_stall));
+  assign lq_load_in.data = sq_data_valid? sq_data_out :
+                            mem_rd_stall? 64'b0 : mem_result_out;
+  assign lq_load_in.data_valid = sq_data_valid | ~mem_rd_stall;
+  assign lq_write_en = (ex_co_valid_inst[FU_LD_IDX] & (mem_rd_stall & ~sq_data_valid & ~sq_data_not_found) | mem_co_stall);
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
