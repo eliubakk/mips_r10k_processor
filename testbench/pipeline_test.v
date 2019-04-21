@@ -38,6 +38,11 @@ module testbench;
   logic [31:0] instr_count;
   int          wb_fileno;
 
+	// For synth debugging
+logic [1:0]	proc2Rmem_command_out;
+logic [1:0]	proc2Dmem_command_out;
+logic [1:0]	proc2Imem_command_out;
+
   logic [1:0]  proc2mem_command;
   logic [63:0] proc2mem_addr;
   logic [63:0] proc2mem_data;
@@ -128,8 +133,12 @@ module testbench;
     .mem2proc_data     (mem2proc_data),
     .mem2proc_tag      (mem2proc_tag),
 
-
-    // Outputs
+    // Outputs for synth debugging
+    .proc2Rmem_command_out(proc2Rmem_command_out),
+    .proc2Dmem_command_out(proc2Dmem_command_out),
+    .proc2Imem_command_out(proc2Imem_command_out),
+    
+// Outputs
     .proc2mem_command  (proc2mem_command),
     .proc2mem_addr     (proc2mem_addr),
     .proc2mem_data     (proc2mem_data),
@@ -308,6 +317,7 @@ module testbench;
 			//display_if_stage;
 		 	$display("pc:%h", if_NPC_out);
 			$display("mem2proc response:%h, mem2proc_data:%h, mem2proc_tag:%h, proc2mem_command:%h, proc2mem_addr:%h, proc2mem_data:%h", mem2proc_response, mem2proc_data, mem2proc_tag, proc2mem_command, proc2mem_addr, proc2mem_data);
+			$display("proc2Rmem_command : %h, proc2Dmem_command : %h, proc2Imem_command : %h", proc2Rmem_command_out, proc2Dmem_command_out, proc2Imem_command_out);	
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);

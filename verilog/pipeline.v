@@ -25,6 +25,11 @@ module pipeline (
     output logic [63:0] proc2mem_addr,      // Address sent to memory
     output logic [63:0] proc2mem_data,      // Data sent to memory
 
+   
+    output logic [1:0]	proc2Rmem_command_out,	// For synthesize debugging
+    output logic [1:0]	proc2Dmem_command_out,	// For synthesize debugging
+    output logic [1:0]	proc2Imem_command_out,	// For synthesize debugging
+
     output logic [3:0]  pipeline_completed_insts,
     output ERROR_CODE   pipeline_error_status,
     output logic [4:0]  pipeline_commit_wr_idx,
@@ -121,7 +126,8 @@ module pipeline (
   parameter FU_IDX [0:(`NUM_TYPE_FU - 1)] FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX, FU_ST_IDX};
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
- 
+
+
 // --------------------------Fetch1 signals  
 
 
@@ -351,7 +357,12 @@ ROB_ROW_T rob_retire_out;
                                   rob_retire_out_halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
-  
+  //---------------------------For synthesis debugging
+
+assign proc2Rmem_command_out = proc2Rmem_command;
+assign proc2Dmem_command_out = proc2Dmem_command;
+assign proc2Imem_command_out = proc2Imem_command;
+ 
 	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
 	// FOR MEMORY INSTRUCTIONS
 //	assign proc2Dmem_command = mem_co_enable ? BUS_LOAD : BUS_NONE;

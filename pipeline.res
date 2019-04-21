@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Sat Apr 20 22:47:43 2019
+Date   : Sat Apr 20 23:45:55 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -12,8 +12,8 @@ Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
-| r339     | DW01_cmp6    | width=64   |               | eq_607 eq_610        |
-| r343     | DW01_sub     | width=64   |               | sub_1672             |
+| r339     | DW01_cmp6    | width=64   |               | eq_618 eq_621        |
+| r343     | DW01_sub     | width=64   |               | sub_1683             |
 ===============================================================================
 
 
@@ -23,7 +23,7 @@ Implementation Report
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
 | r339               | DW01_cmp6        | rpl                |                |
-| sub_1672           | DW01_sub         | rpl                |                |
+| sub_1683           | DW01_sub         | rpl                |                |
 ===============================================================================
 
  
