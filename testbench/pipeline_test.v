@@ -307,8 +307,8 @@ module testbench;
 	for (int i = 0; i < `NUM_SETS; ++i) begin
 		for (int j = 0; j < `NUM_WAYS; ++j) begin
 			set_idx = i;
-			//$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
-			//$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
+			$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
+			$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
 			if (dcache_data[i].cache_lines[j].valid /*&& dcache_data[i].cache_lines[j].dirty*/) begin
 				//$display("valid and dirty");
 				memory.unified_memory[{dcache_data[i].cache_lines[j].tag, set_idx}] = dcache_data[i].cache_lines[j].data;

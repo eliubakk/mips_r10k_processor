@@ -319,7 +319,8 @@ logic [63:0] retire_reg_wr_data;
   logic rob_retire_out_halt;
   logic rob_retire_out_take_branch;
   logic rob_retire_out_T_new; 
-  logic rob_retire_out_T_old; 	
+  logic rob_retire_out_T_old; 
+  logic rob_retire_out_is_store;
   logic [31:0] rob_retire_opcode;
  
 
@@ -511,7 +512,7 @@ logic tag_in_lq;
     .ex_data(ex_store_data),
     .ex_data_en(ex_store_data_valid),
 
-    .rt_en(retire_is_store_next),
+    .rt_en(rob_retire_out_is_store),
 
     .data_rd(sq_data_out),
     .rd_valid(sq_data_valid), // checks for if data that exists is valid
@@ -1367,7 +1368,7 @@ assign lq_pop_en = ~mem_co_stall;
      .reset(reset),
      .rd_mem(ex_co_rd_mem[FU_LD_IDX]),
      .rd_addr(ex_co_alu_result[FU_LD_IDX]), 
-     .wr_mem(retire_is_store_next),
+     .wr_mem(rob_retire_out_is_store),
      .wr_addr(sq_head_address),
      .wr_data(sq_head_data),
      .Dmem2proc_data(Dmem2proc_data),
@@ -1658,8 +1659,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
     end
   end
   
-  assign retire_is_store = (rob_retire_opcode[31:26] == `STQ_INST) ||
-                            (rob_retire_opcode[31:26] == `STQ_C_INST);
+  assign retire_is_store = rob_retire_out.is_store & rob_retire_out.busy;//(rob_retire_opcode[31:26] == `STQ_INST) ||
+                            //(rob_retire_opcode[31:26] == `STQ_C_INST);
 
    
   ROB R0(
@@ -1755,10 +1756,10 @@ always_ff @ (posedge clock) begin
 		retire_reg_NPC <= `SD rob_retire_out.npc;
 		retire_reg_phys <= `SD rob_retire_out.T_new;
 		rob_retire_out_halt <= `SD rob_retire_out.halt;
-    		rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
+    rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
 		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
-		
+		rob_retire_out_is_store <= `SD (rob_retire_out.is_store & rob_retire_out.busy);
 		if(rob_retire_out.branch_inst.en) begin // For branch retire
 			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
 			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;
