@@ -87,6 +87,10 @@ module pipeline (
 
 
 	output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
+	output VIC_CACHE_T [2:0] evicted_data,
+	output logic [2:0] evicted_valid,
+	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue,
+	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
 
     // Outputs from MEM/COMP Pipeline Register
     output logic mem_co_valid_inst,   
@@ -1374,6 +1378,10 @@ assign lq_pop_en = ~mem_co_stall;
      
      // Outputs
      .sets_out(dcache_data),
+	.evicted_out(evicted_data),
+	.evicted_valid_out(evicted_valid),
+	.retire_queue_out(retire_queue),
+	.retire_queue_tail_out(retire_queue_tail),
      .mem_result_out(mem_result_out),
      .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),

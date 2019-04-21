@@ -28,7 +28,7 @@ extern void print_membus(int proc2mem_command, int mem2proc_response,
 extern void print_close();
 
 
-//`define NUM_WAYS 4
+`define NUM_WAYS 4
 `include "../../cache_defs.vh"
 
 // typedef struct packed {
@@ -127,7 +127,11 @@ module testbench;
   logic mem_co_valid_inst;   
   logic [63:0] mem_co_NPC ;        
   logic [31:0] mem_co_IR ;
-	CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data; 
+	CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data;
+	VIC_CACHE_T [2:0] evicted_data;
+	logic [2:0] evicted_valid;
+	RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue;
+	logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail;
  
   int pipe_counter; 
   int copy_pipe_counter;
@@ -161,6 +165,10 @@ module testbench;
     .pipeline_branch_pred_correct(pipeline_branch_pred_correct),
 
 	.dcache_data(dcache_data),
+	.evicted_data(evicted_data),
+	.evicted_valid(evicted_valid),
+	.retire_queue(retire_queue),
+	.retire_queue_tail(retire_queue_tail),
 
     .retire_inst_busy(retire_inst_busy),
     .retire_reg_NPC(retire_reg_NPC),
@@ -305,6 +313,22 @@ module testbench;
 				//$display("valid and dirty");
 				memory.unified_memory[{dcache_data[i].cache_lines[j].tag, set_idx}] = dcache_data[i].cache_lines[j].data;
 			end
+		end
+	end
+
+	for (int i = 0; i < 3; ++i) begin
+		// handle evicted_data
+		//$display("evicted_valid[%d] = %b", i, evicted_valid[i]);
+		if (evicted_valid[i]) begin
+			memory.unified_memory[{evicted_data[i].line.tag, evicted_data[i].idx}] = evicted_data[i].line.data;
+		end
+	end
+
+	for (int i = 0; i < `RETIRE_SIZE; ++i) begin
+		// handle retire buffer
+		//$display("retire_queue[%d].valid = %b", i, retire_queue[i].valid);
+		if (retire_queue[i].valid) begin
+			memory.unified_memory[retire_queue[i].address] = retire_queue[i].data;
 		end
 	end
 
