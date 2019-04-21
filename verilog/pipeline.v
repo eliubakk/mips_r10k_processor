@@ -1336,7 +1336,9 @@ end
   end
 
   // add stall logic for ex_co registers with LQ   logic lq_full;
-
+  logic mem_co_stall;
+  assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
+  
   assign lq_load_in.valid_inst = ex_co_valid_inst[FU_LD_IDX];
   assign lq_load_in.NPC = ex_co_NPC[FU_LD_IDX];
   assign lq_load_in.IR = ex_co_IR[FU_LD_IDX];
@@ -1344,9 +1346,9 @@ end
   assign lq_load_in.illegal = ex_co_illegal[FU_LD_IDX];
   assign lq_load_in.dest_reg = ex_co_dest_reg_idx[FU_LD_IDX];
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
-  assign lq_load_in.data = 64'b0;
-  assign lq_load_in.data_valid = 1'b0;
-  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_rd_stall;
+  assign lq_load_in.data = mem_rd_stall? 64'b0 : mem_result_out;
+  assign lq_load_in.data_valid = ~mem_rd_stall;
+  assign lq_write_en = (ex_co_valid_inst[FU_LD_IDX] & (mem_rd_stall | mem_co_stall));
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
@@ -1359,8 +1361,6 @@ end
 //   //                                              //
 //   //////////////////////////////////////////////////
    
-logic mem_co_stall;
-assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
 assign lq_pop_en = ~mem_co_stall;
   
   mem_stage mem_stage_0 (// Inputs

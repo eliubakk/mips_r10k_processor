@@ -280,9 +280,9 @@ module testbench;
     real cpi;
 
     begin
-      cpi = (clock_count + 1.0) / instr_count+1;
+      cpi = (clock_count) / instr_count;
       $display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
-                clock_count+1, instr_count+1, cpi);
+                clock_count, instr_count, cpi);
       $display("@@  %4.2f ns total time to execute\n@@\n",
                 clock_count*`VIRTUAL_CLOCK_PERIOD);
     end
@@ -307,8 +307,8 @@ module testbench;
 	for (int i = 0; i < `NUM_SETS; ++i) begin
 		for (int j = 0; j < `NUM_WAYS; ++j) begin
 			set_idx = i;
-			$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
-			$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
+			//$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
+			//$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
 			if (dcache_data[i].cache_lines[j].valid /*&& dcache_data[i].cache_lines[j].dirty*/) begin
 				//$display("valid and dirty");
 				memory.unified_memory[{dcache_data[i].cache_lines[j].tag, set_idx}] = dcache_data[i].cache_lines[j].data;

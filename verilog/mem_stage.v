@@ -86,7 +86,7 @@ module mem_stage(
     .Dmem2proc_data(Dmem2proc_data),
     .Dmem2proc_tag(Dmem2proc_tag),
 
-	.sets_out(sets_out),
+	  .sets_out(sets_out),
 
     .Dcache_rd_data_out(Dcache_data_out),
     .Dcache_rd_valid_out(Dcache_valid_out),
