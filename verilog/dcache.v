@@ -213,6 +213,8 @@ module dcache(clock, reset,
    // Debugging for synth
    assign send_request_out = send_request;
    assign unanswered_miss_out = unanswered_miss;
+   logic sendreq_miss;
+
 
   //Instantiate CAM to check for rd address in fifo
   genvar ig, jg, kg;
@@ -343,8 +345,10 @@ module dcache(clock, reset,
   //assign vic_rd_idx = {cache_rd_idx, cache_wr_idx};
   //assign vic_rd_tag = {cache_rd_tag, cache_wr_tag};
 
+assign sendreq_miss = (send_req_ptr < mem_req_queue_tail) ? 1'b1:1'b0;
+
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
-                                         (send_req_ptr < mem_req_queue_tail);
+                                         (sendreq_miss);
                                       //!fifo_hit_num_valid[0] & cache_rd_miss_valid[0];
 
   assign proc2Dmem_addr = send_request? mem_req_queue[send_req_ptr].req.address : 64'b0;

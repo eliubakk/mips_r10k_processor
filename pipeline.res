@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Sun Apr 21 14:19:00 2019
+Date   : Sun Apr 21 14:38:18 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -210,38 +210,38 @@ Resource Sharing Report for design dcache in file ../../verilog/dcache.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
-| r1117    | DW01_dec     | width=4    |               | sub_357 sub_360      |
-| r1141    | DW01_inc     | width=3    |               | add_476 add_478      |
-| r1311    | DW01_cmp2    | width=5    |               | lt_264               |
-| r1313    | DW01_cmp2    | width=5    |               | lt_346               |
-| r1315    | DW01_cmp6    | width=4    |               | eq_354               |
-| r1317    | DW01_inc     | width=5    |               | add_391              |
-| r1319    | DW01_inc     | width=2    |               | add_400              |
-| r1321    | DW01_dec     | width=5    |               | sub_403              |
-| r1323    | DW01_cmp2    | width=5    |               | gt_404               |
-| r1325    | DW01_sub     | width=5    |               | sub_405_aco          |
-| r1327    | DW01_cmp2    | width=5    |               | gt_407               |
-| r1329    | DW01_sub     | width=5    |               | sub_408_aco          |
-| r1331    | DW01_inc     | width=5    |               | add_414              |
-| r1333    | DW01_cmp2    | width=5    |               | lt_419               |
-| r1335    | DW01_inc     | width=5    |               | add_426              |
-| r1337    | DW01_add     | width=3    |               | add_437_I2_I1        |
-| r1339    | DW01_inc     | width=3    |               | add_439_I2_I1        |
-| r1341    | DW01_add     | width=3    |               | add_1_root_add_436_I3_I1_aco |
-| r1343    | DW01_add     | width=64   |               | add_449              |
-| r1345    | DW01_cmp2    | width=3    |               | gte_460              |
-| r1347    | DW01_cmp2    | width=3    |               | gte_460_I2_I1        |
-| r1349    | DW01_add     | width=3    |               | add_462_I2_I1        |
-| r1351    | DW01_inc     | width=3    |               | add_463_I2_I1        |
-| r1353    | DW01_inc     | width=3    |               | add_466_I2_I1        |
-| r1355    | DW01_dec     | width=3    |               | sub_467_I2_I1        |
-| r1357    | DW01_cmp2    | width=3    |               | gte_460_I3_I1        |
-| r1365    | DW_rash      | A_width=312 |              | srl_476              |
+| r1117    | DW01_dec     | width=4    |               | sub_361 sub_364      |
+| r1141    | DW01_inc     | width=3    |               | add_480 add_482      |
+| r1311    | DW01_cmp2    | width=5    |               | lt_266               |
+| r1313    | DW01_cmp2    | width=5    |               | lt_348               |
+| r1315    | DW01_cmp6    | width=4    |               | eq_358               |
+| r1317    | DW01_inc     | width=5    |               | add_395              |
+| r1319    | DW01_inc     | width=2    |               | add_404              |
+| r1321    | DW01_dec     | width=5    |               | sub_407              |
+| r1323    | DW01_cmp2    | width=5    |               | gt_408               |
+| r1325    | DW01_sub     | width=5    |               | sub_409_aco          |
+| r1327    | DW01_cmp2    | width=5    |               | gt_411               |
+| r1329    | DW01_sub     | width=5    |               | sub_412_aco          |
+| r1331    | DW01_inc     | width=5    |               | add_418              |
+| r1333    | DW01_cmp2    | width=5    |               | lt_423               |
+| r1335    | DW01_inc     | width=5    |               | add_430              |
+| r1337    | DW01_add     | width=3    |               | add_441_I2_I1        |
+| r1339    | DW01_inc     | width=3    |               | add_443_I2_I1        |
+| r1341    | DW01_add     | width=3    |               | add_1_root_add_440_I3_I1_aco |
+| r1343    | DW01_add     | width=64   |               | add_453              |
+| r1345    | DW01_cmp2    | width=3    |               | gte_464              |
+| r1347    | DW01_cmp2    | width=3    |               | gte_464_I2_I1        |
+| r1349    | DW01_add     | width=3    |               | add_466_I2_I1        |
+| r1351    | DW01_inc     | width=3    |               | add_467_I2_I1        |
+| r1353    | DW01_inc     | width=3    |               | add_470_I2_I1        |
+| r1355    | DW01_dec     | width=3    |               | sub_471_I2_I1        |
+| r1357    | DW01_cmp2    | width=3    |               | gte_464_I3_I1        |
+| r1365    | DW_rash      | A_width=312 |              | srl_480              |
 |          |              | SH_width=10 |              |                      |
-| r1367    | DW01_sub     | width=2    |               | sub_478              |
-| r1369    | DW01_cmp2    | width=5    |               | lt_484               |
-| r1371    | DW01_inc     | width=5    |               | add_498              |
-| r1373    | DW01_add     | width=64   |               | add_502              |
+| r1367    | DW01_sub     | width=2    |               | sub_482              |
+| r1369    | DW01_cmp2    | width=5    |               | lt_488               |
+| r1371    | DW01_inc     | width=5    |               | add_502              |
+| r1373    | DW01_add     | width=64   |               | add_506              |
 | r1375    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18       |
 | r1377    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1 |
 | r1379    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G1 |
@@ -307,11 +307,11 @@ Resource Sharing Report for design dcache in file ../../verilog/dcache.v
 | r1499    | DW01_dec     | width=8    |               | genblk4[0].fifo_num_enc/sub_9 |
 | r1501    | DW01_dec     | width=10   |               | genblk4[0].mem_queue_num_enc/sub_9 |
 | r1503    | DW01_dec     | width=4    |               | genblk5[0].fifo_idx_enc/sub_9 |
-| r1605    | DW02_mult    | A_width=3  |               | mult_476             |
+| r1605    | DW02_mult    | A_width=3  |               | mult_480             |
 |          |              | B_width=7  |               |                      |
-| r1711    | DW02_mult    | A_width=2  |               | mult_475             |
+| r1711    | DW02_mult    | A_width=2  |               | mult_479             |
 |          |              | B_width=6  |               |                      |
-| r1713    | DW01_add     | width=6    |               | add_475              |
+| r1713    | DW01_add     | width=6    |               | add_479              |
 ===============================================================================
 
 
@@ -320,11 +320,11 @@ Implementation Report
 |                    |                  | Current            | Set            |
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
-| add_475            | DW01_add         | cla                |                |
-| add_502            | DW01_add         | cla                |                |
-| add_449            | DW01_add         | cla                |                |
-| mult_475           | DW02_mult        | csa                |                |
-| mult_476           | DW02_mult        | csa                |                |
+| add_479            | DW01_add         | cla                |                |
+| add_506            | DW01_add         | cla                |                |
+| add_453            | DW01_add         | cla                |                |
+| mult_479           | DW02_mult        | csa                |                |
+| mult_480           | DW02_mult        | csa                |                |
 | mem_queue_cam/eq_18_G10               |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | mem_queue_cam/eq_18_G9                |                    |                |
@@ -345,7 +345,7 @@ Implementation Report
 |                    | DW01_cmp6        | rpl                |                |
 | mem_queue_cam/eq_18                   |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
-| srl_476            | DW_rash          | mx2                |                |
+| srl_480            | DW_rash          | mx2                |                |
 ===============================================================================
 
  

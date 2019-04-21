@@ -15,8 +15,12 @@ mkdir $OUTPUT_DIR
 rm -rf $DIFF_DIR
 mkdir $DIFF_DIR
 
-# synthesize the pipeline
-make clean syn_simv
+kill_syn() {
+	for pid in `lsof +D . | grep "syn" | awk {'print $2'}` ; 
+	do 
+		kill $pid; 
+	done
+}
 
 for file in test_progs/*.s;
 do
@@ -30,9 +34,12 @@ do
 	echo "Running $file"
 
 	# run test case
-	# timeout $TIMEOUT make clean all
-	./syn_simv 
+	make syn
+	timeout $TIMEOUT make all
 	echo "Saving $file output"
+
+	# kill simv if its still running
+	kill_syn
 	
 	# save the output
 	cp writeback.out $OUTPUT_DIR/$file.writeback.out
@@ -41,9 +48,11 @@ do
 
 done
 
-echo "Checking for correctness"
+message="GRADE OUTPUT"
 
-echo "Checking for correct memory..."
+message="$message\nChecking for correctness"
+
+message="$message\nChecking for correct memory..."
 
 wrong=0
 total=0
@@ -63,22 +72,22 @@ do
 		# if file is not empty, then output is incorrect
 		if [ -s $DIFF_DIR/$file ]
 		then
-			echo -e "\t$file \t\t\tFAILED"
+			message="$message\n\t$file \t\t\tFAILED"
 			wrong=`expr $wrong + 1`
 		else
-			echo -e "\t$file \t\t\tPASSED"
+			message="$message\n\t$file \t\t\tPASSED"
 		fi
 		total=`expr $total + 1`
 	fi
 done
 
 correct=`expr $total - $wrong`
-echo "PASSED: $correct/$total"
+message="$message\nPASSED: $correct/$total"
 
 wrong=0
 total=0
 
-echo "Checking for correct writeback..."
+message="$message\nChecking for correct writeback..."
 
 for file in $CORRECT_DIR/*.writeback.out;
 do
@@ -92,15 +101,16 @@ do
 		# if file is not empty, then output is incorrect
 		if [ -s $DIFF_DIR/$file  ]
 		then
-			echo -e "\t$file \t\t\tFAILED"
+			message="$message\n\t$file \t\t\tFAILED"
 			wrong=`expr $wrong + 1`
 		else
-			echo -e "\t$file \t\t\tPASSED"
+			message="$message\n\t$file \t\t\tPASSED"
 		fi
 	fi
 	total=`expr $total + 1`
 done
 
 correct=`expr $total - $wrong`
-echo "PASSED: $correct/$total"
+message="$message\nPASSED $correct/$total"
+echo -e $message | tee grade.txt
 
