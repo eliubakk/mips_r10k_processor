@@ -227,8 +227,6 @@ module pipeline (
   logic [63:0] mem_co_NPC_comb;        
   logic [31:0] mem_co_IR_comb;    
 
- // // Outputs from MEM/WB Pipeline Register
- logic stall_struc;
 
 
 // ---------------------------------Complete stage
@@ -296,21 +294,6 @@ ROB_ROW_T rob_retire_out;
 	logic fr_empty; 
   PHYS_REG fr_free_reg_T;
 
-  
-   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  //logic	       retire_inst_busy;
-//  logic [63:0] retire_reg_NPC;
-logic [63:0] retire_reg_wr_data;
-  logic  [5:0] retire_reg_wr_idx;
-  logic        retire_reg_wr_en;
-  logic  [5:0] retire_reg_phys;;
-	logic head_halt;
-  logic rob_retire_out_halt;
-  logic rob_retire_out_take_branch;
-  logic rob_retire_out_T_new; 
-  logic rob_retire_out_T_old; 	
-  logic [31:0] rob_retire_opcode;
- 
 
 // ------------------------------Signals from modules
 
@@ -353,7 +336,7 @@ logic [63:0] retire_reg_wr_data;
   logic [31:0] rob_retire_opcode;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
-  logic [63:0] proc2Rmem_data;
+  logic [63:0] proc2Rmem_data, proc2Dmem_data;
   logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
   logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
