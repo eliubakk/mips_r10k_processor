@@ -3,37 +3,10 @@ module retire_buffer(clock, reset,
               evicted, evicted_valid,
               Rmem2proc_response,
               proc2Rmem_command, proc2Rmem_addr, proc2Rmem_data,
-              full);
+              full, retire_queue_out, retire_queue_tail_out);
 	parameter NUM_WAYS = 4;
-	parameter WR_PORTS = 3;
-
-	`define NUM_SET_BITS $clog2(32/NUM_WAYS)
-	`define NUM_TAG_BITS (13-`NUM_SET_BITS)
-
-	typedef struct packed {
-		logic [63:0] data;
-		logic [(`NUM_TAG_BITS-1):0] tag;
-		logic valid;
-		logic dirty;
-	} CACHE_LINE_T;
-
-	typedef struct packed {
-		CACHE_LINE_T line;
-		logic [(`NUM_SET_BITS-1):0] idx;
-	} VIC_CACHE_T;
-
-	typedef struct packed {
-		logic [63:0] address;
-		logic [63:0] data;
-		logic valid;
-	} RETIRE_BUF_T;
-
-	const RETIRE_BUF_T EMPTY_RETIRE_BUF =
-	{
-		64'b0,
-		64'b0,
-		1'b0
-	};
+	parameter WR_PORTS = 1;
+	`include "../../cache_defs.vh"
 
 	//inputs
 	input clock, reset;
@@ -46,6 +19,8 @@ module retire_buffer(clock, reset,
 	output logic [63:0] proc2Rmem_addr;
 	output logic [63:0] proc2Rmem_data;
 	output logic full;
+	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue_out;
+	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail_out;
 
 	RETIRE_BUF_T [(`RETIRE_SIZE-1):0] retire_queue, retire_queue_next;
 	logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail, retire_queue_tail_next;
@@ -55,6 +30,9 @@ module retire_buffer(clock, reset,
 	logic request_not_accepted;
 	logic update_queue;
 	//logic mem_done;
+
+	assign retire_queue_out = retire_queue;
+	assign retire_queue_tail_out = retire_queue_tail;
 
 	assign full = (retire_queue_tail >= (`RETIRE_SIZE-WR_PORTS));
 

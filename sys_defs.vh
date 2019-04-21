@@ -45,6 +45,7 @@
 `define VIC_SIZE 4
 `define RETIRE_SIZE 8
 `define NUM_VIC_BITS $clog2(`VIC_SIZE)
+`define NUM_DCACHE_WAYS 4
 //`define NUM_WAYS 4
 //`define NUM_SETS (32 / `NUM_WAYS)
 //`define NUM_SET_BITS $clog2(`NUM_SETS)
@@ -58,6 +59,7 @@
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
 `define MEM_BUFFER_SIZE 10
+`define MEM_BUFFER_SIZE_BITS $clog2(`MEM_BUFFER_SIZE)
 
 typedef struct packed {
   logic [63:0] address;

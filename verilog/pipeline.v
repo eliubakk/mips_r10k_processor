@@ -11,6 +11,9 @@
 `define DEBUG
 `define SD #1
 
+`define NUM_WAYS 4
+`include "../../cache_defs.vh"
+
 module pipeline (
     //input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
     //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
@@ -86,6 +89,13 @@ module pipeline (
     // output logic [4:0][63:0] ex_mem_NPC,
     // output logic [4:0] ex_mem_IR,
     // output logic [4:0]       ex_mem_valid_inst,
+
+
+	output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
+	output VIC_CACHE_T [2:0] evicted_data,
+	output logic [2:0] evicted_valid,
+	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue,
+	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
 
     // Outputs from MEM/COMP Pipeline Register
     output logic mem_co_valid_inst,   
@@ -475,7 +485,7 @@ logic tag_in_lq;
   // Store Queue Module
   SQ store_queue(
     .clock(clock),
-    .reset(reset),
+    .reset(reset | branch_not_taken),
 
     .rd_en(load_wants_store),
     .addr_rd(load_rd_addr),
@@ -523,7 +533,7 @@ logic tag_in_lq;
 
   LQ load_queue(
     .clock(clock),
-    .reset(reset),
+    .reset(reset | branch_not_taken),
 
     .load_in(lq_load_in),
     .write_en(lq_write_en),
@@ -1311,7 +1321,7 @@ end
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end
     if (ex_co_enable[5]) begin
-      ex_co_rega_st <= `SD is_ex_T1_value[5];
+      ex_co_rega_st <= `SD is_ex_T1_value[FU_ST_IDX];
     end
 		//ex_co_done <= `SD 0;
 
@@ -1361,6 +1371,11 @@ assign lq_pop_en = ~mem_co_stall;
      .sq_data_valid(sq_data_valid),           // adddress not found
      
      // Outputs
+     .sets_out(dcache_data),
+	.evicted_out(evicted_data),
+	.evicted_valid_out(evicted_valid),
+	.retire_queue_out(retire_queue),
+	.retire_queue_tail_out(retire_queue_tail),
      .mem_result_out(mem_result_out),
      .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),

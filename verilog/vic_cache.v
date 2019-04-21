@@ -8,37 +8,11 @@ module vic_cache(clock, reset,
               evicted_vic, evicted_valid,
               rd_vic, rd_valid, vic_queue_out);
     parameter NUM_WAYS = 4;
-    parameter RD_PORTS = 2;
-    parameter WR_PORTS = 3;
-    `define NUM_SET_BITS $clog2(32/NUM_WAYS)
-    `define NUM_TAG_BITS (13-`NUM_SET_BITS)
+    parameter RD_PORTS = 1;
+    parameter WR_PORTS = 1;
 
-    typedef struct packed {
-        logic [63:0] data;
-        logic [(`NUM_TAG_BITS-1):0] tag;
-        logic valid;
-        logic dirty;
-    } CACHE_LINE_T;
-
-    const CACHE_LINE_T EMPTY_CACHE_LINE = 
-    {
-        64'b0,
-        {`NUM_TAG_BITS{1'b0}},
-        1'b0,
-        1'b0
-    };
-
-    typedef struct packed {
-        CACHE_LINE_T line;
-        logic [(`NUM_SET_BITS-1):0] idx;
-    } VIC_CACHE_T;
-
-    const VIC_CACHE_T EMPTY_VIC_CACHE = 
-    {
-        EMPTY_CACHE_LINE,
-        {`NUM_SET_BITS{1'b0}}
-    };
-
+    `include "../../cache_defs.vh"
+    
     input clock;
     input reset;
     input [(WR_PORTS-1):0][(`NUM_SET_BITS-1):0] vic_idx;

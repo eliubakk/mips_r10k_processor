@@ -11,7 +11,7 @@ module encoder(in, out, valid);
 	genvar i, j, k;
 	for(i = 0; i < $clog2(WIDTH); i = i + 1) begin
 		for(j = 2 ** i; j < WIDTH; j = j + (2 ** (i+1))) begin
-			for(k = j; k < (j + (2**i)); k = k + 1) begin
+			for(k = j; (k < (j + (2**i))) & (k < WIDTH); k = k + 1) begin
 				assign out[i] = in[k];
 			end
 		end

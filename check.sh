@@ -48,9 +48,11 @@ do
 
 done
 
-echo "Checking for correctness"
+message="GRADE OUTPUT"
 
-echo "Checking for correct memory..."
+message="$message\nChecking for correctness"
+
+message="$message\nChecking for correct memory..."
 
 wrong=0
 total=0
@@ -70,22 +72,22 @@ do
 		# if file is not empty, then output is incorrect
 		if [ -s $DIFF_DIR/$file ]
 		then
-			echo -e "\t$file \t\t\tFAILED"
+			message="$message\n\t$file \t\t\tFAILED"
 			wrong=`expr $wrong + 1`
 		else
-			echo -e "\t$file \t\t\tPASSED"
+			message="$message\n\t$file \t\t\tPASSED"
 		fi
 		total=`expr $total + 1`
 	fi
 done
 
 correct=`expr $total - $wrong`
-echo "PASSED: $correct/$total"
+message="$message\nPASSED: $correct/$total"
 
 wrong=0
 total=0
 
-echo "Checking for correct writeback..."
+message="$message\nChecking for correct writeback..."
 
 for file in $CORRECT_DIR/*.writeback.out;
 do
@@ -99,15 +101,15 @@ do
 		# if file is not empty, then output is incorrect
 		if [ -s $DIFF_DIR/$file  ]
 		then
-			echo -e "\t$file \t\t\tFAILED"
+			message="$message\n\t$file \t\t\tFAILED"
 			wrong=`expr $wrong + 1`
 		else
-			echo -e "\t$file \t\t\tPASSED"
+			message="$message\n\t$file \t\t\tPASSED"
 		fi
 	fi
 	total=`expr $total + 1`
 done
 
 correct=`expr $total - $wrong`
-echo "PASSED: $correct/$total"
-
+message="$message\nPASSED $correct/$total"
+echo -e $message | tee grade.txt

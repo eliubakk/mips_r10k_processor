@@ -28,6 +28,20 @@ extern void print_membus(int proc2mem_command, int mem2proc_response,
 extern void print_close();
 
 
+`define NUM_WAYS 4
+`include "../../cache_defs.vh"
+
+// typedef struct packed {
+//	logic [63:0] data;
+//	logic [(`NUM_TAG_BITS - 1):0] tag;
+//	logic valid;
+//	logic dirty;
+//} CACHE_LINE_T;
+
+//  typedef struct packed {
+//    CACHE_LINE_T [(NUM_DCACHE_WAYS-1):0] cache_lines;
+//  } CACHE_SET_T;
+
 module testbench;
 
   // variables used in the testbench
@@ -117,7 +131,12 @@ logic [1:0]	proc2Imem_command_out;
   logic [`NUM_FU_TOTAL-1:0]       issue_next_valid_inst;
   logic mem_co_valid_inst;   
   logic [63:0] mem_co_NPC ;        
-  logic [31:0] mem_co_IR ;         
+  logic [31:0] mem_co_IR ;
+	CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data;
+	VIC_CACHE_T [2:0] evicted_data;
+	logic [2:0] evicted_valid;
+	RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue;
+	logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail;
  
   int pipe_counter; 
   int copy_pipe_counter;
@@ -153,6 +172,12 @@ logic [1:0]	proc2Imem_command_out;
     .pipeline_commit_phys_from_arch(pipeline_commit_phys_from_arch),
     .pipeline_branch_en(pipeline_branch_en),
     .pipeline_branch_pred_correct(pipeline_branch_pred_correct),
+
+	.dcache_data(dcache_data),
+	.evicted_data(evicted_data),
+	.evicted_valid(evicted_valid),
+	.retire_queue(retire_queue),
+	.retire_queue_tail(retire_queue_tail),
 
     .retire_inst_busy(retire_inst_busy),
     .retire_reg_NPC(retire_reg_NPC),
@@ -280,12 +305,42 @@ logic [1:0]	proc2Imem_command_out;
 	end
   endtask 
 
+	logic [`NUM_SET_BITS - 1:0] set_idx;
   // Show contents of a range of Unified Memory, in both hex and decimal
   task show_mem_with_decimal;
     input [31:0] start_addr;
     input [31:0] end_addr;
     int showing_data;
     begin
+
+	for (int i = 0; i < `NUM_SETS; ++i) begin
+		for (int j = 0; j < `NUM_WAYS; ++j) begin
+			set_idx = i;
+			//$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
+			//$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
+			if (dcache_data[i].cache_lines[j].valid /*&& dcache_data[i].cache_lines[j].dirty*/) begin
+				//$display("valid and dirty");
+				memory.unified_memory[{dcache_data[i].cache_lines[j].tag, set_idx}] = dcache_data[i].cache_lines[j].data;
+			end
+		end
+	end
+
+	for (int i = 0; i < 3; ++i) begin
+		// handle evicted_data
+		//$display("evicted_valid[%d] = %b", i, evicted_valid[i]);
+		if (evicted_valid[i]) begin
+			memory.unified_memory[{evicted_data[i].line.tag, evicted_data[i].idx}] = evicted_data[i].line.data;
+		end
+	end
+
+	for (int i = 0; i < `RETIRE_SIZE; ++i) begin
+		// handle retire buffer
+		//$display("retire_queue[%d].valid = %b", i, retire_queue[i].valid);
+		if (retire_queue[i].valid) begin
+			memory.unified_memory[retire_queue[i].address] = retire_queue[i].data;
+		end
+	end
+
       $display("@@@");
       showing_data=0;
       for(int k=start_addr;k<=end_addr; k=k+1)
@@ -562,6 +617,10 @@ logic [1:0]	proc2Imem_command_out;
         // for (int i = 0; i < 10; ++i) begin
         //   @(posedge clock);
         // end
+
+	// write cache to main mem
+	
+
         $display("@@@ Unified Memory contents hex on left, decimal on right: ");
         show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
           // 8Bytes per line, 16kB total

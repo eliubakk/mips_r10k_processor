@@ -10,24 +10,11 @@
 //                                                                     //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
-
-  `define NUM_SET_BITS $clog2(32/4)
-  `define NUM_TAG_BITS (13-`NUM_SET_BITS)
-
-  typedef struct packed {
-    logic [63:0] data;
-    logic [(`NUM_TAG_BITS-1):0] tag;
-    logic valid;
-    logic dirty;
-  } CACHE_LINE_T;
-
-
-  typedef struct packed {
-    CACHE_LINE_T line;
-    logic [(`NUM_SET_BITS-1):0] idx;
-  } VIC_CACHE_T;
-
 `include "../../sys_defs.vh"
+
+`define NUM_WAYS 4
+`include "../../cache_defs.vh"
+
 module mem_stage(
     input         clock,              // system clock
     input         reset,              // system reset
@@ -53,7 +40,13 @@ module mem_stage(
     output [63:0] proc2Dmem_data,      // Data sent to data-memory
     output [1:0]  proc2Rmem_command,
     output [63:0] proc2Rmem_addr,      // Address sent to data-memory
-    output [63:0] proc2Rmem_data
+    output [63:0] proc2Rmem_data,
+	// signals used for flushing
+	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
+	output VIC_CACHE_T [2:0] evicted_out,
+	output logic [2:0] evicted_valid_out,
+	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue_out,
+	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail_out
   );
 
   logic [63:0] Dcache_data_out;
@@ -77,7 +70,10 @@ module mem_stage(
   assign mem_rd_stall = (rd_mem && ~Dcache_valid_out);
   assign mem_stall_out = ret_buf_full;
 
-  
+ 
+	assign evicted_out = evicted;
+	assign evicted_valid_out = evicted_valid;
+ 
   dcache dcache0(
     .clock(clock),
     .reset(reset),
@@ -89,6 +85,8 @@ module mem_stage(
     .Dmem2proc_response(Dmem2proc_response),
     .Dmem2proc_data(Dmem2proc_data),
     .Dmem2proc_tag(Dmem2proc_tag),
+
+	.sets_out(sets_out),
 
     .Dcache_rd_data_out(Dcache_data_out),
     .Dcache_rd_valid_out(Dcache_valid_out),
@@ -103,7 +101,7 @@ module mem_stage(
   );
 
   retire_buffer #(
-  .NUM_WAYS(4),
+  .NUM_WAYS(`NUM_WAYS),
   .WR_PORTS(3))
   rb0(
     // inputs
@@ -114,6 +112,8 @@ module mem_stage(
     .Rmem2proc_response(Rmem2proc_response),
 
     // outputs
+	.retire_queue_out(retire_queue_out),
+	.retire_queue_tail_out(retire_queue_tail_out),
     .proc2Rmem_command(proc2Rmem_command), 
     .proc2Rmem_addr(proc2Rmem_addr), 
     .proc2Rmem_data(proc2Rmem_data),
