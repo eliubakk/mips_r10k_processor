@@ -1,6 +1,10 @@
 `include "../../sys_defs.vh"
 `define DEBUG
 
+`ifdef SIMV
+`include "../../verilog/vic_cache.v"
+`endif
+
 module dcache(clock, reset,
               rd_en, proc2Dcache_rd_addr,
               wr_en, proc2Dcache_wr_addr, proc2Dcache_wr_data,
