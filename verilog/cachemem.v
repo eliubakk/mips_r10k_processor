@@ -1,7 +1,26 @@
 // cachemem32x64
-
 `include "../../sys_defs.vh"
 `define DEBUG
+
+//`include "../../cache_defs.vh"
+`define NUM_WAYS 4
+`define NUM_SETS (32/`NUM_WAYS)
+`define NUM_SET_BITS $clog2(`NUM_SETS)
+`define NUM_TAG_BITS (13-`NUM_SET_BITS)
+
+
+
+typedef struct packed {
+  logic [63:0] data;
+  logic [(`NUM_TAG_BITS-1):0] tag;
+  logic valid;
+  logic dirty;
+} CACHE_LINE_T;
+
+typedef struct packed {
+  CACHE_LINE_T [(`NUM_WAYS-1):0] cache_lines;
+} CACHE_SET_T;
+
 
 module cachemem(clock, reset, 
                 rd_en, rd_idx, rd_tag,
@@ -17,10 +36,7 @@ module cachemem(clock, reset,
   parameter RD_PORTS = 1;
   parameter WR_PORTS = 3;
 
-  `define NUM_WAYS NUM_WAYS
-  `include "../../cache_defs.vh"
-
-  input clock, reset;
+    input clock, reset;
   
   //read inputs
   input [(RD_PORTS-1):0] rd_en;
