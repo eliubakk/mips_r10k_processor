@@ -16,7 +16,7 @@ Checking for correct memory...
 	char_at_test.program.out 			FAILED
 	copy.program.out 			PASSED
 	copy_long.program.out 			PASSED
-	evens.program.out 			FAILED
+	evens.program.out 			PASSED
 	evens_long.program.out 			PASSED
 	factorial.program.out 			FAILED
 	fib.program.out 			PASSED
@@ -49,7 +49,7 @@ Checking for correct memory...
 	sort.program.out 			FAILED
 	st.program.out 			FAILED
 	strcpy_test.program.out 			FAILED
-	strlen_test.program.out 			FAILED
+	strlen_test.program.out 			PASSED
 	test_branch_1.program.out 			PASSED
 	test_branch_2.program.out 			PASSED
 	test_branch_3.program.out 			PASSED
@@ -76,7 +76,7 @@ Checking for correct memory...
 	test_waw_3.program.out 			PASSED
 	test_waw_4.program.out 			PASSED
 	test_waw_5.program.out 			PASSED
-PASSED: 47/75
+PASSED: 49/75
 Checking for correct writeback...
 	add.writeback.out 			PASSED
 	b.writeback.out 			PASSED
@@ -126,7 +126,7 @@ Checking for correct writeback...
 	sort.writeback.out 			FAILED
 	st.writeback.out 			PASSED
 	strcpy_test.writeback.out 			FAILED
-	strlen_test.writeback.out 			FAILED
+	strlen_test.writeback.out 			PASSED
 	test_branch_1.writeback.out 			PASSED
 	test_branch_2.writeback.out 			PASSED
 	test_branch_3.writeback.out 			PASSED
@@ -153,4 +153,4 @@ Checking for correct writeback...
 	test_waw_3.writeback.out 			PASSED
 	test_waw_4.writeback.out 			PASSED
 	test_waw_5.writeback.out 			PASSED
-PASSED 53/75
+PASSED 54/75
