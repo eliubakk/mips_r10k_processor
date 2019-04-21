@@ -5,7 +5,8 @@ module dcache(clock, reset,
               rd_en, proc2Dcache_rd_addr,
               wr_en, proc2Dcache_wr_addr, proc2Dcache_wr_data,
               Dmem2proc_response, Dmem2proc_data, Dmem2proc_tag,
-              Dcache_rd_data_out, Dcache_rd_valid_out,
+              send_request_out, unanswered_miss_out,
+	      Dcache_rd_data_out, Dcache_rd_valid_out,
               Dcache_rd_miss_addr_out, Dcache_rd_miss_data_out, Dcache_rd_miss_valid_out,
               proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data,
               evicted, evicted_valid, sets_out);
@@ -36,6 +37,11 @@ module dcache(clock, reset,
   ///////////////
   //  OUTPUTS  //
   ///////////////
+  // for synthesis debugging
+  output logic		send_request_out;
+  output logic		unanswered_miss_out;  
+
+
   //to mem_stage
   output logic [(RD_PORTS-1):0][63:0] Dcache_rd_data_out; // value is memory[proc2Dcache_rd_addr]
   output logic [(RD_PORTS-1):0] Dcache_rd_valid_out; // when this is high
@@ -202,6 +208,11 @@ module dcache(clock, reset,
   logic update_mem_tag;
   logic mem_done;
   logic [63:0] mem_rd_data;
+
+
+   // Debugging for synth
+   assign send_request_out = send_request;
+   assign unanswered_miss_out = unanswered_miss;
 
   //Instantiate CAM to check for rd address in fifo
   genvar ig, jg, kg;

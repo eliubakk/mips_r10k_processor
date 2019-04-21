@@ -29,6 +29,9 @@ module mem_stage(
     input         sq_data_not_found,   // store addresses in the store queue not calculated
     input         sq_data_valid,       //address not found for forwarding
 
+   output	  send_request_out,
+   output	  unanswered_miss_out,
+
     output [63:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
     output        mem_rd_stall,
     output        mem_stall_out,
@@ -88,6 +91,8 @@ module mem_stage(
 
 	.sets_out(sets_out),
 
+    .send_request_out(send_request_out),
+    .unanswered_miss_out(unanswered_miss_out),
     .Dcache_rd_data_out(Dcache_data_out),
     .Dcache_rd_valid_out(Dcache_valid_out),
     .Dcache_rd_miss_addr_out(mem_rd_miss_addr_out),
