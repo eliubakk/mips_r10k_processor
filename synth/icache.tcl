@@ -12,11 +12,7 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
-
-read_file -f ddc [list "../../synth/cachemem/cachemem.ddc"]
-set_dont_touch cachemem
-
-analyze -f sverilog [concat "../../verilog/icache.v" $misc_files]
+analyze -f sverilog [concat "../../verilog/icache.v" "../../verilog/cachemem.v" $misc_files]
 elaborate icache
 set design_name icache
 set clock_name clock

@@ -12,7 +12,18 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
-analyze -f sverilog [concat  "../../verilog/RAS.v" "../../verilog/PHT_TWO_SC.v" "../../verilog/BTB.v" "../../verilog/BP2.v" $misc_files]
+#analyze -f sverilog [concat  "../../verilog/RAS.v" "../../verilog/PHT_TWO_SC.v" "../../verilog/BTB.v" "../../verilog/BP2.v" $misc_files]
+read_file -f ddc [list "../../synth/RAS/RAS.ddc"]
+set_dont_touch RAS
+read_file -f ddc [list "../../synth/PHT_TWO_SC/PHT_TWO_SC.ddc"]
+set_dont_touch PHT_TWO_SC
+read_file -f ddc [list "../../synth/BTB/BTB.ddc"]
+set_dont_touch BTB
+
+
+
+
+analyze -f sverilog [concat "../../verilog/BP2.v" $misc_files]
 elaborate BP2
 set design_name BP2
 set clock_name clock

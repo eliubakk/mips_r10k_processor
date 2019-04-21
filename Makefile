@@ -73,6 +73,7 @@ export LIB_DIR
 export PIPELINE_MODULES
 #export PIPELINE_LIBS
 
+
 $(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
@@ -141,6 +142,12 @@ $(DVE): dve_%: $(VERILOG_DIR)/%.v $(MISC_SRC) $(TEST_DIR)/%_test.v
 clean_%:
 	cd $(SYN_DIR) && \
 	rm -rf $(subst clean_,,$@) 
+
+#----------------Modified with Heewoo
+#
+# icache.vg:	icache.v cachemem.vg icache.tcl sys_defs.vh 
+#------------------------------------
+
 #####
 # Should be no need to modify after here
 #####
