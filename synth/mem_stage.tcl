@@ -22,7 +22,7 @@ set design_name mem_stage
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 15
+set CLK_PERIOD 12.3
 #SUPERSCALAR
 #set CLK_PERIOD 10
 
