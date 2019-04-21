@@ -129,7 +129,6 @@ module pipeline (
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
 
-
 // --------------------------Fetch1 signals  
 
 
@@ -252,7 +251,7 @@ module pipeline (
   FU_REG              ex_co_wr_mem;  
   FU_REG              ex_co_rd_mem;
   logic [63:0] ex_co_rega, ex_co_rega_st;
-  logic [1:0] [$clog2(`SQ_SIZE) - 1:0] ex_co_sq_idx; // index 0 is for store, index 1 is for load
+  SQ_INDEX_T   [1:0] ex_co_sq_idx; // index 0 is for store, index 1 is for load
 
 
   //Outputs from the complete stage
@@ -263,6 +262,7 @@ module pipeline (
   logic         co_reg_wr_en_out;
   logic         co_take_branch_selected;
   logic [63:0]  co_NPC_selected;
+  SQ_INDEX_T  [1:0] co_sq_idx;
   logic         co_valid_inst_selected;
   FU_REG        co_selected; // alu which is granted the request from priority selector
   logic         co_branch_valid;
@@ -301,7 +301,6 @@ ROB_ROW_T rob_retire_out;
   logic [$clog2(`FL_SIZE):0]  fr_num_free_entries; 
 	logic fr_empty; 
   PHYS_REG fr_free_reg_T;
-
 
 // ------------------------------Signals from modules
 
@@ -496,7 +495,7 @@ logic tag_in_lq;
     .ex_data(ex_store_data),
     .ex_data_en(ex_store_data_valid),
 
-    .rt_en(retire_is_store_next),
+    .rt_en(rob_retire_out_is_store),
 
     .data_rd(sq_data_out),
     .rd_valid(sq_data_valid), // checks for if data that exists is valid
@@ -920,6 +919,8 @@ end
 	logic id_no_dest_reg;// Instructions that does not have destination register
 	assign id_no_dest_reg = (id_rdest_idx == `ZERO_REG );
 
+    assign free_list_out = fr_rs_rob_T;
+
   Free_List f0(
     // INPUTS
     .clock(clock),
@@ -1320,7 +1321,9 @@ end
   end
 
   // add stall logic for ex_co registers with LQ   logic lq_full;
-
+  logic mem_co_stall;
+  assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
+  
   assign lq_load_in.valid_inst = ex_co_valid_inst[FU_LD_IDX];
   assign lq_load_in.NPC = ex_co_NPC[FU_LD_IDX];
   assign lq_load_in.IR = ex_co_IR[FU_LD_IDX];
@@ -1328,9 +1331,9 @@ end
   assign lq_load_in.illegal = ex_co_illegal[FU_LD_IDX];
   assign lq_load_in.dest_reg = ex_co_dest_reg_idx[FU_LD_IDX];
   assign lq_load_in.alu_result = ex_co_alu_result[FU_LD_IDX];
-  assign lq_load_in.data = 64'b0;
-  assign lq_load_in.data_valid = 1'b0;
-  assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & mem_rd_stall;
+  assign lq_load_in.data = mem_rd_stall? 64'b0 : mem_result_out;
+  assign lq_load_in.data_valid = ~mem_rd_stall;
+  assign lq_write_en = (ex_co_valid_inst[FU_LD_IDX] & (mem_rd_stall | mem_co_stall));
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
@@ -1343,8 +1346,6 @@ end
 //   //                                              //
 //   //////////////////////////////////////////////////
    
-logic mem_co_stall;
-assign mem_co_stall = !co_selected[FU_LD_IDX] & mem_co_valid_inst;
 assign lq_pop_en = ~mem_co_stall;
   
   mem_stage mem_stage_0 (// Inputs
@@ -1352,7 +1353,7 @@ assign lq_pop_en = ~mem_co_stall;
      .reset(reset),
      .rd_mem(ex_co_rd_mem[FU_LD_IDX]),
      .rd_addr(ex_co_alu_result[FU_LD_IDX]), 
-     .wr_mem(retire_is_store_next),
+     .wr_mem(rob_retire_out_is_store),
      .wr_addr(sq_head_address),
      .wr_data(sq_head_data),
      .Dmem2proc_data(Dmem2proc_data),
@@ -1488,17 +1489,17 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 	);
   
     always_comb begin
-	  co_NPC_selected             =    0 ;
-          co_IR_selected              =   `NOOP_INST;
-          co_halt_selected            =    0;
-          co_illegal_selected         =    0;
-          co_valid_inst_selected      =    0;
-          co_reg_wr_idx_out           =   `DUMMY_REG;
-          co_alu_result_selected      =    0;
-	 co_branch_valid = 1'b0;
-	 co_take_branch_selected = 1'b0;
-	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
-	 co_branch_target = 32'h0;
+            co_NPC_selected             =    0 ;
+            co_IR_selected              =   `NOOP_INST;
+            co_halt_selected            =    0;
+            co_illegal_selected         =    0;
+            co_valid_inst_selected      =    0;
+            co_reg_wr_idx_out           =   `DUMMY_REG;
+            co_alu_result_selected      =    0;
+            co_branch_valid = 1'b0;
+            co_take_branch_selected = 1'b0;
+            co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+            co_branch_target = 32'h0;
 
 
 
@@ -1521,24 +1522,24 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               co_branch_target = 32'h0;
 
             end else begin
-                        co_NPC_selected               =    ex_co_NPC[i];
-                        co_IR_selected                =    ex_co_IR[i];
-                        co_halt_selected              =    ex_co_halt[i];
-                        co_illegal_selected           =    ex_co_illegal[i];
-                        co_valid_inst_selected        =    ex_co_valid_inst[i];
-                        co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
-                        co_alu_result_selected        =    ex_co_alu_result[i];
-                        if(i == 4) begin // For branch
-                          co_branch_valid = ex_co_valid_inst[4];
-                          co_take_branch_selected = ex_co_take_branch;
-                          co_branch_index = ex_co_branch_index;
-                          co_branch_target = ex_co_branch_target;
-                        end else begin
-                          co_branch_valid = 1'b0;
-                          co_take_branch_selected = 1'b0;
-                          co_branch_index = {($clog2(`OBQ_SIZE)){0}};
-                          co_branch_target = 32'h0;
-		                    end
+              co_NPC_selected               =    ex_co_NPC[i];
+              co_IR_selected                =    ex_co_IR[i];
+              co_halt_selected              =    ex_co_halt[i];
+              co_illegal_selected           =    ex_co_illegal[i];
+              co_valid_inst_selected        =    ex_co_valid_inst[i];
+              co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
+              co_alu_result_selected        =    ex_co_alu_result[i];
+              if(i == 4) begin // For branch
+                co_branch_valid = ex_co_valid_inst[4];
+                co_take_branch_selected = ex_co_take_branch;
+                co_branch_index = ex_co_branch_index;
+                co_branch_target = ex_co_branch_target;
+              end else begin
+                co_branch_valid = 1'b0;
+                co_take_branch_selected = 1'b0;
+                co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+                co_branch_target = 32'h0;
+              end
             end
           end         
         end 
@@ -1550,10 +1551,10 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
           co_valid_inst_selected      =    0;
           co_reg_wr_idx_out           =   `DUMMY_REG;
           co_alu_result_selected      =    0;
-	 co_branch_valid = 1'b0;
-	 co_take_branch_selected = 1'b0;
-	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
-	 co_branch_target = 32'h0;
+        	 co_branch_valid = 1'b0;
+        	 co_take_branch_selected = 1'b0;
+        	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+        	 co_branch_target = 32'h0;
 
       end
     end
@@ -1641,8 +1642,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
     end
   end
   
-  assign retire_is_store = (rob_retire_opcode[31:26] == `STQ_INST) ||
-                            (rob_retire_opcode[31:26] == `STQ_C_INST);
+  assign retire_is_store = rob_retire_out.is_store & rob_retire_out.busy;//(rob_retire_opcode[31:26] == `STQ_INST) ||
+                            //(rob_retire_opcode[31:26] == `STQ_C_INST);
 
    
   ROB R0(
@@ -1654,8 +1655,10 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   	.T_new_in(fr_free_reg_T), // Comes from Free List During Dispatch
   	.CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
   	.CAM_en(CDB_enable), // Comes from CDB during Commit
-	.CDB_br_valid(co_branch_valid),// ****Heewoo, branch valid signal
-	.CDB_br_idx(co_branch_index), // ******Heewoo, comes from CDB during commit, branch index
+	  .CDB_br_valid(co_branch_valid),// ****Heewoo, branch valid signal
+	  .CDB_br_idx(co_branch_index), // ******Heewoo, comes from CDB during commit, branch index
+    .CDB_sq_valid(ex_co_valid_inst[FU_ST_IDX]),
+    .CDB_sq_idx(ex_co_sq_idx[0]),
   	.dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
   	.branch_not_taken(branch_not_taken),
 	  .halt_in(id_inst_out.inst.halt),
@@ -1665,6 +1668,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
     .id_branch_inst(id_branch_inst), // ***Heewoo added 
     .wr_idx(id_rdest_idx),
     .npc(id_inst_out.npc),
+    .is_store(id_inst_out.inst.wr_mem),
+    .sq_idx_in(id_inst_out.sq_idx),
     .co_alu_result(co_alu_result_selected),
   	
     // OUTPUTS
@@ -1734,10 +1739,10 @@ always_ff @ (posedge clock) begin
 		retire_reg_NPC <= `SD rob_retire_out.npc;
 		retire_reg_phys <= `SD rob_retire_out.T_new;
 		rob_retire_out_halt <= `SD rob_retire_out.halt;
-    		rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
+    rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
 		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
-		
+		rob_retire_out_is_store <= `SD (rob_retire_out.is_store & rob_retire_out.busy);
 		if(rob_retire_out.branch_inst.en) begin // For branch retire
 			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
 			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;

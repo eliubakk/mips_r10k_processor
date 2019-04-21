@@ -286,9 +286,9 @@ logic		unanswered_miss_out;
     real cpi;
 
     begin
-      cpi = (clock_count + 1.0) / instr_count+1;
+      cpi = (clock_count) / instr_count;
       $display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
-                clock_count+1, instr_count+1, cpi);
+                clock_count, instr_count, cpi);
       $display("@@  %4.2f ns total time to execute\n@@\n",
                 clock_count*`VIRTUAL_CLOCK_PERIOD);
     end

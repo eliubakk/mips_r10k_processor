@@ -10,8 +10,10 @@ module ROB(
 		input 		   [`SS_SIZE-1:0] halt_in,
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
-		input						CDB_br_valid, // ** Heewoo added ,need a way to deal with multiple branches
-		input  [$clog2(`OBQ_SIZE)-1 : 0 ] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
+		input						  CDB_br_valid, // ** Heewoo added ,need a way to deal with multiple branches
+		input [$clog2(`OBQ_SIZE)-1:0] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
+		input 						  CDB_sq_valid,
+		input SQ_INDEX_T			  CDB_sq_idx,
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
 		input branch_not_taken,
 		input [`SS_SIZE-1:0][31:0] opcode,
@@ -21,6 +23,8 @@ module ROB(
 		input BR_SIG		id_branch_inst,		//***Heewoo
 		input [`SS_SIZE-1:0][4:0]	wr_idx,
 		input [`SS_SIZE-1:0][63:0]	npc,
+		input [`SS_SIZE-1:0] 	is_store,
+		input SQ_INDEX_T [`SS_SIZE-1:0] sq_idx_in,
 		input [63:0] co_alu_result,
 
 		// OUTPUTS
@@ -95,8 +99,9 @@ module ROB(
 	for(ig = 0; ig < `ROB_SIZE; ig += 1) begin
 		// assign ready_to_retire[ig] = (ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig]));
 
-		assign ready_to_retire[ig] = (ROB_table[ig].branch_inst.en) ? ((ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | ((| cam_hits[ig]) & CDB_br_valid & (CDB_br_idx == ROB_table[ig].branch_inst.br_idx)))) : 
-																	 ((ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig])));
+		assign ready_to_retire[ig] =  (ROB_table[ig].branch_inst.en)? (ROB_table[ig].busy & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | ((| cam_hits[ig]) & CDB_br_valid & (CDB_br_idx == ROB_table[ig].branch_inst.br_idx)))) : 
+									 		(ROB_table[ig].is_store)? (ROB_table[ig].busy & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (CDB_sq_valid & (ROB_table[ig].sq_idx == CDB_sq_idx)))) :
+									 								  (ROB_table[ig].busy & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig])));
 
 		// if(ROB_table[i].branch_inst.en) begin// When branch is broadcasting
 		// 	ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx);
@@ -119,24 +124,25 @@ module ROB(
 		head_next = head;
 		tail_next = tail;
 		for(int i = 0; i < `SS_SIZE; i += 1) begin
-			retire_out[i].T_old = `DUMMY_REG;
-			retire_out[i].T_new = `DUMMY_REG;
-			retire_out[i].halt = 1'b0;
-			retire_out[i].busy = 1'b0;
-			retire_out[i].opcode =  `NOOP_INST;
-			retire_out[i].take_branch = 1'b0;
-			//retire_out[i].branch_valid = 1'b0;
-			retire_out[i].wr_idx = `ZERO_REG;
-			retire_out[i].npc = 64'h0;
+			retire_out[i] = EMPTY_ROB_ROW;
+			// retire_out[i].T_old = `DUMMY_REG;
+			// retire_out[i].T_new = `DUMMY_REG;
+			// retire_out[i].halt = 1'b0;
+			// retire_out[i].busy = 1'b0;
+			// retire_out[i].opcode =  `NOOP_INST;
+			// retire_out[i].take_branch = 1'b0;
+			// //retire_out[i].branch_valid = 1'b0;
+			// retire_out[i].wr_idx = `ZERO_REG;
+			// retire_out[i].npc = 64'h0;
 	
-			retire_out[i].branch_inst.en 		= 1'b0;
-			retire_out[i].branch_inst.cond 		= 1'b0;
-			retire_out[i].branch_inst.direct 	= 1'b0;
-			retire_out[i].branch_inst.ret	 	= 1'b0;
-			retire_out[i].branch_inst.pc 		= 64'h0;
-			retire_out[i].branch_inst.pred_pc 		= 64'h0;
-			retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
-			retire_out[i].branch_inst.prediction 	= 0;
+			// retire_out[i].branch_inst.en 		= 1'b0;
+			// retire_out[i].branch_inst.cond 		= 1'b0;
+			// retire_out[i].branch_inst.direct 	= 1'b0;
+			// retire_out[i].branch_inst.ret	 	= 1'b0;
+			// retire_out[i].branch_inst.pc 		= 64'h0;
+			// retire_out[i].branch_inst.pred_pc 		= 64'h0;
+			// retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
+			// retire_out[i].branch_inst.prediction 	= 0;
 			//retire_out[i].branch_inst.taken 	= 0;
 
 		end
@@ -145,6 +151,8 @@ module ROB(
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
 			if(ROB_table[i].branch_inst.en) begin// When branch is broadcasting
 				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx);
+			end else if(ROB_table[i].is_store) begin
+				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (CDB_sq_valid & (CDB_sq_idx == ROB_table[i].sq_idx));
 			end else begin
 				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
 			end
@@ -176,30 +184,27 @@ module ROB(
 		end else begin // during flush, do not retire
 			retired = {`SS_SIZE{1'b0}};
 			for(int i = 0; i < `SS_SIZE; i += 1) begin
-				retire_out[i].T_old = `DUMMY_REG;
-				retire_out[i].T_new = `DUMMY_REG;
-				retire_out[i].halt = 1'b0;
-				retire_out[i].busy = 1'b0;
-				retire_out[i].opcode =  `NOOP_INST;
-				retire_out[i].take_branch = 1'b0;
-			//	retire_out[i].branch_valid = 1'b0;
-				retire_out[i].wr_idx = `ZERO_REG;
-				retire_out[i].npc = 64'h0;
+				retire_out[i] = EMPTY_ROB_ROW;
+			// 	retire_out[i].T_old = `DUMMY_REG;
+			// 	retire_out[i].T_new = `DUMMY_REG;
+			// 	retire_out[i].halt = 1'b0;
+			// 	retire_out[i].busy = 1'b0;
+			// 	retire_out[i].opcode =  `NOOP_INST;
+			// 	retire_out[i].take_branch = 1'b0;
+			// //	retire_out[i].branch_valid = 1'b0;
+			// 	retire_out[i].wr_idx = `ZERO_REG;
+			// 	retire_out[i].npc = 64'h0;
 
-				retire_out[i].branch_inst.en 		= 1'b0;
-				retire_out[i].branch_inst.cond 		= 1'b0;
-				retire_out[i].branch_inst.direct 	= 1'b0;
-				retire_out[i].branch_inst.ret	 	= 1'b0;
-				retire_out[i].branch_inst.pc 		= 64'h0;
-				retire_out[i].branch_inst.pred_pc	= 64'h0;
-				retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
-				retire_out[i].branch_inst.prediction 	= 0;
+			// 	retire_out[i].branch_inst.en 		= 1'b0;
+			// 	retire_out[i].branch_inst.cond 		= 1'b0;
+			// 	retire_out[i].branch_inst.direct 	= 1'b0;
+			// 	retire_out[i].branch_inst.ret	 	= 1'b0;
+			// 	retire_out[i].branch_inst.pc 		= 64'h0;
+			// 	retire_out[i].branch_inst.pred_pc	= 64'h0;
+			// 	retire_out[i].branch_inst.br_idx 	= {($clog2(`OBQ_SIZE)){0}};
+			// 	retire_out[i].branch_inst.prediction 	= 0;
 				//retire_out[i].branch_inst.taken 	= 0;
-
-
 			end
-	
-
 		end
 		
 
@@ -230,6 +235,8 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].branch_inst = id_branch_inst; // What Heewoo Added 
 				ROB_table_next[dispatch_idx[i]].wr_idx = wr_idx[i];
 				ROB_table_next[dispatch_idx[i]].npc = npc[i];
+				ROB_table_next[dispatch_idx[i]].is_store = is_store[i];
+				ROB_table_next[dispatch_idx[i]].sq_idx = sq_idx_in[i];
 				dispatched[i] = 1'b1;
 			end
 		end
@@ -246,24 +253,25 @@ module ROB(
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
 			for (int i = 0; i < `ROB_SIZE; i += 1) begin
-				ROB_table[i].T_new <= `SD `DUMMY_REG;
-				ROB_table[i].T_old <= `SD `DUMMY_REG;
-				ROB_table[i].halt <= `SD 1'b0;
-				ROB_table[i].busy <= `SD 1'b0;	
-				ROB_table[i].opcode <= `SD `NOOP_INST;
-				ROB_table[i].take_branch <= `SD 1'b0;
-				//ROB_table[i].branch_valid <= `SD 1'b0;
-				ROB_table[i].wr_idx <= `SD `ZERO_REG;
-				ROB_table[i].npc <= `SD 64'h0;
+				ROB_table[i] = EMPTY_ROB_ROW;
+				// ROB_table[i].T_new <= `SD `DUMMY_REG;
+				// ROB_table[i].T_old <= `SD `DUMMY_REG;
+				// ROB_table[i].halt <= `SD 1'b0;
+				// ROB_table[i].busy <= `SD 1'b0;	
+				// ROB_table[i].opcode <= `SD `NOOP_INST;
+				// ROB_table[i].take_branch <= `SD 1'b0;
+				// //ROB_table[i].branch_valid <= `SD 1'b0;
+				// ROB_table[i].wr_idx <= `SD `ZERO_REG;
+				// ROB_table[i].npc <= `SD 64'h0;
 
-				ROB_table[i].branch_inst.en 		<= `SD 1'b0;
-				ROB_table[i].branch_inst.cond 		<= `SD 1'b0;
-				ROB_table[i].branch_inst.direct 	<= `SD 1'b0;
-				ROB_table[i].branch_inst.ret	 	<= `SD 1'b0;
-				ROB_table[i].branch_inst.pc 		<= `SD 64'h0;
-				ROB_table[i].branch_inst.pred_pc	<= `SD 64'h0;
-				ROB_table[i].branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-				ROB_table[i].branch_inst.prediction 	<= `SD 0;
+				// ROB_table[i].branch_inst.en 		<= `SD 1'b0;
+				// ROB_table[i].branch_inst.cond 		<= `SD 1'b0;
+				// ROB_table[i].branch_inst.direct 	<= `SD 1'b0;
+				// ROB_table[i].branch_inst.ret	 	<= `SD 1'b0;
+				// ROB_table[i].branch_inst.pc 		<= `SD 64'h0;
+				// ROB_table[i].branch_inst.pred_pc	<= `SD 64'h0;
+				// ROB_table[i].branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				// ROB_table[i].branch_inst.prediction 	<= `SD 0;
 				//ROB_table[i].branch_inst.taken 		<= `SD 0;
 
 

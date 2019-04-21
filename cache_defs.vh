@@ -34,6 +34,7 @@ typedef struct packed {
   logic [`NUM_SET_BITS-1:0] idx;
   logic [63:0] data;
   logic valid;
+  logic dirty;
 } DCACHE_FIFO_T;
 
 const DCACHE_FIFO_T EMPTY_DCACHE =

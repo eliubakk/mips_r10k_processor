@@ -89,7 +89,7 @@ module mem_stage(
     .Dmem2proc_data(Dmem2proc_data),
     .Dmem2proc_tag(Dmem2proc_tag),
 
-	.sets_out(sets_out),
+	  .sets_out(sets_out),
 
     .send_request_out(send_request_out),
     .unanswered_miss_out(unanswered_miss_out),
