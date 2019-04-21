@@ -52,13 +52,14 @@
 //`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
 //`define NUM_WR_FIFO 4
-`define NUM_FIFO 8
+`define NUM_FIFO 4
 `define NUM_DATA_PREFETCH 2
 `define FIFO_SIZE 4
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
 `define MEM_BUFFER_SIZE 10
+`define MEM_BUFFER_SIZE_BITS $clog2(`MEM_BUFFER_SIZE)
 
 typedef struct packed {
   logic [63:0] address;
@@ -79,7 +80,7 @@ typedef struct packed {
   logic wr_to_cache;
   logic wr_to_fifo;
   logic [(`NUM_FIFO_BITS-1):0] fifo_num;
-  logic [(`NUM_FIFO_SIZE_BITS-1):0] fifo_idx;
+  //logic [(`NUM_FIFO_SIZE_BITS-1):0] fifo_idx;
 } DCACHE_MEM_REQ_T;
 
 const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
@@ -88,8 +89,8 @@ const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
   1'b0,
   1'b0,
   1'b0,
-  {`NUM_FIFO_BITS{1'b0}},
-  {`NUM_FIFO_SIZE_BITS{1'b0}}
+  {`NUM_FIFO_BITS{1'b0}}
+  //{`NUM_FIFO_SIZE_BITS{1'b0}}
 };
 
 // typedef struct packed {
@@ -170,11 +171,24 @@ typedef struct packed{
   logic ret;
   logic [63:0] pc;	// Current pc, NOT NEXT PC!
   logic [63:0] pred_pc; // Predicted pc, used to check the flushing condition
-  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  
+  logic [$clog2(`OBQ_SIZE)-1:0] br_idx;  
   logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
   //logic taken;		// 1: branch actual taken, 0: branch actual not taken
   
 } BR_SIG;
+
+const BR_SIG EMPTY_BR_SIG =
+{
+  1'b0,
+  1'b0,
+  1'b0,
+  1'b0,
+  64'b0,
+  64'b0,
+  {$clog2(`OBQ_SIZE){1'b0}},
+  1'b0
+};
+
 
 // PHT_TWO_SC
 
@@ -191,7 +205,7 @@ typedef struct packed{
 typedef struct packed{
 	logic 		valid_inst;
 	logic 	[63:0]	npc; 
-	logic	[31:0]	ir;
+	logic	  [31:0]	ir;
 	BR_SIG		branch_inst;
 } INST_Q;
 
@@ -267,82 +281,6 @@ typedef enum logic [4:0] {
   ALU_CMPULT    = 5'h0f,
   ALU_CMPULE    = 5'h10
 } ALU_FUNC;
-
-//LUT for bit count of 4-bit numbers
-//                                         0000    0001    0010    0011    0100    0101    0110    0111    1000    1001    1010    1011    1100    1101    1110    1111
-const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001, 3'b010, 3'b010, 3'b011, 3'b001, 3'b010, 3'b010, 3'b011, 3'b010, 3'b011, 3'b011, 3'b100};
-
-typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
-
-// the number of functional units of each specific type we instantiate.
-const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
-
-typedef enum logic [2:0]{
-  FU_ALU,
-  FU_LD,
-  FU_MULT,
-  FU_BR,
-  FU_ST
-} FU_NAME;
-
-const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
-
-typedef enum logic [3:0]{
-  FU_ALU_IDX = 0,
-  FU_LD_IDX = 2,
-  FU_MULT_IDX = 3,
-  FU_BR_IDX = 4,
-  FU_ST_IDX = 5
-} FU_IDX;
-
-const FU_IDX [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
-
-typedef struct packed {
-	PHYS_REG phys_tag;
-} MAP_ROW_T;
-
-
-//ROB_ROWS
-typedef struct packed{
-  PHYS_REG T_new;
-  PHYS_REG T_old;
-  logic busy;
-  logic halt;
-  logic [31:0] opcode;
-  logic take_branch;      
-  //logic branch_valid;     //  Same as branch_inst.valid
-  logic [4:0] wr_idx;
-  logic [63:0] npc;
-  BR_SIG branch_inst;
-} ROB_ROW_T;
-
-const ROB_ROW_T EMPTY_ROB_ROW = 
-{
-  `DUMMY_REG,
-  `DUMMY_REG,
-  1'b0
-};
-
-//Freelist
-`define FL_SIZE `NUM_PHYS_REG
-
-// Store Queue
-`define SQ_SIZE 16
-
-// Load Queue
-`define LQ_SIZE 15
-typedef struct packed {
-  logic valid_inst;
-  logic [31:0] NPC;
-  logic [31:0] IR;
-  logic halt;
-  logic illegal;
-  PHYS_REG dest_reg;
-  logic [63:0] alu_result;
-  logic [63:0] data;
-  logic data_valid;
-  // logic [3:0] mem_response;
-} LQ_ROW_T;
 
 //////////////////////////////////////////////
 //
@@ -545,6 +483,94 @@ typedef enum logic [1:0] {
 `define RET_INST	2'h2
 `define JSR_CO_INST	2'h3
 
+//LUT for bit count of 4-bit numbers
+//                                         0000    0001    0010    0011    0100    0101    0110    0111    1000    1001    1010    1011    1100    1101    1110    1111
+const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001, 3'b010, 3'b010, 3'b011, 3'b001, 3'b010, 3'b010, 3'b011, 3'b010, 3'b011, 3'b011, 3'b100};
+
+typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
+
+// the number of functional units of each specific type we instantiate.
+const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
+
+typedef enum logic [2:0]{
+  FU_ALU,
+  FU_LD,
+  FU_MULT,
+  FU_BR,
+  FU_ST
+} FU_NAME;
+
+const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
+
+typedef enum logic [3:0]{
+  FU_ALU_IDX = 0,
+  FU_LD_IDX = 2,
+  FU_MULT_IDX = 3,
+  FU_BR_IDX = 4,
+  FU_ST_IDX = 5
+} FU_IDX;
+
+const FU_IDX [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
+
+typedef struct packed {
+  PHYS_REG phys_tag;
+} MAP_ROW_T;
+
+// Store Queue
+`define SQ_SIZE 16
+`define SQ_SIZE_BITS $clog2(`SQ_SIZE)
+typedef logic [`SQ_SIZE_BITS-1:0] SQ_INDEX_T;
+`define NULL_LD_POS {`SQ_SIZE_BITS{1'b1}} 
+
+//ROB_ROWS
+typedef struct packed{
+  PHYS_REG T_new;
+  PHYS_REG T_old;
+  logic busy;
+  logic halt;
+  logic [31:0] opcode;
+  logic take_branch;      
+  //logic branch_valid;     //  Same as branch_inst.valid
+  logic [4:0] wr_idx;
+  logic [63:0] npc;
+  logic is_store;
+  SQ_INDEX_T sq_idx;
+  BR_SIG branch_inst;
+} ROB_ROW_T;
+
+const ROB_ROW_T EMPTY_ROB_ROW = 
+{
+  `DUMMY_REG,
+  `DUMMY_REG,
+  1'b0,
+  1'b0,
+  `NOOP_INST,
+  1'b0,
+  `ZERO_REG,
+  64'b0,
+  1'b0,
+  {`SQ_SIZE_BITS{1'b0}},
+  EMPTY_BR_SIG
+};
+
+//Freelist
+`define FL_SIZE `NUM_PHYS_REG
+
+// Load Queue
+`define LQ_SIZE 15
+typedef struct packed {
+  logic valid_inst;
+  logic [31:0] NPC;
+  logic [31:0] IR;
+  logic halt;
+  logic illegal;
+  PHYS_REG dest_reg;
+  logic [63:0] alu_result;
+  logic [63:0] data;
+  logic data_valid;
+  // logic [3:0] mem_response;
+} LQ_ROW_T;
+
 typedef struct packed {
   ALU_OPA_SELECT opa_select; // use this for T1 valid
   ALU_OPB_SELECT opb_select; // use this for T2 valid
@@ -577,8 +603,6 @@ const DECODED_INST EMPTY_INST =
   1'b0
 };
 
-`define NULL_LD_POS {($clog2(`SQ_SIZE) - 1){1'b1}}
-
 // RS_ROWS
 typedef struct packed{
   DECODED_INST inst;
@@ -588,7 +612,7 @@ typedef struct packed{
   logic        busy;
   logic [31:0]  inst_opcode;
   logic [63:0]  npc;
-  logic [$clog2(`SQ_SIZE) - 1:0] sq_idx; // ld_pos;
+  SQ_INDEX_T sq_idx; // ld_pos;
   logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  //*****Heewoo :  Added for branch instruction
 } RS_ROW_T;
 

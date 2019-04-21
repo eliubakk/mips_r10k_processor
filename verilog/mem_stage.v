@@ -41,7 +41,12 @@ module mem_stage(
     output [1:0]  proc2Rmem_command,
     output [63:0] proc2Rmem_addr,      // Address sent to data-memory
     output [63:0] proc2Rmem_data,
-	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out
+	// signals used for flushing
+	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
+	output VIC_CACHE_T [2:0] evicted_out,
+	output logic [2:0] evicted_valid_out,
+	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue_out,
+	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail_out
   );
 
   logic [63:0] Dcache_data_out;
@@ -65,7 +70,10 @@ module mem_stage(
   assign mem_rd_stall = (rd_mem && ~Dcache_valid_out);
   assign mem_stall_out = ret_buf_full;
 
-  
+ 
+	assign evicted_out = evicted;
+	assign evicted_valid_out = evicted_valid;
+ 
   dcache dcache0(
     .clock(clock),
     .reset(reset),
@@ -104,6 +112,8 @@ module mem_stage(
     .Rmem2proc_response(Rmem2proc_response),
 
     // outputs
+	.retire_queue_out(retire_queue_out),
+	.retire_queue_tail_out(retire_queue_tail_out),
     .proc2Rmem_command(proc2Rmem_command), 
     .proc2Rmem_addr(proc2Rmem_addr), 
     .proc2Rmem_data(proc2Rmem_data),
