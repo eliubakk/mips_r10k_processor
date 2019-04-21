@@ -30,7 +30,7 @@ set clock_name clock
 set reset_name reset
 #set CLK_PERIOD 5
 #SINGLESCALAR
-set CLK_PERIOD 3.3
+set CLK_PERIOD 3.5
 #SUPERSCALAR
 #set CLK_PERIOD 10
 
