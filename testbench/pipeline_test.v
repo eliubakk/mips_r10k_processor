@@ -437,7 +437,7 @@ module testbench;
     end
 	`SD;
 	 // display_stages;
-	 if (clock_count == 20000) begin
+	 if (clock_count == 100000) begin
 	   $finish;
 	 end
   end 

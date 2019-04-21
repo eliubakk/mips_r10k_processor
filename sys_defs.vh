@@ -52,7 +52,7 @@
 //`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
 //`define NUM_WR_FIFO 4
-`define NUM_FIFO 8
+`define NUM_FIFO 4
 `define NUM_DATA_PREFETCH 2
 `define FIFO_SIZE 4
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
@@ -80,7 +80,7 @@ typedef struct packed {
   logic wr_to_cache;
   logic wr_to_fifo;
   logic [(`NUM_FIFO_BITS-1):0] fifo_num;
-  logic [(`NUM_FIFO_SIZE_BITS-1):0] fifo_idx;
+  //logic [(`NUM_FIFO_SIZE_BITS-1):0] fifo_idx;
 } DCACHE_MEM_REQ_T;
 
 const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
@@ -89,8 +89,8 @@ const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
   1'b0,
   1'b0,
   1'b0,
-  {`NUM_FIFO_BITS{1'b0}},
-  {`NUM_FIFO_SIZE_BITS{1'b0}}
+  {`NUM_FIFO_BITS{1'b0}}
+  //{`NUM_FIFO_SIZE_BITS{1'b0}}
 };
 
 // typedef struct packed {
