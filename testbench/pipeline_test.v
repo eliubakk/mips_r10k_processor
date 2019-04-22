@@ -460,7 +460,7 @@ module testbench;
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
 	`SD;
-	 //display_stages;
+	 /*//display_stages;
 	 if (clock_count == 100000) begin
 	  $finish;
 	 end
