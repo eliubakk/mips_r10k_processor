@@ -22,7 +22,7 @@ elaborate dcache
 set design_name dcache
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 11.5
+set CLK_PERIOD 12
 #set CLK_PERIOD 12
 
 

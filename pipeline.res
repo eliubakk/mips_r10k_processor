@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Sun Apr 21 18:52:17 2019
+Date   : Sun Apr 21 21:40:18 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -248,119 +248,119 @@ Resource Sharing Report for design dcache in file ../../verilog/dcache.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
-| r845     | DW01_dec     | width=4    |               | sub_423 sub_429      |
-| r865     | DW01_inc     | width=3    |               | add_575 add_576      |
+| r851     | DW01_cmp2    | width=5    |               | gt_423 gt_429 gt_485 |
+| r852     | DW01_dec     | width=4    |               | sub_423 sub_429      |
+| r871     | DW01_inc     | width=3    |               | add_575 add_576      |
 |          |              |            |               | add_577              |
-| r1051    | DW01_cmp2    | width=5    |               | lt_321               |
-| r1053    | DW01_cmp2    | width=5    |               | lt_410               |
-| r1055    | DW01_cmp6    | width=4    |               | eq_419               |
-| r1057    | DW01_dec     | width=3    |               | sub_455              |
-| r1059    | DW01_inc     | width=5    |               | add_463              |
-| r1061    | DW01_inc     | width=5    |               | add_468              |
-| r1063    | DW01_inc     | width=3    |               | add_478              |
-| r1065    | DW01_dec     | width=5    |               | sub_481              |
-| r1067    | DW01_cmp2    | width=5    |               | gt_482               |
-| r1069    | DW01_sub     | width=5    |               | sub_483_aco          |
-| r1071    | DW01_cmp2    | width=5    |               | gt_485               |
-| r1073    | DW01_sub     | width=5    |               | sub_486_aco          |
-| r1083    | DW01_cmp2    | width=5    |               | lt_523               |
-| r1085    | DW01_inc     | width=5    |               | add_530              |
-| r1087    | DW01_inc     | width=2    |               | add_542_I2_I1        |
-| r1089    | DW01_add     | width=64   |               | add_552              |
-| r1097    | DW_rash      | A_width=316 |              | srl_575              |
+| r1056    | DW01_cmp2    | width=5    |               | lt_321               |
+| r1058    | DW01_cmp2    | width=5    |               | lt_410               |
+| r1060    | DW01_cmp6    | width=4    |               | eq_419               |
+| r1062    | DW01_dec     | width=3    |               | sub_455              |
+| r1064    | DW01_inc     | width=5    |               | add_463              |
+| r1066    | DW01_inc     | width=5    |               | add_468              |
+| r1068    | DW01_inc     | width=3    |               | add_478              |
+| r1070    | DW01_dec     | width=5    |               | sub_481              |
+| r1072    | DW01_cmp2    | width=5    |               | gt_482               |
+| r1074    | DW01_sub     | width=5    |               | sub_483_aco          |
+| r1076    | DW01_sub     | width=5    |               | sub_486_aco          |
+| r1086    | DW01_cmp2    | width=5    |               | lt_523               |
+| r1088    | DW01_inc     | width=5    |               | add_530              |
+| r1090    | DW01_inc     | width=2    |               | add_542_I2_I1        |
+| r1092    | DW01_add     | width=64   |               | add_552              |
+| r1100    | DW_rash      | A_width=316 |              | srl_575              |
 |          |              | SH_width=10 |              |                      |
-| r1099    | DW01_sub     | width=3    |               | sub_576              |
-| r1101    | DW01_sub     | width=3    |               | sub_577              |
-| r1103    | DW01_cmp2    | width=5    |               | lt_583_2             |
-| r1105    | DW01_inc     | width=5    |               | add_597              |
-| r1107    | DW01_inc     | width=3    |               | add_599              |
-| r1109    | DW01_add     | width=64   |               | add_601              |
-| r1119    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18       |
-| r1121    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G1 |
-| r1123    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1 |
-| r1125    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G1 |
-| r1127    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G1 |
-| r1129    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G1 |
-| r1131    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G1 |
-| r1133    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G1 |
-| r1135    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2    |
-| r1137    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G2 |
-| r1139    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2 |
-| r1141    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G2 |
-| r1143    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G2 |
-| r1145    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G2 |
-| r1147    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G2 |
-| r1149    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G2 |
-| r1151    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3    |
-| r1153    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G3 |
-| r1155    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3 |
-| r1157    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G3 |
-| r1159    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G3 |
-| r1161    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G3 |
-| r1163    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G3 |
-| r1165    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G3 |
-| r1167    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4    |
-| r1169    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G4 |
-| r1171    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4 |
-| r1173    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G4 |
-| r1175    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G4 |
-| r1177    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G4 |
-| r1179    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G4 |
-| r1181    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G4 |
-| r1183    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18  |
-| r1185    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G2 |
-| r1187    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G3 |
-| r1189    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G4 |
-| r1191    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G5 |
-| r1193    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G6 |
-| r1195    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G7 |
-| r1197    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G8 |
-| r1199    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G9 |
-| r1201    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G10 |
-| r1203    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18 |
-| r1205    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G1 |
-| r1207    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2 |
-| r1209    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G2 |
-| r1211    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G3 |
-| r1213    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G3 |
-| r1215    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G4 |
-| r1217    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G4 |
-| r1219    | DW01_sub     | width=2    |               | fifo_psel/sub_26     |
-| r1221    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29     |
-| r1223    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31     |
-| r1225    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G2  |
-| r1227    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G2  |
-| r1229    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G3  |
-| r1231    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G3  |
-| r1233    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G4  |
-| r1235    | DW01_sub     | width=2    |               | fifo_psel/sub_29_G4  |
-| r1237    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G4  |
-| r1239    | DW01_inc     | width=2    |               | fifo_psel/add_53     |
-| r1241    | DW01_dec     | width=4    |               | fifo_sel_enc/sub_9   |
-| r1243    | DW01_dec     | width=4    |               | genblk5[0].fifo_num_enc/sub_9 |
-| r1245    | DW01_dec     | width=4    |               | genblk5[0].fifo_idx_enc/sub_9 |
-| r1247    | DW01_dec     | width=4    |               | genblk5[0].fetch_addr_enc/sub_9 |
-| r1249    | DW01_dec     | width=4    |               | genblk5[1].fifo_num_enc/sub_9 |
-| r1251    | DW01_dec     | width=4    |               | genblk5[1].fifo_idx_enc/sub_9 |
-| r1253    | DW01_dec     | width=4    |               | genblk5[1].fetch_addr_enc/sub_9 |
-| r1255    | DW01_dec     | width=10   |               | genblk6[0].mem_queue_num_enc/sub_9 |
-| r1361    | DW02_mult    | A_width=6  |               | mult_add_514_aco     |
+| r1102    | DW01_sub     | width=3    |               | sub_576              |
+| r1104    | DW01_sub     | width=3    |               | sub_577              |
+| r1106    | DW01_cmp2    | width=5    |               | lt_583_2             |
+| r1108    | DW01_inc     | width=5    |               | add_597              |
+| r1110    | DW01_inc     | width=3    |               | add_599              |
+| r1112    | DW01_add     | width=64   |               | add_601              |
+| r1122    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18       |
+| r1124    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G1 |
+| r1126    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1 |
+| r1128    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G1 |
+| r1130    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G1 |
+| r1132    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G1 |
+| r1134    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G1 |
+| r1136    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G1 |
+| r1138    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2    |
+| r1140    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G2 |
+| r1142    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2 |
+| r1144    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G2 |
+| r1146    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G2 |
+| r1148    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G2 |
+| r1150    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G2 |
+| r1152    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G2 |
+| r1154    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3    |
+| r1156    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G3 |
+| r1158    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3 |
+| r1160    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G3 |
+| r1162    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G3 |
+| r1164    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G3 |
+| r1166    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G3 |
+| r1168    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G3 |
+| r1170    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4    |
+| r1172    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G4 |
+| r1174    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4 |
+| r1176    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G4 |
+| r1178    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G4 |
+| r1180    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G4 |
+| r1182    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G4 |
+| r1184    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G4 |
+| r1186    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18  |
+| r1188    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G2 |
+| r1190    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G3 |
+| r1192    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G4 |
+| r1194    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G5 |
+| r1196    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G6 |
+| r1198    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G7 |
+| r1200    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G8 |
+| r1202    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G9 |
+| r1204    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G10 |
+| r1206    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18 |
+| r1208    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G1 |
+| r1210    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2 |
+| r1212    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G2 |
+| r1214    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G3 |
+| r1216    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G3 |
+| r1218    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G4 |
+| r1220    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G4 |
+| r1222    | DW01_sub     | width=2    |               | fifo_psel/sub_26     |
+| r1224    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29     |
+| r1226    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31     |
+| r1228    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G2  |
+| r1230    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G2  |
+| r1232    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G3  |
+| r1234    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G3  |
+| r1236    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G4  |
+| r1238    | DW01_sub     | width=2    |               | fifo_psel/sub_29_G4  |
+| r1240    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G4  |
+| r1242    | DW01_inc     | width=2    |               | fifo_psel/add_53     |
+| r1244    | DW01_dec     | width=4    |               | fifo_sel_enc/sub_9   |
+| r1246    | DW01_dec     | width=4    |               | genblk5[0].fifo_num_enc/sub_9 |
+| r1248    | DW01_dec     | width=4    |               | genblk5[0].fifo_idx_enc/sub_9 |
+| r1250    | DW01_dec     | width=4    |               | genblk5[0].fetch_addr_enc/sub_9 |
+| r1252    | DW01_dec     | width=4    |               | genblk5[1].fifo_num_enc/sub_9 |
+| r1254    | DW01_dec     | width=4    |               | genblk5[1].fifo_idx_enc/sub_9 |
+| r1256    | DW01_dec     | width=4    |               | genblk5[1].fetch_addr_enc/sub_9 |
+| r1258    | DW01_dec     | width=10   |               | genblk6[0].mem_queue_num_enc/sub_9 |
+| r1364    | DW02_mult    | A_width=6  |               | mult_add_514_aco     |
 |          |              | B_width=1  |               |                      |
-| r1363    | DW01_add     | width=64   |               | add_514_aco          |
-| r1469    | DW02_mult    | A_width=6  |               | mult_add_514_I4_aco  |
+| r1366    | DW01_add     | width=64   |               | add_514_aco          |
+| r1472    | DW02_mult    | A_width=6  |               | mult_add_514_I4_aco  |
 |          |              | B_width=1  |               |                      |
-| r1471    | DW01_add     | width=64   |               | add_514_I4_aco       |
-| r1577    | DW02_mult    | A_width=6  |               | mult_add_514_I3_aco  |
+| r1474    | DW01_add     | width=64   |               | add_514_I4_aco       |
+| r1580    | DW02_mult    | A_width=6  |               | mult_add_514_I3_aco  |
 |          |              | B_width=1  |               |                      |
-| r1579    | DW01_add     | width=64   |               | add_514_I3_aco       |
-| r1685    | DW02_mult    | A_width=6  |               | mult_add_514_I2_aco  |
+| r1582    | DW01_add     | width=64   |               | add_514_I3_aco       |
+| r1688    | DW02_mult    | A_width=6  |               | mult_add_514_I2_aco  |
 |          |              | B_width=1  |               |                      |
-| r1687    | DW01_add     | width=64   |               | add_514_I2_aco       |
-| r1789    | DW02_mult    | A_width=3  |               | mult_575             |
+| r1690    | DW01_add     | width=64   |               | add_514_I2_aco       |
+| r1792    | DW02_mult    | A_width=3  |               | mult_575             |
 |          |              | B_width=7  |               |                      |
-| r1895    | DW02_mult    | A_width=2  |               | mult_574             |
+| r1898    | DW02_mult    | A_width=2  |               | mult_574             |
 |          |              | B_width=3  |               |                      |
-| r1897    | DW01_add     | width=3    |               | add_574              |
+| r1900    | DW01_add     | width=3    |               | add_574              |
 ===============================================================================
 
 
@@ -369,15 +369,16 @@ Implementation Report
 |                    |                  | Current            | Set            |
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
-| add_601            | DW01_add         | cla                |                |
 | add_552            | DW01_add         | cla                |                |
+| fetch_addr_cam/eq_18                  |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
 | fetch_addr_cam/eq_18_G2               |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | fetch_addr_cam/eq_18_G3               |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | fetch_addr_cam/eq_18_G4               |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
-| fetch_addr_cam/eq_18                  |                    |                |
+| fetch_addr_cam/eq_18_G2_G1_G1         |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | fetch_addr_cam/eq_18_G2_G1_G2         |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
@@ -385,12 +386,11 @@ Implementation Report
 |                    | DW01_cmp6        | rpl                |                |
 | fetch_addr_cam/eq_18_G2_G1_G4         |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
-| fetch_addr_cam/eq_18_G2_G1_G1         |                    |                |
-|                    | DW01_cmp6        | rpl                |                |
 | add_514_aco        | DW01_add         | cla                |                |
 | add_514_I2_aco     | DW01_add         | cla                |                |
 | add_514_I3_aco     | DW01_add         | cla                |                |
 | add_514_I4_aco     | DW01_add         | cla                |                |
+| add_601            | DW01_add         | cla                |                |
 | mult_575           | DW02_mult        | csa                |                |
 | mem_queue_cam/eq_18_G10               |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
