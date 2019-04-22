@@ -420,13 +420,13 @@ module dcache(clock, reset,
                     (mem_req_queue[mem_waiting_ptr].req.mem_tag != 0);
 
   //write from memory
-  assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = mem_req_queue[mem_waiting_ptr-1].req.address[31:3];
+  assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = (mem_waiting_ptr > 0 )? mem_req_queue[mem_waiting_ptr-1].req.address[31:3] : 29'h0;
   assign cache_wr_dirty[RD_PORTS+WR_PORTS] = 1'b0;
   assign cache_wr_data[RD_PORTS+WR_PORTS] = mem_rd_data;
 
   //send rd data from memory to LQ
   //not valid if we fetched from memory for fifo buffers 
-  assign Dcache_rd_miss_addr_out = mem_req_queue[mem_waiting_ptr-1].req.address;
+  assign Dcache_rd_miss_addr_out = ( mem_waiting_ptr > 0 )? mem_req_queue[mem_waiting_ptr-1].req.address : 64'h0;
   assign Dcache_rd_miss_data_out = mem_rd_data;
 
   //request accepted by main memory
