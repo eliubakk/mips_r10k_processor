@@ -16,7 +16,7 @@ module icache(clock, reset,
   //  INPUTS  //
   //////////////
   //from if_stage
-  input [(RD_PORTS-1):0][63:0] proc2Icache_addr;
+  input [63:0] proc2Icache_addr;
 
   //from main memory
   input [3:0]  Imem2proc_response;
@@ -27,8 +27,8 @@ module icache(clock, reset,
   //  OUTPUTS  //
   ///////////////
   //to if_stage
-  output logic [(RD_PORTS-1):0][63:0] Icache_data_out; // value is memory[proc2Icache_addr]
-  output logic [(RD_PORTS-1):0] Icache_valid_out; // when this is high
+  output logic [63:0] Icache_data_out; // value is memory[proc2Icache_addr]
+  output logic  Icache_valid_out; // when this is high
 
   //to main memory
   output logic [1:0]  proc2Imem_command;
@@ -97,9 +97,9 @@ module icache(clock, reset,
   logic [($clog2(`INST_BUFFER_LEN)-1):0] mem_waiting_ptr, mem_waiting_ptr_next;
 
   //fetch address variables
-  logic [(RD_PORTS-1):0][63:0] PC_in;
+  logic [63:0] PC_in;
   logic [(`NUM_INST_PREFETCH-1):0][63:0] PC_in_Plus;
-  logic [(RD_PORTS-1):0][63:0] last_PC_in;
+  logic [63:0] last_PC_in;
   logic [(`NUM_SET_BITS-1):0] current_index;
   logic [(`NUM_TAG_BITS-1):0] current_tag;
 
@@ -107,7 +107,7 @@ module icache(clock, reset,
   logic [(RD_PORTS+`NUM_INST_PREFETCH-1):0][63:0] cam_tags_in;
   logic [(`INST_BUFFER_LEN-1):0][0:0][63:0] cam_table_in;
   logic [(`INST_BUFFER_LEN-1):0][0:0][(RD_PORTS+`NUM_INST_PREFETCH-1):0] PC_cam_hits;
-  logic [(RD_PORTS-1):0][(`INST_BUFFER_LEN-1):0] PC_in_hits;
+  logic [(`INST_BUFFER_LEN-1):0] PC_in_hits;
   logic [(`NUM_INST_PREFETCH-1):0][(`INST_BUFFER_LEN-1):0] PC_in_Plus_hits;
 
   //control variables
@@ -119,9 +119,9 @@ module icache(clock, reset,
 
   //Instantiate CAM to check for requested address in queue
   genvar ig, jg;
-  for(ig = 0; ig < RD_PORTS; ig += 1) begin
-    assign cam_tags_in[ig] = {PC_in[ig][63:3], 3'b0};
-  end
+  
+  assign cam_tags_in[0] = {PC_in[63:3], 3'b0};
+
   for(ig = RD_PORTS; ig < (RD_PORTS+`NUM_INST_PREFETCH); ig += 1) begin
     assign cam_tags_in[ig] = PC_in_Plus[ig-RD_PORTS];
   end
@@ -129,7 +129,7 @@ module icache(clock, reset,
   for(ig = 0; ig < `INST_BUFFER_LEN; ig += 1) begin
     assign cam_table_in[ig][0] = {PC_queue[ig].address[63:3], 3'b0};
     for(jg = 0; jg < RD_PORTS; jg += 1) begin
-      assign PC_in_hits[jg][ig] = PC_cam_hits[ig][0][jg] & (ig < PC_queue_tail);
+      assign PC_in_hits[ig] = PC_cam_hits[ig][0][jg] & (ig < PC_queue_tail);
     end
     for(jg = 0; jg < `NUM_INST_PREFETCH; jg += 1) begin
       assign PC_in_Plus_hits[jg][ig] = PC_cam_hits[ig][0][jg+RD_PORTS] & (ig < PC_queue_tail);
@@ -148,7 +148,7 @@ module icache(clock, reset,
 
   assign PC_in = proc2Icache_addr;
   for(ig = 0; ig < `NUM_INST_PREFETCH; ig += 1) begin
-    assign PC_in_Plus[ig] = {proc2Icache_addr[RD_PORTS-1][63:3],3'b0}+(8*(ig+1));
+    assign PC_in_Plus[ig] = {proc2Icache_addr[63:3],3'b0}+(8*(ig+1));
   end
 
   assign changed_addr = (PC_in != last_PC_in);
@@ -156,9 +156,9 @@ module icache(clock, reset,
   //cache rd PC_in
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
     assign cache_rd_en[ig] = 1'b1;
-    assign {cache_rd_tag[ig], cache_rd_idx[ig]} = PC_in[ig][31:3];
-    assign Icache_data_out[ig] = cache_rd_data[ig];
-    assign Icache_valid_out[ig] = cache_rd_valid[ig];
+    assign {cache_rd_tag[ig], cache_rd_idx[ig]} = PC_in[31:3];
+    assign Icache_data_out = cache_rd_data[ig];
+    assign Icache_valid_out = cache_rd_valid[ig];
   end
 
   //cache rd front of queue
@@ -216,7 +216,7 @@ module icache(clock, reset,
       	PC_queue_tail_next = 0;
       	send_req_ptr_next = 0;
       	mem_waiting_ptr_next = 0;
-        PC_queue_next[PC_queue_tail_next].address = {PC_in[i][63:3], 3'b0};
+        PC_queue_next[PC_queue_tail_next].address = {PC_in[63:3], 3'b0};
         PC_queue_next[PC_queue_tail_next].mem_tag = 4'b0;
         PC_queue_next[PC_queue_tail_next].valid = 1'b1;
         PC_queue_tail_next += 1;
@@ -240,9 +240,9 @@ module icache(clock, reset,
       for(int i = 0; i < `INST_BUFFER_LEN; i += 1) begin
         PC_queue[i] <= `SD EMPTY_MEM_REQ;
       end
-      PC_queue_tail   <= `SD 0;
-      send_req_ptr    <= `SD 0;
-      mem_waiting_ptr <= `SD 0;
+      PC_queue_tail   <= `SD {$clog2(`INST_BUFFER_LEN){1'b0}};
+      send_req_ptr    <= `SD {$clog2(`INST_BUFFER_LEN){1'b0}};
+      mem_waiting_ptr <= `SD {$clog2(`INST_BUFFER_LEN){1'b0}};
       cache_wr_en     <= `SD 1'b0;
       cache_wr_data   <= `SD 64'b0;
       {cache_wr_tag, cache_wr_idx} <= `SD 29'b0;

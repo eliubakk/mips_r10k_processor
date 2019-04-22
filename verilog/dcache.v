@@ -1,10 +1,6 @@
 `include "../../sys_defs.vh"
 `define DEBUG
 
-`ifdef SIMV
-`include "../../verilog/vic_cache.v"
-`endif
-
 module dcache(clock, reset,
               rd_en, proc2Dcache_rd_addr,
               wr_en, proc2Dcache_wr_addr, proc2Dcache_wr_data,
@@ -399,8 +395,8 @@ module dcache(clock, reset,
 
   //send rd request from queue to memory
   assign unanswered_miss = send_request? (Dmem2proc_response == 0) :
-                                         (send_req_ptr < mem_req_queue_tail) | 
-                                          (~(|cache_wr_en[(WR_PORTS+RD_PORTS-1)-:RD_PORTS]) & (|cache_rd_miss_valid));
+                                         (send_req_ptr < mem_req_queue_tail);// | 
+                                          //(~(|cache_wr_en[(WR_PORTS+RD_PORTS-1)-:RD_PORTS]) & (|cache_rd_miss_valid));
 
   assign proc2Dmem_addr = send_request? mem_req_queue[send_req_ptr].req.address :
                                         64'b0;
@@ -411,13 +407,13 @@ module dcache(clock, reset,
                     (mem_req_queue[mem_waiting_ptr].req.mem_tag != 0);
 
   //write from memory
-  assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = mem_req_queue[mem_waiting_ptr-1].req.address[31:3];
+  assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = (mem_waiting_ptr > 0)? mem_req_queue[mem_waiting_ptr-1].req.address[31:3] : 29'b0;
   assign cache_wr_dirty[RD_PORTS+WR_PORTS] = 1'b0;
   assign cache_wr_data[RD_PORTS+WR_PORTS] = mem_rd_data;
 
   //send rd data from memory to LQ
   //not valid if we fetched from memory for fifo buffers 
-  assign Dcache_rd_miss_addr_out = mem_req_queue[mem_waiting_ptr-1].req.address;
+  assign Dcache_rd_miss_addr_out = (mem_waiting_ptr > 0)? mem_req_queue[mem_waiting_ptr-1].req.address : 64'b0;
   assign Dcache_rd_miss_data_out = mem_rd_data;
 
   //request accepted by main memory

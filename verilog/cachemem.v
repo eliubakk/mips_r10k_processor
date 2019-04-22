@@ -73,15 +73,15 @@ module cachemem(clock, reset,
 	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0][0:0][(`NUM_TAG_BITS-1):0] rd_cam_table_in;
 	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0][0:0] rd_cam_hits_out;
 	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0] rd_tag_hits;
-  logic [(RD_PORTS-1):0][$clog2(NUM_WAYS)-1:0] rd_tag_idx;
+  logic [(RD_PORTS-1):0][$clog2(NUM_WAYS):0] rd_tag_idx;
   logic [(RD_PORTS-1):0] wr_forward_to_rd;
 
   //wr search variables
   logic [(WR_PORTS-1):0][(NUM_WAYS-1):0][0:0][(`NUM_TAG_BITS-1):0] wr_cam_table_in;
 	logic [(WR_PORTS-1):0][(NUM_WAYS-1):0][0:0] wr_cam_hits_out;
 	logic [(WR_PORTS-1):0][(NUM_WAYS-1):0] wr_tag_hits;
-  logic [(WR_PORTS-1):0][$clog2(NUM_WAYS)-1:0] wr_tag_idx;
-  logic [$clog2(NUM_WAYS)-1:0] wr_new_tag_idx;
+  logic [(WR_PORTS-1):0][$clog2(NUM_WAYS):0] wr_tag_idx;
+  logic [$clog2(NUM_WAYS):0] wr_new_tag_idx;
 
   // assign statements
   `ifdef DEBUG
@@ -146,6 +146,24 @@ module cachemem(clock, reset,
     next_bst_idx = 0;
     acc = 0;
     temp_idx = 0;
+
+    for(int i = 0; i < RD_PORTS; ++i) begin
+      rd_data[i] = 64'b0;
+      rd_valid[i] = 1'b0;
+      rd_miss_idx[i] = {`NUM_SET_BITS{1'b0}}; 
+      rd_miss_tag[i] = {`NUM_TAG_BITS{1'b0}};
+      rd_miss_valid[i] = 1'b0;
+    end
+    for(int i = 0; i < WR_PORTS; ++i) begin
+      wr_miss_idx[i] = {`NUM_SET_BITS{1'b0}};
+      wr_miss_tag[i] = {`NUM_TAG_BITS{1'b0}};
+      wr_miss_valid[i] = 1'b0;
+
+      // victim cache outputs
+      vic_idx[i] = {`NUM_SET_BITS{1'b0}};
+      victim[i] = EMPTY_CACHE_LINE;
+      victim_valid[i] = 1'b0;
+    end
 
     //rd output logic
     for(int i = 0; i < RD_PORTS; i += 1) begin

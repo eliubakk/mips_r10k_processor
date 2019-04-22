@@ -79,6 +79,9 @@ module mem_controller(clock, reset,
         //proc2mem_command_next = proc2mem_command;
         //proc2mem_addr_next = proc2mem_addr;
         //proc2mem_data_next = proc2mem_data;
+        proc2mem_command = BUS_NONE;
+        proc2mem_addr = 64'b0;
+        proc2mem_data = 64'b0;
 
         case(state)
             IDLE: begin
@@ -137,13 +140,13 @@ module mem_controller(clock, reset,
     always_ff @(posedge clock) begin
         if(reset) begin
             state 	   <= `SD IDLE;
-            Dmem2proc_response <= `SD 0;
-            Dmem2proc_data <= `SD 0;
-            Dmem2proc_tag <= `SD 0;
-            Imem2proc_response <= `SD 0;
-            Imem2proc_data <= `SD 0;
-            Imem2proc_tag <= `SD 0;
-            Rmem2proc_response <= `SD 0;
+            Dmem2proc_response <= `SD 4'b0;
+            Dmem2proc_data <= `SD 64'b0;
+            Dmem2proc_tag <= `SD 4'b0;
+            Imem2proc_response <= `SD 4'b0;
+            Imem2proc_data <= `SD 64'b0;
+            Imem2proc_tag <= `SD 4'b0;
+            Rmem2proc_response <= `SD 4'b0;
             //proc2mem_command <= `SD 0;
             //proc2mem_addr <= `SD 0;
             //proc2mem_data <= `SD 0;

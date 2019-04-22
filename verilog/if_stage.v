@@ -83,7 +83,7 @@ assign if_valid_inst_out = Imem_valid & dispatch_en;
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
-      PC_reg <= `SD 0;       // initial PC value is 0
+      PC_reg <= `SD 64'b0;       // initial PC value is 0
    end else if (co_ret_take_branch) begin
       PC_reg <= `SD co_ret_target_pc;
   end else if (!co_ret_take_branch & if_bp_NPC_valid) begin
