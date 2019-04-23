@@ -73,15 +73,15 @@ module cachemem(clock, reset,
 	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0][0:0][(`NUM_TAG_BITS-1):0] rd_cam_table_in;
 	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0][0:0] rd_cam_hits_out;
 	logic [(RD_PORTS-1):0][(NUM_WAYS-1):0] rd_tag_hits;
-  logic [(RD_PORTS-1):0][$clog2(NUM_WAYS):0] rd_tag_idx;
+  logic [(RD_PORTS-1):0][$clog2(NUM_WAYS)-1:0] rd_tag_idx;
   logic [(RD_PORTS-1):0] wr_forward_to_rd;
 
   //wr search variables
   logic [(WR_PORTS-1):0][(NUM_WAYS-1):0][0:0][(`NUM_TAG_BITS-1):0] wr_cam_table_in;
 	logic [(WR_PORTS-1):0][(NUM_WAYS-1):0][0:0] wr_cam_hits_out;
 	logic [(WR_PORTS-1):0][(NUM_WAYS-1):0] wr_tag_hits;
-  logic [(WR_PORTS-1):0][$clog2(NUM_WAYS):0] wr_tag_idx;
-  logic [$clog2(NUM_WAYS):0] wr_new_tag_idx;
+  logic [(WR_PORTS-1):0][$clog2(NUM_WAYS)-1:0] wr_tag_idx;
+  logic [$clog2(NUM_WAYS)-1:0] wr_new_tag_idx;
 
   // assign statements
   `ifdef DEBUG

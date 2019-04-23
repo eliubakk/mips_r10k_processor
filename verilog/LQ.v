@@ -5,7 +5,7 @@
 module LQ(
     input clock,
     input reset,
-
+    input branch_incorrect,
     input LQ_ROW_T load_in,
     input write_en,
     input pop_en,
@@ -33,7 +33,7 @@ module LQ(
     for (ig = 0; ig < `LQ_SIZE; ++ig) begin
 	// change the hit to check if address from bits 63:0 matches so that
 	// addresses of each block match as a hit
-        assign addr_hits[ig] = (load_queue[ig].alu_result == lq_miss_addr) & (load_queue[ig].valid_inst) & lq_miss_valid; 
+        assign addr_hits[ig] = (branch_incorrect)? 1'b0 : (load_queue[ig].alu_result == lq_miss_addr) & (load_queue[ig].valid_inst) & lq_miss_valid; 
     end
 
     // assign tag_found = |mem_tag_hits;
@@ -41,7 +41,7 @@ module LQ(
     // assign load_out = load_queue[head];
     assign full = (tail + 1'b1) == head;
     // assign read_valid = load_queue[head].valid_inst;
-    assign read_valid = load_queue[head].data_valid;
+    assign read_valid = (branch_incorrect)? 1'b0 : load_queue[head].data_valid;
 
     // combinational logic
     always_comb begin
@@ -70,7 +70,7 @@ module LQ(
 
     // sequential logic
     always_ff @(posedge clock) begin
-      if (reset) begin
+      if (reset | branch_incorrect) begin
         for (int i = 0; i < `LQ_SIZE; ++i) begin
             load_queue[i].valid_inst <= `SD 1'b0;
             load_queue[i].NPC <= `SD 32'b0;
@@ -83,8 +83,8 @@ module LQ(
             load_queue[i].data_valid   <= 1'b0;
             // load_queue[i].mem_response <= `SD 4'b0;
         end 
-        head <= {`lq_index_t{0}};
-        tail <= {`lq_index_t{0}};
+        head <= `SD {`lq_index_t{1'b0}};
+        tail <= `SD {`lq_index_t{1'b0}};
       end else begin
         load_queue <= `SD load_queue_next;
         head <= `SD head_next;

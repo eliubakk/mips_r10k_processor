@@ -8,8 +8,8 @@ module vic_cache(clock, reset,
               evicted_vic, evicted_valid,
               rd_vic, rd_valid, vic_queue_out);
     parameter NUM_WAYS = 4;
-    parameter RD_PORTS = 1;
-    parameter WR_PORTS = 1;
+    parameter RD_PORTS = 2;
+    parameter WR_PORTS = 3;
 
     `include "../../cache_defs.vh"
     
@@ -44,7 +44,7 @@ module vic_cache(clock, reset,
 
     //update logic variables
     logic [(`VIC_SIZE-1):0][(`NUM_VIC_BITS-1):0] vic_num_shift;
-    logic [(`NUM_VIC_BITS-1):0] num_evict;
+    logic [(`NUM_VIC_BITS):0] num_evict;
 
     //assign rd CAM variables
     genvar ig, jg;
@@ -54,7 +54,7 @@ module vic_cache(clock, reset,
 	for (ig = 0; ig < `VIC_SIZE; ++ig) begin
 		assign vic_queue_cam_table_in[ig][0] = {vic_queue[ig].line.tag, vic_queue[ig].idx};
         for (jg = 0; jg < RD_PORTS; ++jg) begin
-            assign rd_vic_hits[jg][ig] = vic_cam_hits[ig][jg] & vic_queue[ig].line.valid;
+            assign rd_vic_hits[jg][ig] = vic_cam_hits[ig][0][jg] & vic_queue[ig].line.valid;
         end
 	end
 
