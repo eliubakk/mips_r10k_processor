@@ -92,10 +92,10 @@ module IQ(
 				inst_queue[i].branch_inst.ret		<= `SD 1'b0;
 				inst_queue[i].branch_inst.pc		<= `SD 64'h0;
 				inst_queue[i].branch_inst.pred_pc	<= `SD 64'h0;
-				inst_queue[i].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				inst_queue[i].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 				inst_queue[i].branch_inst.prediction	<= `SD 1'b0;
 			end	
-				tail 				<= `SD 0;
+				tail 				<= `SD 1'b0;
 
 				inst_queue_full			<= `SD 1'b0;
 				
@@ -108,7 +108,7 @@ module IQ(
 				if_inst_out.branch_inst.ret		<= `SD 1'b0;
 				if_inst_out.branch_inst.pc		<= `SD 64'h0;
 				if_inst_out.branch_inst.pred_pc	<= `SD 64'h0;
-				if_inst_out.branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				if_inst_out.branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 				if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 
 		end else begin
@@ -127,7 +127,7 @@ module IQ(
 					inst_queue[`IQ_SIZE-1].branch_inst.ret		<= `SD 1'b0;
 					inst_queue[`IQ_SIZE-1].branch_inst.pc		<= `SD 64'h0;
 					inst_queue[`IQ_SIZE-1].branch_inst.pred_pc	<= `SD 64'h0;
-					inst_queue[`IQ_SIZE-1].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+					inst_queue[`IQ_SIZE-1].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 					inst_queue[`IQ_SIZE-1].branch_inst.prediction	<= `SD 1'b0;
 
 
@@ -145,7 +145,7 @@ module IQ(
 					if_inst_out.branch_inst.ret		<= `SD 1'b0;
 					if_inst_out.branch_inst.pc		<= `SD 64'h0;
 					if_inst_out.branch_inst.pred_pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){0}};
+					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 					if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 					inst_queue				<= `SD next_inst_queue;
 					tail 					<= `SD next_tail;
@@ -164,7 +164,7 @@ module IQ(
 					if_inst_out.branch_inst.ret		<= `SD 1'b0;
 					if_inst_out.branch_inst.pc		<= `SD 64'h0;
 					if_inst_out.branch_inst.pred_pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){0}};
+					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 					if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 					inst_queue				<= `SD next_inst_queue;
 					tail 					<= `SD next_tail;
