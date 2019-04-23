@@ -17,9 +17,7 @@ elaborate LQ
 set design_name LQ
 set clock_name clock
 set reset_name reset
-#SINGLESCALAR
-set CLK_PERIOD 1.9
-#SUPERSCALAR
+set CLK_PERIOD 2.1
 
 
 

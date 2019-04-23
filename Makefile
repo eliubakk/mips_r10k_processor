@@ -25,6 +25,7 @@ PIPE_FILES = $(wildcard verilog/*.v)
 PIPE_SIMFILES = $(PIPE_FILES)
 
 PIPELINE_TESTBENCH = 	sys_defs.vh	\
+			cache_defs.vh	\
 			testbench/pipeline_test.v	\
 			testbench/mem.v			\
 			testbench/pipe_print.c		
@@ -75,32 +76,32 @@ export LIB_DIR
 export PIPELINE_MODULES
 #export PIPELINE_LIBS
 
-$(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
+$(MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh cache_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out && \
 	mkdir -p ../$(LIB_DIR) && \
 	cp -f $*.ddc ../$(LIB_DIR)
 
-$(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
+$(MISC_MODULES_SYN_FILES): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh cache_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out && \
 	mkdir -p ../$(LIB_DIR) && \
 	cp -f $*.ddc ../$(LIB_DIR)
 
-$(PIPELINE_SYN_FILE): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh
+$(PIPELINE_SYN_FILE): %.vg: $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh cache_defs.vh
 	cd $(SYN_DIR) && \
 	mkdir -p $* && cd $* && \
 	dc_shell-t -f ../$*.tcl | tee $*_synth.out
 
-$(MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh
+$(MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh cache_defs.vh
 	make $*.vg
 
-$(MISC_MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh
+$(MISC_MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh cache_defs.vh
 	make $*.vg
 
-$(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh
+$(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh cache_defs.vh
 	make $*.vg
 
 .PHONY: $(MODULES_VG)
@@ -108,7 +109,7 @@ $(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_de
 .PHONY: $(PIPELINE_VG)
 
 $(SYN_SIMV): syn_simv_%: $(TEST_DIR)/%_test.v
-	make $(SYN_DIR)/$*/$*.vg && \
+	make -j $(SYN_DIR)/$*/$*.vg && \
 	cd $(SYN_DIR)/$* && \
 	$(VCS) $*.vg ../../$(TEST_DIR)/$*_test.v $(LIB) -o $@
 
@@ -156,7 +157,7 @@ simv: $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR
 	cd $(SYN_DIR) && rm -rf $(PIPELINE_NAME) &&\
 	mkdir -p $(PIPELINE_NAME) && cd $(PIPELINE_NAME) && \
 	$(VCS_PIPE) $(patsubst %,../../%,$^) -o simv &&\
-	mv -f * ../../. && cd ../..
+	mv * ../../. && cd ../..
 
 .PHONY: sim
 
@@ -170,7 +171,7 @@ dve:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
 
 syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
-	make -j $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
+	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
 	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
 	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
 	mv ** ../../.
@@ -204,3 +205,4 @@ nuke:	clean
 
 syn_dve:	$(SYNFILES) $(TESTBENCH)
 	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o dve -R -gui
+

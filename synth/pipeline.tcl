@@ -40,7 +40,7 @@ elaborate ${pipeline_name}
 set design_name ${pipeline_name}
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 9.8
+set CLK_PERIOD 20
 #set clock_name [getenv CLOCK_NET_NAME]
 #set reset_name [getenv RESET_NET_NAME]
 #set CLK_PERIOD [getenv CLOCK_PERIOD]
@@ -118,6 +118,7 @@ set dc_shell_status [ set chk_file [format "%s%s"  [format "%s%s"  $SYN_DIR $des
 if {  $dc_shell_status != [list] } {
   current_design $design_name
   link
+  set_host_options -max_cores {3}
   set_wire_load_model -name $WIRE_LOAD -lib $LOGICLIB $design_name
   set_wire_load_mode top
   set_fix_multiple_port_nets -outputs -buffer_constants

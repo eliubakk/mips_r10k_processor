@@ -1,6 +1,6 @@
 `include "../../sys_defs.vh"
 
-//typedef enum logic [1:0] {_IDLE, _IMEM, _DMEM} _ts_state;
+typedef enum logic [1:0] {IDLE,IMEM, DMEM} ts_state;
 
 `define DELAY #2
 `define CLOCK_PERIOD #10

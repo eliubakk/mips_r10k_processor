@@ -11,9 +11,6 @@
 `define DEBUG
 `define SD #1
 
-`define NUM_WAYS 4
-`include "../../cache_defs.vh"
-
 module pipeline (
     //input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
     //input MAP_ROW_T [`NUM_GEN_REG-1:0]	map_check_point,
@@ -27,6 +24,13 @@ module pipeline (
     output logic [1:0]  proc2mem_command,    // command sent to memory
     output logic [63:0] proc2mem_addr,      // Address sent to memory
     output logic [63:0] proc2mem_data,      // Data sent to memory
+
+   
+    output logic [1:0]	proc2Rmem_command_out,	// For synthesize debugging
+    output logic [1:0]	proc2Dmem_command_out,	// For synthesize debugging
+    output logic [1:0]	proc2Imem_command_out,	// For synthesize debugging
+    output logic	send_request_out,
+    output logic	unanswered_miss_out,
 
     output logic [3:0]  pipeline_completed_insts,
     output ERROR_CODE   pipeline_error_status,
@@ -85,12 +89,12 @@ module pipeline (
     // output logic [4:0] ex_mem_IR,
     // output logic [4:0]       ex_mem_valid_inst,
 
-
 	output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
 	output VIC_CACHE_T [2:0] evicted_data,
 	output logic [2:0] evicted_valid,
 	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue,
 	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
+
 
     // Outputs from MEM/COMP Pipeline Register
       output logic mem_co_valid_inst,   
@@ -132,7 +136,6 @@ module pipeline (
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
 
- 
 // --------------------------Fetch1 signals  
 
 
@@ -238,8 +241,6 @@ module pipeline (
   logic [63:0] mem_co_NPC_comb;        
   logic [31:0] mem_co_IR_comb;    
 
- // // Outputs from MEM/WB Pipeline Register
- logic stall_struc;
 
 
 // ---------------------------------Complete stage
@@ -308,23 +309,6 @@ ROB_ROW_T rob_retire_out;
 	logic fr_empty; 
   PHYS_REG fr_free_reg_T;
 
-  
-   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  //logic	       retire_inst_busy;
-//  logic [63:0] retire_reg_NPC;
-logic [63:0] retire_reg_wr_data;
-  logic  [5:0] retire_reg_wr_idx;
-  logic        retire_reg_wr_en;
-  logic  [5:0] retire_reg_phys;;
-	logic head_halt;
-  logic rob_retire_out_halt;
-  logic rob_retire_out_take_branch;
-  logic rob_retire_out_T_new; 
-  logic rob_retire_out_T_old; 
-  logic rob_retire_out_is_store;
-  logic [31:0] rob_retire_opcode;
- 
-
 // ------------------------------Signals from modules
 
   //Outputs from the arch map
@@ -366,7 +350,7 @@ logic [63:0] retire_reg_wr_data;
   logic [31:0] rob_retire_opcode;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
-  logic [63:0] proc2Rmem_data;
+  logic [63:0] proc2Rmem_data, proc2Dmem_data;
   logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
   logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
@@ -381,7 +365,12 @@ logic [63:0] retire_reg_wr_data;
                                   rob_retire_out_halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
-  
+  //---------------------------For synthesis debugging
+
+assign proc2Rmem_command_out = proc2Rmem_command;
+assign proc2Dmem_command_out = proc2Dmem_command;
+assign proc2Imem_command_out = proc2Imem_command;
+ 
 	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
 	// FOR MEMORY INSTRUCTIONS
 //	assign proc2Dmem_command = mem_co_enable ? BUS_LOAD : BUS_NONE;
@@ -493,7 +482,7 @@ logic tag_in_lq;
   // Store Queue Module
   SQ store_queue(
     .clock(clock),
-    .reset(reset | branch_not_taken),
+    .reset(reset),
 
     .rd_en(load_wants_store),
     .addr_rd(load_rd_addr),
@@ -538,7 +527,7 @@ logic tag_in_lq;
 
   LQ load_queue(
     .clock(clock),
-    .reset(reset | branch_not_taken),
+    .reset(reset),
 
     .load_in(lq_load_in),
     .write_en(lq_write_en),
@@ -1328,7 +1317,7 @@ end
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end
     if (ex_co_enable[5]) begin
-      ex_co_rega_st <= `SD is_ex_T1_value[FU_ST_IDX];
+      ex_co_rega_st <= `SD is_ex_T1_value[5];
     end
 		//ex_co_done <= `SD 0;
 
@@ -1380,11 +1369,15 @@ assign lq_pop_en = ~mem_co_stall;
      .sq_data_valid(sq_data_valid),           // adddress not found
      
      // Outputs
-     .sets_out(dcache_data),
+     .send_request_out(send_request_out),
+     .unanswered_miss_out(unanswered_miss_out),
+
+    .sets_out(dcache_data),
   	.evicted_out(evicted_data),
   	.evicted_valid_out(evicted_valid),
   	.retire_queue_out(retire_queue),
   	.retire_queue_tail_out(retire_queue_tail),
+
      .mem_result_out(mem_result_out),
      .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),

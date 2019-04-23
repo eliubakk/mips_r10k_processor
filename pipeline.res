@@ -4,10 +4,14 @@ Report : resources
 Design : pipeline
 Version: O-2018.06
 <<<<<<< HEAD
+<<<<<<< HEAD
 Date   : Fri Apr 19 23:51:58 2019
 =======
 Date   : Thu Apr 18 20:55:15 2019
 >>>>>>> parent of 0760f9f... correct writeback and mem out after synth
+=======
+Date   : Sun Apr 21 21:40:18 2019
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -16,8 +20,13 @@ Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
+<<<<<<< HEAD
 | r346     | DW01_cmp6    | width=64   |               | eq_563 eq_566        |
 | r350     | DW01_sub     | width=64   |               | sub_1618             |
+=======
+| r338     | DW01_cmp6    | width=64   |               | eq_619 eq_622        |
+| r342     | DW01_sub     | width=64   |               | sub_1693             |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ===============================================================================
 
 
@@ -26,8 +35,13 @@ Implementation Report
 |                    |                  | Current            | Set            |
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
+<<<<<<< HEAD
 | sub_1618           | DW01_sub         | cla                |                |
 | r346               | DW01_cmp6        | rpl                |                |
+=======
+| r338               | DW01_cmp6        | rpl                |                |
+| sub_1693           | DW01_sub         | rpl                |                |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ===============================================================================
 
  
@@ -89,6 +103,7 @@ Resource Sharing Report for design ROB in file ../../verilog/ROB.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
+<<<<<<< HEAD
 | r697     | DW01_cmp6    | width=4    |               | eq_147 eq_151 eq_152 |
 |          |              |            |               | eq_98                |
 | r698     | DW01_cmp6    | width=4    |               | eq_147_I2 eq_151_I2  |
@@ -161,6 +176,118 @@ Resource Sharing Report for design ROB in file ../../verilog/ROB.v
 | r1053    | DW01_sub     | width=5    |               | sub_1_root_add_240   |
 | r1055    | DW01_inc     | width=5    |               | add_0_root_add_240   |
 | r1057    | DW01_sub     | width=5    |               | sub_240_3            |
+=======
+| r873     | DW01_cmp6    | width=4    |               | eq_102 eq_153 eq_159 |
+|          |              |            |               | eq_160               |
+| r874     | DW01_cmp6    | width=4    |               | eq_102_2 eq_155      |
+| r875     | DW01_cmp6    | width=4    |               | eq_102_G2 eq_153_I2  |
+|          |              |            |               | eq_159_I2 eq_160_I2  |
+| r876     | DW01_cmp6    | width=4    |               | eq_102_2_G2          |
+|          |              |            |               | eq_155_I2            |
+| r877     | DW01_cmp6    | width=4    |               | eq_102_G3 eq_153_I3  |
+|          |              |            |               | eq_159_I3 eq_160_I3  |
+| r878     | DW01_cmp6    | width=4    |               | eq_102_2_G3          |
+|          |              |            |               | eq_155_I3            |
+| r879     | DW01_cmp6    | width=4    |               | eq_102_G4 eq_153_I4  |
+|          |              |            |               | eq_159_I4 eq_160_I4  |
+| r880     | DW01_cmp6    | width=4    |               | eq_102_2_G4          |
+|          |              |            |               | eq_155_I4            |
+| r881     | DW01_cmp6    | width=4    |               | eq_102_G5 eq_153_I5  |
+|          |              |            |               | eq_159_I5 eq_160_I5  |
+| r882     | DW01_cmp6    | width=4    |               | eq_102_2_G5          |
+|          |              |            |               | eq_155_I5            |
+| r883     | DW01_cmp6    | width=4    |               | eq_102_G6 eq_153_I6  |
+|          |              |            |               | eq_159_I6 eq_160_I6  |
+| r884     | DW01_cmp6    | width=4    |               | eq_102_2_G6          |
+|          |              |            |               | eq_155_I6            |
+| r885     | DW01_cmp6    | width=4    |               | eq_102_G7 eq_153_I7  |
+|          |              |            |               | eq_159_I7 eq_160_I7  |
+| r886     | DW01_cmp6    | width=4    |               | eq_102_2_G7          |
+|          |              |            |               | eq_155_I7            |
+| r887     | DW01_cmp6    | width=4    |               | eq_102_G8 eq_153_I8  |
+|          |              |            |               | eq_159_I8 eq_160_I8  |
+| r888     | DW01_cmp6    | width=4    |               | eq_102_2_G8          |
+|          |              |            |               | eq_155_I8            |
+| r889     | DW01_cmp6    | width=4    |               | eq_102_G9 eq_153_I9  |
+|          |              |            |               | eq_159_I9 eq_160_I9  |
+| r890     | DW01_cmp6    | width=4    |               | eq_102_2_G9          |
+|          |              |            |               | eq_155_I9            |
+| r891     | DW01_cmp6    | width=4    |               | eq_102_G10           |
+|          |              |            |               | eq_153_I10           |
+|          |              |            |               | eq_159_I10           |
+|          |              |            |               | eq_160_I10           |
+| r892     | DW01_cmp6    | width=4    |               | eq_102_2_G10         |
+|          |              |            |               | eq_155_I10           |
+| r893     | DW01_cmp6    | width=4    |               | eq_102_G11           |
+|          |              |            |               | eq_153_I11           |
+|          |              |            |               | eq_159_I11           |
+|          |              |            |               | eq_160_I11           |
+| r894     | DW01_cmp6    | width=4    |               | eq_102_2_G11         |
+|          |              |            |               | eq_155_I11           |
+| r895     | DW01_cmp6    | width=4    |               | eq_102_G12           |
+|          |              |            |               | eq_153_I12           |
+|          |              |            |               | eq_159_I12           |
+|          |              |            |               | eq_160_I12           |
+| r896     | DW01_cmp6    | width=4    |               | eq_102_2_G12         |
+|          |              |            |               | eq_155_I12           |
+| r897     | DW01_cmp6    | width=4    |               | eq_102_G13           |
+|          |              |            |               | eq_153_I13           |
+|          |              |            |               | eq_159_I13           |
+|          |              |            |               | eq_160_I13           |
+| r898     | DW01_cmp6    | width=4    |               | eq_102_2_G13         |
+|          |              |            |               | eq_155_I13           |
+| r899     | DW01_cmp6    | width=4    |               | eq_102_G14           |
+|          |              |            |               | eq_153_I14           |
+|          |              |            |               | eq_159_I14           |
+|          |              |            |               | eq_160_I14           |
+| r900     | DW01_cmp6    | width=4    |               | eq_102_2_G14         |
+|          |              |            |               | eq_155_I14           |
+| r901     | DW01_cmp6    | width=4    |               | eq_102_G15           |
+|          |              |            |               | eq_153_I15           |
+|          |              |            |               | eq_159_I15           |
+|          |              |            |               | eq_160_I15           |
+| r902     | DW01_cmp6    | width=4    |               | eq_102_2_G15         |
+|          |              |            |               | eq_155_I15           |
+| r903     | DW01_cmp6    | width=4    |               | eq_102_G16           |
+|          |              |            |               | eq_153_I16           |
+|          |              |            |               | eq_159_I16           |
+|          |              |            |               | eq_160_I16           |
+| r904     | DW01_cmp6    | width=4    |               | eq_102_2_G16         |
+|          |              |            |               | eq_155_I16           |
+| r906     | DW01_cmp2    | width=5    |               | gte_116_2 lt_116     |
+| r908     | DW01_cmp2    | width=5    |               | gte_116 gte_116_3    |
+| r915     | DW01_cmp6    | width=5    |               | eq_224_2 ne_224      |
+| r916     | DW01_cmp6    | width=5    |               | eq_247 gt_247        |
+| r968     | DW01_add     | width=5    |               | add_114              |
+| r970     | DW01_cmp2    | width=5    |               | lte_116              |
+| r972     | DW01_cmp6    | width=5    |               | eq_211_2             |
+| r974     | DW01_dec     | width=5    |               | sub_211_7            |
+| r976     | DW01_sub     | width=6    |               | sub_219_2            |
+| r978     | DW01_sub     | width=5    |               | sub_219_4            |
+| r984     | DW01_sub     | width=5    |               | sub_247              |
+| r992     | DW01_sub     | width=5    |               | sub_1_root_sub_247_5 |
+| r994     | DW01_cmp6    | width=6    |               | robcam/eq_18         |
+| r996     | DW01_cmp6    | width=6    |               | robcam/eq_18_G2      |
+| r998     | DW01_cmp6    | width=6    |               | robcam/eq_18_G3      |
+| r1000    | DW01_cmp6    | width=6    |               | robcam/eq_18_G4      |
+| r1002    | DW01_cmp6    | width=6    |               | robcam/eq_18_G5      |
+| r1004    | DW01_cmp6    | width=6    |               | robcam/eq_18_G6      |
+| r1006    | DW01_cmp6    | width=6    |               | robcam/eq_18_G7      |
+| r1008    | DW01_cmp6    | width=6    |               | robcam/eq_18_G8      |
+| r1010    | DW01_cmp6    | width=6    |               | robcam/eq_18_G9      |
+| r1012    | DW01_cmp6    | width=6    |               | robcam/eq_18_G10     |
+| r1014    | DW01_cmp6    | width=6    |               | robcam/eq_18_G11     |
+| r1016    | DW01_cmp6    | width=6    |               | robcam/eq_18_G12     |
+| r1018    | DW01_cmp6    | width=6    |               | robcam/eq_18_G13     |
+| r1020    | DW01_cmp6    | width=6    |               | robcam/eq_18_G14     |
+| r1022    | DW01_cmp6    | width=6    |               | robcam/eq_18_G15     |
+| r1024    | DW01_cmp6    | width=6    |               | robcam/eq_18_G16     |
+| r1132    | DW01_add     | width=5    |               | add_1_root_sub_0_root_sub_219_6 |
+| r1134    | DW01_sub     | width=5    |               | sub_0_root_sub_0_root_sub_219_6 |
+| r1245    | DW01_sub     | width=5    |               | sub_1_root_add_247   |
+| r1247    | DW01_inc     | width=5    |               | add_0_root_add_247   |
+| r1249    | DW01_sub     | width=5    |               | sub_247_3            |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ===============================================================================
 
 
@@ -192,7 +319,316 @@ Resource Sharing Report for design mem_stage in file ../../verilog/mem_stage.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
+<<<<<<< HEAD
 | r55      | DW01_cmp6    | width=4    |               | eq_53_2 ne_50        |
+=======
+| r172     | DW01_cmp2    | width=4    |               | rb0/gte_37           |
+| r174     | DW01_cmp2    | width=4    |               | rb0/lt_39            |
+| r178     | DW01_cmp2    | width=4    |               | rb0/gt_60            |
+| r180     | DW01_sub     | width=4    |               | rb0/sub_61_aco       |
+| r298     | DW01_add     | width=4    |               | add_1_root_add_1_root_rb0/add_73_I3_aco |
+| r300     | DW01_sub     | width=4    |               | sub_2_root_add_1_root_rb0/add_73_I3_aco |
+| r302     | DW01_add     | width=4    |               | add_0_root_add_1_root_rb0/add_73_I3_aco |
+===============================================================================
+
+
+No implementations to report
+ 
+****************************************
+Design : dcache
+****************************************
+
+Resource Sharing Report for design dcache in file ../../verilog/dcache.v
+
+===============================================================================
+|          |              |            | Contained     |                      |
+| Resource | Module       | Parameters | Resources     | Contained Operations |
+===============================================================================
+| r851     | DW01_cmp2    | width=5    |               | gt_423 gt_429 gt_485 |
+| r852     | DW01_dec     | width=4    |               | sub_423 sub_429      |
+| r871     | DW01_inc     | width=3    |               | add_575 add_576      |
+|          |              |            |               | add_577              |
+| r1056    | DW01_cmp2    | width=5    |               | lt_321               |
+| r1058    | DW01_cmp2    | width=5    |               | lt_410               |
+| r1060    | DW01_cmp6    | width=4    |               | eq_419               |
+| r1062    | DW01_dec     | width=3    |               | sub_455              |
+| r1064    | DW01_inc     | width=5    |               | add_463              |
+| r1066    | DW01_inc     | width=5    |               | add_468              |
+| r1068    | DW01_inc     | width=3    |               | add_478              |
+| r1070    | DW01_dec     | width=5    |               | sub_481              |
+| r1072    | DW01_cmp2    | width=5    |               | gt_482               |
+| r1074    | DW01_sub     | width=5    |               | sub_483_aco          |
+| r1076    | DW01_sub     | width=5    |               | sub_486_aco          |
+| r1086    | DW01_cmp2    | width=5    |               | lt_523               |
+| r1088    | DW01_inc     | width=5    |               | add_530              |
+| r1090    | DW01_inc     | width=2    |               | add_542_I2_I1        |
+| r1092    | DW01_add     | width=64   |               | add_552              |
+| r1100    | DW_rash      | A_width=316 |              | srl_575              |
+|          |              | SH_width=10 |              |                      |
+| r1102    | DW01_sub     | width=3    |               | sub_576              |
+| r1104    | DW01_sub     | width=3    |               | sub_577              |
+| r1106    | DW01_cmp2    | width=5    |               | lt_583_2             |
+| r1108    | DW01_inc     | width=5    |               | add_597              |
+| r1110    | DW01_inc     | width=3    |               | add_599              |
+| r1112    | DW01_add     | width=64   |               | add_601              |
+| r1122    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18       |
+| r1124    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G1 |
+| r1126    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1 |
+| r1128    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G1 |
+| r1130    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G1 |
+| r1132    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G1 |
+| r1134    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G1 |
+| r1136    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G1 |
+| r1138    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2    |
+| r1140    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G2 |
+| r1142    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2 |
+| r1144    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G2 |
+| r1146    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G2 |
+| r1148    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G2 |
+| r1150    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G2 |
+| r1152    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G2 |
+| r1154    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3    |
+| r1156    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G3 |
+| r1158    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3 |
+| r1160    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G3 |
+| r1162    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G3 |
+| r1164    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G3 |
+| r1166    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G3 |
+| r1168    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G3 |
+| r1170    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4    |
+| r1172    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G1_G4 |
+| r1174    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4 |
+| r1176    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G2_G4 |
+| r1178    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G3_G4 |
+| r1180    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G3_G4 |
+| r1182    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G4_G4 |
+| r1184    | DW01_cmp6    | width=13   |               | fifo_cam/eq_18_G2_G4_G4 |
+| r1186    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18  |
+| r1188    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G2 |
+| r1190    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G3 |
+| r1192    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G4 |
+| r1194    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G5 |
+| r1196    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G6 |
+| r1198    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G7 |
+| r1200    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G8 |
+| r1202    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G9 |
+| r1204    | DW01_cmp6    | width=64   |               | mem_queue_cam/eq_18_G10 |
+| r1206    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18 |
+| r1208    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G1 |
+| r1210    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2 |
+| r1212    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G2 |
+| r1214    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G3 |
+| r1216    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G3 |
+| r1218    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G4 |
+| r1220    | DW01_cmp6    | width=64   |               | fetch_addr_cam/eq_18_G2_G1_G4 |
+| r1222    | DW01_sub     | width=2    |               | fifo_psel/sub_26     |
+| r1224    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29     |
+| r1226    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31     |
+| r1228    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G2  |
+| r1230    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G2  |
+| r1232    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G3  |
+| r1234    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G3  |
+| r1236    | DW01_cmp2    | width=2    |               | fifo_psel/gte_29_G4  |
+| r1238    | DW01_sub     | width=2    |               | fifo_psel/sub_29_G4  |
+| r1240    | DW01_cmp2    | width=2    |               | fifo_psel/gte_31_G4  |
+| r1242    | DW01_inc     | width=2    |               | fifo_psel/add_53     |
+| r1244    | DW01_dec     | width=4    |               | fifo_sel_enc/sub_9   |
+| r1246    | DW01_dec     | width=4    |               | genblk5[0].fifo_num_enc/sub_9 |
+| r1248    | DW01_dec     | width=4    |               | genblk5[0].fifo_idx_enc/sub_9 |
+| r1250    | DW01_dec     | width=4    |               | genblk5[0].fetch_addr_enc/sub_9 |
+| r1252    | DW01_dec     | width=4    |               | genblk5[1].fifo_num_enc/sub_9 |
+| r1254    | DW01_dec     | width=4    |               | genblk5[1].fifo_idx_enc/sub_9 |
+| r1256    | DW01_dec     | width=4    |               | genblk5[1].fetch_addr_enc/sub_9 |
+| r1258    | DW01_dec     | width=10   |               | genblk6[0].mem_queue_num_enc/sub_9 |
+| r1364    | DW02_mult    | A_width=6  |               | mult_add_514_aco     |
+|          |              | B_width=1  |               |                      |
+| r1366    | DW01_add     | width=64   |               | add_514_aco          |
+| r1472    | DW02_mult    | A_width=6  |               | mult_add_514_I4_aco  |
+|          |              | B_width=1  |               |                      |
+| r1474    | DW01_add     | width=64   |               | add_514_I4_aco       |
+| r1580    | DW02_mult    | A_width=6  |               | mult_add_514_I3_aco  |
+|          |              | B_width=1  |               |                      |
+| r1582    | DW01_add     | width=64   |               | add_514_I3_aco       |
+| r1688    | DW02_mult    | A_width=6  |               | mult_add_514_I2_aco  |
+|          |              | B_width=1  |               |                      |
+| r1690    | DW01_add     | width=64   |               | add_514_I2_aco       |
+| r1792    | DW02_mult    | A_width=3  |               | mult_575             |
+|          |              | B_width=7  |               |                      |
+| r1898    | DW02_mult    | A_width=2  |               | mult_574             |
+|          |              | B_width=3  |               |                      |
+| r1900    | DW01_add     | width=3    |               | add_574              |
+===============================================================================
+
+
+Implementation Report
+===============================================================================
+|                    |                  | Current            | Set            |
+| Cell               | Module           | Implementation     | Implementation |
+===============================================================================
+| add_552            | DW01_add         | cla                |                |
+| fetch_addr_cam/eq_18                  |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G2               |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G3               |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G4               |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G2_G1_G1         |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G2_G1_G2         |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G2_G1_G3         |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| fetch_addr_cam/eq_18_G2_G1_G4         |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| add_514_aco        | DW01_add         | cla                |                |
+| add_514_I2_aco     | DW01_add         | cla                |                |
+| add_514_I3_aco     | DW01_add         | cla                |                |
+| add_514_I4_aco     | DW01_add         | cla                |                |
+| add_601            | DW01_add         | cla                |                |
+| mult_575           | DW02_mult        | csa                |                |
+| mem_queue_cam/eq_18_G10               |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G9                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G8                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G7                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G6                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G5                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G4                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G3                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18_G2                |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| mem_queue_cam/eq_18                   |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| srl_575            | DW_rash          | mx2                |                |
+===============================================================================
+
+ 
+****************************************
+Design : dcache_DW02_mult_4
+****************************************
+
+Resource Sharing Report for design DW02_mult_A_width3_B_width7
+
+===============================================================================
+|          |              |            | Contained     |                      |
+| Resource | Module       | Parameters | Resources     | Contained Operations |
+===============================================================================
+| r67      | DW01_add     | width=9    |               | FS_4                 |
+| r69      | DW01_absval  | width=3    |               | A2_1                 |
+| r71      | DW01_absval  | width=7    |               | A2_2                 |
+| r73      | DW01_inc     | width=10   |               | A3                   |
+===============================================================================
+
+
+Implementation Report
+===============================================================================
+|                    |                  | Current            | Set            |
+| Cell               | Module           | Implementation     | Implementation |
+===============================================================================
+| FS_4               | DW01_add         | cla                | cla            |
+===============================================================================
+
+ 
+****************************************
+Design : vic_cache
+****************************************
+
+Resource Sharing Report for design vic_cache in file ../../verilog/vic_cache.v
+
+===============================================================================
+|          |              |            | Contained     |                      |
+| Resource | Module       | Parameters | Resources     | Contained Operations |
+===============================================================================
+| r181     | DW01_cmp2    | width=2    |               | gt_121 gt_135 lt_126 |
+| r182     | DW01_cmp2    | width=2    |               | gt_121_I2 lt_126_I2  |
+| r183     | DW01_cmp2    | width=2    |               | gt_121_I3 lt_126_I3  |
+| r223     | DW01_sub     | width=3    |               | sub_102              |
+| r225     | DW01_sub     | width=3    |               | sub_107              |
+| r227     | DW01_cmp2    | width=3    |               | gte_109              |
+| r229     | DW01_sub     | width=3    |               | sub_107_I2           |
+| r231     | DW01_cmp2    | width=3    |               | gte_109_I2           |
+| r233     | DW01_sub     | width=3    |               | sub_107_I3           |
+| r235     | DW01_cmp2    | width=3    |               | gte_109_I3           |
+| r237     | DW01_cmp2    | width=3    |               | gte_109_I4           |
+| r239     | DW01_sub     | width=4    |               | sub_115              |
+| r241     | DW01_cmp2    | width=32   |               | gt_115               |
+| r247     | DW01_inc     | width=4    |               | add_131_I2           |
+| r249     | DW01_add     | width=4    |               | add_131_I3           |
+| r251     | DW01_add     | width=3    |               | add_135              |
+| r253     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18     |
+| r255     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G2_G1_G1 |
+| r257     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G2  |
+| r259     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G2_G1_G2 |
+| r261     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G3  |
+| r263     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G2_G1_G3 |
+| r265     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G4  |
+| r267     | DW01_cmp6    | width=13   |               | rd_vic_cam/eq_18_G2_G1_G4 |
+| r269     | DW01_dec     | width=4    |               | genblk3[0].enc0/sub_9 |
+| r271     | DW01_dec     | width=4    |               | genblk3[1].enc0/sub_9 |
+| r378     | DW01_sub     | width=2    |               | sub_115_2            |
+| r380     | DW01_sub     | width=2    |               | sub_115_3            |
+===============================================================================
+
+
+No implementations to report
+ 
+****************************************
+Design : cachemem
+****************************************
+
+Resource Sharing Report for design cachemem in file ../../verilog/cachemem.v
+
+===============================================================================
+|          |              |            | Contained     |                      |
+| Resource | Module       | Parameters | Resources     | Contained Operations |
+===============================================================================
+| r818     | DW01_cmp6    | width=3    |               | eq_176               |
+| r820     | DW01_cmp6    | width=10   |               | eq_176_2             |
+| r822     | DW01_cmp6    | width=3    |               | eq_176_I2_I1         |
+| r824     | DW01_cmp6    | width=10   |               | eq_176_2_I2_I1       |
+| r826     | DW01_cmp6    | width=3    |               | eq_176_I3_I1         |
+| r828     | DW01_cmp6    | width=10   |               | eq_176_2_I3_I1       |
+| r830     | DW01_cmp2    | width=2    |               | gte_217              |
+| r832     | DW01_cmp2    | width=2    |               | gte_217_I2_I1        |
+| r834     | DW01_inc     | width=2    |               | add_238_I2_I1        |
+| r836     | DW01_cmp2    | width=2    |               | gte_217_I2           |
+| r838     | DW01_cmp2    | width=2    |               | gte_217_I2_I2        |
+| r840     | DW01_inc     | width=2    |               | add_238_I2_I2        |
+| r842     | DW01_cmp2    | width=2    |               | gte_217_I3           |
+| r844     | DW01_cmp2    | width=2    |               | gte_217_I2_I3        |
+| r846     | DW01_inc     | width=2    |               | add_238_I2_I3        |
+| r848     | DW01_cmp2    | width=2    |               | gte_268              |
+| r850     | DW01_cmp2    | width=2    |               | gte_268_I2_I1        |
+| r852     | DW01_cmp6    | width=10   |               | genblk1[0].rd_cam/eq_18 |
+| r854     | DW01_cmp6    | width=10   |               | genblk1[0].rd_cam/eq_18_G2 |
+| r856     | DW01_cmp6    | width=10   |               | genblk1[0].rd_cam/eq_18_G3 |
+| r858     | DW01_cmp6    | width=10   |               | genblk1[0].rd_cam/eq_18_G4 |
+| r860     | DW01_dec     | width=4    |               | genblk1[0].rd_enc/sub_9 |
+| r862     | DW01_cmp6    | width=10   |               | genblk2[0].wr_cam/eq_18 |
+| r864     | DW01_cmp6    | width=10   |               | genblk2[0].wr_cam/eq_18_G2 |
+| r866     | DW01_cmp6    | width=10   |               | genblk2[0].wr_cam/eq_18_G3 |
+| r868     | DW01_cmp6    | width=10   |               | genblk2[0].wr_cam/eq_18_G4 |
+| r870     | DW01_dec     | width=4    |               | genblk2[0].wr_enc/sub_9 |
+| r872     | DW01_cmp6    | width=10   |               | genblk2[1].wr_cam/eq_18 |
+| r874     | DW01_cmp6    | width=10   |               | genblk2[1].wr_cam/eq_18_G2 |
+| r876     | DW01_cmp6    | width=10   |               | genblk2[1].wr_cam/eq_18_G3 |
+| r878     | DW01_cmp6    | width=10   |               | genblk2[1].wr_cam/eq_18_G4 |
+| r880     | DW01_dec     | width=4    |               | genblk2[1].wr_enc/sub_9 |
+| r882     | DW01_cmp6    | width=10   |               | genblk2[2].wr_cam/eq_18 |
+| r884     | DW01_cmp6    | width=10   |               | genblk2[2].wr_cam/eq_18_G2 |
+| r886     | DW01_cmp6    | width=10   |               | genblk2[2].wr_cam/eq_18_G3 |
+| r888     | DW01_cmp6    | width=10   |               | genblk2[2].wr_cam/eq_18_G4 |
+| r890     | DW01_dec     | width=4    |               | genblk2[2].wr_enc/sub_9 |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ===============================================================================
 
 
@@ -710,6 +1146,7 @@ Resource Sharing Report for design LQ in file ../../verilog/LQ.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
+<<<<<<< HEAD
 | r122     | DW01_inc     | width=4    |               | add_29 add_46        |
 | r158     | DW01_cmp6    | width=4    |               | eq_29                |
 | r160     | DW01_cmp6    | width=4    |               | eq_33                |
@@ -732,6 +1169,51 @@ Resource Sharing Report for design LQ in file ../../verilog/LQ.v
 
 
 No implementations to report
+=======
+| r153     | DW01_inc     | width=4    |               | add_42 add_54        |
+| r174     | DW01_cmp6    | width=64   |               | eq_36                |
+| r176     | DW01_cmp6    | width=64   |               | eq_36_G2             |
+| r178     | DW01_cmp6    | width=64   |               | eq_36_G3             |
+| r180     | DW01_cmp6    | width=64   |               | eq_36_G4             |
+| r182     | DW01_cmp6    | width=64   |               | eq_36_G5             |
+| r184     | DW01_cmp6    | width=64   |               | eq_36_G6             |
+| r186     | DW01_cmp6    | width=64   |               | eq_36_G7             |
+| r188     | DW01_cmp6    | width=64   |               | eq_36_G8             |
+| r190     | DW01_cmp6    | width=64   |               | eq_36_G9             |
+| r192     | DW01_cmp6    | width=64   |               | eq_36_G10            |
+| r194     | DW01_cmp6    | width=64   |               | eq_36_G11            |
+| r196     | DW01_cmp6    | width=64   |               | eq_36_G12            |
+| r198     | DW01_cmp6    | width=64   |               | eq_36_G13            |
+| r200     | DW01_cmp6    | width=64   |               | eq_36_G14            |
+| r202     | DW01_cmp6    | width=64   |               | eq_36_G15            |
+| r204     | DW01_cmp6    | width=4    |               | eq_42                |
+| r206     | DW01_inc     | width=4    |               | add_66               |
+===============================================================================
+
+
+Implementation Report
+===============================================================================
+|                    |                  | Current            | Set            |
+| Cell               | Module           | Implementation     | Implementation |
+===============================================================================
+| eq_36              | DW01_cmp6        | rpl                |                |
+| eq_36_G2           | DW01_cmp6        | rpl                |                |
+| eq_36_G3           | DW01_cmp6        | rpl                |                |
+| eq_36_G4           | DW01_cmp6        | rpl                |                |
+| eq_36_G5           | DW01_cmp6        | rpl                |                |
+| eq_36_G6           | DW01_cmp6        | rpl                |                |
+| eq_36_G7           | DW01_cmp6        | rpl                |                |
+| eq_36_G8           | DW01_cmp6        | rpl                |                |
+| eq_36_G9           | DW01_cmp6        | rpl                |                |
+| eq_36_G10          | DW01_cmp6        | rpl                |                |
+| eq_36_G11          | DW01_cmp6        | rpl                |                |
+| eq_36_G12          | DW01_cmp6        | rpl                |                |
+| eq_36_G13          | DW01_cmp6        | rpl                |                |
+| eq_36_G14          | DW01_cmp6        | rpl                |                |
+| eq_36_G15          | DW01_cmp6        | rpl                |                |
+===============================================================================
+
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
  
 ****************************************
 Design : SQ
@@ -743,6 +1225,7 @@ Resource Sharing Report for design SQ in file ../../verilog/SQ.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
+<<<<<<< HEAD
 | r715     | DW01_inc     | width=4    |               | add_104 add_156      |
 | r717     | DW01_cmp2    | width=4    |               | lte_116 lte_116_G10  |
 |          |              |            |               | lte_116_G11          |
@@ -941,6 +1424,206 @@ Resource Sharing Report for design SQ in file ../../verilog/SQ.v
 | r842     | DW01_cmp6    | width=32   |               | eq_169_I14           |
 | r844     | DW01_cmp6    | width=32   |               | eq_169_I15           |
 | r846     | DW01_cmp6    | width=32   |               | eq_169_I16           |
+=======
+| r715     | DW01_inc     | width=4    |               | add_103 add_155      |
+| r717     | DW01_cmp2    | width=4    |               | lte_115 lte_115_G10  |
+|          |              |            |               | lte_115_G11          |
+|          |              |            |               | lte_115_G12          |
+|          |              |            |               | lte_115_G13          |
+|          |              |            |               | lte_115_G14          |
+|          |              |            |               | lte_115_G15          |
+|          |              |            |               | lte_115_G16          |
+|          |              |            |               | lte_115_G2           |
+|          |              |            |               | lte_115_G3           |
+|          |              |            |               | lte_115_G4           |
+|          |              |            |               | lte_115_G5           |
+|          |              |            |               | lte_115_G6           |
+|          |              |            |               | lte_115_G7           |
+|          |              |            |               | lte_115_G8           |
+|          |              |            |               | lte_115_G9 lte_168   |
+|          |              |            |               | lte_168_I10          |
+|          |              |            |               | lte_168_I11          |
+|          |              |            |               | lte_168_I12          |
+|          |              |            |               | lte_168_I13          |
+|          |              |            |               | lte_168_I14          |
+|          |              |            |               | lte_168_I15          |
+|          |              |            |               | lte_168_I16          |
+|          |              |            |               | lte_168_I2           |
+|          |              |            |               | lte_168_I3           |
+|          |              |            |               | lte_168_I4           |
+|          |              |            |               | lte_168_I5           |
+|          |              |            |               | lte_168_I6           |
+|          |              |            |               | lte_168_I7           |
+|          |              |            |               | lte_168_I8           |
+|          |              |            |               | lte_168_I9           |
+| r718     | DW01_cmp2    | width=4    |               | lte_115_2 lte_115_3  |
+|          |              |            |               | lte_168_2 lte_168_3  |
+| r719     | DW01_cmp2    | width=4    |               | lt_115_2 lt_115_3    |
+|          |              |            |               | lt_168_2 lt_168_3    |
+| r720     | DW01_cmp2    | width=4    |               | lt_115 lt_168        |
+| r721     | DW01_cmp2    | width=4    |               | lte_115_2_G2         |
+|          |              |            |               | lte_115_3_G2         |
+|          |              |            |               | lte_168_2_I2         |
+|          |              |            |               | lte_168_3_I2         |
+| r722     | DW01_cmp2    | width=4    |               | lt_115_2_G2          |
+|          |              |            |               | lt_115_3_G2          |
+|          |              |            |               | lt_168_2_I2          |
+|          |              |            |               | lt_168_3_I2          |
+| r723     | DW01_cmp2    | width=4    |               | lt_115_G2 lt_168_I2  |
+| r724     | DW01_cmp2    | width=4    |               | lte_115_2_G3         |
+|          |              |            |               | lte_115_3_G3         |
+|          |              |            |               | lte_168_2_I3         |
+|          |              |            |               | lte_168_3_I3         |
+| r725     | DW01_cmp2    | width=4    |               | lt_115_2_G3          |
+|          |              |            |               | lt_115_3_G3          |
+|          |              |            |               | lt_168_2_I3          |
+|          |              |            |               | lt_168_3_I3          |
+| r726     | DW01_cmp2    | width=4    |               | lt_115_G3 lt_168_I3  |
+| r727     | DW01_cmp2    | width=4    |               | lte_115_2_G4         |
+|          |              |            |               | lte_115_3_G4         |
+|          |              |            |               | lte_168_2_I4         |
+|          |              |            |               | lte_168_3_I4         |
+| r728     | DW01_cmp2    | width=4    |               | lt_115_2_G4          |
+|          |              |            |               | lt_115_3_G4          |
+|          |              |            |               | lt_168_2_I4          |
+|          |              |            |               | lt_168_3_I4          |
+| r729     | DW01_cmp2    | width=4    |               | lt_115_G4 lt_168_I4  |
+| r730     | DW01_cmp2    | width=4    |               | lte_115_2_G5         |
+|          |              |            |               | lte_115_3_G5         |
+|          |              |            |               | lte_168_2_I5         |
+|          |              |            |               | lte_168_3_I5         |
+| r731     | DW01_cmp2    | width=4    |               | lt_115_2_G5          |
+|          |              |            |               | lt_115_3_G5          |
+|          |              |            |               | lt_168_2_I5          |
+|          |              |            |               | lt_168_3_I5          |
+| r732     | DW01_cmp2    | width=4    |               | lt_115_G5 lt_168_I5  |
+| r733     | DW01_cmp2    | width=4    |               | lte_115_2_G6         |
+|          |              |            |               | lte_115_3_G6         |
+|          |              |            |               | lte_168_2_I6         |
+|          |              |            |               | lte_168_3_I6         |
+| r734     | DW01_cmp2    | width=4    |               | lt_115_2_G6          |
+|          |              |            |               | lt_115_3_G6          |
+|          |              |            |               | lt_168_2_I6          |
+|          |              |            |               | lt_168_3_I6          |
+| r735     | DW01_cmp2    | width=4    |               | lt_115_G6 lt_168_I6  |
+| r736     | DW01_cmp2    | width=4    |               | lte_115_2_G7         |
+|          |              |            |               | lte_115_3_G7         |
+|          |              |            |               | lte_168_2_I7         |
+|          |              |            |               | lte_168_3_I7         |
+| r737     | DW01_cmp2    | width=4    |               | lt_115_2_G7          |
+|          |              |            |               | lt_115_3_G7          |
+|          |              |            |               | lt_168_2_I7          |
+|          |              |            |               | lt_168_3_I7          |
+| r738     | DW01_cmp2    | width=4    |               | lt_115_G7 lt_168_I7  |
+| r739     | DW01_cmp2    | width=4    |               | lte_115_2_G8         |
+|          |              |            |               | lte_115_3_G8         |
+|          |              |            |               | lte_168_2_I8         |
+|          |              |            |               | lte_168_3_I8         |
+| r740     | DW01_cmp2    | width=4    |               | lt_115_2_G8          |
+|          |              |            |               | lt_115_3_G8          |
+|          |              |            |               | lt_168_2_I8          |
+|          |              |            |               | lt_168_3_I8          |
+| r741     | DW01_cmp2    | width=4    |               | lt_115_G8 lt_168_I8  |
+| r742     | DW01_cmp2    | width=4    |               | lte_115_2_G9         |
+|          |              |            |               | lte_115_3_G9         |
+|          |              |            |               | lte_168_2_I9         |
+|          |              |            |               | lte_168_3_I9         |
+| r743     | DW01_cmp2    | width=4    |               | lt_115_2_G9          |
+|          |              |            |               | lt_115_3_G9          |
+|          |              |            |               | lt_168_2_I9          |
+|          |              |            |               | lt_168_3_I9          |
+| r744     | DW01_cmp2    | width=4    |               | lt_115_G9 lt_168_I9  |
+| r745     | DW01_cmp2    | width=4    |               | lte_115_2_G10        |
+|          |              |            |               | lte_115_3_G10        |
+|          |              |            |               | lte_168_2_I10        |
+|          |              |            |               | lte_168_3_I10        |
+| r746     | DW01_cmp2    | width=4    |               | lt_115_2_G10         |
+|          |              |            |               | lt_115_3_G10         |
+|          |              |            |               | lt_168_2_I10         |
+|          |              |            |               | lt_168_3_I10         |
+| r747     | DW01_cmp2    | width=4    |               | lt_115_G10           |
+|          |              |            |               | lt_168_I10           |
+| r748     | DW01_cmp2    | width=4    |               | lte_115_2_G11        |
+|          |              |            |               | lte_115_3_G11        |
+|          |              |            |               | lte_168_2_I11        |
+|          |              |            |               | lte_168_3_I11        |
+| r749     | DW01_cmp2    | width=4    |               | lt_115_2_G11         |
+|          |              |            |               | lt_115_3_G11         |
+|          |              |            |               | lt_168_2_I11         |
+|          |              |            |               | lt_168_3_I11         |
+| r750     | DW01_cmp2    | width=4    |               | lt_115_G11           |
+|          |              |            |               | lt_168_I11           |
+| r751     | DW01_cmp2    | width=4    |               | lte_115_2_G12        |
+|          |              |            |               | lte_115_3_G12        |
+|          |              |            |               | lte_168_2_I12        |
+|          |              |            |               | lte_168_3_I12        |
+| r752     | DW01_cmp2    | width=4    |               | lt_115_2_G12         |
+|          |              |            |               | lt_115_3_G12         |
+|          |              |            |               | lt_168_2_I12         |
+|          |              |            |               | lt_168_3_I12         |
+| r753     | DW01_cmp2    | width=4    |               | lt_115_G12           |
+|          |              |            |               | lt_168_I12           |
+| r754     | DW01_cmp2    | width=4    |               | lte_115_2_G13        |
+|          |              |            |               | lte_115_3_G13        |
+|          |              |            |               | lte_168_2_I13        |
+|          |              |            |               | lte_168_3_I13        |
+| r755     | DW01_cmp2    | width=4    |               | lt_115_2_G13         |
+|          |              |            |               | lt_115_3_G13         |
+|          |              |            |               | lt_168_2_I13         |
+|          |              |            |               | lt_168_3_I13         |
+| r756     | DW01_cmp2    | width=4    |               | lt_115_G13           |
+|          |              |            |               | lt_168_I13           |
+| r757     | DW01_cmp2    | width=4    |               | lte_115_2_G14        |
+|          |              |            |               | lte_115_3_G14        |
+|          |              |            |               | lte_168_2_I14        |
+|          |              |            |               | lte_168_3_I14        |
+| r758     | DW01_cmp2    | width=4    |               | lt_115_2_G14         |
+|          |              |            |               | lt_115_3_G14         |
+|          |              |            |               | lt_168_2_I14         |
+|          |              |            |               | lt_168_3_I14         |
+| r759     | DW01_cmp2    | width=4    |               | lt_115_G14           |
+|          |              |            |               | lt_168_I14           |
+| r760     | DW01_cmp2    | width=4    |               | lte_115_2_G15        |
+|          |              |            |               | lte_115_3_G15        |
+|          |              |            |               | lte_168_2_I15        |
+|          |              |            |               | lte_168_3_I15        |
+| r761     | DW01_cmp2    | width=4    |               | lt_115_2_G15         |
+|          |              |            |               | lt_115_3_G15         |
+|          |              |            |               | lt_168_2_I15         |
+|          |              |            |               | lt_168_3_I15         |
+| r762     | DW01_cmp2    | width=4    |               | lt_115_G15           |
+|          |              |            |               | lt_168_I15           |
+| r763     | DW01_cmp2    | width=4    |               | lte_115_2_G16        |
+|          |              |            |               | lte_115_3_G16        |
+|          |              |            |               | lte_168_2_I16        |
+|          |              |            |               | lte_168_3_I16        |
+| r764     | DW01_cmp2    | width=4    |               | lt_115_2_G16         |
+|          |              |            |               | lt_115_3_G16         |
+|          |              |            |               | lt_168_2_I16         |
+|          |              |            |               | lt_168_3_I16         |
+| r765     | DW01_cmp2    | width=4    |               | lt_115_G16           |
+|          |              |            |               | lt_168_I16           |
+| r808     | DW01_cmp6    | width=4    |               | eq_103               |
+| r810     | DW01_inc     | width=4    |               | add_137              |
+| r812     | DW01_cmp6    | width=4    |               | ne_155               |
+| r814     | DW01_inc     | width=4    |               | add_160              |
+| r816     | DW01_cmp6    | width=32   |               | eq_168               |
+| r818     | DW01_cmp6    | width=32   |               | eq_168_I2            |
+| r820     | DW01_cmp6    | width=32   |               | eq_168_I3            |
+| r822     | DW01_cmp6    | width=32   |               | eq_168_I4            |
+| r824     | DW01_cmp6    | width=32   |               | eq_168_I5            |
+| r826     | DW01_cmp6    | width=32   |               | eq_168_I6            |
+| r828     | DW01_cmp6    | width=32   |               | eq_168_I7            |
+| r830     | DW01_cmp6    | width=32   |               | eq_168_I8            |
+| r832     | DW01_cmp6    | width=32   |               | eq_168_I9            |
+| r834     | DW01_cmp6    | width=32   |               | eq_168_I10           |
+| r836     | DW01_cmp6    | width=32   |               | eq_168_I11           |
+| r838     | DW01_cmp6    | width=32   |               | eq_168_I12           |
+| r840     | DW01_cmp6    | width=32   |               | eq_168_I13           |
+| r842     | DW01_cmp6    | width=32   |               | eq_168_I14           |
+| r844     | DW01_cmp6    | width=32   |               | eq_168_I15           |
+| r846     | DW01_cmp6    | width=32   |               | eq_168_I16           |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 | r848     | DW01_dec     | width=16   |               | enc/sub_9            |
 ===============================================================================
 
@@ -950,6 +1633,7 @@ Implementation Report
 |                    |                  | Current            | Set            |
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
+<<<<<<< HEAD
 | eq_169_I11         | DW01_cmp6        | rpl                |                |
 | eq_169_I5          | DW01_cmp6        | rpl                |                |
 | eq_169_I10         | DW01_cmp6        | rpl                |                |
@@ -965,6 +1649,23 @@ Implementation Report
 | eq_169_I6          | DW01_cmp6        | rpl                |                |
 | eq_169_I7          | DW01_cmp6        | rpl                |                |
 | eq_169_I8          | DW01_cmp6        | rpl                |                |
+=======
+| eq_168_I11         | DW01_cmp6        | rpl                |                |
+| eq_168_I5          | DW01_cmp6        | rpl                |                |
+| eq_168_I10         | DW01_cmp6        | rpl                |                |
+| eq_168_I12         | DW01_cmp6        | rpl                |                |
+| eq_168_I9          | DW01_cmp6        | rpl                |                |
+| eq_168_I13         | DW01_cmp6        | rpl                |                |
+| eq_168_I14         | DW01_cmp6        | rpl                |                |
+| eq_168_I15         | DW01_cmp6        | rpl                |                |
+| eq_168             | DW01_cmp6        | rpl                |                |
+| eq_168_I2          | DW01_cmp6        | rpl                |                |
+| eq_168_I3          | DW01_cmp6        | rpl                |                |
+| eq_168_I4          | DW01_cmp6        | rpl                |                |
+| eq_168_I6          | DW01_cmp6        | rpl                |                |
+| eq_168_I7          | DW01_cmp6        | rpl                |                |
+| eq_168_I8          | DW01_cmp6        | rpl                |                |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ===============================================================================
 
  
@@ -978,6 +1679,7 @@ Resource Sharing Report for design icache in file ../../verilog/icache.v
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
+<<<<<<< HEAD
 | r822     | DW01_add     | width=64   |               | add_164              |
 | r824     | DW01_add     | width=64   |               | add_164_G2           |
 | r826     | DW01_add     | width=64   |               | add_164_G3           |
@@ -1068,6 +1770,123 @@ Resource Sharing Report for design icache in file ../../verilog/icache.v
 | r996     | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G6 |
 | r998     | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G6 |
 | r1000    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G6 |
+=======
+| r763     | DW01_cmp2    | width=3    |               | lt_134 lt_137        |
+|          |              |            |               | lt_137_G2_G1         |
+|          |              |            |               | lt_137_G3_G1         |
+|          |              |            |               | lt_137_G4_G1         |
+| r764     | DW01_cmp2    | width=3    |               | lt_134_G2 lt_137_G2  |
+|          |              |            |               | lt_137_G2_G2         |
+|          |              |            |               | lt_137_G3_G2         |
+|          |              |            |               | lt_137_G4_G2         |
+| r765     | DW01_cmp2    | width=3    |               | lt_134_G3            |
+|          |              |            |               | lt_137_G2_G3         |
+|          |              |            |               | lt_137_G3            |
+|          |              |            |               | lt_137_G3_G3         |
+|          |              |            |               | lt_137_G4_G3         |
+| r766     | DW01_cmp2    | width=3    |               | lt_134_G4            |
+|          |              |            |               | lt_137_G2_G4         |
+|          |              |            |               | lt_137_G3_G4         |
+|          |              |            |               | lt_137_G4            |
+|          |              |            |               | lt_137_G4_G4         |
+| r767     | DW01_cmp2    | width=3    |               | lt_134_G5            |
+|          |              |            |               | lt_137_G2_G5         |
+|          |              |            |               | lt_137_G3_G5         |
+|          |              |            |               | lt_137_G4_G5         |
+|          |              |            |               | lt_137_G5            |
+| r768     | DW01_cmp2    | width=3    |               | lt_134_G6            |
+|          |              |            |               | lt_137_G2_G6         |
+|          |              |            |               | lt_137_G3_G6         |
+|          |              |            |               | lt_137_G4_G6         |
+|          |              |            |               | lt_137_G6            |
+| r944     | DW01_add     | width=64   |               | add_153              |
+| r946     | DW01_add     | width=64   |               | add_153_G2           |
+| r948     | DW01_add     | width=64   |               | add_153_G3           |
+| r950     | DW01_add     | width=64   |               | add_153_G4           |
+| r952     | DW01_cmp6    | width=64   |               | ne_156               |
+| r954     | DW01_cmp2    | width=3    |               | lt_171               |
+| r956     | DW01_cmp6    | width=4    |               | eq_183               |
+| r958     | DW01_inc     | width=3    |               | add_197              |
+| r960     | DW01_sub     | width=3    |               | sub_202_aco          |
+| r962     | DW01_cmp2    | width=3    |               | gt_203               |
+| r964     | DW01_sub     | width=3    |               | sub_204_aco          |
+| r966     | DW01_cmp2    | width=3    |               | gt_206               |
+| r968     | DW01_sub     | width=3    |               | sub_207_aco          |
+| r970     | DW01_inc     | width=3    |               | add_213              |
+| r972     | DW01_cmp2    | width=3    |               | lt_228               |
+| r974     | DW01_inc     | width=3    |               | add_232              |
+| r976     | DW01_cmp2    | width=3    |               | lt_228_I2            |
+| r978     | DW01_inc     | width=3    |               | add_232_I2           |
+| r980     | DW01_cmp2    | width=3    |               | lt_228_I3            |
+| r982     | DW01_inc     | width=3    |               | add_232_I3           |
+| r984     | DW01_cmp2    | width=3    |               | lt_228_I4            |
+| r986     | DW01_inc     | width=3    |               | add_232_I4           |
+| r988     | DW01_cmp6    | width=3    |               | memory/eq_176        |
+| r990     | DW01_cmp6    | width=10   |               | memory/eq_176_2      |
+| r992     | DW01_cmp6    | width=3    |               | memory/eq_176_I2     |
+| r994     | DW01_cmp6    | width=10   |               | memory/eq_176_2_I2   |
+| r996     | DW01_cmp6    | width=3    |               | memory/eq_176_I3     |
+| r998     | DW01_cmp6    | width=10   |               | memory/eq_176_2_I3   |
+| r1000    | DW01_cmp2    | width=2    |               | memory/gte_217       |
+| r1002    | DW01_cmp2    | width=2    |               | memory/gte_217_I2_I1 |
+| r1004    | DW01_inc     | width=2    |               | memory/add_238_I2_I1 |
+| r1006    | DW01_cmp2    | width=2    |               | memory/gte_268       |
+| r1008    | DW01_cmp2    | width=2    |               | memory/gte_268_I2_I1 |
+| r1010    | DW01_cmp2    | width=2    |               | memory/gte_268_I2    |
+| r1012    | DW01_cmp2    | width=2    |               | memory/gte_268_I2_I2 |
+| r1014    | DW01_cmp2    | width=2    |               | memory/gte_268_I3    |
+| r1016    | DW01_cmp2    | width=2    |               | memory/gte_268_I2_I3 |
+| r1018    | DW01_cmp6    | width=10   |               | memory/genblk1[0].rd_cam/eq_18 |
+| r1020    | DW01_cmp6    | width=10   |               | memory/genblk1[0].rd_cam/eq_18_G2 |
+| r1022    | DW01_cmp6    | width=10   |               | memory/genblk1[0].rd_cam/eq_18_G3 |
+| r1024    | DW01_cmp6    | width=10   |               | memory/genblk1[0].rd_cam/eq_18_G4 |
+| r1026    | DW01_dec     | width=4    |               | memory/genblk1[0].rd_enc/sub_9 |
+| r1028    | DW01_cmp6    | width=10   |               | memory/genblk1[1].rd_cam/eq_18 |
+| r1030    | DW01_cmp6    | width=10   |               | memory/genblk1[1].rd_cam/eq_18_G2 |
+| r1032    | DW01_cmp6    | width=10   |               | memory/genblk1[1].rd_cam/eq_18_G3 |
+| r1034    | DW01_cmp6    | width=10   |               | memory/genblk1[1].rd_cam/eq_18_G4 |
+| r1036    | DW01_dec     | width=4    |               | memory/genblk1[1].rd_enc/sub_9 |
+| r1038    | DW01_cmp6    | width=10   |               | memory/genblk1[2].rd_cam/eq_18 |
+| r1040    | DW01_cmp6    | width=10   |               | memory/genblk1[2].rd_cam/eq_18_G2 |
+| r1042    | DW01_cmp6    | width=10   |               | memory/genblk1[2].rd_cam/eq_18_G3 |
+| r1044    | DW01_cmp6    | width=10   |               | memory/genblk1[2].rd_cam/eq_18_G4 |
+| r1046    | DW01_dec     | width=4    |               | memory/genblk1[2].rd_enc/sub_9 |
+| r1048    | DW01_cmp6    | width=10   |               | memory/genblk2[0].wr_cam/eq_18 |
+| r1050    | DW01_cmp6    | width=10   |               | memory/genblk2[0].wr_cam/eq_18_G2 |
+| r1052    | DW01_cmp6    | width=10   |               | memory/genblk2[0].wr_cam/eq_18_G3 |
+| r1054    | DW01_cmp6    | width=10   |               | memory/genblk2[0].wr_cam/eq_18_G4 |
+| r1056    | DW01_dec     | width=4    |               | memory/genblk2[0].wr_enc/sub_9 |
+| r1058    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18   |
+| r1060    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2_G1_G1 |
+| r1062    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G1 |
+| r1064    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G1 |
+| r1066    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G1 |
+| r1068    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2 |
+| r1070    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2_G1_G2 |
+| r1072    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G2 |
+| r1074    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G2 |
+| r1076    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G2 |
+| r1078    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3 |
+| r1080    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2_G1_G3 |
+| r1082    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G3 |
+| r1084    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G3 |
+| r1086    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G3 |
+| r1088    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4 |
+| r1090    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2_G1_G4 |
+| r1092    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G4 |
+| r1094    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G4 |
+| r1096    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G4 |
+| r1098    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5 |
+| r1100    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2_G1_G5 |
+| r1102    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G5 |
+| r1104    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G5 |
+| r1106    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G5 |
+| r1108    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G6 |
+| r1110    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G2_G1_G6 |
+| r1112    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G3_G1_G6 |
+| r1114    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G4_G1_G6 |
+| r1116    | DW01_cmp6    | width=64   |               | PC_queue_cam/eq_18_G5_G1_G6 |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 ===============================================================================
 
 
@@ -1076,6 +1895,7 @@ Implementation Report
 |                    |                  | Current            | Set            |
 | Cell               | Module           | Implementation     | Implementation |
 ===============================================================================
+<<<<<<< HEAD
 | PC_queue_cam/eq_18_G5_G1_G6           |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | PC_queue_cam/eq_18_G5_G1_G5           |                    |                |
@@ -1089,6 +1909,9 @@ Implementation Report
 | PC_queue_cam/eq_18_G5_G1_G1           |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | add_164_G4         | DW01_add         | cla                |                |
+=======
+| add_153            | DW01_add         | cla                |                |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 | PC_queue_cam/eq_18_G2_G1_G6           |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | PC_queue_cam/eq_18_G2_G1_G5           |                    |                |
@@ -1101,6 +1924,22 @@ Implementation Report
 |                    | DW01_cmp6        | rpl                |                |
 | PC_queue_cam/eq_18_G2_G1_G1           |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
+<<<<<<< HEAD
+=======
+| PC_queue_cam/eq_18_G5_G1_G6           |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| PC_queue_cam/eq_18_G5_G1_G5           |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| PC_queue_cam/eq_18_G5_G1_G4           |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| PC_queue_cam/eq_18_G5_G1_G3           |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| PC_queue_cam/eq_18_G5_G1_G2           |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| PC_queue_cam/eq_18_G5_G1_G1           |                    |                |
+|                    | DW01_cmp6        | rpl                |                |
+| add_153_G4         | DW01_add         | cla                |                |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 | PC_queue_cam/eq_18_G3_G1_G6           |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | PC_queue_cam/eq_18_G3_G1_G5           |                    |                |
@@ -1125,10 +1964,16 @@ Implementation Report
 |                    | DW01_cmp6        | rpl                |                |
 | PC_queue_cam/eq_18_G4_G1_G1           |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
+<<<<<<< HEAD
 | add_164_G3         | DW01_add         | cla                |                |
 | add_164_G2         | DW01_add         | cla                |                |
 | add_164            | DW01_add         | cla                |                |
 | ne_167             | DW01_cmp6        | rpl                |                |
+=======
+| add_153_G3         | DW01_add         | cla                |                |
+| add_153_G2         | DW01_add         | cla                |                |
+| ne_156             | DW01_cmp6        | rpl                |                |
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 | PC_queue_cam/eq_18_G6                 |                    |                |
 |                    | DW01_cmp6        | rpl                |                |
 | PC_queue_cam/eq_18_G5                 |                    |                |
@@ -1142,4 +1987,15 @@ Implementation Report
 | PC_queue_cam/eq_18 | DW01_cmp6        | rpl                |                |
 ===============================================================================
 
+<<<<<<< HEAD
+=======
+
+No resource sharing information to report.
+ 
+****************************************
+Design : mem_controller
+****************************************
+
+No implementations to report
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 1

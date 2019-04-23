@@ -126,7 +126,7 @@ module testbench;
 	task check_for_correct_bp_reset;
 		begin
 			for(i=0;i<`PHT_ROW;++i) begin
-				assert( pht_out[i] == 2'b0 ) else #1 exit_on_error;
+				assert( pht_out[i] == 2'b01 ) else #1 exit_on_error;
 			end
 		end
 	endtask

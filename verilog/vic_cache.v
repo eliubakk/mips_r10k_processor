@@ -8,8 +8,8 @@ module vic_cache(clock, reset,
               evicted_vic, evicted_valid,
               rd_vic, rd_valid, vic_queue_out);
     parameter NUM_WAYS = 4;
-    parameter RD_PORTS = 1;
-    parameter WR_PORTS = 1;
+    parameter RD_PORTS = 2;
+    parameter WR_PORTS = 3;
 
     `include "../../cache_defs.vh"
     

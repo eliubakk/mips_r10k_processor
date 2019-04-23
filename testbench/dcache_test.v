@@ -1,8 +1,28 @@
 `include "../../sys_defs.vh"
 `include "../../cache_defs.vh"
+`define DEBUG
+`define DELAY #2
+`define CLOCK_PERIOD #10
+`define NUM_RAND_ITER 500
+
+module testbench;
+
+	initial
+	begin
+		$finish;
+	end
+
+
+endmodule
+/*
+`include "../../sys_defs.vh"
+>>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
+`define NUM_SET_BITS $clog2(32/NUM_WAYS)
+`define NUM_TAG_BITS (13-`NUM_SET_BITS)
+
 
 module testbench;
     //inputs
