@@ -93,9 +93,9 @@ module pipeline (
 	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
 
     // Outputs from MEM/COMP Pipeline Register
-    output logic mem_co_valid_inst,   
-    output logic [63:0] mem_co_NPC ,        
-    output logic [31:0] mem_co_IR ,         
+      output logic mem_co_valid_inst,   
+      output logic [63:0] mem_co_NPC ,        
+      output logic [31:0] mem_co_IR ,         
  
     // Outputs from EX/COM Pipeline Register
     output logic [`NUM_FU_TOTAL-1:0][63:0] ex_co_NPC,
@@ -425,9 +425,8 @@ logic tag_in_lq;
   // assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
   // assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
   // assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
-
-  // assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
-  // assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
+  assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
+  assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
   // assign Dmem2proc_tag = (proc2Dmem_command == BUS_LOAD) ? mem2proc_tag : 0;
 
 	icache inst_memory(
@@ -530,15 +529,12 @@ logic tag_in_lq;
   LQ_ROW_T lq_load_in;
   logic lq_write_en;
   logic lq_pop_en;
-  logic [63:0] lq_miss_data;
-  logic [63:0] lq_miss_addr;
-  logic lq_miss_valid;
+
+  logic [3:0] lq_mem_tag;
 
   LQ_ROW_T lq_load_out;
   logic lq_read_valid;
   logic lq_full;
-
-  //assign lq_pop_en = mem_stall_out;
 
   LQ load_queue(
     .clock(clock),
@@ -547,10 +543,10 @@ logic tag_in_lq;
     .load_in(lq_load_in),
     .write_en(lq_write_en),
     .pop_en(lq_pop_en),
-    .lq_miss_data(lq_miss_data),
-    .lq_miss_addr(lq_miss_addr),
-    .lq_miss_valid(lq_miss_valid),
 
+    .mem_tag(mem2proc_tag),
+
+    .tag_found(tag_in_lq),
     .load_out(lq_load_out),
     .read_valid(lq_read_valid),
     .full(lq_full)
@@ -1353,10 +1349,11 @@ end
                             mem_rd_stall? 64'b0 : mem_result_out;
   assign lq_load_in.data_valid = sq_data_valid | ~mem_rd_stall;
   assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & ((mem_rd_stall & ~sq_data_valid & ~sq_data_not_found) | mem_co_stall);
+
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
-  // assign lq_pop_en = ~mem_stall_out; // tag_in_lq;
+  assign lq_pop_en = tag_in_lq;
   // assign lq_mem_tag = Dmem2proc_response;
 
 //   //////////////////////////////////////////////////
@@ -1391,9 +1388,6 @@ assign lq_pop_en = ~mem_co_stall;
      .mem_result_out(mem_result_out),
      .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),
-     .mem_rd_miss_addr_out (lq_miss_addr),
-     .mem_rd_miss_data_out (lq_miss_data),
-     .mem_rd_miss_valid_out(lq_miss_valid),
      .proc2Dmem_command(proc2Dmem_command),
      .proc2Dmem_addr(proc2Dmem_addr),
      .proc2Dmem_data(proc2Dmem_data),
@@ -1401,7 +1395,6 @@ assign lq_pop_en = ~mem_co_stall;
      .proc2Rmem_addr       (proc2Rmem_addr),
      .proc2Rmem_data       (proc2Rmem_data)
   );
-
   wire [5:0] mem_dest_reg_idx_out =
              mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[2];
   wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_rd_stall;
@@ -1410,7 +1403,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 
 
 
-  //////////////////////////////////////////////////_
+  //////////////////////////////////////////////////
   //                                              //
   //           mem/co stage                   //
   //                                              //
@@ -1419,7 +1412,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   logic mem_co_comb;
   assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.data_valid; 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst & lq_pop_en; 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
@@ -1807,3 +1800,4 @@ assign arch_enable = rob_retire_out.busy & !branch_not_taken;
  );
 
 endmodule  // module verisimple
+

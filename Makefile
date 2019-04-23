@@ -188,7 +188,7 @@ vis_simv:	$(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST
 #	$(VCS) $(TESTBENCH) $(SYNFILES) $(LIB) -o syn_simv
 
 syn:	syn_simv
-	./syn_simv | tee syn_program.out
+	./syn_simv | tee syn_program.out	
 
 clean:
 	rm -rvf simv *.daidir csrc vcs.key program.out \
