@@ -349,6 +349,7 @@ ROB_ROW_T rob_retire_out;
   logic rob_retire_out_T_new; 
   logic rob_retire_out_T_old; 	
   logic [31:0] rob_retire_opcode;
+logic rob_retire_out_is_store;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
   logic [63:0] proc2Rmem_data, proc2Dmem_data;
@@ -415,8 +416,8 @@ logic tag_in_lq;
   // assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
   // assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
   // assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
-  assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
-  assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
+  //assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
+  //assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
   // assign Dmem2proc_tag = (proc2Dmem_command == BUS_LOAD) ? mem2proc_tag : 0;
 
 	icache inst_memory(
@@ -515,32 +516,36 @@ logic tag_in_lq;
     .full(sq_full)
   );
 
-  // Load queue signals
+// Load queue signals
   LQ_ROW_T lq_load_in;
   logic lq_write_en;
   logic lq_pop_en;
-
-  logic [3:0] lq_mem_tag;
+  logic [63:0] lq_miss_data;
+  logic [63:0] lq_miss_addr;
+  logic lq_miss_valid;
 
   LQ_ROW_T lq_load_out;
   logic lq_read_valid;
   logic lq_full;
 
+  //assign lq_pop_en = mem_stall_out;
+
   LQ load_queue(
     .clock(clock),
-    .reset(reset),
+    .reset(reset | branch_not_taken),
 
     .load_in(lq_load_in),
     .write_en(lq_write_en),
     .pop_en(lq_pop_en),
+    .lq_miss_data(lq_miss_data),
+    .lq_miss_addr(lq_miss_addr),
+    .lq_miss_valid(lq_miss_valid),
 
-    .mem_tag(mem2proc_tag),
-
-    .tag_found(tag_in_lq),
     .load_out(lq_load_out),
     .read_valid(lq_read_valid),
     .full(lq_full)
   );
+
 
   //////////////////////////////////////////////////
   //                                              //
@@ -895,7 +900,7 @@ end
   );
 
   // Instantiating the map table
-  Map_Table m1( //Inputs
+ Map_Table m1( //Inputs
     .clock(clock),
   	.reset(reset),
   	.enable(fr_read_en),		// Should not read during stalling for structural hazard
@@ -913,6 +918,7 @@ end
   	.T2(id_inst_out.T2), 		// Output for Dispatch and goes to RS
   	.T_old(T_old) 		// Output for Dispatch and goes to RS and ROB
   );
+
 
   //Instantiating the freelist
   
@@ -1343,7 +1349,7 @@ end
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
-  assign lq_pop_en = tag_in_lq;
+  //assign lq_pop_en = tag_in_lq;
   // assign lq_mem_tag = Dmem2proc_response;
 
 //   //////////////////////////////////////////////////
@@ -1354,7 +1360,8 @@ end
    
 assign lq_pop_en = ~mem_co_stall;
   
-  mem_stage mem_stage_0 (// Inputs
+ 
+ mem_stage mem_stage_0 (// Inputs
      .clock(clock),
      .reset(reset),
      .rd_mem(ex_co_rd_mem[FU_LD_IDX]),
@@ -1370,18 +1377,17 @@ assign lq_pop_en = ~mem_co_stall;
      .sq_data_valid(sq_data_valid),           // adddress not found
      
      // Outputs
-     .send_request_out(send_request_out),
-     .unanswered_miss_out(unanswered_miss_out),
-
-    .sets_out(dcache_data),
+     .sets_out(dcache_data),
   	.evicted_out(evicted_data),
   	.evicted_valid_out(evicted_valid),
   	.retire_queue_out(retire_queue),
   	.retire_queue_tail_out(retire_queue_tail),
-
      .mem_result_out(mem_result_out),
      .mem_rd_stall(mem_rd_stall),
      .mem_stall_out(mem_stall_out),
+     .mem_rd_miss_addr_out (lq_miss_addr),
+     .mem_rd_miss_data_out (lq_miss_data),
+     .mem_rd_miss_valid_out(lq_miss_valid),
      .proc2Dmem_command(proc2Dmem_command),
      .proc2Dmem_addr(proc2Dmem_addr),
      .proc2Dmem_data(proc2Dmem_data),
@@ -1389,6 +1395,8 @@ assign lq_pop_en = ~mem_co_stall;
      .proc2Rmem_addr       (proc2Rmem_addr),
      .proc2Rmem_data       (proc2Rmem_data)
   );
+
+
   wire [5:0] mem_dest_reg_idx_out =
              mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[2];
   wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_rd_stall;
@@ -1710,6 +1718,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   assign pipeline_branch_en = ret_branch_inst.en; 
   assign pipeline_branch_pred_correct =  ret_branch_inst.en & ret_pred_correct;
 
+logic rob_retire_out_is_store_comb;
+assign rob_retire_out_is_store_comb = rob_retire_out.is_store & rob_retire_out.busy;
 
   
 // FF between complete and retire
@@ -1750,7 +1760,7 @@ always_ff @ (posedge clock) begin
     rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
 		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
-		rob_retire_out_is_store <= `SD (rob_retire_out.is_store & rob_retire_out.busy);
+		rob_retire_out_is_store <= `SD rob_retire_out_is_store_comb;
 		if(rob_retire_out.branch_inst.en) begin // For branch retire
 			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
 			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;
