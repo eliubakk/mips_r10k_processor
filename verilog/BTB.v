@@ -93,7 +93,7 @@ module  BTB(
 		end
 	end
 
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			valid		<= `SD `BTB_ROW'b0;

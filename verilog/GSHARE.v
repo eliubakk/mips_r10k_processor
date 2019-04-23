@@ -91,8 +91,7 @@ module GSHARE(
 		end
 	end
 
-
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			pht			<=  `SD {(2**`BH_SIZE){1'b0}}; // Initialized to not taken

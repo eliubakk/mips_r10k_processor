@@ -95,6 +95,7 @@ module OBQ(
 	end
 
 	// sequential logic
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `OBQ_SIZE; ++i) begin

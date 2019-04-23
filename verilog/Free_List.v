@@ -148,7 +148,7 @@ module Free_List(
 			end
 		end
 	end
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			// if reset, set i = pr_(num_gen + i), 0 -> 32,

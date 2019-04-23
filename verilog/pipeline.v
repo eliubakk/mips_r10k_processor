@@ -8,6 +8,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
+`include "../../cache_defs.vh"
 `define DEBUG
 `define SD #1
 

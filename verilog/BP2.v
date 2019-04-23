@@ -345,7 +345,7 @@ module  BP2(
 
 	end
 
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			br_idx <= `SD {($clog2(`OBQ_SIZE)){0}};

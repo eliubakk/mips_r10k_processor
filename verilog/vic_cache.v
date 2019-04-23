@@ -135,7 +135,7 @@ module vic_cache(clock, reset,
         vic_queue_tail_next = (num_evict > 0)? `VIC_SIZE : vic_queue_tail_next + BIT_COUNT_LUT[vic_valid];
     end
 
-        
+     // synopsys sync_set_reset "reset"     
     always_ff @(posedge clock) begin
         if (reset) begin
             for(int i = 0; i < `VIC_SIZE; ++i) begin

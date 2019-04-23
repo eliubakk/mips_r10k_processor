@@ -250,6 +250,7 @@ module ROB(
 	end
 
 	//UPDATE_FLIP_FLOPS
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
 			for (int i = 0; i < `ROB_SIZE; i += 1) begin

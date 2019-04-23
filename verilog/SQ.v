@@ -171,7 +171,7 @@ module SQ(
 			load_req = 0;
 		end
 	end
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `SQ_SIZE; ++i) begin

@@ -10,7 +10,7 @@ module icache(clock, reset,
   parameter RD_PORTS = 1;
 
   `define NUM_WAYS NUM_WAYS
-  `include "../../cache_defs.vh"
+  //`include "../../cache_defs.vh"
 
   input clock, reset;
 

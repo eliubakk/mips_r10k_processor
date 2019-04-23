@@ -606,7 +606,7 @@ module dcache(clock, reset,
     end
 
   end
-
+  // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset) begin
       for(int i = 0; i < `NUM_FIFO; i += 1) begin

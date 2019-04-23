@@ -10,7 +10,7 @@
 
 
 
-typedef struct packed {
+/*typedef struct packed {
   logic [63:0] data;
   logic [(`NUM_TAG_BITS-1):0] tag;
   logic valid;
@@ -20,7 +20,7 @@ typedef struct packed {
 typedef struct packed {
   CACHE_LINE_T [(`NUM_WAYS-1):0] cache_lines;
 } CACHE_SET_T;
-
+*/
 
 module cachemem(clock, reset, 
                 rd_en, rd_idx, rd_tag,
@@ -300,6 +300,7 @@ module cachemem(clock, reset,
 	end
 
   //sequential logic
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			for (int i = 0; i < `NUM_SETS; i += 1) begin

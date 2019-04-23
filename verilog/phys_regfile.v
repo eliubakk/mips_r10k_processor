@@ -41,7 +41,7 @@ module phys_regfile(
   //
   //
   //
-
+  // synopsys sync_set_reset "reset"
   always_ff @(posedge wr_clk) begin
     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
       if (wr_en[i]) begin

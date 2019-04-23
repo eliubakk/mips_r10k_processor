@@ -86,7 +86,7 @@ module Map_Table(
 			end
 		end
 	end
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset) begin
 			// if reset, set reg_i = pr_i (i.e. reg0 = pr0, ...)
