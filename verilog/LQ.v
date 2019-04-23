@@ -85,8 +85,8 @@ module LQ(
             load_queue[i].data_valid   <= 1'b0;
             // load_queue[i].mem_response <= `SD 4'b0;
         end 
-        head <= {`lq_index_t{0}};
-        tail <= {`lq_index_t{0}};
+        head <= `SD {`lq_index_t{1'b0}};
+        tail <= `SD {`lq_index_t{1'b0}};
       end else begin
         load_queue <= `SD load_queue_next;
         head <= `SD head_next;
