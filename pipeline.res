@@ -3,11 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-<<<<<<< HEAD
-Date   : Tue Apr 23 22:47:17 2019
-=======
-Date   : Tue Apr 23 23:19:33 2019
->>>>>>> 9f68d034b6fd2176bdaab23738a2f7db8d501ab7
+Date   : Wed Apr 24 00:29:54 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v

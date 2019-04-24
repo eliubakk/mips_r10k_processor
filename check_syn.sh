@@ -34,10 +34,8 @@ do
 	echo "Running $file"
 
 	# run test case
-	make clean
-	cp pipeline.vg	synth/pipeline/pipeline.vg
-	make syn
-	timeout $TIMEOUT make all
+	make syn_simv
+	timeout $TIMEOUT ./syn_simv | tee program.out
 	echo "Saving $file output"
 
 	# kill simv if its still running
