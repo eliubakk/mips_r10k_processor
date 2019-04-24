@@ -18,7 +18,7 @@ set design_name ex_stage
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 7.0
+set CLK_PERIOD 7.2
 #SUPERSCALAR
 #set CLK_PERIOD 10
 

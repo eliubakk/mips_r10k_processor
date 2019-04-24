@@ -41,6 +41,7 @@ set design_name ${pipeline_name}
 set clock_name clock
 set reset_name reset
 set CLK_PERIOD 30
+#set CLK_PERIOD 12
 #set clock_name [getenv CLOCK_NET_NAME]
 #set reset_name [getenv RESET_NET_NAME]
 #set CLK_PERIOD [getenv CLOCK_PERIOD]
