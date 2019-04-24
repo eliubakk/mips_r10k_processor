@@ -1,5 +1,6 @@
 // cachemem32x64
 `include "../../sys_defs.vh"
+`include "../../cache_defs.vh"
 `define DEBUG
 
 //`include "../../cache_defs.vh"

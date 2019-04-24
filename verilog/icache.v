@@ -1,4 +1,5 @@
 `include "../../sys_defs.vh"
+`include "../../cache_defs.vh"
 //`define INST_BUFFER_LEN 6
 //`define NUM_INST_PREFETCH 4
 module icache(clock, reset,
