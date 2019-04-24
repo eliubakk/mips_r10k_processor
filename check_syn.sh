@@ -41,7 +41,7 @@ do
 	echo "Saving $file output"
 
 	# kill simv if its still running
-	kill_simv
+	kill_syn
 	
 	# save the output
 	cp writeback.out $OUTPUT_DIR/$file.writeback.out
