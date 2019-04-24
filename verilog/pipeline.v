@@ -1404,14 +1404,20 @@ assign lq_pop_en = ~mem_co_stall;
 
 assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex_co_rd_mem[FU_LD_IDX] & ex_co_wr_mem[FU_LD_IDX])) & (ex_co_valid_inst[FU_LD_IDX]) ;
 
-logic co_lq_miss_valid;
+logic mem_lq_miss_valid;
+logic [63:0] mem_lq_miss_addr;
+logic [63:0] mem_lq_miss_data;
 
 //synopsys sync_set_reset "reset"
 always_ff @(posedge clock) begin
 		if(reset | branch_not_taken) begin
-			co_lq_miss_valid <= `SD 1'b0;
+			mem_lq_miss_valid <= `SD 1'b0;
+			mem_lq_miss_addr <= `SD 64'h0;
+			mem_lq_miss_data <= `SD 64'h0;
 		end else begin
-			co_lq_miss_valid <= `SD lq_miss_valid;
+			mem_lq_miss_valid <= `SD lq_miss_valid;
+			mem_lq_miss_addr <= `SD lq_miss_addr;
+			mem_lq_miss_data <= `SD lq_miss_data;
 		end
 	end
 
@@ -1425,7 +1431,7 @@ always_ff @(posedge clock) begin
   logic mem_co_comb;
   assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : (lq_load_out.valid_inst & co_lq_miss_valid); 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : (lq_load_out.valid_inst & mem_lq_miss_valid); 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;

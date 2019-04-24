@@ -369,7 +369,7 @@ logic		unanswered_miss_out;
   endtask  // task show_mem_with_decimal
 	task display_stages;
 		begin
-			 if (clock_count == 10000) begin
+			 if (clock_count == 100000) begin
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
