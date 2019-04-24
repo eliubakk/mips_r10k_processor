@@ -1,0 +1,951 @@
+                         Chronologic VCS (TM)
+      Version N-2017.12-SP2-1_Full64 -- Sat Mar 23 18:17:50 2019
+               Copyright (c) 1991-2017 by Synopsys Inc.
+                         ALL RIGHTS RESERVED
+
+This program is proprietary and confidential information of Synopsys Inc.
+and may be used and disclosed only as authorized in a license agreement
+controlling such use and disclosure.
+
+Parsing design file 'BP_test.v'
+Parsing included file 'sys_defs.vh'.
+Back to file 'BP_test.v'.
+Parsing design file 'BP.v'
+Parsing included file 'sys_defs.vh'.
+Back to file 'BP.v'.
+Parsing included file 'BTB.v'.
+Back to file 'BP.v'.
+Parsing included file 'GSHARE.v'.
+Back to file 'BP.v'.
+Parsing included file 'OBQ.v'.
+Back to file 'BP.v'.
+Top Level Modules:
+       testbench
+No TimeScale specified
+
+Warning-[PCWM-W] Port connection width mismatch
+BP_test.v, 43
+"BP bp( .clock (clock),  .reset (reset),  .enable (enable),  .if_branch (if_branch),  .if_pc_in (if_pc_in),  .rt_en_branch (rt_en_branch),  .rt_branch_taken (rt_branch_taken),  .rt_prediction_correct (rt_prediction_correct),  .rt_pc (rt_pc),  .rt_calculated_pc (rt_calculated_pc),  .rt_branch_index (rt_branch_index),  .valid_out (valid_out),  .tag_out (tag_out),  .target_address_out (target_address_out),  .obq_out (obq_out),  .tail_out (tail_out),  .ght_out (ght_out),  .pht_out (pht_out),  .next_pc_valid (next_pc_valid),  .next_pc_index (next_pc_index),  .next_pc (next_pc));"
+  The following 32-bit expression is connected to 5-bit port "rt_branch_index"
+  of module "BP", instance "bp".
+  Expression: rt_branch_index
+  	use +lint=PCWM for more details
+
+Starting vcs inline pass...
+1 module and 0 UDP read.
+recompiling module testbench
+make[1]: Entering directory `/afs/umich.edu/user/a/s/ashvarma/470/final/group10w19/BP_test/csrc'
+rm -f _csrc*.so pre_vcsobj_*.so share_vcsobj_*.so
+if [ -x ../simv ]; then chmod -x ../simv; fi
+g++  -o ../simv    -Wl,-rpath-link=./ -Wl,-rpath='$ORIGIN'/simv.daidir/ -Wl,-rpath=./simv.daidir/ -Wl,-rpath='$ORIGIN'/simv.daidir//scsim.db.dir  -rdynamic  -Wl,-rpath=/usr/caen/vcs-2017.12-SP2-1/linux64/lib -L/usr/caen/vcs-2017.12-SP2-1/linux64/lib -lcmsg   objs/amcQw_d.o   _1516_archive_1.so  SIM_l.o       rmapats_mop.o rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o          -lzerosoft_rt_stubs -lvirsim -lerrorinf -lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_tls.o   -Wl,-whole-archive -lvcsucli -Wl,-no-whole-archive          /usr/caen/vcs-2017.12-SP2-1/linux64/lib/vcs_save_restore_new.o -ldl  -lc -lm -lpthread -ldl 
+../simv up to date
+make[1]: Leaving directory `/afs/umich.edu/user/a/s/ashvarma/470/final/group10w19/BP_test/csrc'
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Mar 23 18:17 2019
+Clock:    0, reset: 0, enable: 0, if_branch: 0, if_pc_in: 00000000. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : x, next_pc_index : xxxxx, next_pc : xxxxxxxx
+Clock:    1, reset: 0, enable: 0, if_branch: 0, if_pc_in: 00000000. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : xxxxx, next_pc : 00000004
+--------------------------------RESET----------------------------------
+Clock:    0, reset: 1, enable: 0, if_branch: 0, if_pc_in: 00000000. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : xxxxx, next_pc : 00000004
+Clock:    1, reset: 1, enable: 0, if_branch: 0, if_pc_in: 00000000. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : xxxxx, next_pc : 00000004
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000000. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : xxxxx, next_pc : 00000004
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000000. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000004
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 00000000
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 0, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000000, rt_calculated_pc : 00000000, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000004
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 0		000		000
+         13		 0		000		000
+         14		 0		000		000
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 0
+Idx 1101 : Prediction 0
+Idx 1110 : Prediction 0
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+--------------------------------Check the roll back ----------------------------------
+temp_pc =          48
+Clock:    0, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000030. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000004
+Clock:    1, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000030. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000000, rt_calculated_pc: 00000000, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000034
+AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 1, if_pc_in : 00000030
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 0, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000000, rt_calculated_pc : 00000000, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000034
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 0		000		000
+         13		 0		000		000
+         14		 0		000		000
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 0
+Idx 1101 : Prediction 0
+Idx 1110 : Prediction 0
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  1
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000030. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000030, rt_calculated_pc: 00000090, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000034
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000030. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000030, rt_calculated_pc: 00000090, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000034
+AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 00000030
+RETIRE_IN @@@ rt_en_branch : 1, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000030, rt_calculated_pc : 00000090, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000034
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 0		000		000
+         14		 0		000		000
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 0
+Idx 1110 : Prediction 0
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 1000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+temp_pc =          52
+Clock:    0, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000034. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000030, rt_calculated_pc: 00000090, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000034
+Clock:    1, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000034. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000030, rt_calculated_pc: 00000090, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000038
+AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 1, if_pc_in : 00000034
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000030, rt_calculated_pc : 00000090, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000038
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 0		000		000
+         14		 0		000		000
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 0
+Idx 1110 : Prediction 0
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  1
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 1000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000034. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000034, rt_calculated_pc: 0000009c, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000038
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000034. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000034, rt_calculated_pc: 0000009c, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000038
+AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 00000034
+RETIRE_IN @@@ rt_en_branch : 1, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000034, rt_calculated_pc : 0000009c, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000038
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 0		000		000
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 0
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+temp_pc =          56
+Clock:    0, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000038. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000034, rt_calculated_pc: 0000009c, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000038
+Clock:    1, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000038. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000034, rt_calculated_pc: 0000009c, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 0000003c
+AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 1, if_pc_in : 00000038
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000034, rt_calculated_pc : 0000009c, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 1, next_pc_index : 00000, next_pc : 0000003c
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 0		000		000
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 0
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  1
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000038. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000038, rt_calculated_pc: 000000a8, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 0000003c
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000038. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000038, rt_calculated_pc: 000000a8, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 0000003c
+AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 00000038
+RETIRE_IN @@@ rt_en_branch : 1, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000038, rt_calculated_pc : 000000a8, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 0000003c
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 1000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+temp_pc =          60
+Clock:    0, reset: 0, enable: 1, if_branch: 1, if_pc_in: 0000003c. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000038, rt_calculated_pc: 000000a8, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 0000003c
+Clock:    1, reset: 0, enable: 1, if_branch: 1, if_pc_in: 0000003c. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000038, rt_calculated_pc: 000000a8, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000040
+AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 1, if_pc_in : 0000003c
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000038, rt_calculated_pc : 000000a8, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000040
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 0		000		000
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 0
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  1
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 1000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 0000003c. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 0000003c, rt_calculated_pc: 000000b4, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000040
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 0000003c. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 0000003c, rt_calculated_pc: 000000b4, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000040
+AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 0000003c
+RETIRE_IN @@@ rt_en_branch : 1, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 0000003c, rt_calculated_pc : 000000b4, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000040
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 1		000		02d
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 1
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+temp_pc =          64
+Clock:    0, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000040. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 0000003c, rt_calculated_pc: 000000b4, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000040
+Clock:    1, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000040. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 0000003c, rt_calculated_pc: 000000b4, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000044
+AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 1, if_pc_in : 00000040
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 0000003c, rt_calculated_pc : 000000b4, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000044
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 0		000		000
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 1		000		02d
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 0
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 1
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  1
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000040. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000040, rt_calculated_pc: 000000c0, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000044
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000040. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000040, rt_calculated_pc: 000000c0, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000044
+AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 00000040
+RETIRE_IN @@@ rt_en_branch : 1, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000040, rt_calculated_pc : 000000c0, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000044
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 1		001		030
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 1		000		02d
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 1
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 1
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 1000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+temp_pc =          68
+Clock:    0, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000044. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000040, rt_calculated_pc: 000000c0, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000044
+Clock:    1, reset: 0, enable: 1, if_branch: 1, if_pc_in: 00000044. rt_en_branch: 0, rt_prediction_correct: 0, rt_pc: 00000040, rt_calculated_pc: 000000c0, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000048
+AFTER FETCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 1, if_pc_in : 00000044
+RETIRE_IN @@@ rt_en_branch : 0, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000040, rt_calculated_pc : 000000c0, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000048
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 1		001		030
+          1		 0		000		000
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 1		000		02d
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 1
+Idx 0001 : Prediction 0
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 1
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  1
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 1000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+Clock:    0, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000044. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000044, rt_calculated_pc: 000000cc, rt_branch_index: 00000, next_pc_valid : 1, next_pc_index : 00000, next_pc : 00000048
+Clock:    1, reset: 0, enable: 1, if_branch: 0, if_pc_in: 00000044. rt_en_branch: 1, rt_prediction_correct: 0, rt_pc: 00000044, rt_calculated_pc: 000000cc, rt_branch_index: 00000, next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000048
+AFTER RETIRE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*******************************************************************************
+*******************************************************************************
+FETCH_IN  @@@ if_branch : 0, if_pc_in : 00000044
+RETIRE_IN @@@ rt_en_branch : 1, rt_branch_taken : 1, rt_prediction_correct : 0
+	    @@@ rt_pc : 00000044, rt_calculated_pc : 000000cc, rt_branch_index : 00000
+FETCH_OUT @@@ next_pc_valid : 0, next_pc_index : 00000, next_pc : 00000048
+--------------------------BTB-----------------------------------
+index(pc[ 5:2]		valid		tag(pc[16, 6])	target_address(pc[13,2])
+          0		 1		001		030
+          1		 1		001		033
+          2		 0		000		000
+          3		 0		000		000
+          4		 0		000		000
+          5		 0		000		000
+          6		 0		000		000
+          7		 0		000		000
+          8		 0		000		000
+          9		 0		000		000
+         10		 0		000		000
+         11		 0		000		000
+         12		 1		000		024
+         13		 1		000		027
+         14		 1		000		02a
+         15		 1		000		02d
+*******************************************************************************
+--------------------------GSHARE PHT-----------------------------------
+GHT : 0000
+GHT idx           PHT
+Idx 0000 : Prediction 1
+Idx 0001 : Prediction 1
+Idx 0010 : Prediction 0
+Idx 0011 : Prediction 0
+Idx 0100 : Prediction 0
+Idx 0101 : Prediction 0
+Idx 0110 : Prediction 0
+Idx 0111 : Prediction 0
+Idx 1000 : Prediction 0
+Idx 1001 : Prediction 0
+Idx 1010 : Prediction 0
+Idx 1011 : Prediction 0
+Idx 1100 : Prediction 1
+Idx 1101 : Prediction 1
+Idx 1110 : Prediction 1
+Idx 1111 : Prediction 1
+*******************************************************************************
+---------------------------OBQ-----------------------------------------
+tail_out:  0
+index:           0 branch_history: 0000
+index:           1 branch_history: 0000
+index:           2 branch_history: 0000
+index:           3 branch_history: 0000
+index:           4 branch_history: 0000
+index:           5 branch_history: 0000
+index:           6 branch_history: 0000
+index:           7 branch_history: 0000
+index:           8 branch_history: 0000
+index:           9 branch_history: 0000
+index:          10 branch_history: 0000
+index:          11 branch_history: 0000
+index:          12 branch_history: 0000
+index:          13 branch_history: 0000
+index:          14 branch_history: 0000
+index:          15 branch_history: 0000
+*******************************************************************************
+*******************************************************************************
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@@@passed
+$finish called from file "BP_test.v", line 334.
+$finish at simulation time                  292
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 292
+CPU Time:      0.200 seconds;       Data structure size:   0.0Mb
+Sat Mar 23 18:17:52 2019
+CPU time: .276 seconds to compile + .176 seconds to elab + .240 seconds to link + .230 seconds in simulation

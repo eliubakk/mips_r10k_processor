@@ -16,7 +16,7 @@ rm -rf $DIFF_DIR
 mkdir $DIFF_DIR
 
 kill_syn() {
-	for pid in `lsof +D . | grep "syn" | awk {'print $2'}` ; 
+	for pid in `lsof +D . | grep "syn_simv" | awk {'print $2'}` ; 
 	do 
 		kill $pid; 
 	done
@@ -34,8 +34,8 @@ do
 	echo "Running $file"
 
 	# run test case
-	make syn
-	timeout $TIMEOUT make all
+	make syn_simv
+	timeout $TIMEOUT ./syn_simv | tee program.out
 	echo "Saving $file output"
 
 	# kill simv if its still running

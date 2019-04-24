@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:28 2019
+Date   : Tue Apr 23 22:47:17 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -259,23 +259,23 @@ Resource Sharing Report for design mem_stage in file ../../verilog/mem_stage.v
 | r3083    | DW01_inc     | width=5    |               | dcache0/add_598      |
 | r3085    | DW01_inc     | width=3    |               | dcache0/add_600      |
 | r3087    | DW01_add     | width=64   |               | dcache0/add_602      |
-| r3097    | DW01_cmp6    | width=3    |               | dcache0/memory/eq_194 |
-| r3099    | DW01_cmp6    | width=10   |               | dcache0/memory/eq_194_2 |
-| r3101    | DW01_cmp6    | width=3    |               | dcache0/memory/eq_194_I2_I1 |
-| r3103    | DW01_cmp6    | width=10   |               | dcache0/memory/eq_194_2_I2_I1 |
-| r3105    | DW01_cmp6    | width=3    |               | dcache0/memory/eq_194_I3_I1 |
-| r3107    | DW01_cmp6    | width=10   |               | dcache0/memory/eq_194_2_I3_I1 |
-| r3109    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_235 |
-| r3111    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_235_I2_I1 |
-| r3113    | DW01_inc     | width=2    |               | dcache0/memory/add_256_I2_I1 |
-| r3115    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_235_I2 |
-| r3117    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_235_I2_I2 |
-| r3119    | DW01_inc     | width=2    |               | dcache0/memory/add_256_I2_I2 |
-| r3121    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_235_I3 |
-| r3123    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_235_I2_I3 |
-| r3125    | DW01_inc     | width=2    |               | dcache0/memory/add_256_I2_I3 |
-| r3127    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_286 |
-| r3129    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_286_I2_I1 |
+| r3097    | DW01_cmp6    | width=3    |               | dcache0/memory/eq_195 |
+| r3099    | DW01_cmp6    | width=10   |               | dcache0/memory/eq_195_2 |
+| r3101    | DW01_cmp6    | width=3    |               | dcache0/memory/eq_195_I2_I1 |
+| r3103    | DW01_cmp6    | width=10   |               | dcache0/memory/eq_195_2_I2_I1 |
+| r3105    | DW01_cmp6    | width=3    |               | dcache0/memory/eq_195_I3_I1 |
+| r3107    | DW01_cmp6    | width=10   |               | dcache0/memory/eq_195_2_I3_I1 |
+| r3109    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_236 |
+| r3111    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_236_I2_I1 |
+| r3113    | DW01_inc     | width=2    |               | dcache0/memory/add_257_I2_I1 |
+| r3115    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_236_I2 |
+| r3117    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_236_I2_I2 |
+| r3119    | DW01_inc     | width=2    |               | dcache0/memory/add_257_I2_I2 |
+| r3121    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_236_I3 |
+| r3123    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_236_I2_I3 |
+| r3125    | DW01_inc     | width=2    |               | dcache0/memory/add_257_I2_I3 |
+| r3127    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_287 |
+| r3129    | DW01_cmp2    | width=2    |               | dcache0/memory/gte_287_I2_I1 |
 | r3131    | DW01_cmp6    | width=10   |               | dcache0/memory/genblk1[0].rd_cam/eq_18 |
 | r3133    | DW01_cmp6    | width=10   |               | dcache0/memory/genblk1[0].rd_cam/eq_18_G2 |
 | r3135    | DW01_cmp6    | width=10   |               | dcache0/memory/genblk1[0].rd_cam/eq_18_G3 |

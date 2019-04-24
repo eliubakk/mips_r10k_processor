@@ -5,7 +5,7 @@ Warning: Design 'pipeline' contains 1 high-fanout nets. A fanout number of 1000 
 Report : design
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 22:47:16 2019
 ****************************************
 
 Design allows ideal nets on clock nets.
@@ -87,7 +87,7 @@ Design Parameters:
 Report : area
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 22:47:16 2019
 ****************************************
 
 Library(s) Used:
@@ -123,7 +123,7 @@ Report : timing
         -transition_time
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 22:47:16 2019
 ****************************************
 
  * Some/all delay information is back-annotated.
@@ -1940,7 +1940,7 @@ Report : constraint
         -max_delay
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 22:47:17 2019
 ****************************************
 
 
@@ -2309,7 +2309,7 @@ Warning: Design 'pipeline' contains 2 high-fanout nets. A fanout number of 1000 
 Report : reference
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:44 2019
+Date   : Tue Apr 23 22:47:31 2019
 ****************************************
 
 Attributes:

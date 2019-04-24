@@ -1,6 +1,6 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 23 22:20 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 23 22:55 2019
 @@
 @@
 @@                     0  Asserting System reset......
@@ -21,43 +21,43 @@ Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
 @@@
-@@@ mem[    0] = 205f27bb203f0008 : 2332626816654573576
-@@@ mem[    8] = 201f2ee648421722 : 2314620300081370914
-@@@ mem[   16] = 201f087b44400402 : 2314578059010769922
-@@@ mem[   24] = 4440040248419722 : 4917935200937285410
-@@@ mem[   32] = 48419722201f00b0 : 5206608817040588976
-@@@ mem[   40] = 201f00fd44400402 : 2314569821263496194
-@@@ mem[   48] = 4440040248411722 : 4917935200937252642
-@@@ mem[   56] = 48619723207f0b50 : 5215616020596591440
-@@@ mem[   64] = 44600403201f04f3 : 4926942403813639411
-@@@ mem[   72] = 48609723201f002d : 5215334545613586477
-@@@ mem[   80] = 209f000044600403 : 2350597531657831427
-@@@ mem[   88] = 4081fda540803404 : 4648275176616637444
-@@@ mem[   96] = 4143040a4c22040a : 4702606878178411530
-@@@ mem[  104] = 4163040b4d42040b : 4711614081746994187
-@@@ mem[  112] = 4183040c4d62040c : 4720621285298799628
-@@@ mem[  120] = 402304014d820401 : 4621542046254105601
-@@@ mem[  128] = 4964168b4944168a : 5288376649925269130
-@@@ mem[  136] = 4824168d4984168c : 5198304665971988108
-@@@ mem[  144] = f4bffff040041400 : 17636096073137394688
-@@@ mem[  152] = 0000000000000555 : 1365
+@@@ mem[    0] = 203f100020bf0bad : 2323593525481900973
+@@@ mem[    8] = b4a10004b4a10000 : 13015684418287763456
+@@@ mem[   16] = b4a1000cb4a10008 : 13015684452647501832
+@@@ mem[   24] = b4a10014b4a10010 : 13015684487007240208
+@@@ mem[   32] = b4a1001cb4a10018 : 13015684521366978584
+@@@ mem[   40] = b4a10024b4a10020 : 13015684555726716960
+@@@ mem[   48] = b4a1002cb4a10028 : 13015684590086455336
+@@@ mem[   56] = b4a10034b4a10030 : 13015684624446193712
+@@@ mem[   64] = b4a1003cb4a10038 : 13015684658805932088
+@@@ mem[   72] = 00000555b4a10040 : 5865660809280
+@@@
+@@@ mem[ 4096] = 0000000000000bad : 2989
+@@@ mem[ 4104] = 0000000000000bad : 2989
+@@@ mem[ 4112] = 0000000000000bad : 2989
+@@@ mem[ 4120] = 0000000000000bad : 2989
+@@@ mem[ 4128] = 0000000000000bad : 2989
+@@@ mem[ 4136] = 0000000000000bad : 2989
+@@@ mem[ 4144] = 0000000000000bad : 2989
+@@@ mem[ 4152] = 0000000000000bad : 2989
+@@@ mem[ 4160] = 0000000000000bad : 2989
 @@@
 @@@
-@@                108820 : System halted
+@@                 11620 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  539 cycles / 278 instrs = 1.938849 CPI
+@@  53 cycles / 19 instrs = 2.789474 CPI
 @@
-@@  16170.00 ns total time to execute
+@@  1590.00 ns total time to execute
 @@
 
 
--------------Branch prediction accuracy : 14 correct / 16 branch instrs = 87.5000 percent
+-------------Branch prediction accuracy : 0 correct / 0 branch instrs = -nan percent
 $finish called from file "../../testbench/pipeline_test.v", line 652.
-$finish at simulation time               109010
+$finish at simulation time                11810
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 10901000 ps
-CPU Time:      0.340 seconds;       Data structure size:   0.4Mb
-Tue Apr 23 22:20:55 2019
+Time: 1181000 ps
+CPU Time:      0.210 seconds;       Data structure size:   0.4Mb
+Tue Apr 23 22:55:55 2019
