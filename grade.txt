@@ -5,6 +5,7 @@ Checking for correct memory...
 	btest2.program.out 			PASSED
 	copy_long.program.out 			PASSED
 	copy.program.out 			PASSED
+	evens_long.program.out 			PASSED
 	evens.program.out 			PASSED
 	fib_long.program.out 			PASSED
 	fib.program.out 			PASSED
@@ -19,12 +20,13 @@ Checking for correct memory...
 	parsort.program.out 			FAILED
 	saxpy.program.out 			FAILED
 	sort.program.out 			FAILED
-PASSED: 11/18
+PASSED: 12/19
 Checking for correct writeback...
 	btest1.writeback.out 			PASSED
 	btest2.writeback.out 			PASSED
 	copy_long.writeback.out 			PASSED
 	copy.writeback.out 			PASSED
+	evens_long.writeback.out 			PASSED
 	evens.writeback.out 			PASSED
 	fib_long.writeback.out 			PASSED
 	fib_rec.writeback.out 			FAILED

@@ -262,8 +262,8 @@ module cachemem(clock, reset,
   				end
 
           //if LRU index was filled, send to victim cache
-          victim[i] = sets[wr_idx[i]].cache_lines[wr_new_tag_idx];
-          victim_valid[i] = sets[wr_idx[i]].cache_lines[wr_new_tag_idx].valid;
+          victim[i] = sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx];
+          victim_valid[i] = sets_next[wr_idx[i]].cache_lines[wr_new_tag_idx].valid;
   			end
 
         //wr block
