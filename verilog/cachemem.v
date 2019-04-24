@@ -305,7 +305,7 @@ module cachemem(clock, reset,
 		if (reset) begin
 			for (int i = 0; i < `NUM_SETS; i += 1) begin
 				for (int j = 0; j < NUM_WAYS; j += 1) begin
-					sets[i].cache_lines[j].data <= `SD 0;
+					sets[i].cache_lines[j].data <= `SD 64'h0;
 					sets[i].cache_lines[j].tag <= `SD 0;
 					sets[i].cache_lines[j].valid <= `SD 0;
 					sets[i].cache_lines[j].dirty <= `SD 0;

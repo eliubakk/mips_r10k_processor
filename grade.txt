@@ -1,154 +1,42 @@
 GRADE OUTPUT
 Checking for correctness
 Checking for correct memory...
-	add.program.out 			PASSED
-	badnewarr.program.out 			FAILED
-	badsub.program.out 			FAILED
-	b.program.out 			PASSED
-	branch1.program.out 			PASSED
-	branch2.program.out 			PASSED
-	branch.program.out 			PASSED
-	br.program.out 			PASSED
 	btest1.program.out 			PASSED
 	btest2.program.out 			PASSED
-	bubble_sort.program.out 			FAILED
-	bubble_sort_test.program.out 			FAILED
-	char_at_test.program.out 			FAILED
 	copy_long.program.out 			PASSED
 	copy.program.out 			PASSED
 	evens.program.out 			FAILED
-	factorial.program.out 			FAILED
-	fib_decaf.program.out 			FAILED
 	fib_long.program.out 			PASSED
 	fib.program.out 			PASSED
 	fib_rec.program.out 			FAILED
 	halt.program.out 			PASSED
-	heewoo.program.out 			PASSED
-	hw.program.out 			PASSED
 	insertion.program.out 			FAILED
-	merge_sort_test.program.out 			FAILED
-	mult1.program.out 			PASSED
-	mult2.program.out 			PASSED
-	mult_no_lsq_br.program.out 			PASSED
 	mult_no_lsq.program.out 			PASSED
-	mult_no_lsq_roll.program.out 			PASSED
 	mult.program.out 			FAILED
-	no_mult_lsq.program.out 			FAILED
 	objsort.program.out 			FAILED
 	parallel_long.program.out 			PASSED
 	parallel.program.out 			PASSED
 	parsort.program.out 			FAILED
-	queue_mod.program.out 			PASSED
 	saxpy.program.out 			FAILED
-	simple_decaf.program.out 			FAILED
-	simple_ld_st.program.out 			PASSED
-	simple_load_store.program.out 			PASSED
-	simple_mult.program.out 			PASSED
-	simple.program.out 			PASSED
 	sort.program.out 			FAILED
-	st.program.out 			PASSED
-	strcpy_test.program.out 			FAILED
-	strlen_test.program.out 			FAILED
-	test_branch_1.program.out 			PASSED
-	test_branch_2.program.out 			PASSED
-	test_branch_3.program.out 			PASSED
-	test_branch_4.program.out 			PASSED
-	test_long_add.program.out 			PASSED
-	test_raw_10.program.out 			PASSED
-	test_raw_11.program.out 			PASSED
-	test_raw_12.program.out 			PASSED
-	test_raw_1.program.out 			PASSED
-	test_raw_2.program.out 			PASSED
-	test_raw_3.program.out 			PASSED
-	test_raw_4.program.out 			PASSED
-	test_raw_5.program.out 			PASSED
-	test_raw_6.program.out 			PASSED
-	test_raw_7.program.out 			PASSED
-	test_simple_store.program.out 			PASSED
-	test_sq_full.program.out 			PASSED
-	test_sq_stall.program.out 			PASSED
-	test_store_part2.program.out 			PASSED
-	test_store_part2_without_forwad.program.out 			PASSED
-	test_strcmp.program.out 			FAILED
-	test_waw_1.program.out 			PASSED
-	test_waw_2.program.out 			PASSED
-	test_waw_3.program.out 			PASSED
-	test_waw_4.program.out 			PASSED
-	test_waw_5.program.out 			PASSED
-PASSED: 53/74
+PASSED: 10/18
 Checking for correct writeback...
-	add.writeback.out 			PASSED
-	badnewarr.writeback.out 			FAILED
-	badsub.writeback.out 			FAILED
-	branch1.writeback.out 			PASSED
-	branch2.writeback.out 			PASSED
-	branch.writeback.out 			PASSED
-	br.writeback.out 			PASSED
 	btest1.writeback.out 			PASSED
 	btest2.writeback.out 			PASSED
-	bubble_sort_test.writeback.out 			FAILED
-	bubble_sort.writeback.out 			FAILED
-	b.writeback.out 			PASSED
-	char_at_test.writeback.out 			FAILED
 	copy_long.writeback.out 			PASSED
 	copy.writeback.out 			PASSED
 	evens.writeback.out 			PASSED
-	factorial.writeback.out 			FAILED
-	fib_decaf.writeback.out 			FAILED
 	fib_long.writeback.out 			PASSED
 	fib_rec.writeback.out 			FAILED
 	fib.writeback.out 			PASSED
 	halt.writeback.out 			PASSED
-	heewoo.writeback.out 			PASSED
-	hw.writeback.out 			PASSED
 	insertion.writeback.out 			FAILED
-	merge_sort_test.writeback.out 			FAILED
-	mult1.writeback.out 			PASSED
-	mult2.writeback.out 			PASSED
-	mult_no_lsq_br.writeback.out 			PASSED
-	mult_no_lsq_roll.writeback.out 			PASSED
 	mult_no_lsq.writeback.out 			PASSED
 	mult.writeback.out 			FAILED
-	no_mult_lsq.writeback.out 			PASSED
 	objsort.writeback.out 			FAILED
 	parallel_long.writeback.out 			PASSED
 	parallel.writeback.out 			PASSED
 	parsort.writeback.out 			FAILED
-	queue_mod.writeback.out 			PASSED
 	saxpy.writeback.out 			FAILED
-	simple_decaf.writeback.out 			FAILED
-	simple_ld_st.writeback.out 			FAILED
-	simple_load_store.writeback.out 			PASSED
-	simple_mult.writeback.out 			PASSED
-	simple.writeback.out 			PASSED
 	sort.writeback.out 			FAILED
-	strcpy_test.writeback.out 			FAILED
-	strlen_test.writeback.out 			FAILED
-	st.writeback.out 			PASSED
-	test_branch_1.writeback.out 			PASSED
-	test_branch_2.writeback.out 			PASSED
-	test_branch_3.writeback.out 			PASSED
-	test_branch_4.writeback.out 			PASSED
-	test_long_add.writeback.out 			PASSED
-	test_raw_10.writeback.out 			PASSED
-	test_raw_11.writeback.out 			PASSED
-	test_raw_12.writeback.out 			PASSED
-	test_raw_1.writeback.out 			PASSED
-	test_raw_2.writeback.out 			PASSED
-	test_raw_3.writeback.out 			PASSED
-	test_raw_4.writeback.out 			PASSED
-	test_raw_5.writeback.out 			PASSED
-	test_raw_6.writeback.out 			PASSED
-	test_raw_7.writeback.out 			PASSED
-	test_simple_store.writeback.out 			PASSED
-	test_sq_full.writeback.out 			PASSED
-	test_sq_stall.writeback.out 			PASSED
-	test_store_part2_without_forwad.writeback.out 			PASSED
-	test_store_part2.writeback.out 			PASSED
-	test_strcmp.writeback.out 			FAILED
-	test_waw_1.writeback.out 			PASSED
-	test_waw_2.writeback.out 			PASSED
-	test_waw_3.writeback.out 			PASSED
-	test_waw_4.writeback.out 			PASSED
-	test_waw_5.writeback.out 			PASSED
-PASSED 55/75
+PASSED 68/75
