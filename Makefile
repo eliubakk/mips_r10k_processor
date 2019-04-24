@@ -179,10 +179,10 @@ syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DI
 	then \
 		make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
 		cd $(SYN_DIR)/$(PIPELINE_NAME) && \
-		$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
+		$(VCS_PIPE) +define+SYN=1 $(PIPELINE_NAME).vg ../../$(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c ../../$(TEST_DIR)/mem.v $(LIB) -o $@ && \
 		mv ** ../../.; \
 	else \
-		$(VCS_PIPE) $(PIPELINE_NAME).vg $(LIB) -o syn_simv; \
+		$(VCS_PIPE) +define+SYN=1 $(PIPELINE_NAME).vg $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(LIB) -o syn_simv; \
 	fi 
 
 #syn_simv: synth/pipeline.vg  $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 

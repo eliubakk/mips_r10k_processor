@@ -13,8 +13,15 @@
 // `else
 // `include "../../sys_defs.vh"
 // `endif
+`ifndef SYN
 `include "../../sys_defs.vh"
-
+`define NUM_WAYS 4
+`include "../../cache_defs.vh"
+`else
+`include "sys_defs.vh"
+`define NUM_WAYS 4
+`include "cache_defs.vh"
+`endif
 extern void print_header(string str);
 extern void print_cycles(int valid);
 extern void print_stage(string div, int inst, int npc, int valid_inst);
@@ -28,8 +35,6 @@ extern void print_membus(int proc2mem_command, int mem2proc_response,
 extern void print_close();
 
 
-`define NUM_WAYS 4
-`include "../../cache_defs.vh"
 
 // typedef struct packed {
 //	logic [63:0] data;
