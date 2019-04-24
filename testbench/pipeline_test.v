@@ -360,7 +360,7 @@ logic		unanswered_miss_out;
   endtask  // task show_mem_with_decimal
 	task display_stages;
 		begin
-			 if (clock_count == 1000) begin
+			 if (clock_count == 100000) begin
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
@@ -474,10 +474,10 @@ logic		unanswered_miss_out;
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
 	`SD;
-	 //display_stages;
-	 if (clock_count == 100000) begin
+	display_stages;
+	/* if (clock_count == 100000) begin
 	  $finish;
-	 end
+	 end*/
 	 
 	   end 
 

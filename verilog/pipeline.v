@@ -1325,7 +1325,7 @@ end
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end
     if (ex_co_enable[5]) begin
-      ex_co_rega_st <= `SD is_ex_T1_value[5];
+      ex_co_rega_st <= `SD is_ex_T1_value[FU_ST_IDX];
     end
 		//ex_co_done <= `SD 0;
 
@@ -1415,7 +1415,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   logic mem_co_comb;
   assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst & lq_pop_en; 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst; 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;

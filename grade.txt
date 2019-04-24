@@ -1,42 +1,24 @@
 GRADE OUTPUT
 Checking for correctness
 Checking for correct memory...
-	btest1.program.out 			PASSED
-	btest2.program.out 			PASSED
-	copy_long.program.out 			PASSED
-	copy.program.out 			PASSED
-	evens.program.out 			PASSED
-	fib_long.program.out 			PASSED
-	fib.program.out 			PASSED
-	fib_rec.program.out 			FAILED
-	halt.program.out 			PASSED
-	insertion.program.out 			FAILED
-	mult_no_lsq.program.out 			PASSED
-	mult.program.out 			FAILED
-	objsort.program.out 			FAILED
-	parallel_long.program.out 			PASSED
-	parallel.program.out 			PASSED
-	parsort.program.out 			FAILED
-	saxpy.program.out 			FAILED
-	sort.program.out 			FAILED
-PASSED: 11/18
+PASSED: 0/0
 Checking for correct writeback...
-	btest1.writeback.out 			PASSED
-	btest2.writeback.out 			PASSED
-	copy_long.writeback.out 			PASSED
-	copy.writeback.out 			PASSED
+	btest1.writeback.out 			FAILED
+	btest2.writeback.out 			FAILED
+	copy_long.writeback.out 			FAILED
+	copy.writeback.out 			FAILED
 	evens.writeback.out 			PASSED
-	fib_long.writeback.out 			PASSED
+	fib_long.writeback.out 			FAILED
 	fib_rec.writeback.out 			FAILED
-	fib.writeback.out 			PASSED
+	fib.writeback.out 			FAILED
 	halt.writeback.out 			PASSED
 	insertion.writeback.out 			FAILED
 	mult_no_lsq.writeback.out 			PASSED
 	mult.writeback.out 			FAILED
 	objsort.writeback.out 			FAILED
-	parallel_long.writeback.out 			PASSED
+	parallel_long.writeback.out 			FAILED
 	parallel.writeback.out 			PASSED
 	parsort.writeback.out 			FAILED
 	saxpy.writeback.out 			FAILED
 	sort.writeback.out 			FAILED
-PASSED 68/75
+PASSED 61/75
