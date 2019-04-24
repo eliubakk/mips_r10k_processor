@@ -121,18 +121,32 @@ module vic_cache(clock, reset,
             evicted_valid[i] = (num_evict > i);
         end
 
-        //wr vic to queue
-        for(int i = 0; i < WR_PORTS; ++i) begin
-            if(i < num_evict) begin
+        for(int i = 0; i < `VIC_SIZE; ++i) begin
+            if((i+num_evict) < `VIC_SIZE) begin
                 vic_queue_next[i] = vic_queue_next[i+num_evict];
-                vic_queue_next[WR_PORTS+i].line = vic[i];
-                vic_queue_next[WR_PORTS+i].idx = vic_idx[i];
-            end else if(vic_valid[i]) begin
-                vic_queue_next[vic_queue_tail_next+i].line = vic[i];
-                vic_queue_next[vic_queue_tail_next+i].idx = vic_idx[i];
+            end else begin
+                vic_queue_next[i] = EMPTY_VIC_CACHE;
             end
         end
-        vic_queue_tail_next = (num_evict > 0)? `VIC_SIZE : vic_queue_tail_next + BIT_COUNT_LUT[vic_valid];
+        vic_queue_tail_next -= num_evict;
+
+        //wr vic to queue
+        for(int i = 0; i < WR_PORTS; ++i) begin
+            // if(i < num_evict) begin
+            //     vic_queue_next[i] = vic_queue_next[i+num_evict];
+            //     vic_queue_next[WR_PORTS+i].line = vic[i];
+            //     vic_queue_next[WR_PORTS+i].idx = vic_idx[i];
+            // end else if(vic_valid[i]) begin
+            //     vic_queue_next[vic_queue_tail_next+i].line = vic[i];
+            //     vic_queue_next[vic_queue_tail_next+i].idx = vic_idx[i];
+            // end
+            if(vic_valid[i]) begin
+                vic_queue_next[vic_queue_tail_next].line = vic[i];
+                vic_queue_next[vic_queue_tail_next].idx = vic_idx[i];
+                vic_queue_tail_next += 1'b1;
+            end
+        end
+        //vic_queue_tail_next = (num_evict > 0)? `VIC_SIZE : vic_queue_tail_next + BIT_COUNT_LUT[vic_valid];
     end
 
         
