@@ -29,6 +29,7 @@
 
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)
+`define MEM_ADDR_BITS          ($clog2(`MEM_SIZE_IN_BYTES))
 
 // probably not a good idea to change this second one
 `define VIRTUAL_CLOCK_PERIOD   30.0 // Clock period from dc_shell
@@ -58,8 +59,77 @@
 `define NUM_FIFO_BITS $clog2(`NUM_FIFO)
 //`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
 `define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
-`define MEM_BUFFER_SIZE 10
+`define MEM_BUFFER_SIZE 30
 `define MEM_BUFFER_SIZE_BITS $clog2(`MEM_BUFFER_SIZE)
+
+`define NUM_WAYS 4
+//`endif
+
+`define NUM_SETS (32/`NUM_WAYS)
+`define NUM_SET_BITS $clog2(`NUM_SETS)
+`define NUM_TAG_BITS (`MEM_ADDR_BITS-3-`NUM_SET_BITS)
+
+typedef struct packed {
+  logic [63:0] data;
+  logic [(`NUM_TAG_BITS-1):0] tag;
+  logic valid;
+  logic dirty;
+} CACHE_LINE_T;
+
+const CACHE_LINE_T EMPTY_CACHE_LINE = 
+{
+  64'b0,
+  {`NUM_TAG_BITS{1'b0}},
+  1'b0,
+  1'b0
+};
+
+typedef struct packed {
+  CACHE_LINE_T [(`NUM_WAYS-1):0] cache_lines;
+} CACHE_SET_T;
+
+
+typedef struct packed {
+  logic [`NUM_TAG_BITS-1:0] tag;
+  logic [`NUM_SET_BITS-1:0] idx;
+  logic [63:0] data;
+  logic valid;
+  logic dirty;
+} DCACHE_FIFO_T;
+
+const DCACHE_FIFO_T EMPTY_DCACHE =
+{
+  {`NUM_TAG_BITS{1'b0}},
+  {`NUM_SET_BITS{1'b0}},
+  64'b0,
+  1'b0
+};
+
+typedef struct packed {
+  CACHE_LINE_T line;
+  logic [(`NUM_SET_BITS-1):0] idx;
+} VIC_CACHE_T;
+
+const VIC_CACHE_T EMPTY_VIC_CACHE = 
+{
+  EMPTY_CACHE_LINE,
+  {`NUM_SET_BITS{1'b0}}
+};
+
+typedef struct packed {
+  logic [63:0] address;
+  logic [63:0] data;
+  logic [3:0] mem_tag;
+  logic valid;
+} RETIRE_BUF_T;
+
+const RETIRE_BUF_T EMPTY_RETIRE_BUF =
+{
+  64'b0,
+  64'b0,
+  4'b0,
+  1'b0
+};
 
 typedef struct packed {
   logic [63:0] address;
@@ -626,7 +696,7 @@ const RS_ROW_T EMPTY_ROW =
   `NOOP_INST,
   64'b0,
   `NULL_LD_POS,
-  {$clog2(`OBQ_SIZE){0}}
+  {$clog2(`OBQ_SIZE){1'b0}}
   
 };
 

@@ -7,7 +7,7 @@
 
 `define NUM_SETS (32/`NUM_WAYS)
 `define NUM_SET_BITS $clog2(`NUM_SETS)
-`define NUM_TAG_BITS (13-`NUM_SET_BITS)
+`define NUM_TAG_BITS (17-`NUM_SET_BITS)
 
 typedef struct packed {
   logic [63:0] data;

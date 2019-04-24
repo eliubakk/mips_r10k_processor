@@ -12,8 +12,8 @@
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
 
-`define NUM_WAYS 4
-`include "../../cache_defs.vh"
+//`define NUM_WAYS 4
+//`include "../../cache_defs.vh"
 
 module mem_stage(
     input         clock,              // system clock
@@ -52,8 +52,8 @@ module mem_stage(
   logic Dcache_valid_out;
 
   logic ret_buf_full;
-  VIC_CACHE_T [2:0] evicted;
-  logic [2:0] evicted_valid;
+  VIC_CACHE_T [1:0] evicted;
+  logic [1:0] evicted_valid;
 
 
   // // Determine the command that must be sent to mem
@@ -76,19 +76,19 @@ module mem_stage(
   dcache dcache0(
     .clock(clock),
     .reset(reset),
-    .rd_en(rd_mem & (~sq_data_valid & ~sq_data_not_found)),
-    .proc2Dcache_rd_addr(rd_addr),
-    .wr_en(wr_mem),
-    .proc2Dcache_wr_addr(wr_addr),
-    .proc2Dcache_wr_data(wr_data),
+    .rd_en({rd_mem & (~sq_data_valid & ~sq_data_not_found)}),
+    .proc2Dcache_rd_addr({rd_addr}),
+    .wr_en({wr_mem}),
+    .proc2Dcache_wr_addr({wr_addr}),
+    .proc2Dcache_wr_data({wr_data}),
     .Dmem2proc_response(Dmem2proc_response),
     .Dmem2proc_data(Dmem2proc_data),
     .Dmem2proc_tag(Dmem2proc_tag),
 
 	  .sets_out(sets_out),
 
-    .Dcache_rd_data_out(Dcache_data_out),
-    .Dcache_rd_valid_out(Dcache_valid_out),
+    .Dcache_rd_data_out({Dcache_data_out}),
+    .Dcache_rd_valid_out({Dcache_valid_out}),
     .Dcache_rd_miss_addr_out(mem_rd_miss_addr_out),
     .Dcache_rd_miss_data_out(mem_rd_miss_data_out),
     .Dcache_rd_miss_valid_out(mem_rd_miss_valid_out),
@@ -100,8 +100,8 @@ module mem_stage(
   );
 
   retire_buffer #(
-  .NUM_WAYS(`NUM_WAYS),
-  .WR_PORTS(3))
+  //.NUM_WAYS(`NUM_WAYS),
+  .WR_PORTS(2))
   rb0(
     // inputs
     .clock(clock), 
@@ -112,8 +112,8 @@ module mem_stage(
     .Rmem2proc_response(Rmem2proc_response),
 
     // outputs
-	.retire_queue_out(retire_queue_out),
-	.retire_queue_tail_out(retire_queue_tail_out),
+    .retire_queue_out(retire_queue_out),
+    .retire_queue_tail_out(retire_queue_tail_out),
     .proc2Rmem_command(proc2Rmem_command), 
     .proc2Rmem_addr(proc2Rmem_addr), 
     .proc2Rmem_data(proc2Rmem_data),

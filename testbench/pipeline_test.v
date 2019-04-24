@@ -28,8 +28,8 @@ extern void print_membus(int proc2mem_command, int mem2proc_response,
 extern void print_close();
 
 
-`define NUM_WAYS 4
-`include "../../cache_defs.vh"
+//`define NUM_WAYS 4
+//`include "../../cache_defs.vh"
 
 // typedef struct packed {
 //	logic [63:0] data;
@@ -333,9 +333,9 @@ logic		unanswered_miss_out;
 		// handle evicted_data
 		//$display("evicted_valid[%d] = %b", i, evicted_valid[i]);
     //$display("evicted[i]",);
-		if (vic_queue_out[i].line.valid & vic_queue_out[i].line.dirty) begin
-			memory.unified_memory[{vic_queue_out[i].line.tag, vic_queue_out[i].idx}] = vic_queue_out[i].line.data;
-		end
+		//if (vic_queue_out[i].line.valid & vic_queue_out[i].line.dirty) begin
+		//	memory.unified_memory[{vic_queue_out[i].line.tag, vic_queue_out[i].idx}] = vic_queue_out[i].line.data;
+		//end
 	end
 
 	for (int i = 0; i < `RETIRE_SIZE; ++i) begin
@@ -369,17 +369,17 @@ logic		unanswered_miss_out;
 				$finish;
 			 end
 			//$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
-			$display("Pipeline Assigns");
+			//$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
+			//$display("Pipeline Assigns");
 			//display_icache;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
 			//display_cache;
 			//display_if_stage;
-		 	$display("pc:%h", if_NPC_out);
-			$display("mem2proc response:%h, mem2proc_data:%h, mem2proc_tag:%h, proc2mem_command:%h, proc2mem_addr:%h, proc2mem_data:%h", mem2proc_response, mem2proc_data, mem2proc_tag, proc2mem_command, proc2mem_addr, proc2mem_data);
-			$display("proc2Rmem_command : %h, proc2Dmem_command : %h, proc2Imem_command : %h", proc2Rmem_command_out, proc2Dmem_command_out, proc2Imem_command_out);	
-			$display("Dcache - send_request : %b, unanswered_miss : %b", send_request_out, unanswered_miss_out);
+		 	//$display("pc:%h", if_NPC_out);
+			//$display("mem2proc response:%h, mem2proc_data:%h, mem2proc_tag:%h, proc2mem_command:%h, proc2mem_addr:%h, proc2mem_data:%h", mem2proc_response, mem2proc_data, mem2proc_tag, proc2mem_command, proc2mem_addr, proc2mem_data);
+			//$display("proc2Rmem_command : %h, proc2Dmem_command : %h, proc2Imem_command : %h", proc2Rmem_command_out, proc2Dmem_command_out, proc2Imem_command_out);	
+			//$display("Dcache - send_request : %b, unanswered_miss : %b", send_request_out, unanswered_miss_out);
 			//display_id_stage;
 			//$display("LOOK HERE!!!!!!!!!!!!!!!!!!!!");
 			//$display("free_rows_next: %d fr_empty: %b rob_full: %b id_di_enable: %b ", pipeline_0.free_rows_next, pipeline_0.fr_empty, pipeline_0.rob_full, pipeline_0.id_di_enable);
@@ -415,7 +415,7 @@ logic		unanswered_miss_out;
 		//	$display("branch_not_taken : %d, pred_incorrect : %d", pipeline_0.branch_not_taken, !pipeline_0.ret_pred_correct);
 			
 			//$display("halt : %b", pipeline_0.head_halt);
-			$display("\n");
+			//$display("\n");
 
 		end
 	endtask
