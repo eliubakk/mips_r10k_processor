@@ -311,39 +311,39 @@ module ex_stage(
   // instantiate the ALU
   //
   alu alu_0 (// Inputs                //    *******ALU_0**********
-    .opa(opa_mux_out[0]),
-    .opb(opb_mux_out[0]),
-    .func(issue_reg[0].inst.alu_func),
+    .opa(opa_mux_out[FU_ALU_IDX]),
+    .opb(opb_mux_out[FU_ALU_IDX]),
+    .func(issue_reg[FU_ALU_IDX].inst.alu_func),
 
     // Output
-    .result(ex_alu_result_out[0])
+    .result(ex_alu_result_out[FU_ALU_IDX])
   );
 
   alu alu_1 (// Inputs                //    *******ALU_1**********
-    .opa(opa_mux_out[1]),
-    .opb(opb_mux_out[1]),
-    .func(issue_reg[1].inst.alu_func),
+    .opa(opa_mux_out[FU_ALU_IDX+1]),
+    .opb(opb_mux_out[FU_ALU_IDX+1]),
+    .func(issue_reg[FU_ALU_IDX+1].inst.alu_func),
 
     // Output
-    .result(ex_alu_result_out[1])
+    .result(ex_alu_result_out[FU_ALU_IDX+1])
   );  
 
   alu alu_ls (// Inputs                //    *******LOAD AND STORE**********
-    .opa(opa_mux_out[2]),
-    .opb(opb_mux_out[2]),
-    .func(issue_reg[2].inst.alu_func),
+    .opa(opa_mux_out[FU_LD_IDX]),
+    .opb(opb_mux_out[FU_LD_IDX]),
+    .func(issue_reg[FU_LD_IDX].inst.alu_func),
 
     // Output
-    .result(ex_alu_result_out[2])
+    .result(ex_alu_result_out[FU_LD_IDX])
   );  
 
   alu alu_st (// Inputs                //    *******LOAD AND STORE**********
-    .opa(opa_mux_out[5]),
-    .opb(opb_mux_out[5]),
-    .func(issue_reg[5].inst.alu_func),
+    .opa(opa_mux_out[FU_ST_IDX]),
+    .opb(opb_mux_out[FU_ST_IDX]),
+    .func(issue_reg[FU_ST_IDX].inst.alu_func),
 
     // Output
-    .result(ex_alu_result_out[5])
+    .result(ex_alu_result_out[FU_ST_IDX])
   );  
   // alu alu_store (// Inputs
   //   .opa(opa_mux_out_alu_store),
@@ -358,21 +358,21 @@ module ex_stage(
   pipe_mult mult0 (// Inputs)                 //********MULT************
     .clock(clock),
     .reset(reset),
-	  .mcand(opa_mux_out[3]),
-    .mplier(opb_mux_out[3]),
-	  .start(issue_reg[3].inst.valid_inst),
-	  .product(ex_alu_result_out[3]),
+	  .mcand(opa_mux_out[FU_MULT_IDX]),
+    .mplier(opb_mux_out[FU_MULT_IDX]),
+	  .start(issue_reg[FU_MULT_IDX].inst.valid_inst),
+	  .product(ex_alu_result_out[FU_MULT_IDX]),
 		.done(done)
   );
 
   
     alu alu_branch (// Inputs                //    *******BRANCH**********
-    .opa(opa_mux_out[4]),
-    .opb(opb_mux_out[4]),
-    .func(issue_reg[4].inst.alu_func),
+    .opa(opa_mux_out[FU_BR_IDX]),
+    .opb(opb_mux_out[FU_BR_IDX]),
+    .func(issue_reg[FU_BR_IDX].inst.alu_func),
 
     // Output
-    .result(ex_alu_result_out[4])
+    .result(ex_alu_result_out[FU_BR_IDX])
   ); 
   
 
@@ -380,8 +380,8 @@ module ex_stage(
    // instantiate the branch condition tester
    //
   brcond brcond (// Inputs
-    .opa(T1_value[4]),       // always check regA value
-    .func(issue_reg[4].inst_opcode[28:26]), // inst bits to determine check
+    .opa(T1_value[FU_BR_IDX]),       // always check regA value
+    .func(issue_reg[FU_BR_IDX].inst_opcode[28:26]), // inst bits to determine check
 
     // Output
     .cond(brcond_result)
@@ -389,7 +389,7 @@ module ex_stage(
 
    // ultimate "take branch" signal:
    //    unconditional, or conditional and the condition is true
-  assign ex_take_branch_out = issue_reg[4].busy & (issue_reg[4].inst.uncond_branch
-                              | (issue_reg[4].inst.cond_branch & brcond_result));
+  assign ex_take_branch_out = issue_reg[FU_BR_IDX].busy & (issue_reg[FU_BR_IDX].inst.uncond_branch
+                              | (issue_reg[FU_BR_IDX].inst.cond_branch & brcond_result));
 
 endmodule // module ex_stage

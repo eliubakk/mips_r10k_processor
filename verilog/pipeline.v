@@ -1137,9 +1137,9 @@ end
    	.phys_registers_out(phys_reg),
     
     .wr_clk(clock),
-    .wr_en({1'b0, ex_co_valid_inst[4:3], mem_co_valid_inst, ex_co_valid_inst[1:0]}),
-    .wr_idx({{$clog2(`NUM_PHYS_REG){1'b1}}, ex_co_dest_reg_idx[4:3], mem_co_dest_reg_idx, ex_co_dest_reg_idx[1:0]}),
-    .wr_data({64'b0, ex_co_br_wr_data, ex_alu_result_out[3], mem_co_alu_result, ex_co_alu_result[1:0]})
+    .wr_en({1'b0, ex_co_valid_inst[FU_BR_IDX:FU_MULT_IDX], mem_co_valid_inst, ex_co_valid_inst[FU_ALU2_IDX:0]}),
+    .wr_idx({{$clog2(`NUM_PHYS_REG){1'b1}}, ex_co_dest_reg_idx[FU_BR_IDX:FU_MULT_IDX], mem_co_dest_reg_idx, ex_co_dest_reg_idx[FU_ALU2_IDX:0]}),
+    .wr_data({64'b0, ex_co_br_wr_data, ex_alu_result_out[FU_MULT_IDX], mem_co_alu_result, ex_co_alu_result[FU_ALU2_IDX:0]})
   );
 
  
@@ -1170,7 +1170,7 @@ ex_stage ex_stage_0 (
   // synopsys sync_set_reset "reset"
 always_ff @(posedge clock) begin
 	if(reset | branch_not_taken) begin
-		for(integer i=0 ; i<3; ++i) begin
+		for(integer i=0 ; i<FU_MULT_IDX; ++i) begin
 			ex_mult_reg[i].npc <= `SD 64'b0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
 			ex_mult_reg[i].T <= `SD `ZERO_REG;
@@ -1181,7 +1181,7 @@ always_ff @(posedge clock) begin
 			ex_mult_reg[i].inst.valid_inst <= `SD 1'b0;
 		end
 	end else begin
-		ex_mult_reg <=  `SD {ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
+		ex_mult_reg <=  `SD {ex_mult_reg[1],ex_mult_reg[0],issue_reg[FU_MULT_IDX]};
 	end
 end
 
@@ -1193,7 +1193,7 @@ end
   //////////////////////////////////////////////////
   // not sure whether it can be directly assigned
   always_comb begin
-    for (integer i=0; i<2; i=i+1) begin
+    for (integer i=0; i<FU_LD_IDX; i=i+1) begin
       ex_co_enable[i]= (~ex_co_valid_inst[i])| (ex_co_valid_inst[i] & co_selected[i]);
     end
   end
@@ -1201,11 +1201,11 @@ end
   assign ex_co_enable[FU_LD_IDX] = ~ex_co_valid_inst[FU_LD_IDX] | (ex_co_valid_inst[FU_LD_IDX] & ((sq_data_valid & mem_co_enable) | (~sq_data_valid & ~sq_data_not_found & ~lq_full)));
   //enable signal for the multipler  register
   //assign ex_co_enable[3]=  (done & ~ex_co_valid_inst[3]) | (done & co_selected[3] & ex_co_valid_inst[3]); 
-  assign ex_co_enable[3] = 1 ;
+  assign ex_co_enable[FU_MULT_IDX] = 1 ;
   assign ex_co_done = done; // Done itself is enabled during complete stage
   //assign ex_co_alu_result[3] = ex_alu_result_out[3];// Multiplication output is in during complete stage
 
-  assign ex_co_enable[4]= (~ex_co_valid_inst[4]| (ex_co_valid_inst[4] & co_selected[4]));
+  assign ex_co_enable[FU_BR_IDX]= (~ex_co_valid_inst[FU_BR_IDX]| (ex_co_valid_inst[FU_BR_IDX] & co_selected[FU_BR_IDX]));
 
   // @@@TODO MUST DETERMINE EX_CO_ENABLE FOR STORE INSTRUCTIONS
   assign ex_co_enable[FU_ST_IDX] = (~ex_co_valid_inst[FU_ST_IDX] | (ex_co_valid_inst[FU_ST_IDX] & co_selected[FU_ST_IDX]));
@@ -1252,7 +1252,7 @@ end
           // ex_co_sq_idx[0] <= `SD 0;
           // ex_co_sq_idx[1] <= `SD 0;
 	  //ex_co_done		<= `SD 1'b0;
-      end else if (ex_co_enable[i] && i!=3) begin
+      end else if (ex_co_enable[i] && i!=FU_MULT_IDX) begin
 		     // these are forwarded directly from ID/EX latches
 			    ex_co_NPC[i]          <= `SD issue_reg[i].npc;
        		ex_co_IR[i]           <= `SD issue_reg[i].inst_opcode;
@@ -1265,17 +1265,17 @@ end
      		  ex_co_alu_result[i]   <= `SD ex_alu_result_out[i];
           // ex_co_sq_idx          <= `SD issue_reg[i].sq_idx;  
 	
-	end else if (ex_co_enable[3])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
+	end else if (ex_co_enable[FU_MULT_IDX])  begin // Done is enabled only the one cycle when execution is completed, and comes from issue_reg.inst.valid_inst
 
-          	ex_co_NPC[3]          <= `SD ex_mult_reg[2].npc;
-       			ex_co_IR[3]           <= `SD ex_mult_reg[2].inst_opcode;
- 		        ex_co_dest_reg_idx[3] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
- 		        ex_co_wr_mem[3]       <= `SD ex_mult_reg[2].inst.wr_mem;
-      			ex_co_halt[3]         <= `SD ex_mult_reg[2].inst.halt;
-       			ex_co_illegal[3]      <= `SD ex_mult_reg[2].inst.illegal;
-       			ex_co_valid_inst[3]   <= `SD ex_mult_reg[2].inst.valid_inst;
+          	ex_co_NPC[FU_MULT_IDX]          <= `SD ex_mult_reg[2].npc;
+       			ex_co_IR[FU_MULT_IDX]           <= `SD ex_mult_reg[2].inst_opcode;
+ 		        ex_co_dest_reg_idx[FU_MULT_IDX] <= `SD ex_mult_reg[2].T[$clog2(`NUM_PHYS_REG)-1:0];
+ 		        ex_co_wr_mem[FU_MULT_IDX]       <= `SD ex_mult_reg[2].inst.wr_mem;
+      			ex_co_halt[FU_MULT_IDX]         <= `SD ex_mult_reg[2].inst.halt;
+       			ex_co_illegal[FU_MULT_IDX]      <= `SD ex_mult_reg[2].inst.illegal;
+       			ex_co_valid_inst[FU_MULT_IDX]   <= `SD ex_mult_reg[2].inst.valid_inst;
 			  // these are results of EX stage
-     		     ex_co_alu_result[3]   <= `SD ex_alu_result_out[3]; 
+     		     ex_co_alu_result[FU_MULT_IDX]   <= `SD ex_alu_result_out[FU_MULT_IDX]; 
                 // ex_co_sq_idx      <= `SD issue_reg[i].sq_idx;
 			//ex_co_done	      <= `SD done;
       end// else: !if(reset)
@@ -1314,17 +1314,17 @@ end
       ex_co_br_wr_data <= `SD 64'b0;
       ex_co_branch_target <= `SD 1'b0;
     end
-    if(ex_co_enable[4]) begin
+    if(ex_co_enable[FU_BR_IDX]) begin
       ex_co_rega <= `SD is_ex_T1_value[2];
       //ex_co_rd_mem <= `SD issue_reg[2].inst;
       //ex_co_wr_mem <= `SD 0;
       ex_co_take_branch  <= `SD ex_take_branch_out;
-      ex_co_branch_index <= `SD issue_reg[4].br_idx;
-      ex_co_unconditional_branch <= `SD issue_reg[4].inst.uncond_branch;
-      ex_co_br_wr_data <= `SD (issue_reg[4].inst.uncond_branch)? issue_reg[4].npc : ex_co_alu_result[4];
-      ex_co_branch_target <=`SD ex_alu_result_out[4]; 
+      ex_co_branch_index <= `SD issue_reg[FU_BR_IDX].br_idx;
+      ex_co_unconditional_branch <= `SD issue_reg[FU_BR_IDX].inst.uncond_branch;
+      ex_co_br_wr_data <= `SD (issue_reg[FU_BR_IDX].inst.uncond_branch)? issue_reg[FU_BR_IDX].npc : ex_co_alu_result[FU_BR_IDX];
+      ex_co_branch_target <=`SD ex_alu_result_out[FU_BR_IDX]; 
     end
-    if (ex_co_enable[5]) begin
+    if (ex_co_enable[FU_ST_IDX]) begin
       ex_co_rega_st <= `SD is_ex_T1_value[FU_ST_IDX];
     end
 		//ex_co_done <= `SD 0;
@@ -1399,10 +1399,10 @@ assign lq_pop_en = ~mem_co_stall;
 
 
   wire [5:0] mem_dest_reg_idx_out =
-             mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[2];
-  wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_rd_stall;
+             mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[FU_LD_IDX];
+  wire mem_valid_inst_out = ex_co_valid_inst[FU_LD_IDX] & ~mem_rd_stall;
 
-assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & ex_co_wr_mem[2])) & (ex_co_valid_inst[2]) ;
+assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex_co_rd_mem[FU_LD_IDX] & ex_co_wr_mem[FU_LD_IDX])) & (ex_co_valid_inst[FU_LD_IDX]) ;
 
 
 
@@ -1495,14 +1495,14 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   
   
   
-  assign psel_enable = ex_co_valid_inst[0] | ex_co_valid_inst[1] | mem_co_valid_inst | done | ex_co_valid_inst[4]  | ex_co_valid_inst[FU_ST_IDX]; // ask the use of wor
+  assign psel_enable = ex_co_valid_inst[FU_ALU_IDX] | ex_co_valid_inst[FU_ALU2_IDX] | mem_co_valid_inst | done | ex_co_valid_inst[FU_BR_IDX]  | ex_co_valid_inst[FU_ST_IDX]; // ask the use of wor
   //priority encoder to select the results of the execution stage to put in cdb
   //Mult has the priority
   psel_generic #(.WIDTH(`NUM_FU_TOTAL), .NUM_REQS(1)) psel(
-		.req({ ex_co_done, ex_co_valid_inst[FU_ST_IDX], ex_co_valid_inst[4], mem_co_valid_inst, ex_co_valid_inst[1:0]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+		.req({ ex_co_done, ex_co_valid_inst[FU_ST_IDX], ex_co_valid_inst[FU_BR_IDX], mem_co_valid_inst, ex_co_valid_inst[FU_ALU2_IDX:FU_ALU_IDX]}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
-		.gnt({co_selected[3], co_selected[FU_ST_IDX], co_selected[4], co_selected[2:0]}),
-    .gnt_bus({gnt_bus[3], gnt_bus[FU_ST_IDX], gnt_bus[4], gnt_bus[2:0]})
+		.gnt({co_selected[FU_MULT_IDX], co_selected[FU_ST_IDX], co_selected[FU_BR_IDX], co_selected[FU_LD_IDX:FU_ALU_IDX]}),
+    .gnt_bus({gnt_bus[FU_MULT_IDX], gnt_bus[FU_ST_IDX], gnt_bus[FU_BR_IDX], gnt_bus[FU_LD_IDX:FU_ALU_IDX]})
 	);
   
     always_comb begin
@@ -1524,7 +1524,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
       if (|co_selected == 1) begin
         for (integer i=0; i< `NUM_FU_TOTAL; i=i+1) begin
           if(co_selected[i]==1) begin
-            if(i==2) begin
+            if(i==FU_LD_IDX) begin
               co_NPC_selected               =    mem_co_NPC;
               co_IR_selected                =    mem_co_IR;
               co_halt_selected              =    mem_co_halt;
@@ -1546,8 +1546,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               co_valid_inst_selected        =    ex_co_valid_inst[i];
               co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
               co_alu_result_selected        =    ex_co_alu_result[i];
-              if(i == 4) begin // For branch
-                co_branch_valid = ex_co_valid_inst[4];
+              if(i == FU_BR_IDX) begin // For branch
+                co_branch_valid = ex_co_valid_inst[FU_BR_IDX];
                 co_take_branch_selected = ex_co_take_branch;
                 co_branch_index = ex_co_branch_index;
                 co_branch_target = ex_co_branch_target;

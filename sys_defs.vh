@@ -574,6 +574,7 @@ const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MUL
 
 typedef enum logic [3:0]{
   FU_ALU_IDX = 0,
+  FU_ALU2_IDX = 1,	// 3 ALU : this is 2, 1 ALU : this is 0
   FU_LD_IDX = 2,
   FU_MULT_IDX = 3,
   FU_BR_IDX = 4,
