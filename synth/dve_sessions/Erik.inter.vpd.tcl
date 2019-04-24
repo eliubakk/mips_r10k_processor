@@ -1,16 +1,16 @@
 # Begin_DVE_Session_Save_Info
 # DVE full session
-# Saved on Tue Apr 23 17:39:34 2019
+# Saved on Wed Apr 24 10:26:49 2019
 # Designs open: 1
 #   Sim: dve
 # Toplevel windows open: 2
 # 	TopLevel.1
 # 	TopLevel.2
-#   Source.1: testbench.pipeline_0.mem_stage_0.dcache0.fifo_psel
-#   Wave.1: 1010 signals
-#   Group count = 98
+#   Source.1: testbench.pipeline_0.R0.unnamed$$_2
+#   Wave.1: 1012 signals
+#   Group count = 101
 #   Group R0 signal count = 47
-#   Group ROB signal count = 16
+#   Group ROB signal count = 17
 #   Group Free_List signal count = 22
 #   Group Map_Table signal count = 22
 #   Group Arch_Map signal count = 18
@@ -18,7 +18,7 @@
 #   Group icache signal count = 13
 #   Group IQ signal count = 19
 #   Group BP2 signal count = 48
-#   Group if_stage signal count = 24
+#   Group if_stage signal count = 25
 #   Group id_stage signal count = 22
 #   Group RS signal count = 49
 #   Group ex_stage signal count = 15
@@ -39,14 +39,16 @@
 #   Group pipeline mem signals signal count = 45
 #   Group pipeline co signals signal count = 77
 #   Group pipeline ret signals signal count = 27
-#   Group Group2 signal count = 0
+#   Group Group2 signal count = 1
+#   Group Group3 signal count = 0
+#   Group Group4 signal count = 0
 # End_DVE_Session_Save_Info
 
 # DVE version: N-2017.12-SP2-1_Full64
 # DVE build date: Jul 14 2018 20:58:30
 
 
-#<Session mode="Full" path="/afs/umich.edu/user/e/l/eliubakk/eecs470/projects/4/synth/dve_sessions/Erik.inter.vpd.tcl" type="Debug">
+#<Session mode="Full" path="/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/synth/dve_sessions/Erik.inter.vpd.tcl" type="Debug">
 
 gui_set_loading_session_type Post
 gui_continuetime_set
@@ -98,7 +100,7 @@ if {![gui_exist_window -window TopLevel.1]} {
 } else { 
     set TopLevel.1 TopLevel.1
 }
-gui_show_window -window ${TopLevel.1} -show_state maximized -rect {{0 65} {2559 1405}}
+gui_show_window -window ${TopLevel.1} -show_state maximized -rect {{0 102} {3839 1602}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -145,28 +147,28 @@ gui_show_toolbar -toolbar {Testbench}
 # End ToolBar settings
 
 # Docked window settings
-set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 244]
+set HSPane.1 [gui_create_window -type HSPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 243]
 catch { set Hier.1 [gui_share_window -id ${HSPane.1} -type Hier] }
-gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 244
+gui_set_window_pref_key -window ${HSPane.1} -key dock_width -value_type integer -value 243
 gui_set_window_pref_key -window ${HSPane.1} -key dock_height -value_type integer -value -1
 gui_set_window_pref_key -window ${HSPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 243} {height 1088} {dock_state left} {dock_on_new_line true} {child_hier_colhier 149} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
-set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 481]
+gui_update_layout -id ${HSPane.1} {{left 0} {top 0} {width 242} {height 1249} {dock_state left} {dock_on_new_line true} {child_hier_colhier 149} {child_hier_coltype 100} {child_hier_colpd 0} {child_hier_col1 0} {child_hier_col2 1} {child_hier_col3 -1}}
+set DLPane.1 [gui_create_window -type DLPane -parent ${TopLevel.1} -dock_state left -dock_on_new_line true -dock_extent 480]
 catch { set Data.1 [gui_share_window -id ${DLPane.1} -type Data] }
-gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 481
+gui_set_window_pref_key -window ${DLPane.1} -key dock_width -value_type integer -value 480
 gui_set_window_pref_key -window ${DLPane.1} -key dock_height -value_type integer -value 935
 gui_set_window_pref_key -window ${DLPane.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 480} {height 1088} {dock_state left} {dock_on_new_line true} {child_data_colvariable 212} {child_data_colvalue 153} {child_data_coltype 144} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
-set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 178]
+gui_update_layout -id ${DLPane.1} {{left 0} {top 0} {width 479} {height 1249} {dock_state left} {dock_on_new_line true} {child_data_colvariable 212} {child_data_colvalue 153} {child_data_coltype 144} {child_data_col1 0} {child_data_col2 1} {child_data_col3 2}}
+set Console.1 [gui_create_window -type Console -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line true -dock_extent 177]
 gui_set_window_pref_key -window ${Console.1} -key dock_width -value_type integer -value -1
-gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 178
+gui_set_window_pref_key -window ${Console.1} -key dock_height -value_type integer -value 177
 gui_set_window_pref_key -window ${Console.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 271} {height 177} {dock_state bottom} {dock_on_new_line true}}
-set DriverLoad.1 [gui_create_window -type DriverLoad -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line false -dock_extent 178]
+gui_update_layout -id ${Console.1} {{left 0} {top 0} {width 271} {height 176} {dock_state bottom} {dock_on_new_line true}}
+set DriverLoad.1 [gui_create_window -type DriverLoad -parent ${TopLevel.1} -dock_state bottom -dock_on_new_line false -dock_extent 177]
 gui_set_window_pref_key -window ${DriverLoad.1} -key dock_width -value_type integer -value 150
-gui_set_window_pref_key -window ${DriverLoad.1} -key dock_height -value_type integer -value 178
+gui_set_window_pref_key -window ${DriverLoad.1} -key dock_height -value_type integer -value 177
 gui_set_window_pref_key -window ${DriverLoad.1} -key dock_offset -value_type integer -value 0
-gui_update_layout -id ${DriverLoad.1} {{left 0} {top 0} {width 2287} {height 177} {dock_state bottom} {dock_on_new_line false}}
+gui_update_layout -id ${DriverLoad.1} {{left 0} {top 0} {width 3567} {height 176} {dock_state bottom} {dock_on_new_line false}}
 #### Start - Readjusting docked view's offset / size
 set dockAreaList { top left right bottom }
 foreach dockArea $dockAreaList {
@@ -203,7 +205,7 @@ if {![gui_exist_window -window TopLevel.2]} {
 } else { 
     set TopLevel.2 TopLevel.2
 }
-gui_show_window -window ${TopLevel.2} -show_state maximized -rect {{0 102} {2559 1442}}
+gui_show_window -window ${TopLevel.2} -show_state maximized -rect {{0 139} {3839 1639}}
 
 # ToolBar settings
 gui_set_toolbar_attributes -toolbar {TimeOperations} -dock_state top
@@ -255,7 +257,7 @@ gui_sync_global -id ${TopLevel.2} -option true
 # MDI window settings
 set Wave.1 [gui_create_window -type {Wave}  -parent ${TopLevel.2}]
 gui_show_window -window ${Wave.1} -show_state maximized
-gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 743} {child_wave_right 1811} {child_wave_colname 368} {child_wave_colvalue 371} {child_wave_col1 0} {child_wave_col2 1}}
+gui_update_layout -id ${Wave.1} {{show_state maximized} {dock_state undocked} {dock_on_new_line false} {child_wave_left 1115} {child_wave_right 2719} {child_wave_colname 553} {child_wave_colvalue 558} {child_wave_col1 0} {child_wave_col2 1}}
 
 # End MDI window settings
 
@@ -308,7 +310,7 @@ gui_load_child_values {testbench.pipeline_0.load_queue}
 gui_load_child_values {testbench.pipeline_0.bp0}
 gui_load_child_values {testbench.pipeline_0.ex_stage_0}
 gui_load_child_values {testbench.pipeline_0.if_stage_0}
-gui_load_child_values {testbench.pipeline_0.mem_stage_0.dcache0}
+gui_load_child_values {testbench.pipeline_0.store_queue}
 gui_load_child_values {testbench.pipeline_0.f0}
 gui_load_child_values {testbench.pipeline_0.R0}
 gui_load_child_values {testbench.pipeline_0.iq0}
@@ -328,7 +330,7 @@ set _session_group_2 ROB
 gui_sg_create "$_session_group_2"
 set ROB "$_session_group_2"
 
-gui_sg_addsignal -group "$_session_group_2" { testbench.pipeline_0.R0.clock testbench.pipeline_0.R0.reset testbench.pipeline_0.R0.enable testbench.pipeline_0.R0.full testbench.pipeline_0.R0.free_rows_next testbench.pipeline_0.R0.retire_idx_valid testbench.pipeline_0.R0.wr_idx testbench.pipeline_0.R0.CDB_br_valid {testbench.pipeline_0.R0.$unit} }
+gui_sg_addsignal -group "$_session_group_2" { testbench.pipeline_0.clock testbench.pipeline_0.R0.clock testbench.pipeline_0.R0.reset testbench.pipeline_0.R0.enable testbench.pipeline_0.R0.full testbench.pipeline_0.R0.free_rows_next testbench.pipeline_0.R0.retire_idx_valid testbench.pipeline_0.R0.wr_idx testbench.pipeline_0.R0.CDB_br_valid {testbench.pipeline_0.R0.$unit} }
 
 set _session_group_3 $_session_group_2|
 append _session_group_3 {DEBUG OUT}
@@ -337,7 +339,7 @@ set {ROB|DEBUG OUT} "$_session_group_3"
 
 gui_sg_addsignal -group "$_session_group_3" { testbench.pipeline_0.R0.ROB_table_out testbench.pipeline_0.R0.head_out testbench.pipeline_0.R0.head_next_out testbench.pipeline_0.R0.tail_out testbench.pipeline_0.R0.tail_next_out testbench.pipeline_0.R0.retire_idx_out testbench.pipeline_0.R0.retire_idx_valid_out testbench.pipeline_0.R0.ready_to_retire_out testbench.pipeline_0.R0.dispatch_idx_out }
 
-gui_sg_move "$_session_group_3" -after "$_session_group_2" -pos 11 
+gui_sg_move "$_session_group_3" -after "$_session_group_2" -pos 12 
 
 set _session_group_4 $_session_group_2|
 append _session_group_4 RETIRED
@@ -346,7 +348,7 @@ set ROB|RETIRED "$_session_group_4"
 
 gui_sg_addsignal -group "$_session_group_4" { testbench.pipeline_0.R0.retired testbench.pipeline_0.R0.retire_out }
 
-gui_sg_move "$_session_group_4" -after "$_session_group_2" -pos 10 
+gui_sg_move "$_session_group_4" -after "$_session_group_2" -pos 11 
 
 set _session_group_5 $_session_group_2|
 append _session_group_5 DISPATCHED
@@ -355,7 +357,7 @@ set ROB|DISPATCHED "$_session_group_5"
 
 gui_sg_addsignal -group "$_session_group_5" { testbench.pipeline_0.R0.is_store testbench.pipeline_0.R0.sq_idx_in testbench.pipeline_0.R0.dispatch_en testbench.pipeline_0.R0.npc testbench.pipeline_0.R0.T_old_in testbench.pipeline_0.R0.T_new_in testbench.pipeline_0.R0.halt_in testbench.pipeline_0.R0.dispatched testbench.pipeline_0.R0.id_branch_inst testbench.pipeline_0.R0.opcode }
 
-gui_sg_move "$_session_group_5" -after "$_session_group_2" -pos 9 
+gui_sg_move "$_session_group_5" -after "$_session_group_2" -pos 10 
 
 set _session_group_6 $_session_group_2|
 append _session_group_6 {IDX LOGIC}
@@ -364,7 +366,7 @@ set {ROB|IDX LOGIC} "$_session_group_6"
 
 gui_sg_addsignal -group "$_session_group_6" { testbench.pipeline_0.R0.ready_to_retire testbench.pipeline_0.R0.retire_idx testbench.pipeline_0.R0.retire_idx_valid testbench.pipeline_0.R0.dispatch_idx testbench.pipeline_0.R0.head_next_busy }
 
-gui_sg_move "$_session_group_6" -after "$_session_group_2" -pos 8 
+gui_sg_move "$_session_group_6" -after "$_session_group_2" -pos 9 
 
 set _session_group_7 $_session_group_2|
 append _session_group_7 {Branch Inputs}
@@ -373,7 +375,7 @@ set {ROB|Branch Inputs} "$_session_group_7"
 
 gui_sg_addsignal -group "$_session_group_7" { testbench.pipeline_0.R0.wr_idx testbench.pipeline_0.R0.CDB_br_valid testbench.pipeline_0.R0.CDB_br_idx testbench.pipeline_0.R0.co_alu_result testbench.pipeline_0.R0.branch_not_taken testbench.pipeline_0.R0.take_branch }
 
-gui_sg_move "$_session_group_7" -after "$_session_group_2" -pos 7 
+gui_sg_move "$_session_group_7" -after "$_session_group_2" -pos 8 
 
 set _session_group_8 $_session_group_2|
 append _session_group_8 TABLE
@@ -382,7 +384,7 @@ set ROB|TABLE "$_session_group_8"
 
 gui_sg_addsignal -group "$_session_group_8" { }
 
-gui_sg_move "$_session_group_8" -after "$_session_group_2" -pos 6 
+gui_sg_move "$_session_group_8" -after "$_session_group_2" -pos 7 
 
 set _session_group_9 $_session_group_8|
 append _session_group_9 next
@@ -407,7 +409,7 @@ set ROB|CAM "$_session_group_11"
 
 gui_sg_addsignal -group "$_session_group_11" { testbench.pipeline_0.R0.CDB_tag_in testbench.pipeline_0.R0.cam_tags_in testbench.pipeline_0.R0.CDB_sq_idx testbench.pipeline_0.R0.CDB_sq_valid testbench.pipeline_0.R0.cam_hits testbench.pipeline_0.R0.cam_table_in testbench.pipeline_0.R0.CAM_en }
 
-gui_sg_move "$_session_group_11" -after "$_session_group_2" -pos 5 
+gui_sg_move "$_session_group_11" -after "$_session_group_2" -pos 6 
 
 set _session_group_12 Free_List
 gui_sg_create "$_session_group_12"
@@ -509,22 +511,22 @@ gui_sg_addsignal -group "$_session_group_23" { testbench.pipeline_0.inst_memory.
 gui_sg_move "$_session_group_23" -after "$_session_group_16" -pos 7 
 
 set _session_group_24 $_session_group_23|
-append _session_group_24 next
+append _session_group_24 curr
 gui_sg_create "$_session_group_24"
-set icache|Queue|next "$_session_group_24"
+set icache|Queue|curr "$_session_group_24"
 
-gui_sg_addsignal -group "$_session_group_24" { testbench.pipeline_0.inst_memory.PC_queue_next testbench.pipeline_0.inst_memory.PC_queue_tail_next testbench.pipeline_0.inst_memory.send_req_ptr_next testbench.pipeline_0.inst_memory.mem_waiting_ptr_next }
+gui_sg_addsignal -group "$_session_group_24" { testbench.pipeline_0.inst_memory.PC_queue testbench.pipeline_0.inst_memory.PC_queue_tail testbench.pipeline_0.inst_memory.send_req_ptr testbench.pipeline_0.inst_memory.mem_waiting_ptr }
 
-gui_sg_move "$_session_group_24" -after "$_session_group_23" -pos 5 
+gui_sg_move "$_session_group_24" -after "$_session_group_23" -pos 4 
 
 set _session_group_25 $_session_group_23|
-append _session_group_25 curr
+append _session_group_25 next
 gui_sg_create "$_session_group_25"
-set icache|Queue|curr "$_session_group_25"
+set icache|Queue|next "$_session_group_25"
 
-gui_sg_addsignal -group "$_session_group_25" { testbench.pipeline_0.inst_memory.PC_queue testbench.pipeline_0.inst_memory.PC_queue_tail testbench.pipeline_0.inst_memory.send_req_ptr testbench.pipeline_0.inst_memory.mem_waiting_ptr }
+gui_sg_addsignal -group "$_session_group_25" { testbench.pipeline_0.inst_memory.PC_queue_next testbench.pipeline_0.inst_memory.PC_queue_tail_next testbench.pipeline_0.inst_memory.send_req_ptr_next testbench.pipeline_0.inst_memory.mem_waiting_ptr_next }
 
-gui_sg_move "$_session_group_25" -after "$_session_group_23" -pos 4 
+gui_sg_move "$_session_group_25" -after "$_session_group_23" -pos 5 
 
 set _session_group_26 $_session_group_16|
 append _session_group_26 CAM
@@ -551,7 +553,9 @@ set _session_group_29 if_stage
 gui_sg_create "$_session_group_29"
 set if_stage "$_session_group_29"
 
-gui_sg_addsignal -group "$_session_group_29" { testbench.pipeline_0.if_stage_0.clock testbench.pipeline_0.if_stage_0.reset testbench.pipeline_0.if_stage_0.proc2Imem_addr testbench.pipeline_0.if_stage_0.Imem2proc_data testbench.pipeline_0.if_stage_0.Imem_valid testbench.pipeline_0.if_stage_0.PC_enable testbench.pipeline_0.if_stage_0.dispatch_en testbench.pipeline_0.if_stage_0.PC_reg testbench.pipeline_0.if_stage_0.PC_plus_4 testbench.pipeline_0.if_stage_0.next_PC testbench.pipeline_0.if_stage_0.ready_for_valid testbench.pipeline_0.if_stage_0.next_ready_for_valid testbench.pipeline_0.if_stage_0.co_ret_valid_inst testbench.pipeline_0.if_stage_0.co_ret_take_branch testbench.pipeline_0.if_stage_0.co_ret_branch_valid testbench.pipeline_0.if_stage_0.co_ret_target_pc testbench.pipeline_0.if_stage_0.if_bp_NPC testbench.pipeline_0.if_stage_0.if_bp_NPC_valid testbench.pipeline_0.if_stage_0.if_PC_reg testbench.pipeline_0.if_stage_0.if_valid_inst testbench.pipeline_0.if_stage_0.if_IR_out testbench.pipeline_0.if_stage_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.if_NPC_out {testbench.pipeline_0.if_stage_0.$unit} }
+gui_sg_addsignal -group "$_session_group_29" { testbench.clock_count testbench.pipeline_0.if_stage_0.clock testbench.pipeline_0.if_stage_0.reset testbench.pipeline_0.if_stage_0.proc2Imem_addr testbench.pipeline_0.if_stage_0.Imem2proc_data testbench.pipeline_0.if_stage_0.Imem_valid testbench.pipeline_0.if_stage_0.PC_enable testbench.pipeline_0.if_stage_0.dispatch_en testbench.pipeline_0.if_stage_0.PC_reg testbench.pipeline_0.if_stage_0.PC_plus_4 testbench.pipeline_0.if_stage_0.next_PC testbench.pipeline_0.if_stage_0.ready_for_valid testbench.pipeline_0.if_stage_0.next_ready_for_valid testbench.pipeline_0.if_stage_0.co_ret_valid_inst testbench.pipeline_0.if_stage_0.co_ret_take_branch testbench.pipeline_0.if_stage_0.co_ret_branch_valid testbench.pipeline_0.if_stage_0.co_ret_target_pc testbench.pipeline_0.if_stage_0.if_bp_NPC testbench.pipeline_0.if_stage_0.if_bp_NPC_valid testbench.pipeline_0.if_stage_0.if_PC_reg testbench.pipeline_0.if_stage_0.if_valid_inst testbench.pipeline_0.if_stage_0.if_IR_out testbench.pipeline_0.if_stage_0.if_valid_inst_out testbench.pipeline_0.if_stage_0.if_NPC_out {testbench.pipeline_0.if_stage_0.$unit} }
+gui_set_radix -radix {decimal} -signals {Sim:testbench.clock_count}
+gui_set_radix -radix {unsigned} -signals {Sim:testbench.clock_count}
 
 set _session_group_30 id_stage
 gui_sg_create "$_session_group_30"
@@ -892,22 +896,22 @@ gui_sg_addsignal -group "$_session_group_67" { testbench.pipeline_0.mem_stage_0.
 gui_sg_move "$_session_group_67" -after "$_session_group_60" -pos 8 
 
 set _session_group_68 $_session_group_67|
-append _session_group_68 Rd
+append _session_group_68 Wr
 gui_sg_create "$_session_group_68"
-set dcache0|Cache|Rd "$_session_group_68"
+set dcache0|Cache|Wr "$_session_group_68"
 
-gui_sg_addsignal -group "$_session_group_68" { testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_en testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_data testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_valid testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_miss_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_miss_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_miss_valid }
+gui_sg_addsignal -group "$_session_group_68" { testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_en testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_data testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_dirty testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_miss_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_miss_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_miss_valid }
 
-gui_sg_move "$_session_group_68" -after "$_session_group_67" -pos 1 
+gui_sg_move "$_session_group_68" -after "$_session_group_67" -pos 2 
 
 set _session_group_69 $_session_group_67|
-append _session_group_69 Wr
+append _session_group_69 Rd
 gui_sg_create "$_session_group_69"
-set dcache0|Cache|Wr "$_session_group_69"
+set dcache0|Cache|Rd "$_session_group_69"
 
-gui_sg_addsignal -group "$_session_group_69" { testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_en testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_data testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_dirty testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_miss_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_miss_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_miss_valid }
+gui_sg_addsignal -group "$_session_group_69" { testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_en testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_data testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_valid testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_miss_idx testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_miss_tag testbench.pipeline_0.mem_stage_0.dcache0.cache_rd_miss_valid }
 
-gui_sg_move "$_session_group_69" -after "$_session_group_67" -pos 2 
+gui_sg_move "$_session_group_69" -after "$_session_group_67" -pos 1 
 
 set _session_group_70 $_session_group_60|
 append _session_group_70 {Mem Queue}
@@ -919,22 +923,22 @@ gui_sg_addsignal -group "$_session_group_70" { testbench.pipeline_0.mem_stage_0.
 gui_sg_move "$_session_group_70" -after "$_session_group_60" -pos 7 
 
 set _session_group_71 $_session_group_70|
-append _session_group_71 Current
+append _session_group_71 Next
 gui_sg_create "$_session_group_71"
-set {dcache0|Mem Queue|Current} "$_session_group_71"
+set {dcache0|Mem Queue|Next} "$_session_group_71"
 
-gui_sg_addsignal -group "$_session_group_71" { testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue_tail testbench.pipeline_0.mem_stage_0.dcache0.send_req_ptr testbench.pipeline_0.mem_stage_0.dcache0.mem_waiting_ptr }
+gui_sg_addsignal -group "$_session_group_71" { testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue_next testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue_tail_next testbench.pipeline_0.mem_stage_0.dcache0.send_req_ptr_next testbench.pipeline_0.mem_stage_0.dcache0.mem_waiting_ptr_next }
 
-gui_sg_move "$_session_group_71" -after "$_session_group_70" -pos 6 
+gui_sg_move "$_session_group_71" -after "$_session_group_70" -pos 7 
 
 set _session_group_72 $_session_group_70|
-append _session_group_72 Next
+append _session_group_72 Current
 gui_sg_create "$_session_group_72"
-set {dcache0|Mem Queue|Next} "$_session_group_72"
+set {dcache0|Mem Queue|Current} "$_session_group_72"
 
-gui_sg_addsignal -group "$_session_group_72" { testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue_next testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue_tail_next testbench.pipeline_0.mem_stage_0.dcache0.send_req_ptr_next testbench.pipeline_0.mem_stage_0.dcache0.mem_waiting_ptr_next }
+gui_sg_addsignal -group "$_session_group_72" { testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue testbench.pipeline_0.mem_stage_0.dcache0.mem_req_queue_tail testbench.pipeline_0.mem_stage_0.dcache0.send_req_ptr testbench.pipeline_0.mem_stage_0.dcache0.mem_waiting_ptr }
 
-gui_sg_move "$_session_group_72" -after "$_session_group_70" -pos 7 
+gui_sg_move "$_session_group_72" -after "$_session_group_70" -pos 6 
 
 set _session_group_73 $_session_group_60|
 append _session_group_73 Encoders
@@ -996,13 +1000,13 @@ gui_sg_addsignal -group "$_session_group_79" { testbench.pipeline_0.mem_stage_0.
 gui_sg_move "$_session_group_79" -after "$_session_group_60" -pos 4 
 
 set _session_group_80 $_session_group_79|
-append _session_group_80 Next
+append _session_group_80 LRU
 gui_sg_create "$_session_group_80"
-set dcache0|FIFO|Next "$_session_group_80"
+set dcache0|FIFO|LRU "$_session_group_80"
 
-gui_sg_addsignal -group "$_session_group_80" { testbench.pipeline_0.mem_stage_0.dcache0.fifo_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_tail_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_filled_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_busy_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_fetch_addr_next testbench.pipeline_0.mem_stage_0.dcache0.fetch_stride_next }
+gui_sg_addsignal -group "$_session_group_80" { testbench.pipeline_0.mem_stage_0.dcache0.fifo_lru testbench.pipeline_0.mem_stage_0.dcache0.fifo_lru_next testbench.pipeline_0.mem_stage_0.dcache0.next_lru_idx testbench.pipeline_0.mem_stage_0.dcache0.acc testbench.pipeline_0.mem_stage_0.dcache0.temp_lru_idx testbench.pipeline_0.mem_stage_0.dcache0.fill_fifo_idx }
 
-gui_sg_move "$_session_group_80" -after "$_session_group_79" -pos 3 
+gui_sg_move "$_session_group_80" -after "$_session_group_79" -pos 4 
 
 set _session_group_81 $_session_group_79|
 append _session_group_81 Current
@@ -1014,13 +1018,13 @@ gui_sg_addsignal -group "$_session_group_81" { testbench.pipeline_0.mem_stage_0.
 gui_sg_move "$_session_group_81" -after "$_session_group_79" -pos 2 
 
 set _session_group_82 $_session_group_79|
-append _session_group_82 LRU
+append _session_group_82 Next
 gui_sg_create "$_session_group_82"
-set dcache0|FIFO|LRU "$_session_group_82"
+set dcache0|FIFO|Next "$_session_group_82"
 
-gui_sg_addsignal -group "$_session_group_82" { testbench.pipeline_0.mem_stage_0.dcache0.fifo_lru testbench.pipeline_0.mem_stage_0.dcache0.fifo_lru_next testbench.pipeline_0.mem_stage_0.dcache0.next_lru_idx testbench.pipeline_0.mem_stage_0.dcache0.acc testbench.pipeline_0.mem_stage_0.dcache0.temp_lru_idx testbench.pipeline_0.mem_stage_0.dcache0.fill_fifo_idx }
+gui_sg_addsignal -group "$_session_group_82" { testbench.pipeline_0.mem_stage_0.dcache0.fifo_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_tail_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_filled_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_busy_next testbench.pipeline_0.mem_stage_0.dcache0.fifo_fetch_addr_next testbench.pipeline_0.mem_stage_0.dcache0.fetch_stride_next }
 
-gui_sg_move "$_session_group_82" -after "$_session_group_79" -pos 4 
+gui_sg_move "$_session_group_82" -after "$_session_group_79" -pos 3 
 
 set _session_group_83 Vic_cache
 gui_sg_create "$_session_group_83"
@@ -1140,6 +1144,23 @@ set _session_group_98 Group2
 gui_sg_create "$_session_group_98"
 set Group2 "$_session_group_98"
 
+gui_sg_addsignal -group "$_session_group_98" { }
+
+set _session_group_99 $_session_group_98|
+append _session_group_99 Group1
+gui_sg_create "$_session_group_99"
+set Group2|Group1 "$_session_group_99"
+
+
+set _session_group_100 Group3
+gui_sg_create "$_session_group_100"
+set Group3 "$_session_group_100"
+
+
+set _session_group_101 Group4
+gui_sg_create "$_session_group_101"
+set Group4 "$_session_group_101"
+
 
 # Global: Highlighting
 
@@ -1149,7 +1170,7 @@ gui_change_stack_mode -mode list
 # Post database loading setting...
 
 # Restore C1 time
-gui_set_time -C1_only 15538
+gui_set_time -C1_only 3999310
 
 
 
@@ -1175,20 +1196,16 @@ gui_list_set_filter -id ${Hier.1} -list { {Package 1} {All 0} {Process 1} {VirtP
 gui_list_set_filter -id ${Hier.1} -text {*}
 gui_hier_list_init -id ${Hier.1}
 gui_change_design -id ${Hier.1} -design Sim
-catch {gui_list_expand -id ${Hier.1} testbench}
-catch {gui_list_expand -id ${Hier.1} testbench.pipeline_0}
-catch {gui_list_expand -id ${Hier.1} testbench.pipeline_0.mem_stage_0}
-catch {gui_list_expand -id ${Hier.1} testbench.pipeline_0.mem_stage_0.dcache0}
-catch {gui_list_select -id ${Hier.1} {testbench.pipeline_0.mem_stage_0.dcache0.victim_memory}}
+catch {gui_list_select -id ${Hier.1} {testbench}}
 gui_view_scroll -id ${Hier.1} -vertical -set 0
 gui_view_scroll -id ${Hier.1} -horizontal -set 0
 
 # Data 'Data.1'
 gui_list_set_filter -id ${Data.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {LowPower 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
-gui_list_set_filter -id ${Data.1} -text {*}
-gui_list_show_data -id ${Data.1} {testbench.pipeline_0.mem_stage_0.dcache0.victim_memory}
+gui_list_set_filter -id ${Data.1} -text {clock*}
+gui_list_show_data -id ${Data.1} {testbench}
 gui_show_window -window ${Data.1}
-catch { gui_list_select -id ${Data.1} {testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.clock testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.reset testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_idx testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_valid testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_en testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_idx testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_tag testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.evicted_vic testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.evicted_valid testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_vic testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_valid testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_out testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_next testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_tail testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_tail_next testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_cam_table_in testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_cam_tags testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_cam_hits testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_vic_hits testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_vic_idx testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_vic_idx_valid testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_num_shift testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.num_evict testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.vic_queue_hits testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.NUM_WAYS testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.RD_PORTS testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.WR_PORTS {testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.$unit} }}
+catch { gui_list_select -id ${Data.1} {testbench.clock_count }}
 gui_view_scroll -id ${Data.1} -vertical -set 0
 gui_view_scroll -id ${Data.1} -horizontal -set 0
 gui_view_scroll -id ${Hier.1} -vertical -set 0
@@ -1202,10 +1219,10 @@ gui_get_drivers -session -id ${DriverLoad.1} -signal testbench.pipeline_0.store_
 # Source 'Source.1'
 gui_src_value_annotate -id ${Source.1} -switch false
 gui_set_env TOGGLE::VALUEANNOTATE 0
-gui_open_source -id ${Source.1}  -replace -active testbench.pipeline_0.mem_stage_0.dcache0.fifo_psel /afs/umich.edu/user/e/l/eliubakk/eecs470/projects/4/verilog/misc/psel_rotating.v
+gui_open_source -id ${Source.1}  -replace -active {testbench.pipeline_0.R0.unnamed$$_2} /afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/verilog/ROB.v
 gui_src_value_annotate -id ${Source.1} -switch true
 gui_set_env TOGGLE::VALUEANNOTATE 1
-gui_view_scroll -id ${Source.1} -vertical -set 390
+gui_view_scroll -id ${Source.1} -vertical -set 2115
 gui_src_set_reusable -id ${Source.1}
 
 # View 'Wave.1'
@@ -1217,7 +1234,7 @@ gui_list_set_height -id Wave -height 25
 set origGroupCreationState [gui_list_create_group_when_add -wave]
 gui_list_create_group_when_add -wave -disable
 gui_marker_set_ref -id ${Wave.1}  C1
-gui_wv_zoom_timerange -id ${Wave.1} 14946 16399
+gui_wv_zoom_timerange -id ${Wave.1} 3996402 4002219
 gui_list_add_group -id ${Wave.1} -after {New Group} {ROB}
 gui_list_add_group -id ${Wave.1}  -after {testbench.pipeline_0.R0.free_rows_next[4:0]} {ROB|CAM}
 gui_list_add_group -id ${Wave.1} -after ROB|CAM {ROB|TABLE}
@@ -1314,6 +1331,11 @@ gui_list_add_group -id ${Wave.1} -after {New Group} {{pipeline mem signals}}
 gui_list_add_group -id ${Wave.1} -after {New Group} {{pipeline co signals}}
 gui_list_add_group -id ${Wave.1} -after {New Group} {{pipeline ret signals}}
 gui_list_add_group -id ${Wave.1} -after {New Group} {Group2}
+gui_list_add_group -id ${Wave.1}  -after Group2 {Group2|Group1}
+gui_list_add_group -id ${Wave.1} -after {New Group} {Group3}
+gui_list_add_group -id ${Wave.1} -after {New Group} {Group4}
+gui_list_collapse -id ${Wave.1} ROB
+gui_list_collapse -id ${Wave.1} ROB|TABLE
 gui_list_collapse -id ${Wave.1} {ROB|Branch Inputs}
 gui_list_collapse -id ${Wave.1} {ROB|IDX LOGIC}
 gui_list_collapse -id ${Wave.1} {ROB|DEBUG OUT}
@@ -1324,24 +1346,29 @@ gui_list_collapse -id ${Wave.1} icache_mem
 gui_list_collapse -id ${Wave.1} icache
 gui_list_collapse -id ${Wave.1} IQ
 gui_list_collapse -id ${Wave.1} BP2
-gui_list_collapse -id ${Wave.1} if_stage
 gui_list_collapse -id ${Wave.1} id_stage
 gui_list_collapse -id ${Wave.1} RS
 gui_list_collapse -id ${Wave.1} ex_stage
+gui_list_collapse -id ${Wave.1} LQ
+gui_list_collapse -id ${Wave.1} {LQ|load in}
 gui_list_collapse -id ${Wave.1} LQ|queue
+gui_list_collapse -id ${Wave.1} SQ
 gui_list_collapse -id ${Wave.1} SQ|encoder
 gui_list_collapse -id ${Wave.1} {SQ|interal data|next}
 gui_list_collapse -id ${Wave.1} {SQ|internals out}
+gui_list_collapse -id ${Wave.1} mem_stage
 gui_list_collapse -id ${Wave.1} {mem_stage|rd signals}
 gui_list_collapse -id ${Wave.1} {mem_stage|memory signals}
 gui_list_collapse -id ${Wave.1} memory
 gui_list_collapse -id ${Wave.1} Phys_reg_file
+gui_list_collapse -id ${Wave.1} dcache0
 gui_list_collapse -id ${Wave.1} dcache0|FIFO|Next
 gui_list_collapse -id ${Wave.1} dcache0|FIFO|LRU
 gui_list_collapse -id ${Wave.1} dcache0|Encoders|Inputs
 gui_list_collapse -id ${Wave.1} {dcache0|Mem Queue|Next}
 gui_list_collapse -id ${Wave.1} {dcache0|Vic cache|wr/evicted}
 gui_list_collapse -id ${Wave.1} {dcache0|memory signals|proc/Dmem}
+gui_list_collapse -id ${Wave.1} Vic_cache
 gui_list_collapse -id ${Wave.1} retire_buffer
 gui_list_collapse -id ${Wave.1} {pipeline if signals}
 gui_list_collapse -id ${Wave.1} {pipeline id signals}
@@ -1351,27 +1378,7 @@ gui_list_collapse -id ${Wave.1} {pipeline ex signals}
 gui_list_collapse -id ${Wave.1} {pipeline mem signals}
 gui_list_collapse -id ${Wave.1} {pipeline co signals}
 gui_list_collapse -id ${Wave.1} {pipeline ret signals}
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.R0.ROB_table
-gui_list_expand -id ${Wave.1} {testbench.pipeline_0.R0.ROB_table[15]}
-gui_list_expand -id ${Wave.1} {testbench.pipeline_0.R0.ROB_table[14]}
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.R0.retire_out
-gui_list_expand -id ${Wave.1} {testbench.pipeline_0.R0.retire_out[0]}
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.load_queue.load_in
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.load_queue.load_in
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.store_queue.addr
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.store_queue.data
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.fifo_cam_tags
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.fetch_addr_cam_table_in
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.mem_queue_cam_table_in
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.mem_queue_cam_tags
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_idx
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.cache_wr_tag
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.vic_rd_en
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.vic_rd_idx
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.vic_rd_tag
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_idx
-gui_list_expand -id ${Wave.1} testbench.pipeline_0.mem_stage_0.dcache0.victim_memory.rd_tag
-gui_list_select -id ${Wave.1} {testbench.pipeline_0.load_queue.load_in.valid_inst }
+gui_list_select -id ${Wave.1} {testbench.pipeline_0.if_stage_0.reset }
 gui_seek_criteria -id ${Wave.1} {Any Edge}
 
 
@@ -1387,21 +1394,21 @@ if { $groupExD } {
 }
 gui_list_set_filter -id ${Wave.1} -list { {Buffer 1} {Input 1} {Others 1} {Linkage 1} {Output 1} {Parameter 1} {All 1} {Aggregate 1} {LibBaseMember 1} {Event 1} {Assertion 1} {Constant 1} {Interface 1} {BaseMembers 1} {Signal 1} {$unit 1} {Inout 1} {Variable 1} }
 gui_list_set_filter -id ${Wave.1} -text {*}
-gui_list_set_insertion_bar  -id ${Wave.1} -group dcache0  -item {testbench.pipeline_0.mem_stage_0.dcache0.$unit} -position below
+gui_list_set_insertion_bar  -id ${Wave.1} -group if_stage  -item {testbench.clock_count[31:0]} -position below
 
-gui_marker_move -id ${Wave.1} {C1} 15538
-gui_view_scroll -id ${Wave.1} -vertical -set 2625
+gui_marker_move -id ${Wave.1} {C1} 3999310
+gui_view_scroll -id ${Wave.1} -vertical -set 0
 gui_show_grid -id ${Wave.1} -enable false
 # Restore toplevel window zorder
 # The toplevel window could be closed if it has no view/pane
+if {[gui_exist_window -window ${TopLevel.2}]} {
+	gui_set_active_window -window ${TopLevel.2}
+	gui_set_active_window -window ${Wave.1}
+}
 if {[gui_exist_window -window ${TopLevel.1}]} {
 	gui_set_active_window -window ${TopLevel.1}
 	gui_set_active_window -window ${Source.1}
 	gui_set_active_window -window ${DLPane.1}
-}
-if {[gui_exist_window -window ${TopLevel.2}]} {
-	gui_set_active_window -window ${TopLevel.2}
-	gui_set_active_window -window ${Wave.1}
 }
 #</Session>
 

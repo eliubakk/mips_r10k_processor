@@ -177,7 +177,7 @@ dve:	$(SIMFILES) $(TESTBENCH)
 syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v
 	if [ ! -f pipeline.vg ]; \
 	then \
-		make -j $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
+		make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
 		cd $(SYN_DIR)/$(PIPELINE_NAME) && \
 		$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
 		mv ** ../../.; \
