@@ -1,0 +1,480 @@
+Information: Updating design information... (UID-85)
+ 
+****************************************
+Report : design
+Design : GSHARE
+Version: O-2018.06
+Date   : Tue Mar 19 16:07:17 2019
+****************************************
+
+Design allows ideal nets on clock nets.
+
+Library(s) Used:
+
+    lec25dscc25_TT (File: /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db)
+
+Local Link Library:
+
+    {lec25dscc25_TT.db}
+
+Flip-Flop Types:
+
+    No flip-flop types specified.
+
+Latch Types:
+
+    No latch types specified.
+
+Operating Conditions:
+
+
+    Operating Condition Name : nom_pvt
+    Library : lec25dscc25_TT
+    Process :   1.00
+    Temperature :  25.00
+    Voltage :   2.50
+    Interconnect Model : balanced_tree
+
+Wire Loading Model:
+
+    Selected manually by the user.
+
+Name           :   tsmcwire
+Location       :   lec25dscc25_TT
+Resistance     :   0.2642
+Capacitance    :   0.000132782
+Area           :   0.27
+Slope          :   0.74
+Fanout   Length   Points Average Cap Std Deviation
+--------------------------------------------------------------
+     1     0.89
+     2     1.48
+     3     2.44
+     4     3.18
+     5     3.92
+
+
+
+Wire Loading Model Mode: top.
+
+Timing Ranges:
+
+    No timing ranges specified.
+
+Pin Input Delays:
+
+    None specified.
+
+Pin Output Delays:
+
+    None specified.
+
+Disabled Timing Arcs:
+
+    No arcs disabled.
+
+Required Licenses:
+
+    None Required
+
+Design Parameters:
+
+    None specified.
+1
+ 
+****************************************
+Report : area
+Design : GSHARE
+Version: O-2018.06
+Date   : Tue Mar 19 16:07:17 2019
+****************************************
+
+Library(s) Used:
+
+    lec25dscc25_TT (File: /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db)
+
+Number of ports:                           65
+Number of nets:                           153
+Number of cells:                          135
+Number of combinational cells:            114
+Number of sequential cells:                21
+Number of macros/black boxes:               0
+Number of buf/inv:                         30
+Number of references:                      19
+
+Combinational area:               5341.593575
+Buf/Inv area:                     1003.622425
+Noncombinational area:            4313.080139
+Macro/Black Box area:                0.000000
+Net Interconnect area:              78.093991
+
+Total cell area:                  9654.673714
+Total area:                       9732.767705
+1
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -input_pins
+        -nets
+        -max_paths 2
+        -transition_time
+Design : GSHARE
+Version: O-2018.06
+Date   : Tue Mar 19 16:07:17 2019
+****************************************
+
+Operating Conditions: nom_pvt   Library: lec25dscc25_TT
+Wire Load Model Mode: top
+
+  Startpoint: ght_reg[1] (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: ght_reg[0] (rising edge-triggered flip-flop clocked by clock)
+  Path Group: clock
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  GSHARE             tsmcwire              lec25dscc25_TT
+
+  Point                        Fanout     Trans      Incr       Path
+  ---------------------------------------------------------------------
+  clock clock (rise edge)                            0.00       0.00
+  clock network delay (ideal)                        0.00       0.00
+  ght_reg[1]/CLK (dffs2)                   0.00      0.00       0.00 r
+  ght_reg[1]/Q (dffs2)                     0.29      0.25       0.25 f
+  ght_out[1] (net)               3                   0.00       0.25 f
+  U124/DIN2 (xor2s1)                       0.29      0.00       0.26 f
+  U124/Q (xor2s1)                          0.25      0.28       0.54 r
+  N16 (net)                      3                   0.00       0.54 r
+  U108/DIN (ib1s1)                         0.25      0.00       0.54 r
+  U108/Q (ib1s1)                           0.16      0.08       0.62 f
+  n111 (net)                     2                   0.00       0.62 f
+  U155/DIN1 (nor2s1)                       0.16      0.00       0.62 f
+  U155/Q (nor2s1)                          0.40      0.17       0.79 r
+  n100 (net)                     4                   0.00       0.79 r
+  U165/DIN4 (aoi22s1)                      0.40      0.00       0.79 r
+  U165/Q (aoi22s1)                         0.36      0.17       0.96 f
+  n99 (net)                      1                   0.00       0.96 f
+  U167/DIN1 (aoi21s1)                      0.36      0.00       0.96 f
+  U167/Q (aoi21s1)                         0.25      0.13       1.10 r
+  n107 (net)                     1                   0.00       1.10 r
+  U171/DIN1 (oai21s1)                      0.25      0.00       1.10 r
+  U171/Q (oai21s1)                         0.27      0.16       1.25 f
+  n108 (net)                     1                   0.00       1.25 f
+  U172/DIN2 (nnd2s1)                       0.27      0.00       1.25 f
+  U172/Q (nnd2s1)                          0.29      0.15       1.40 r
+  N61 (net)                      2                   0.00       1.40 r
+  U119/DIN3 (aoi22s2)                      0.29      0.00       1.40 r
+  U119/Q (aoi22s2)                         0.32      0.16       1.56 f
+  n37 (net)                      1                   0.00       1.56 f
+  U118/DIN3 (oai22s2)                      0.32      0.00       1.56 f
+  U118/Q (oai22s2)                         0.59      0.24       1.80 r
+  n70 (net)                      1                   0.00       1.80 r
+  ght_reg[0]/DIN (dffs2)                   0.59      0.01       1.81 r
+  data arrival time                                             1.81
+
+  clock clock (rise edge)                           10.00      10.00
+  clock network delay (ideal)                        0.00      10.00
+  clock uncertainty                                 -0.10       9.90
+  ght_reg[0]/CLK (dffs2)                             0.00       9.90 r
+  library setup time                                -0.15       9.75
+  data required time                                            9.75
+  ---------------------------------------------------------------------
+  data required time                                            9.75
+  data arrival time                                            -1.81
+  ---------------------------------------------------------------------
+  slack (MET)                                                   7.94
+
+
+  Startpoint: ght_reg[1] (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: prediction_reg
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: clock
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  GSHARE             tsmcwire              lec25dscc25_TT
+
+  Point                        Fanout     Trans      Incr       Path
+  ---------------------------------------------------------------------
+  clock clock (rise edge)                            0.00       0.00
+  clock network delay (ideal)                        0.00       0.00
+  ght_reg[1]/CLK (dffs2)                   0.00      0.00       0.00 r
+  ght_reg[1]/Q (dffs2)                     0.29      0.25       0.25 f
+  ght_out[1] (net)               3                   0.00       0.25 f
+  U124/DIN2 (xor2s1)                       0.29      0.00       0.26 f
+  U124/Q (xor2s1)                          0.25      0.28       0.54 r
+  N16 (net)                      3                   0.00       0.54 r
+  U108/DIN (ib1s1)                         0.25      0.00       0.54 r
+  U108/Q (ib1s1)                           0.16      0.08       0.62 f
+  n111 (net)                     2                   0.00       0.62 f
+  U155/DIN1 (nor2s1)                       0.16      0.00       0.62 f
+  U155/Q (nor2s1)                          0.40      0.17       0.79 r
+  n100 (net)                     4                   0.00       0.79 r
+  U165/DIN4 (aoi22s1)                      0.40      0.00       0.79 r
+  U165/Q (aoi22s1)                         0.36      0.17       0.96 f
+  n99 (net)                      1                   0.00       0.96 f
+  U167/DIN1 (aoi21s1)                      0.36      0.00       0.96 f
+  U167/Q (aoi21s1)                         0.25      0.13       1.10 r
+  n107 (net)                     1                   0.00       1.10 r
+  U171/DIN1 (oai21s1)                      0.25      0.00       1.10 r
+  U171/Q (oai21s1)                         0.27      0.16       1.25 f
+  n108 (net)                     1                   0.00       1.25 f
+  U172/DIN2 (nnd2s1)                       0.27      0.00       1.25 f
+  U172/Q (nnd2s1)                          0.29      0.15       1.40 r
+  N61 (net)                      2                   0.00       1.40 r
+  U133/DIN3 (aoi22s2)                      0.29      0.00       1.40 r
+  U133/Q (aoi22s2)                         0.32      0.16       1.56 f
+  n66 (net)                      1                   0.00       1.56 f
+  U132/DIN (ib1s1)                         0.32      0.00       1.56 f
+  U132/Q (ib1s1)                           0.14      0.06       1.62 r
+  n133 (net)                     1                   0.00       1.62 r
+  prediction_reg/DIN (dffcs1)              0.14      0.00       1.63 r
+  data arrival time                                             1.63
+
+  clock clock (rise edge)                           10.00      10.00
+  clock network delay (ideal)                        0.00      10.00
+  clock uncertainty                                 -0.10       9.90
+  prediction_reg/CLK (dffcs1)                        0.00       9.90 r
+  library setup time                                -0.30       9.60
+  data required time                                            9.60
+  ---------------------------------------------------------------------
+  data required time                                            9.60
+  data arrival time                                            -1.63
+  ---------------------------------------------------------------------
+  slack (MET)                                                   7.97
+
+
+  Startpoint: obq_gh_in[0]
+              (input port clocked by clock)
+  Endpoint: pht_reg[0] (rising edge-triggered flip-flop clocked by clock)
+  Path Group: input_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  GSHARE             tsmcwire              lec25dscc25_TT
+
+  Point                        Fanout     Trans      Incr       Path
+  ---------------------------------------------------------------------
+  clock clock (rise edge)                            0.00       0.00
+  clock network delay (ideal)                        0.00       0.00
+  input external delay                               0.10       0.10 f
+  obq_gh_in[0] (in)                        0.32      0.10       0.20 f
+  N11 (net)                      6                   0.00       0.20 f
+  U127/DIN (ib1s1)                         0.32      0.00       0.20 f
+  U127/Q (ib1s1)                           0.31      0.15       0.36 r
+  n89 (net)                      4                   0.00       0.36 r
+  U139/DIN1 (nor2s1)                       0.31      0.00       0.36 r
+  U139/Q (nor2s1)                          0.37      0.21       0.57 f
+  n81 (net)                      4                   0.00       0.57 f
+  U140/DIN4 (aoi22s1)                      0.37      0.00       0.58 f
+  U140/Q (aoi22s1)                         0.33      0.20       0.77 r
+  n71 (net)                      1                   0.00       0.77 r
+  U141/DIN2 (aoi21s1)                      0.33      0.00       0.77 r
+  U141/Q (aoi21s1)                         0.26      0.14       0.91 f
+  n76 (net)                      1                   0.00       0.91 f
+  U145/DIN1 (oai21s1)                      0.26      0.00       0.92 f
+  U145/Q (oai21s1)                         0.33      0.15       1.07 r
+  n88 (net)                      1                   0.00       1.07 r
+  U153/DIN1 (nnd2s1)                       0.33      0.00       1.07 r
+  U153/Q (nnd2s1)                          0.16      0.07       1.13 f
+  N21 (net)                      1                   0.00       1.13 f
+  U122/DIN2 (or2s1)                        0.16      0.00       1.14 f
+  U122/Q (or2s1)                           0.16      0.20       1.33 f
+  n38 (net)                      1                   0.00       1.33 f
+  U121/DIN (i1s3)                          0.16      0.00       1.34 f
+  U121/Q (i1s3)                            1.31      0.50       1.84 r
+  n132 (net)                    16                   0.00       1.84 r
+  pht_reg[0]/DIN (dffles2)                 1.31      0.01       1.85 r
+  data arrival time                                             1.85
+
+  clock clock (rise edge)                           10.00      10.00
+  clock network delay (ideal)                        0.00      10.00
+  clock uncertainty                                 -0.10       9.90
+  pht_reg[0]/CLK (dffles2)                           0.00       9.90 r
+  library setup time                                -0.36       9.54
+  data required time                                            9.54
+  ---------------------------------------------------------------------
+  data required time                                            9.54
+  data arrival time                                            -1.85
+  ---------------------------------------------------------------------
+  slack (MET)                                                   7.69
+
+
+  Startpoint: obq_gh_in[0]
+              (input port clocked by clock)
+  Endpoint: pht_reg[1] (rising edge-triggered flip-flop clocked by clock)
+  Path Group: input_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  GSHARE             tsmcwire              lec25dscc25_TT
+
+  Point                        Fanout     Trans      Incr       Path
+  ---------------------------------------------------------------------
+  clock clock (rise edge)                            0.00       0.00
+  clock network delay (ideal)                        0.00       0.00
+  input external delay                               0.10       0.10 f
+  obq_gh_in[0] (in)                        0.32      0.10       0.20 f
+  N11 (net)                      6                   0.00       0.20 f
+  U127/DIN (ib1s1)                         0.32      0.00       0.20 f
+  U127/Q (ib1s1)                           0.31      0.15       0.36 r
+  n89 (net)                      4                   0.00       0.36 r
+  U139/DIN1 (nor2s1)                       0.31      0.00       0.36 r
+  U139/Q (nor2s1)                          0.37      0.21       0.57 f
+  n81 (net)                      4                   0.00       0.57 f
+  U140/DIN4 (aoi22s1)                      0.37      0.00       0.58 f
+  U140/Q (aoi22s1)                         0.33      0.20       0.77 r
+  n71 (net)                      1                   0.00       0.77 r
+  U141/DIN2 (aoi21s1)                      0.33      0.00       0.77 r
+  U141/Q (aoi21s1)                         0.26      0.14       0.91 f
+  n76 (net)                      1                   0.00       0.91 f
+  U145/DIN1 (oai21s1)                      0.26      0.00       0.92 f
+  U145/Q (oai21s1)                         0.33      0.15       1.07 r
+  n88 (net)                      1                   0.00       1.07 r
+  U153/DIN1 (nnd2s1)                       0.33      0.00       1.07 r
+  U153/Q (nnd2s1)                          0.16      0.07       1.13 f
+  N21 (net)                      1                   0.00       1.13 f
+  U122/DIN2 (or2s1)                        0.16      0.00       1.14 f
+  U122/Q (or2s1)                           0.16      0.20       1.33 f
+  n38 (net)                      1                   0.00       1.33 f
+  U121/DIN (i1s3)                          0.16      0.00       1.34 f
+  U121/Q (i1s3)                            1.31      0.50       1.84 r
+  n132 (net)                    16                   0.00       1.84 r
+  pht_reg[1]/DIN (dffles2)                 1.31      0.01       1.85 r
+  data arrival time                                             1.85
+
+  clock clock (rise edge)                           10.00      10.00
+  clock network delay (ideal)                        0.00      10.00
+  clock uncertainty                                 -0.10       9.90
+  pht_reg[1]/CLK (dffles2)                           0.00       9.90 r
+  library setup time                                -0.36       9.54
+  data required time                                            9.54
+  ---------------------------------------------------------------------
+  data required time                                            9.54
+  data arrival time                                            -1.85
+  ---------------------------------------------------------------------
+  slack (MET)                                                   7.69
+
+
+  Startpoint: prediction_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: prediction_out
+            (output port clocked by clock)
+  Path Group: output_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  GSHARE             tsmcwire              lec25dscc25_TT
+
+  Point                        Fanout     Trans      Incr       Path
+  ---------------------------------------------------------------------
+  prediction_reg/CLK (dffcs1)              0.00      0.00       0.00 r
+  prediction_reg/QN (dffcs1)               0.00      0.16       0.16 f
+  prediction_reg/Q (dffcs1)                0.58      0.23       0.39 r
+  prediction_out (net)           2                   0.00       0.39 r
+  prediction_out (out)                     0.58      0.02       0.41 r
+  data arrival time                                             0.41
+
+  max_delay                                         10.00      10.00
+  clock uncertainty                                 -0.10       9.90
+  output external delay                             -0.10       9.80
+  data required time                                            9.80
+  ---------------------------------------------------------------------
+  data required time                                            9.80
+  data arrival time                                            -0.41
+  ---------------------------------------------------------------------
+  slack (MET)                                                   9.39
+
+
+  Startpoint: ght_reg[0] (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: ght_out[0] (output port clocked by clock)
+  Path Group: output_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  GSHARE             tsmcwire              lec25dscc25_TT
+
+  Point                        Fanout     Trans      Incr       Path
+  ---------------------------------------------------------------------
+  ght_reg[0]/CLK (dffs2)                   0.00      0.00       0.00 r
+  ght_reg[0]/Q (dffs2)                     0.29      0.25       0.25 f
+  ght_out[0] (net)               3                   0.00       0.25 f
+  ght_out[0] (out)                         0.29      0.02       0.27 f
+  data arrival time                                             0.27
+
+  max_delay                                         10.00      10.00
+  clock uncertainty                                 -0.10       9.90
+  output external delay                             -0.10       9.80
+  data required time                                            9.80
+  ---------------------------------------------------------------------
+  data required time                                            9.80
+  data arrival time                                            -0.27
+  ---------------------------------------------------------------------
+  slack (MET)                                                   9.53
+
+
+1
+ 
+****************************************
+Report : constraint
+        -all_violators
+        -verbose
+Design : GSHARE
+Version: O-2018.06
+Date   : Tue Mar 19 16:07:17 2019
+****************************************
+
+This design has no violated constraints.
+
+1
+Information: Updating graph... (UID-83)
+ 
+****************************************
+Report : reference
+Design : GSHARE
+Version: O-2018.06
+Date   : Tue Mar 19 16:07:18 2019
+****************************************
+
+Attributes:
+    b - black box (unknown)
+   bo - allows boundary optimization
+    d - dont_touch
+   mo - map_only
+    h - hierarchical
+    n - noncombinational
+    r - removable
+    s - synthetic operator
+    u - contains unmapped logic
+
+Reference          Library       Unit Area   Count    Total Area   Attributes
+-----------------------------------------------------------------------------
+and2s1             lec25dscc25_TT    49.766399       1    49.766399
+and2s2             lec25dscc25_TT    58.060799       1    58.060799
+aoi21s1            lec25dscc25_TT    49.766399       8   398.131195
+aoi22s1            lec25dscc25_TT    58.060799      16   928.972778
+aoi22s2            lec25dscc25_TT    58.060799       5   290.303993
+dffcs1             lec25dscc25_TT   165.888000       1   165.888000 n
+dffles2            lec25dscc25_TT   215.654007      16  3450.464111 n
+dffs2              lec25dscc25_TT   174.182007       4   696.728027 n
+i1s3               lec25dscc25_TT    41.472000       1    41.472000
+ib1s1              lec25dscc25_TT    33.177601      29   962.150425
+nnd2s1             lec25dscc25_TT    41.472000       2    82.944000
+nnd2s2             lec25dscc25_TT    41.472000      12   497.664001
+nnd3s2             lec25dscc25_TT    49.766399       1    49.766399
+nor2s1             lec25dscc25_TT    41.472000       9   373.248001
+oai21s1            lec25dscc25_TT    49.766399       4   199.065598
+oai21s2            lec25dscc25_TT    49.766399      16   796.262390
+oai22s2            lec25dscc25_TT    58.060799       4   232.243195
+or2s1              lec25dscc25_TT    49.766399       1    49.766399
+xor2s1             lec25dscc25_TT    82.944000       4   331.776001
+-----------------------------------------------------------------------------
+Total 19 references                                  9654.673714
+1

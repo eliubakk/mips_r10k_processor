@@ -1,0 +1,2399 @@
+Information: Updating design information... (UID-85)
+Warning: Design 'pipeline' contains 1 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
+ 
+****************************************
+Report : design
+Design : pipeline
+Version: O-2018.06
+Date   : Tue Apr 23 22:17:27 2019
+****************************************
+
+Design allows ideal nets on clock nets.
+
+Library(s) Used:
+
+    lec25dscc25_TT (File: /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db)
+
+Local Link Library:
+
+    {lec25dscc25_TT.db}
+
+Flip-Flop Types:
+
+    No flip-flop types specified.
+
+Latch Types:
+
+    No latch types specified.
+
+Operating Conditions:
+
+
+    Operating Condition Name : nom_pvt
+    Library : lec25dscc25_TT
+    Process :   1.00
+    Temperature :  25.00
+    Voltage :   2.50
+    Interconnect Model : balanced_tree
+
+Wire Loading Model:
+
+    Selected manually by the user.
+
+Name           :   tsmcwire
+Location       :   lec25dscc25_TT
+Resistance     :   0.2642
+Capacitance    :   0.000132782
+Area           :   0.27
+Slope          :   0.74
+Fanout   Length   Points Average Cap Std Deviation
+--------------------------------------------------------------
+     1     0.89
+     2     1.48
+     3     2.44
+     4     3.18
+     5     3.92
+
+
+
+Wire Loading Model Mode: top.
+
+Timing Ranges:
+
+    No timing ranges specified.
+
+Pin Input Delays:
+
+    None specified.
+
+Pin Output Delays:
+
+    None specified.
+
+Disabled Timing Arcs:
+
+    No arcs disabled.
+
+Required Licenses:
+
+    None Required
+
+Design Parameters:
+
+    None specified.
+1
+ 
+****************************************
+Report : area
+Design : pipeline
+Version: O-2018.06
+Date   : Tue Apr 23 22:17:27 2019
+****************************************
+
+Library(s) Used:
+
+    lec25dscc25_TT (File: /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db)
+
+Number of ports:                        77760
+Number of nets:                        338103
+Number of cells:                       273754
+Number of combinational cells:         230783
+Number of sequential cells:             42814
+Number of macros/black boxes:               0
+Number of buf/inv:                      47608
+Number of references:                      69
+
+Combinational area:           13571034.234051
+Buf/Inv area:                  1797338.558010
+Noncombinational area:         6631466.057281
+Macro/Black Box area:                0.000000
+Net Interconnect area:          183329.830456
+
+Total cell area:              20202500.291332
+Total area:                   20385830.121788
+1
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -input_pins
+        -nets
+        -max_paths 2
+        -transition_time
+Design : pipeline
+Version: O-2018.06
+Date   : Tue Apr 23 22:17:27 2019
+****************************************
+
+ * Some/all delay information is back-annotated.
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: nom_pvt   Library: lec25dscc25_TT
+Wire Load Model Mode: top
+
+  Startpoint: rob_retire_out_is_store_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: mem_stage_0/rb0/retire_queue_reg[25][data][55]
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: clock
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                       Fanout     Trans      Incr       Path
+  ------------------------------------------------------------------------------------
+  clock clock (rise edge)                                           0.00       0.00
+  clock network delay (ideal)                                       0.00       0.00
+  rob_retire_out_is_store_reg/CLK (dffs2)                 0.00      0.00 #     0.00 r
+  rob_retire_out_is_store_reg/Q (dffs2)                   0.30      0.26       0.26 f
+  rob_retire_out_is_store (net)                18                   0.00       0.26 f
+  store_queue/rt_en (SQ)                                            0.00       0.26 f
+  store_queue/rt_en (net)                                           0.00       0.26 f
+  store_queue/U13042/DIN2 (and2s2)                        0.30      0.00       0.26 f
+  store_queue/U13042/Q (and2s2)                           0.12      0.20       0.46 f
+  store_queue/n7041 (net)                       2                   0.00       0.46 f
+  store_queue/U7128/DIN1 (nnd2s3)                         0.12      0.00       0.46 f
+  store_queue/U7128/Q (nnd2s3)                            0.19      0.07       0.53 r
+  store_queue/n5072 (net)                       3                   0.00       0.53 r
+  store_queue/U13229/DIN2 (xor2s2)                        0.19      0.00       0.54 r
+  store_queue/U13229/Q (xor2s2)                           0.14      0.17       0.70 r
+  store_queue/n7706 (net)                       2                   0.00       0.70 r
+  store_queue/U13236/DIN1 (xnr2s2)                        0.14      0.00       0.70 r
+  store_queue/U13236/Q (xnr2s2)                           0.14      0.19       0.89 f
+  store_queue/n7562 (net)                       1                   0.00       0.89 f
+  store_queue/U8346/DIN1 (nnd3s2)                         0.14      0.00       0.89 f
+  store_queue/U8346/Q (nnd3s2)                            0.22      0.07       0.96 r
+  store_queue/n7564 (net)                       1                   0.00       0.96 r
+  store_queue/U8345/DIN2 (oai21s2)                        0.22      0.00       0.96 r
+  store_queue/U8345/Q (oai21s2)                           0.22      0.09       1.06 f
+  store_queue/n7568 (net)                       1                   0.00       1.06 f
+  store_queue/U8344/DIN (i1s8)                            0.22      0.00       1.06 f
+  store_queue/U8344/Q (i1s8)                              0.12      0.18       1.24 r
+  store_queue/n7584 (net)                      11                   0.00       1.24 r
+  store_queue/U13177/DIN2 (nnd2s3)                        0.12      0.00       1.24 r
+  store_queue/U13177/Q (nnd2s3)                           0.28      0.10       1.34 f
+  store_queue/n7567 (net)                       2                   0.00       1.34 f
+  store_queue/U8216/DIN (ib1s6)                           0.28      0.01       1.35 f
+  store_queue/U8216/Q (ib1s6)                             0.09      0.07       1.42 r
+  store_queue/n7582 (net)                       7                   0.00       1.42 r
+  store_queue/U7905/DIN1 (nnd3s2)                         0.09      0.00       1.42 r
+  store_queue/U7905/Q (nnd3s2)                            0.35      0.09       1.51 f
+  store_queue/n7062 (net)                       2                   0.00       1.51 f
+  store_queue/U8121/DIN3 (oai211s1)                       0.35      0.00       1.51 f
+  store_queue/U8121/Q (oai211s1)                          0.45      0.20       1.71 r
+  store_queue/N491 (net)                        1                   0.00       1.71 r
+  store_queue/U8119/DIN (i1s8)                            0.45      0.00       1.71 r
+  store_queue/U8119/Q (i1s8)                              0.09      0.18       1.89 f
+  store_queue/n5260 (net)                       6                   0.00       1.89 f
+  store_queue/U7895/DIN2 (nnd2s2)                         0.09      0.00       1.89 f
+  store_queue/U7895/Q (nnd2s2)                            0.16      0.08       1.97 r
+  store_queue/n7752 (net)                       3                   0.00       1.97 r
+  store_queue/U8768/DIN (hi1s1)                           0.16      0.00       1.97 r
+  store_queue/U8768/Q (hi1s1)                             0.28      0.14       2.11 f
+  store_queue/n7766 (net)                       2                   0.00       2.11 f
+  store_queue/U8182/DIN1 (nnd2s1)                         0.28      0.00       2.11 f
+  store_queue/U8182/Q (nnd2s1)                            0.23      0.12       2.22 r
+  store_queue/n7887 (net)                       3                   0.00       2.22 r
+  store_queue/U8446/DIN (hi1s1)                           0.23      0.00       2.23 r
+  store_queue/U8446/Q (hi1s1)                             0.50      0.24       2.46 f
+  store_queue/n7884 (net)                       2                   0.00       2.46 f
+  store_queue/U14745/DIN1 (nnd2s2)                        0.50      0.00       2.47 f
+  store_queue/U14745/Q (nnd2s2)                           0.25      0.13       2.60 r
+  store_queue/n7974 (net)                       2                   0.00       2.60 r
+  store_queue/U8562/DIN (ib1s1)                           0.25      0.00       2.60 r
+  store_queue/U8562/Q (ib1s1)                             0.17      0.08       2.69 f
+  store_queue/n7899 (net)                       2                   0.00       2.69 f
+  store_queue/U14748/DIN5 (oai33s1)                       0.17      0.00       2.69 f
+  store_queue/U14748/Q (oai33s1)                          0.60      0.26       2.95 r
+  store_queue/n7903 (net)                       1                   0.00       2.95 r
+  store_queue/U14749/DIN1 (aoi13s2)                       0.60      0.00       2.95 r
+  store_queue/U14749/Q (aoi13s2)                          0.29      0.12       3.08 f
+  store_queue/n7904 (net)                       1                   0.00       3.08 f
+  store_queue/U14750/DIN4 (oai211s2)                      0.29      0.00       3.08 f
+  store_queue/U14750/Q (oai211s2)                         0.34      0.15       3.23 r
+  store_queue/n7917 (net)                       1                   0.00       3.23 r
+  store_queue/U14755/DIN2 (oai13s2)                       0.34      0.00       3.23 r
+  store_queue/U14755/Q (oai13s2)                          0.31      0.16       3.39 f
+  store_queue/n7930 (net)                       1                   0.00       3.39 f
+  store_queue/U14757/DIN2 (oai1112s2)                     0.31      0.00       3.40 f
+  store_queue/U14757/Q (oai1112s2)                        0.54      0.22       3.61 r
+  store_queue/n7967 (net)                       1                   0.00       3.61 r
+  store_queue/U14765/DIN2 (oai13s2)                       0.54      0.00       3.61 r
+  store_queue/U14765/Q (oai13s2)                          0.39      0.20       3.82 f
+  store_queue/n7971 (net)                       1                   0.00       3.82 f
+  store_queue/U14767/DIN1 (nnd2s2)                        0.39      0.00       3.82 f
+  store_queue/U14767/Q (nnd2s2)                           0.29      0.15       3.97 r
+  store_queue/store_data_stall (net)            4                   0.00       3.97 r
+  store_queue/U8911/DIN (ib1s1)                           0.29      0.00       3.98 r
+  store_queue/U8911/Q (ib1s1)                             0.12      0.05       4.03 f
+  store_queue/n7983 (net)                       1                   0.00       4.03 f
+  store_queue/U14770/DIN3 (oai211s2)                      0.12      0.00       4.03 f
+  store_queue/U14770/Q (oai211s2)                         0.38      0.15       4.18 r
+  store_queue/n7986 (net)                       1                   0.00       4.18 r
+  store_queue/U8904/DIN (ib1s1)                           0.38      0.00       4.18 r
+  store_queue/U8904/Q (ib1s1)                             0.30      0.16       4.34 f
+  store_queue/rd_valid (net)                    5                   0.00       4.34 f
+  store_queue/rd_valid (SQ)                                         0.00       4.34 f
+  sq_data_valid (net)                                               0.00       4.34 f
+  mem_stage_0/sq_data_valid (mem_stage)                             0.00       4.34 f
+  mem_stage_0/sq_data_valid (net)                                   0.00       4.34 f
+  mem_stage_0/U57151/DIN1 (or3s1)                         0.30      0.00       4.34 f
+  mem_stage_0/U57151/Q (or3s1)                            0.40      0.37       4.71 f
+  mem_stage_0/n70218 (net)                      9                   0.00       4.71 f
+  mem_stage_0/U67361/DIN (ib1s1)                          0.40      0.00       4.71 f
+  mem_stage_0/U67361/Q (ib1s1)                            0.99      0.43       5.14 r
+  mem_stage_0/n69224 (net)                     18                   0.00       5.14 r
+  mem_stage_0/U56970/DIN (ib1s1)                          0.99      0.00       5.14 r
+  mem_stage_0/U56970/Q (ib1s1)                            0.30      0.09       5.23 f
+  mem_stage_0/n59499 (net)                      1                   0.00       5.23 f
+  mem_stage_0/U106553/DIN (ib1s1)                         0.30      0.00       5.23 f
+  mem_stage_0/U106553/Q (ib1s1)                           1.01      0.42       5.65 r
+  mem_stage_0/n59498 (net)                     17                   0.00       5.65 r
+  mem_stage_0/U106663/DIN1 (nnd4s1)                       1.01      0.00       5.65 r
+  mem_stage_0/U106663/Q (nnd4s1)                          0.41      0.12       5.77 f
+  mem_stage_0/n68833 (net)                      1                   0.00       5.77 f
+  mem_stage_0/U106666/DIN4 (or5s1)                        0.41      0.00       5.78 f
+  mem_stage_0/U106666/Q (or5s1)                           0.18      0.23       6.00 f
+  mem_stage_0/n70123 (net)                      2                   0.00       6.00 f
+  mem_stage_0/U106667/DIN8 (oai2222s3)                    0.18      0.00       6.01 f
+  mem_stage_0/U106667/Q (oai2222s3)                       0.11      0.37       6.38 r
+  mem_stage_0/n68837 (net)                      1                   0.00       6.38 r
+  mem_stage_0/U70295/DIN (ib1s1)                          0.11      0.00       6.38 r
+  mem_stage_0/U70295/Q (ib1s1)                            0.20      0.10       6.48 f
+  mem_stage_0/n69091 (net)                      3                   0.00       6.48 f
+  mem_stage_0/U106668/DIN2 (nnd2s2)                       0.20      0.00       6.49 f
+  mem_stage_0/U106668/Q (nnd2s2)                          0.36      0.16       6.65 r
+  mem_stage_0/dcache0/N616 (net)                5                   0.00       6.65 r
+  mem_stage_0/U65736/DIN (ib1s1)                          0.36      0.00       6.65 r
+  mem_stage_0/U65736/Q (ib1s1)                            0.39      0.21       6.86 f
+  mem_stage_0/n52986 (net)                      6                   0.00       6.86 f
+  mem_stage_0/U99425/DIN2 (nnd2s2)                        0.39      0.00       6.87 f
+  mem_stage_0/U99425/Q (nnd2s2)                           0.20      0.11       6.98 r
+  mem_stage_0/n52988 (net)                      1                   0.00       6.98 r
+  mem_stage_0/U56037/DIN (ib1s1)                          0.20      0.00       6.98 r
+  mem_stage_0/U56037/Q (ib1s1)                            0.55      0.27       7.25 f
+  mem_stage_0/n51690 (net)                     13                   0.00       7.25 f
+  mem_stage_0/U56347/DIN (ib1s1)                          0.55      0.00       7.25 f
+  mem_stage_0/U56347/Q (ib1s1)                            0.29      0.16       7.40 r
+  mem_stage_0/n53156 (net)                      3                   0.00       7.40 r
+  mem_stage_0/U58904/DIN (ib1s1)                          0.29      0.00       7.40 r
+  mem_stage_0/U58904/Q (ib1s1)                            0.51      0.26       7.67 f
+  mem_stage_0/n53157 (net)                     11                   0.00       7.67 f
+  mem_stage_0/U99427/DIN4 (aoi22s1)                       0.51      0.00       7.67 f
+  mem_stage_0/U99427/Q (aoi22s1)                          0.39      0.23       7.89 r
+  mem_stage_0/n51693 (net)                      1                   0.00       7.89 r
+  mem_stage_0/U97488/DIN1 (nnd2s2)                        0.39      0.00       7.90 r
+  mem_stage_0/U97488/Q (nnd2s2)                           0.18      0.07       7.96 f
+  mem_stage_0/dcache0/N710 (net)                1                   0.00       7.96 f
+  mem_stage_0/U106555/DIN2 (nnd2s2)                       0.18      0.00       7.97 f
+  mem_stage_0/U106555/Q (nnd2s2)                          0.25      0.12       8.09 r
+  mem_stage_0/n68633 (net)                      3                   0.00       8.09 r
+  mem_stage_0/U67157/DIN1 (nnd2s2)                        0.25      0.00       8.09 r
+  mem_stage_0/U67157/Q (nnd2s2)                           0.39      0.18       8.28 f
+  mem_stage_0/dcache0/fifo_hit_idx[0][0] (net)     9                0.00       8.28 f
+  mem_stage_0/U55720/DIN (ib1s1)                          0.39      0.00       8.28 f
+  mem_stage_0/U55720/Q (ib1s1)                            0.92      0.40       8.68 r
+  mem_stage_0/dcache0/N15444 (net)             15                   0.00       8.68 r
+  mem_stage_0/U64858/DIN2 (and2s1)                        0.92      0.00       8.68 r
+  mem_stage_0/U64858/Q (and2s1)                           0.48      0.28       8.96 r
+  mem_stage_0/n50746 (net)                      5                   0.00       8.96 r
+  mem_stage_0/U56349/DIN (ib1s1)                          0.48      0.00       8.96 r
+  mem_stage_0/U56349/Q (ib1s1)                            0.29      0.15       9.11 f
+  mem_stage_0/n51680 (net)                      4                   0.00       9.11 f
+  mem_stage_0/U58905/DIN (ib1s1)                          0.29      0.00       9.11 f
+  mem_stage_0/U58905/Q (ib1s1)                            0.76      0.32       9.44 r
+  mem_stage_0/n51681 (net)                     14                   0.00       9.44 r
+  mem_stage_0/U97250/DIN4 (aoi22s2)                       0.76      0.00       9.44 r
+  mem_stage_0/U97250/Q (aoi22s2)                          0.44      0.19       9.63 f
+  mem_stage_0/n51510 (net)                      1                   0.00       9.63 f
+  mem_stage_0/U97248/DIN1 (nnd2s2)                        0.44      0.00       9.63 f
+  mem_stage_0/U97248/Q (nnd2s2)                           0.26      0.12       9.76 r
+  mem_stage_0/dcache0/N725 (net)                1                   0.00       9.76 r
+  mem_stage_0/U70085/DIN1 (mxi21s2)                       0.26      0.00       9.76 r
+  mem_stage_0/U70085/Q (mxi21s2)                          0.47      0.28      10.05 f
+  mem_stage_0/n71868 (net)                      9                   0.00      10.05 f
+  mem_stage_0/U67353/DIN (ib1s1)                          0.47      0.00      10.05 f
+  mem_stage_0/U67353/Q (ib1s1)                            0.58      0.28      10.33 r
+  mem_stage_0/dcache0/memory/N997 (net)         9                   0.00      10.33 r
+  mem_stage_0/U101868/DIN2 (nor2s1)                       0.58      0.00      10.33 r
+  mem_stage_0/U101868/Q (nor2s1)                          0.34      0.20      10.53 f
+  mem_stage_0/n55256 (net)                      2                   0.00      10.53 f
+  mem_stage_0/U64866/DIN1 (nnd2s2)                        0.34      0.00      10.53 f
+  mem_stage_0/U64866/Q (nnd2s2)                           0.29      0.14      10.67 r
+  mem_stage_0/n50749 (net)                      4                   0.00      10.67 r
+  mem_stage_0/U61199/DIN (ib1s1)                          0.29      0.00      10.67 r
+  mem_stage_0/U61199/Q (ib1s1)                            0.18      0.09      10.76 f
+  mem_stage_0/n56612 (net)                      2                   0.00      10.76 f
+  mem_stage_0/U56328/DIN (ib1s1)                          0.18      0.00      10.76 f
+  mem_stage_0/U56328/Q (ib1s1)                            0.48      0.20      10.96 r
+  mem_stage_0/n56614 (net)                      9                   0.00      10.96 r
+  mem_stage_0/U57888/DIN (ib1s1)                          0.48      0.00      10.96 r
+  mem_stage_0/U57888/Q (ib1s1)                            0.58      0.31      11.27 f
+  mem_stage_0/n56627 (net)                     15                   0.00      11.27 f
+  mem_stage_0/U102066/DIN4 (aoi22s1)                      0.58      0.00      11.27 f
+  mem_stage_0/U102066/Q (aoi22s1)                         0.36      0.21      11.49 r
+  mem_stage_0/n55413 (net)                      1                   0.00      11.49 r
+  mem_stage_0/U102067/DIN4 (nnd4s1)                       0.36      0.00      11.49 r
+  mem_stage_0/U102067/Q (nnd4s1)                          0.46      0.21      11.70 f
+  mem_stage_0/dcache0/memory/wr_cam_table_in[1][3][0][0] (net)     2     0.00    11.70 f
+  mem_stage_0/U67359/DIN2 (xnr2s1)                        0.46      0.01      11.71 f
+  mem_stage_0/U67359/Q (xnr2s1)                           0.21      0.28      11.99 f
+  mem_stage_0/n68974 (net)                      1                   0.00      11.99 f
+  mem_stage_0/U106756/DIN5 (or5s1)                        0.21      0.00      11.99 f
+  mem_stage_0/U106756/Q (or5s1)                           0.13      0.18      12.17 f
+  mem_stage_0/n68979 (net)                      1                   0.00      12.17 f
+  mem_stage_0/U106757/DIN5 (or5s1)                        0.13      0.00      12.17 f
+  mem_stage_0/U106757/Q (or5s1)                           0.15      0.17      12.34 f
+  mem_stage_0/n70220 (net)                      2                   0.00      12.34 f
+  mem_stage_0/U106758/DIN1 (oai13s2)                      0.15      0.00      12.34 f
+  mem_stage_0/U106758/Q (oai13s2)                         0.47      0.12      12.46 r
+  mem_stage_0/n68987 (net)                      1                   0.00      12.46 r
+  mem_stage_0/U106759/DIN2 (nnd2s2)                       0.47      0.00      12.46 r
+  mem_stage_0/U106759/Q (nnd2s2)                          0.32      0.12      12.59 f
+  mem_stage_0/n70244 (net)                      4                   0.00      12.59 f
+  mem_stage_0/U65659/DIN3 (oai21s2)                       0.32      0.00      12.59 f
+  mem_stage_0/U65659/Q (oai21s2)                          0.51      0.24      12.82 r
+  mem_stage_0/n70221 (net)                      3                   0.00      12.82 r
+  mem_stage_0/U64844/DIN (ib1s1)                          0.51      0.00      12.83 r
+  mem_stage_0/U64844/Q (ib1s1)                            0.20      0.09      12.92 f
+  mem_stage_0/n68989 (net)                      1                   0.00      12.92 f
+  mem_stage_0/U64843/DIN1 (nnd2s2)                        0.20      0.00      12.92 f
+  mem_stage_0/U64843/Q (nnd2s2)                           0.81      0.31      13.23 r
+  mem_stage_0/n70340 (net)                     18                   0.00      13.23 r
+  mem_stage_0/U108219/DIN2 (oai21s2)                      0.81      0.00      13.23 r
+  mem_stage_0/U108219/Q (oai21s2)                         0.49      0.12      13.35 f
+  mem_stage_0/n70234 (net)                      1                   0.00      13.35 f
+  mem_stage_0/U65673/DIN (ib1s1)                          0.49      0.00      13.35 f
+  mem_stage_0/U65673/Q (ib1s1)                            0.46      0.23      13.58 r
+  mem_stage_0/n70331 (net)                      8                   0.00      13.58 r
+  mem_stage_0/U108261/DIN1 (oai21s2)                      0.46      0.00      13.59 r
+  mem_stage_0/U108261/Q (oai21s2)                         0.40      0.21      13.80 f
+  mem_stage_0/dcache0/memory/N13356 (net)       3                   0.00      13.80 f
+  mem_stage_0/U100538/DIN3 (aoi22s1)                      0.40      0.00      13.80 f
+  mem_stage_0/U100538/Q (aoi22s1)                         0.35      0.19      13.99 r
+  mem_stage_0/n54028 (net)                      1                   0.00      13.99 r
+  mem_stage_0/U100539/DIN4 (nnd4s1)                       0.35      0.00      13.99 r
+  mem_stage_0/U100539/Q (nnd4s1)                          0.68      0.30      14.29 f
+  mem_stage_0/dcache0/memory/N13491 (net)       8                   0.00      14.29 f
+  mem_stage_0/U65677/DIN1 (oai22s2)                       0.68      0.00      14.29 f
+  mem_stage_0/U65677/Q (oai22s2)                          0.55      0.20      14.49 r
+  mem_stage_0/dcache0/memory/N13555 (net)       2                   0.00      14.49 r
+  mem_stage_0/U101863/DIN3 (aoi22s2)                      0.55      0.00      14.49 r
+  mem_stage_0/U101863/Q (aoi22s2)                         0.38      0.19      14.68 f
+  mem_stage_0/n54032 (net)                      1                   0.00      14.68 f
+  mem_stage_0/U64842/DIN4 (nnd4s1)                        0.38      0.00      14.68 f
+  mem_stage_0/U64842/Q (nnd4s1)                           1.15      0.51      15.19 r
+  mem_stage_0/dcache0/memory/N13517 (net)      14                   0.00      15.19 r
+  mem_stage_0/U61362/DIN (ib1s1)                          1.15      0.00      15.19 r
+  mem_stage_0/U61362/Q (ib1s1)                            0.76      0.40      15.59 f
+  mem_stage_0/dcache0/memory/N1008 (net)       14                   0.00      15.59 f
+  mem_stage_0/U106554/DIN2 (aoi22s2)                      0.76      0.00      15.60 f
+  mem_stage_0/U106554/Q (aoi22s2)                         0.55      0.25      15.84 r
+  mem_stage_0/n44424 (net)                      2                   0.00      15.84 r
+  mem_stage_0/U39136/DIN1 (nnd2s2)                        0.55      0.00      15.85 r
+  mem_stage_0/U39136/Q (nnd2s2)                           0.44      0.19      16.04 f
+  mem_stage_0/n44400 (net)                      8                   0.00      16.04 f
+  mem_stage_0/U65725/DIN2 (oai22s2)                       0.44      0.00      16.04 f
+  mem_stage_0/U65725/Q (oai22s2)                          0.53      0.17      16.21 r
+  mem_stage_0/dcache0/memory/N13561 (net)       2                   0.00      16.21 r
+  mem_stage_0/U100556/DIN3 (aoi22s1)                      0.53      0.00      16.21 r
+  mem_stage_0/U100556/Q (aoi22s1)                         0.40      0.20      16.42 f
+  mem_stage_0/n54044 (net)                      1                   0.00      16.42 f
+  mem_stage_0/U100557/DIN4 (nnd4s1)                       0.40      0.00      16.42 f
+  mem_stage_0/U100557/Q (nnd4s1)                          0.39      0.22      16.63 r
+  mem_stage_0/dcache0/memory/N13607 (net)       1                   0.00      16.63 r
+  mem_stage_0/U64845/DIN3 (oai22s2)                       0.39      0.00      16.64 r
+  mem_stage_0/U64845/Q (oai22s2)                          0.57      0.26      16.89 f
+  mem_stage_0/dcache0/memory/N1007 (net)        4                   0.00      16.89 f
+  mem_stage_0/U61189/DIN (ib1s1)                          0.57      0.00      16.90 f
+  mem_stage_0/U61189/Q (ib1s1)                            0.22      0.11      17.00 r
+  mem_stage_0/n53347 (net)                      2                   0.00      17.00 r
+  mem_stage_0/U55736/DIN1 (or2s1)                         0.22      0.00      17.01 r
+  mem_stage_0/U55736/Q (or2s1)                            0.34      0.23      17.24 r
+  mem_stage_0/n49949 (net)                      4                   0.00      17.24 r
+  mem_stage_0/U57310/DIN (ib1s1)                          0.34      0.00      17.24 r
+  mem_stage_0/U57310/Q (ib1s1)                            0.44      0.23      17.47 f
+  mem_stage_0/n53356 (net)                     11                   0.00      17.47 f
+  mem_stage_0/U99651/DIN4 (aoi22s1)                       0.44      0.00      17.47 f
+  mem_stage_0/U99651/Q (aoi22s1)                          0.33      0.20      17.67 r
+  mem_stage_0/n53343 (net)                      1                   0.00      17.67 r
+  mem_stage_0/U99652/DIN2 (nnd2s1)                        0.33      0.00      17.67 r
+  mem_stage_0/U99652/Q (nnd2s1)                           0.21      0.09      17.76 f
+  mem_stage_0/dcache0/memory/N13996 (net)       1                   0.00      17.76 f
+  mem_stage_0/U29018/DIN1 (nnd2s2)                        0.21      0.00      17.76 f
+  mem_stage_0/U29018/Q (nnd2s2)                           0.37      0.12      17.88 r
+  mem_stage_0/n36234 (net)                      4                   0.00      17.88 r
+  mem_stage_0/U65732/DIN1 (xor2s1)                        0.37      0.00      17.88 r
+  mem_stage_0/U65732/Q (xor2s1)                           0.27      0.30      18.18 r
+  mem_stage_0/n36929 (net)                      1                   0.00      18.18 r
+  mem_stage_0/U65731/DIN2 (xnr2s1)                        0.27      0.01      18.19 r
+  mem_stage_0/U65731/Q (xnr2s1)                           0.20      0.24      18.43 r
+  mem_stage_0/dcache0/victim_memory/N1966 (net)     3               0.00      18.43 r
+  mem_stage_0/U67162/DIN1 (nor2s1)                        0.20      0.00      18.43 r
+  mem_stage_0/U67162/Q (nor2s1)                           0.40      0.21      18.64 f
+  mem_stage_0/n36917 (net)                      4                   0.00      18.64 f
+  mem_stage_0/U65672/DIN2 (or2s1)                         0.40      0.00      18.64 f
+  mem_stage_0/U65672/Q (or2s1)                            0.13      0.21      18.85 f
+  mem_stage_0/n36916 (net)                      1                   0.00      18.85 f
+  mem_stage_0/U65671/DIN2 (aoi22s2)                       0.13      0.00      18.86 f
+  mem_stage_0/U65671/Q (aoi22s2)                          0.45      0.16      19.01 r
+  mem_stage_0/n36915 (net)                      1                   0.00      19.01 r
+  mem_stage_0/U65670/DIN2 (xnr2s1)                        0.45      0.01      19.02 r
+  mem_stage_0/U65670/Q (xnr2s1)                           0.20      0.25      19.27 r
+  mem_stage_0/n36914 (net)                      1                   0.00      19.27 r
+  mem_stage_0/U28990/DIN2 (nnd2s2)                        0.20      0.00      19.27 r
+  mem_stage_0/U28990/Q (nnd2s2)                           0.30      0.10      19.37 f
+  mem_stage_0/n36406 (net)                      4                   0.00      19.37 f
+  mem_stage_0/U28399/DIN1 (nnd2s2)                        0.30      0.00      19.38 f
+  mem_stage_0/U28399/Q (nnd2s2)                           0.65      0.28      19.65 r
+  mem_stage_0/evicted_valid_out[1] (net)        4                   0.00      19.65 r
+  mem_stage_0/U65658/DIN (ib1s1)                          0.65      0.00      19.66 r
+  mem_stage_0/U65658/Q (ib1s1)                            0.23      0.09      19.74 f
+  mem_stage_0/n68991 (net)                      1                   0.00      19.74 f
+  mem_stage_0/U55711/DIN2 (and2s2)                        0.23      0.00      19.74 f
+  mem_stage_0/U55711/Q (and2s2)                           0.23      0.24      19.99 f
+  mem_stage_0/n49927 (net)                     10                   0.00      19.99 f
+  mem_stage_0/U56346/DIN (ib1s1)                          0.23      0.00      19.99 f
+  mem_stage_0/U56346/Q (ib1s1)                            0.99      0.40      20.39 r
+  mem_stage_0/n61321 (net)                     24                   0.00      20.39 r
+  mem_stage_0/U55712/DIN1 (and3s1)                        0.99      0.00      20.39 r
+  mem_stage_0/U55712/Q (and3s1)                           0.43      0.28      20.67 r
+  mem_stage_0/n49928 (net)                      4                   0.00      20.67 r
+  mem_stage_0/U66102/DIN (ib1s1)                          0.43      0.00      20.67 r
+  mem_stage_0/U66102/Q (ib1s1)                            0.70      0.36      21.03 f
+  mem_stage_0/n66945 (net)                     27                   0.00      21.03 f
+  mem_stage_0/U66069/DIN2 (or2s1)                         0.70      0.00      21.03 f
+  mem_stage_0/U66069/Q (or2s1)                            0.31      0.36      21.39 f
+  mem_stage_0/n28660 (net)                      9                   0.00      21.39 f
+  mem_stage_0/U56494/DIN (ib1s1)                          0.31      0.00      21.39 f
+  mem_stage_0/U56494/Q (ib1s1)                            0.28      0.14      21.53 r
+  mem_stage_0/n65052 (net)                      4                   0.00      21.53 r
+  mem_stage_0/U61229/DIN (ib1s1)                          0.28      0.00      21.53 r
+  mem_stage_0/U61229/Q (ib1s1)                            0.89      0.43      21.96 f
+  mem_stage_0/n65050 (net)                     31                   0.00      21.96 f
+  mem_stage_0/U55858/DIN2 (and2s1)                        0.89      0.00      21.96 f
+  mem_stage_0/U55858/Q (and2s1)                           0.25      0.41      22.37 f
+  mem_stage_0/n50059 (net)                      3                   0.00      22.37 f
+  mem_stage_0/U57397/DIN (ib1s1)                          0.25      0.00      22.37 f
+  mem_stage_0/U57397/Q (ib1s1)                            0.94      0.38      22.75 r
+  mem_stage_0/n65057 (net)                     26                   0.00      22.75 r
+  mem_stage_0/U50532/DIN2 (oai222s1)                      0.94      0.00      22.76 r
+  mem_stage_0/U50532/Q (oai222s1)                         0.56      0.24      23.00 f
+  mem_stage_0/n28686 (net)                      1                   0.00      23.00 f
+  mem_stage_0/U76257/DIN3 (aoi22s2)                       0.56      0.00      23.00 f
+  mem_stage_0/U76257/Q (aoi22s2)                          0.40      0.18      23.18 r
+  mem_stage_0/n28685 (net)                      1                   0.00      23.18 r
+  mem_stage_0/U76256/DIN4 (oai22s2)                       0.40      0.00      23.18 r
+  mem_stage_0/U76256/Q (oai22s2)                          0.46      0.14      23.32 f
+  mem_stage_0/rb0/retire_queue_next[25][data][55] (net)     1       0.00      23.32 f
+  mem_stage_0/rb0/retire_queue_reg[25][data][55]/CLRB (dffcs1)     0.46     0.00    23.32 f
+  data arrival time                                                           23.32
+
+  clock clock (rise edge)                                          30.00      30.00
+  clock network delay (ideal)                                       0.00      30.00
+  clock uncertainty                                                -0.10      29.90
+  mem_stage_0/rb0/retire_queue_reg[25][data][55]/CLK (dffcs1)       0.00      29.90 r
+  library setup time                                               -0.35      29.55
+  data required time                                                          29.55
+  ------------------------------------------------------------------------------------
+  data required time                                                          29.55
+  data arrival time                                                          -23.32
+  ------------------------------------------------------------------------------------
+  slack (MET)                                                                  6.23
+
+
+  Startpoint: rob_retire_out_is_store_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: mem_stage_0/rb0/retire_queue_reg[26][data][55]
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: clock
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                       Fanout     Trans      Incr       Path
+  ------------------------------------------------------------------------------------
+  clock clock (rise edge)                                           0.00       0.00
+  clock network delay (ideal)                                       0.00       0.00
+  rob_retire_out_is_store_reg/CLK (dffs2)                 0.00      0.00 #     0.00 r
+  rob_retire_out_is_store_reg/Q (dffs2)                   0.30      0.26       0.26 f
+  rob_retire_out_is_store (net)                18                   0.00       0.26 f
+  store_queue/rt_en (SQ)                                            0.00       0.26 f
+  store_queue/rt_en (net)                                           0.00       0.26 f
+  store_queue/U13042/DIN2 (and2s2)                        0.30      0.00       0.26 f
+  store_queue/U13042/Q (and2s2)                           0.12      0.20       0.46 f
+  store_queue/n7041 (net)                       2                   0.00       0.46 f
+  store_queue/U7128/DIN1 (nnd2s3)                         0.12      0.00       0.46 f
+  store_queue/U7128/Q (nnd2s3)                            0.19      0.07       0.53 r
+  store_queue/n5072 (net)                       3                   0.00       0.53 r
+  store_queue/U13229/DIN2 (xor2s2)                        0.19      0.00       0.54 r
+  store_queue/U13229/Q (xor2s2)                           0.14      0.17       0.70 r
+  store_queue/n7706 (net)                       2                   0.00       0.70 r
+  store_queue/U13236/DIN1 (xnr2s2)                        0.14      0.00       0.70 r
+  store_queue/U13236/Q (xnr2s2)                           0.14      0.19       0.89 f
+  store_queue/n7562 (net)                       1                   0.00       0.89 f
+  store_queue/U8346/DIN1 (nnd3s2)                         0.14      0.00       0.89 f
+  store_queue/U8346/Q (nnd3s2)                            0.22      0.07       0.96 r
+  store_queue/n7564 (net)                       1                   0.00       0.96 r
+  store_queue/U8345/DIN2 (oai21s2)                        0.22      0.00       0.96 r
+  store_queue/U8345/Q (oai21s2)                           0.22      0.09       1.06 f
+  store_queue/n7568 (net)                       1                   0.00       1.06 f
+  store_queue/U8344/DIN (i1s8)                            0.22      0.00       1.06 f
+  store_queue/U8344/Q (i1s8)                              0.12      0.18       1.24 r
+  store_queue/n7584 (net)                      11                   0.00       1.24 r
+  store_queue/U13177/DIN2 (nnd2s3)                        0.12      0.00       1.24 r
+  store_queue/U13177/Q (nnd2s3)                           0.28      0.10       1.34 f
+  store_queue/n7567 (net)                       2                   0.00       1.34 f
+  store_queue/U8216/DIN (ib1s6)                           0.28      0.01       1.35 f
+  store_queue/U8216/Q (ib1s6)                             0.09      0.07       1.42 r
+  store_queue/n7582 (net)                       7                   0.00       1.42 r
+  store_queue/U7905/DIN1 (nnd3s2)                         0.09      0.00       1.42 r
+  store_queue/U7905/Q (nnd3s2)                            0.35      0.09       1.51 f
+  store_queue/n7062 (net)                       2                   0.00       1.51 f
+  store_queue/U8121/DIN3 (oai211s1)                       0.35      0.00       1.51 f
+  store_queue/U8121/Q (oai211s1)                          0.45      0.20       1.71 r
+  store_queue/N491 (net)                        1                   0.00       1.71 r
+  store_queue/U8119/DIN (i1s8)                            0.45      0.00       1.71 r
+  store_queue/U8119/Q (i1s8)                              0.09      0.18       1.89 f
+  store_queue/n5260 (net)                       6                   0.00       1.89 f
+  store_queue/U7895/DIN2 (nnd2s2)                         0.09      0.00       1.89 f
+  store_queue/U7895/Q (nnd2s2)                            0.16      0.08       1.97 r
+  store_queue/n7752 (net)                       3                   0.00       1.97 r
+  store_queue/U8768/DIN (hi1s1)                           0.16      0.00       1.97 r
+  store_queue/U8768/Q (hi1s1)                             0.28      0.14       2.11 f
+  store_queue/n7766 (net)                       2                   0.00       2.11 f
+  store_queue/U8182/DIN1 (nnd2s1)                         0.28      0.00       2.11 f
+  store_queue/U8182/Q (nnd2s1)                            0.23      0.12       2.22 r
+  store_queue/n7887 (net)                       3                   0.00       2.22 r
+  store_queue/U8446/DIN (hi1s1)                           0.23      0.00       2.23 r
+  store_queue/U8446/Q (hi1s1)                             0.50      0.24       2.46 f
+  store_queue/n7884 (net)                       2                   0.00       2.46 f
+  store_queue/U14745/DIN1 (nnd2s2)                        0.50      0.00       2.47 f
+  store_queue/U14745/Q (nnd2s2)                           0.25      0.13       2.60 r
+  store_queue/n7974 (net)                       2                   0.00       2.60 r
+  store_queue/U8562/DIN (ib1s1)                           0.25      0.00       2.60 r
+  store_queue/U8562/Q (ib1s1)                             0.17      0.08       2.69 f
+  store_queue/n7899 (net)                       2                   0.00       2.69 f
+  store_queue/U14748/DIN5 (oai33s1)                       0.17      0.00       2.69 f
+  store_queue/U14748/Q (oai33s1)                          0.60      0.26       2.95 r
+  store_queue/n7903 (net)                       1                   0.00       2.95 r
+  store_queue/U14749/DIN1 (aoi13s2)                       0.60      0.00       2.95 r
+  store_queue/U14749/Q (aoi13s2)                          0.29      0.12       3.08 f
+  store_queue/n7904 (net)                       1                   0.00       3.08 f
+  store_queue/U14750/DIN4 (oai211s2)                      0.29      0.00       3.08 f
+  store_queue/U14750/Q (oai211s2)                         0.34      0.15       3.23 r
+  store_queue/n7917 (net)                       1                   0.00       3.23 r
+  store_queue/U14755/DIN2 (oai13s2)                       0.34      0.00       3.23 r
+  store_queue/U14755/Q (oai13s2)                          0.31      0.16       3.39 f
+  store_queue/n7930 (net)                       1                   0.00       3.39 f
+  store_queue/U14757/DIN2 (oai1112s2)                     0.31      0.00       3.40 f
+  store_queue/U14757/Q (oai1112s2)                        0.54      0.22       3.61 r
+  store_queue/n7967 (net)                       1                   0.00       3.61 r
+  store_queue/U14765/DIN2 (oai13s2)                       0.54      0.00       3.61 r
+  store_queue/U14765/Q (oai13s2)                          0.39      0.20       3.82 f
+  store_queue/n7971 (net)                       1                   0.00       3.82 f
+  store_queue/U14767/DIN1 (nnd2s2)                        0.39      0.00       3.82 f
+  store_queue/U14767/Q (nnd2s2)                           0.29      0.15       3.97 r
+  store_queue/store_data_stall (net)            4                   0.00       3.97 r
+  store_queue/U8911/DIN (ib1s1)                           0.29      0.00       3.98 r
+  store_queue/U8911/Q (ib1s1)                             0.12      0.05       4.03 f
+  store_queue/n7983 (net)                       1                   0.00       4.03 f
+  store_queue/U14770/DIN3 (oai211s2)                      0.12      0.00       4.03 f
+  store_queue/U14770/Q (oai211s2)                         0.38      0.15       4.18 r
+  store_queue/n7986 (net)                       1                   0.00       4.18 r
+  store_queue/U8904/DIN (ib1s1)                           0.38      0.00       4.18 r
+  store_queue/U8904/Q (ib1s1)                             0.30      0.16       4.34 f
+  store_queue/rd_valid (net)                    5                   0.00       4.34 f
+  store_queue/rd_valid (SQ)                                         0.00       4.34 f
+  sq_data_valid (net)                                               0.00       4.34 f
+  mem_stage_0/sq_data_valid (mem_stage)                             0.00       4.34 f
+  mem_stage_0/sq_data_valid (net)                                   0.00       4.34 f
+  mem_stage_0/U57151/DIN1 (or3s1)                         0.30      0.00       4.34 f
+  mem_stage_0/U57151/Q (or3s1)                            0.40      0.37       4.71 f
+  mem_stage_0/n70218 (net)                      9                   0.00       4.71 f
+  mem_stage_0/U67361/DIN (ib1s1)                          0.40      0.00       4.71 f
+  mem_stage_0/U67361/Q (ib1s1)                            0.99      0.43       5.14 r
+  mem_stage_0/n69224 (net)                     18                   0.00       5.14 r
+  mem_stage_0/U56970/DIN (ib1s1)                          0.99      0.00       5.14 r
+  mem_stage_0/U56970/Q (ib1s1)                            0.30      0.09       5.23 f
+  mem_stage_0/n59499 (net)                      1                   0.00       5.23 f
+  mem_stage_0/U106553/DIN (ib1s1)                         0.30      0.00       5.23 f
+  mem_stage_0/U106553/Q (ib1s1)                           1.01      0.42       5.65 r
+  mem_stage_0/n59498 (net)                     17                   0.00       5.65 r
+  mem_stage_0/U106663/DIN1 (nnd4s1)                       1.01      0.00       5.65 r
+  mem_stage_0/U106663/Q (nnd4s1)                          0.41      0.12       5.77 f
+  mem_stage_0/n68833 (net)                      1                   0.00       5.77 f
+  mem_stage_0/U106666/DIN4 (or5s1)                        0.41      0.00       5.78 f
+  mem_stage_0/U106666/Q (or5s1)                           0.18      0.23       6.00 f
+  mem_stage_0/n70123 (net)                      2                   0.00       6.00 f
+  mem_stage_0/U106667/DIN8 (oai2222s3)                    0.18      0.00       6.01 f
+  mem_stage_0/U106667/Q (oai2222s3)                       0.11      0.37       6.38 r
+  mem_stage_0/n68837 (net)                      1                   0.00       6.38 r
+  mem_stage_0/U70295/DIN (ib1s1)                          0.11      0.00       6.38 r
+  mem_stage_0/U70295/Q (ib1s1)                            0.20      0.10       6.48 f
+  mem_stage_0/n69091 (net)                      3                   0.00       6.48 f
+  mem_stage_0/U106668/DIN2 (nnd2s2)                       0.20      0.00       6.49 f
+  mem_stage_0/U106668/Q (nnd2s2)                          0.36      0.16       6.65 r
+  mem_stage_0/dcache0/N616 (net)                5                   0.00       6.65 r
+  mem_stage_0/U65736/DIN (ib1s1)                          0.36      0.00       6.65 r
+  mem_stage_0/U65736/Q (ib1s1)                            0.39      0.21       6.86 f
+  mem_stage_0/n52986 (net)                      6                   0.00       6.86 f
+  mem_stage_0/U99425/DIN2 (nnd2s2)                        0.39      0.00       6.87 f
+  mem_stage_0/U99425/Q (nnd2s2)                           0.20      0.11       6.98 r
+  mem_stage_0/n52988 (net)                      1                   0.00       6.98 r
+  mem_stage_0/U56037/DIN (ib1s1)                          0.20      0.00       6.98 r
+  mem_stage_0/U56037/Q (ib1s1)                            0.55      0.27       7.25 f
+  mem_stage_0/n51690 (net)                     13                   0.00       7.25 f
+  mem_stage_0/U56347/DIN (ib1s1)                          0.55      0.00       7.25 f
+  mem_stage_0/U56347/Q (ib1s1)                            0.29      0.16       7.40 r
+  mem_stage_0/n53156 (net)                      3                   0.00       7.40 r
+  mem_stage_0/U58904/DIN (ib1s1)                          0.29      0.00       7.40 r
+  mem_stage_0/U58904/Q (ib1s1)                            0.51      0.26       7.67 f
+  mem_stage_0/n53157 (net)                     11                   0.00       7.67 f
+  mem_stage_0/U99427/DIN4 (aoi22s1)                       0.51      0.00       7.67 f
+  mem_stage_0/U99427/Q (aoi22s1)                          0.39      0.23       7.89 r
+  mem_stage_0/n51693 (net)                      1                   0.00       7.89 r
+  mem_stage_0/U97488/DIN1 (nnd2s2)                        0.39      0.00       7.90 r
+  mem_stage_0/U97488/Q (nnd2s2)                           0.18      0.07       7.96 f
+  mem_stage_0/dcache0/N710 (net)                1                   0.00       7.96 f
+  mem_stage_0/U106555/DIN2 (nnd2s2)                       0.18      0.00       7.97 f
+  mem_stage_0/U106555/Q (nnd2s2)                          0.25      0.12       8.09 r
+  mem_stage_0/n68633 (net)                      3                   0.00       8.09 r
+  mem_stage_0/U67157/DIN1 (nnd2s2)                        0.25      0.00       8.09 r
+  mem_stage_0/U67157/Q (nnd2s2)                           0.39      0.18       8.28 f
+  mem_stage_0/dcache0/fifo_hit_idx[0][0] (net)     9                0.00       8.28 f
+  mem_stage_0/U55720/DIN (ib1s1)                          0.39      0.00       8.28 f
+  mem_stage_0/U55720/Q (ib1s1)                            0.92      0.40       8.68 r
+  mem_stage_0/dcache0/N15444 (net)             15                   0.00       8.68 r
+  mem_stage_0/U64858/DIN2 (and2s1)                        0.92      0.00       8.68 r
+  mem_stage_0/U64858/Q (and2s1)                           0.48      0.28       8.96 r
+  mem_stage_0/n50746 (net)                      5                   0.00       8.96 r
+  mem_stage_0/U56349/DIN (ib1s1)                          0.48      0.00       8.96 r
+  mem_stage_0/U56349/Q (ib1s1)                            0.29      0.15       9.11 f
+  mem_stage_0/n51680 (net)                      4                   0.00       9.11 f
+  mem_stage_0/U58905/DIN (ib1s1)                          0.29      0.00       9.11 f
+  mem_stage_0/U58905/Q (ib1s1)                            0.76      0.32       9.44 r
+  mem_stage_0/n51681 (net)                     14                   0.00       9.44 r
+  mem_stage_0/U97250/DIN4 (aoi22s2)                       0.76      0.00       9.44 r
+  mem_stage_0/U97250/Q (aoi22s2)                          0.44      0.19       9.63 f
+  mem_stage_0/n51510 (net)                      1                   0.00       9.63 f
+  mem_stage_0/U97248/DIN1 (nnd2s2)                        0.44      0.00       9.63 f
+  mem_stage_0/U97248/Q (nnd2s2)                           0.26      0.12       9.76 r
+  mem_stage_0/dcache0/N725 (net)                1                   0.00       9.76 r
+  mem_stage_0/U70085/DIN1 (mxi21s2)                       0.26      0.00       9.76 r
+  mem_stage_0/U70085/Q (mxi21s2)                          0.47      0.28      10.05 f
+  mem_stage_0/n71868 (net)                      9                   0.00      10.05 f
+  mem_stage_0/U67353/DIN (ib1s1)                          0.47      0.00      10.05 f
+  mem_stage_0/U67353/Q (ib1s1)                            0.58      0.28      10.33 r
+  mem_stage_0/dcache0/memory/N997 (net)         9                   0.00      10.33 r
+  mem_stage_0/U101868/DIN2 (nor2s1)                       0.58      0.00      10.33 r
+  mem_stage_0/U101868/Q (nor2s1)                          0.34      0.20      10.53 f
+  mem_stage_0/n55256 (net)                      2                   0.00      10.53 f
+  mem_stage_0/U64866/DIN1 (nnd2s2)                        0.34      0.00      10.53 f
+  mem_stage_0/U64866/Q (nnd2s2)                           0.29      0.14      10.67 r
+  mem_stage_0/n50749 (net)                      4                   0.00      10.67 r
+  mem_stage_0/U61199/DIN (ib1s1)                          0.29      0.00      10.67 r
+  mem_stage_0/U61199/Q (ib1s1)                            0.18      0.09      10.76 f
+  mem_stage_0/n56612 (net)                      2                   0.00      10.76 f
+  mem_stage_0/U56328/DIN (ib1s1)                          0.18      0.00      10.76 f
+  mem_stage_0/U56328/Q (ib1s1)                            0.48      0.20      10.96 r
+  mem_stage_0/n56614 (net)                      9                   0.00      10.96 r
+  mem_stage_0/U57888/DIN (ib1s1)                          0.48      0.00      10.96 r
+  mem_stage_0/U57888/Q (ib1s1)                            0.58      0.31      11.27 f
+  mem_stage_0/n56627 (net)                     15                   0.00      11.27 f
+  mem_stage_0/U102066/DIN4 (aoi22s1)                      0.58      0.00      11.27 f
+  mem_stage_0/U102066/Q (aoi22s1)                         0.36      0.21      11.49 r
+  mem_stage_0/n55413 (net)                      1                   0.00      11.49 r
+  mem_stage_0/U102067/DIN4 (nnd4s1)                       0.36      0.00      11.49 r
+  mem_stage_0/U102067/Q (nnd4s1)                          0.46      0.21      11.70 f
+  mem_stage_0/dcache0/memory/wr_cam_table_in[1][3][0][0] (net)     2     0.00    11.70 f
+  mem_stage_0/U67359/DIN2 (xnr2s1)                        0.46      0.01      11.71 f
+  mem_stage_0/U67359/Q (xnr2s1)                           0.21      0.28      11.99 f
+  mem_stage_0/n68974 (net)                      1                   0.00      11.99 f
+  mem_stage_0/U106756/DIN5 (or5s1)                        0.21      0.00      11.99 f
+  mem_stage_0/U106756/Q (or5s1)                           0.13      0.18      12.17 f
+  mem_stage_0/n68979 (net)                      1                   0.00      12.17 f
+  mem_stage_0/U106757/DIN5 (or5s1)                        0.13      0.00      12.17 f
+  mem_stage_0/U106757/Q (or5s1)                           0.15      0.17      12.34 f
+  mem_stage_0/n70220 (net)                      2                   0.00      12.34 f
+  mem_stage_0/U106758/DIN1 (oai13s2)                      0.15      0.00      12.34 f
+  mem_stage_0/U106758/Q (oai13s2)                         0.47      0.12      12.46 r
+  mem_stage_0/n68987 (net)                      1                   0.00      12.46 r
+  mem_stage_0/U106759/DIN2 (nnd2s2)                       0.47      0.00      12.46 r
+  mem_stage_0/U106759/Q (nnd2s2)                          0.32      0.12      12.59 f
+  mem_stage_0/n70244 (net)                      4                   0.00      12.59 f
+  mem_stage_0/U65659/DIN3 (oai21s2)                       0.32      0.00      12.59 f
+  mem_stage_0/U65659/Q (oai21s2)                          0.51      0.24      12.82 r
+  mem_stage_0/n70221 (net)                      3                   0.00      12.82 r
+  mem_stage_0/U64844/DIN (ib1s1)                          0.51      0.00      12.83 r
+  mem_stage_0/U64844/Q (ib1s1)                            0.20      0.09      12.92 f
+  mem_stage_0/n68989 (net)                      1                   0.00      12.92 f
+  mem_stage_0/U64843/DIN1 (nnd2s2)                        0.20      0.00      12.92 f
+  mem_stage_0/U64843/Q (nnd2s2)                           0.81      0.31      13.23 r
+  mem_stage_0/n70340 (net)                     18                   0.00      13.23 r
+  mem_stage_0/U108219/DIN2 (oai21s2)                      0.81      0.00      13.23 r
+  mem_stage_0/U108219/Q (oai21s2)                         0.49      0.12      13.35 f
+  mem_stage_0/n70234 (net)                      1                   0.00      13.35 f
+  mem_stage_0/U65673/DIN (ib1s1)                          0.49      0.00      13.35 f
+  mem_stage_0/U65673/Q (ib1s1)                            0.46      0.23      13.58 r
+  mem_stage_0/n70331 (net)                      8                   0.00      13.58 r
+  mem_stage_0/U108261/DIN1 (oai21s2)                      0.46      0.00      13.59 r
+  mem_stage_0/U108261/Q (oai21s2)                         0.40      0.21      13.80 f
+  mem_stage_0/dcache0/memory/N13356 (net)       3                   0.00      13.80 f
+  mem_stage_0/U100538/DIN3 (aoi22s1)                      0.40      0.00      13.80 f
+  mem_stage_0/U100538/Q (aoi22s1)                         0.35      0.19      13.99 r
+  mem_stage_0/n54028 (net)                      1                   0.00      13.99 r
+  mem_stage_0/U100539/DIN4 (nnd4s1)                       0.35      0.00      13.99 r
+  mem_stage_0/U100539/Q (nnd4s1)                          0.68      0.30      14.29 f
+  mem_stage_0/dcache0/memory/N13491 (net)       8                   0.00      14.29 f
+  mem_stage_0/U65677/DIN1 (oai22s2)                       0.68      0.00      14.29 f
+  mem_stage_0/U65677/Q (oai22s2)                          0.55      0.20      14.49 r
+  mem_stage_0/dcache0/memory/N13555 (net)       2                   0.00      14.49 r
+  mem_stage_0/U101863/DIN3 (aoi22s2)                      0.55      0.00      14.49 r
+  mem_stage_0/U101863/Q (aoi22s2)                         0.38      0.19      14.68 f
+  mem_stage_0/n54032 (net)                      1                   0.00      14.68 f
+  mem_stage_0/U64842/DIN4 (nnd4s1)                        0.38      0.00      14.68 f
+  mem_stage_0/U64842/Q (nnd4s1)                           1.15      0.51      15.19 r
+  mem_stage_0/dcache0/memory/N13517 (net)      14                   0.00      15.19 r
+  mem_stage_0/U61362/DIN (ib1s1)                          1.15      0.00      15.19 r
+  mem_stage_0/U61362/Q (ib1s1)                            0.76      0.40      15.59 f
+  mem_stage_0/dcache0/memory/N1008 (net)       14                   0.00      15.59 f
+  mem_stage_0/U106554/DIN2 (aoi22s2)                      0.76      0.00      15.60 f
+  mem_stage_0/U106554/Q (aoi22s2)                         0.55      0.25      15.84 r
+  mem_stage_0/n44424 (net)                      2                   0.00      15.84 r
+  mem_stage_0/U39136/DIN1 (nnd2s2)                        0.55      0.00      15.85 r
+  mem_stage_0/U39136/Q (nnd2s2)                           0.44      0.19      16.04 f
+  mem_stage_0/n44400 (net)                      8                   0.00      16.04 f
+  mem_stage_0/U65725/DIN2 (oai22s2)                       0.44      0.00      16.04 f
+  mem_stage_0/U65725/Q (oai22s2)                          0.53      0.17      16.21 r
+  mem_stage_0/dcache0/memory/N13561 (net)       2                   0.00      16.21 r
+  mem_stage_0/U100556/DIN3 (aoi22s1)                      0.53      0.00      16.21 r
+  mem_stage_0/U100556/Q (aoi22s1)                         0.40      0.20      16.42 f
+  mem_stage_0/n54044 (net)                      1                   0.00      16.42 f
+  mem_stage_0/U100557/DIN4 (nnd4s1)                       0.40      0.00      16.42 f
+  mem_stage_0/U100557/Q (nnd4s1)                          0.39      0.22      16.63 r
+  mem_stage_0/dcache0/memory/N13607 (net)       1                   0.00      16.63 r
+  mem_stage_0/U64845/DIN3 (oai22s2)                       0.39      0.00      16.64 r
+  mem_stage_0/U64845/Q (oai22s2)                          0.57      0.26      16.89 f
+  mem_stage_0/dcache0/memory/N1007 (net)        4                   0.00      16.89 f
+  mem_stage_0/U61189/DIN (ib1s1)                          0.57      0.00      16.90 f
+  mem_stage_0/U61189/Q (ib1s1)                            0.22      0.11      17.00 r
+  mem_stage_0/n53347 (net)                      2                   0.00      17.00 r
+  mem_stage_0/U55736/DIN1 (or2s1)                         0.22      0.00      17.01 r
+  mem_stage_0/U55736/Q (or2s1)                            0.34      0.23      17.24 r
+  mem_stage_0/n49949 (net)                      4                   0.00      17.24 r
+  mem_stage_0/U57310/DIN (ib1s1)                          0.34      0.00      17.24 r
+  mem_stage_0/U57310/Q (ib1s1)                            0.44      0.23      17.47 f
+  mem_stage_0/n53356 (net)                     11                   0.00      17.47 f
+  mem_stage_0/U99651/DIN4 (aoi22s1)                       0.44      0.00      17.47 f
+  mem_stage_0/U99651/Q (aoi22s1)                          0.33      0.20      17.67 r
+  mem_stage_0/n53343 (net)                      1                   0.00      17.67 r
+  mem_stage_0/U99652/DIN2 (nnd2s1)                        0.33      0.00      17.67 r
+  mem_stage_0/U99652/Q (nnd2s1)                           0.21      0.09      17.76 f
+  mem_stage_0/dcache0/memory/N13996 (net)       1                   0.00      17.76 f
+  mem_stage_0/U29018/DIN1 (nnd2s2)                        0.21      0.00      17.76 f
+  mem_stage_0/U29018/Q (nnd2s2)                           0.37      0.12      17.88 r
+  mem_stage_0/n36234 (net)                      4                   0.00      17.88 r
+  mem_stage_0/U65732/DIN1 (xor2s1)                        0.37      0.00      17.88 r
+  mem_stage_0/U65732/Q (xor2s1)                           0.27      0.30      18.18 r
+  mem_stage_0/n36929 (net)                      1                   0.00      18.18 r
+  mem_stage_0/U65731/DIN2 (xnr2s1)                        0.27      0.01      18.19 r
+  mem_stage_0/U65731/Q (xnr2s1)                           0.20      0.24      18.43 r
+  mem_stage_0/dcache0/victim_memory/N1966 (net)     3               0.00      18.43 r
+  mem_stage_0/U67162/DIN1 (nor2s1)                        0.20      0.00      18.43 r
+  mem_stage_0/U67162/Q (nor2s1)                           0.40      0.21      18.64 f
+  mem_stage_0/n36917 (net)                      4                   0.00      18.64 f
+  mem_stage_0/U65672/DIN2 (or2s1)                         0.40      0.00      18.64 f
+  mem_stage_0/U65672/Q (or2s1)                            0.13      0.21      18.85 f
+  mem_stage_0/n36916 (net)                      1                   0.00      18.85 f
+  mem_stage_0/U65671/DIN2 (aoi22s2)                       0.13      0.00      18.86 f
+  mem_stage_0/U65671/Q (aoi22s2)                          0.45      0.16      19.01 r
+  mem_stage_0/n36915 (net)                      1                   0.00      19.01 r
+  mem_stage_0/U65670/DIN2 (xnr2s1)                        0.45      0.01      19.02 r
+  mem_stage_0/U65670/Q (xnr2s1)                           0.20      0.25      19.27 r
+  mem_stage_0/n36914 (net)                      1                   0.00      19.27 r
+  mem_stage_0/U28990/DIN2 (nnd2s2)                        0.20      0.00      19.27 r
+  mem_stage_0/U28990/Q (nnd2s2)                           0.30      0.10      19.37 f
+  mem_stage_0/n36406 (net)                      4                   0.00      19.37 f
+  mem_stage_0/U28399/DIN1 (nnd2s2)                        0.30      0.00      19.38 f
+  mem_stage_0/U28399/Q (nnd2s2)                           0.65      0.28      19.65 r
+  mem_stage_0/evicted_valid_out[1] (net)        4                   0.00      19.65 r
+  mem_stage_0/U65658/DIN (ib1s1)                          0.65      0.00      19.66 r
+  mem_stage_0/U65658/Q (ib1s1)                            0.23      0.09      19.74 f
+  mem_stage_0/n68991 (net)                      1                   0.00      19.74 f
+  mem_stage_0/U55711/DIN2 (and2s2)                        0.23      0.00      19.74 f
+  mem_stage_0/U55711/Q (and2s2)                           0.23      0.24      19.99 f
+  mem_stage_0/n49927 (net)                     10                   0.00      19.99 f
+  mem_stage_0/U56346/DIN (ib1s1)                          0.23      0.00      19.99 f
+  mem_stage_0/U56346/Q (ib1s1)                            0.99      0.40      20.39 r
+  mem_stage_0/n61321 (net)                     24                   0.00      20.39 r
+  mem_stage_0/U55712/DIN1 (and3s1)                        0.99      0.00      20.39 r
+  mem_stage_0/U55712/Q (and3s1)                           0.43      0.28      20.67 r
+  mem_stage_0/n49928 (net)                      4                   0.00      20.67 r
+  mem_stage_0/U66102/DIN (ib1s1)                          0.43      0.00      20.67 r
+  mem_stage_0/U66102/Q (ib1s1)                            0.70      0.36      21.03 f
+  mem_stage_0/n66945 (net)                     27                   0.00      21.03 f
+  mem_stage_0/U66083/DIN2 (or2s1)                         0.70      0.00      21.03 f
+  mem_stage_0/U66083/Q (or2s1)                            0.31      0.36      21.39 f
+  mem_stage_0/n28449 (net)                      9                   0.00      21.39 f
+  mem_stage_0/U56495/DIN (ib1s1)                          0.31      0.00      21.39 f
+  mem_stage_0/U56495/Q (ib1s1)                            0.28      0.14      21.53 r
+  mem_stage_0/n65112 (net)                      4                   0.00      21.53 r
+  mem_stage_0/U61230/DIN (ib1s1)                          0.28      0.00      21.53 r
+  mem_stage_0/U61230/Q (ib1s1)                            0.89      0.43      21.96 f
+  mem_stage_0/n65110 (net)                     31                   0.00      21.96 f
+  mem_stage_0/U55859/DIN2 (and2s1)                        0.89      0.00      21.96 f
+  mem_stage_0/U55859/Q (and2s1)                           0.25      0.41      22.37 f
+  mem_stage_0/n50060 (net)                      3                   0.00      22.37 f
+  mem_stage_0/U57400/DIN (ib1s1)                          0.25      0.00      22.37 f
+  mem_stage_0/U57400/Q (ib1s1)                            0.94      0.38      22.75 r
+  mem_stage_0/n65117 (net)                     26                   0.00      22.75 r
+  mem_stage_0/U50454/DIN2 (oai222s1)                      0.94      0.00      22.76 r
+  mem_stage_0/U50454/Q (oai222s1)                         0.56      0.24      23.00 f
+  mem_stage_0/n28475 (net)                      1                   0.00      23.00 f
+  mem_stage_0/U76407/DIN3 (aoi22s2)                       0.56      0.00      23.00 f
+  mem_stage_0/U76407/Q (aoi22s2)                          0.40      0.18      23.18 r
+  mem_stage_0/n28474 (net)                      1                   0.00      23.18 r
+  mem_stage_0/U76406/DIN4 (oai22s2)                       0.40      0.00      23.18 r
+  mem_stage_0/U76406/Q (oai22s2)                          0.46      0.14      23.32 f
+  mem_stage_0/rb0/retire_queue_next[26][data][55] (net)     1       0.00      23.32 f
+  mem_stage_0/rb0/retire_queue_reg[26][data][55]/CLRB (dffcs1)     0.46     0.00    23.32 f
+  data arrival time                                                           23.32
+
+  clock clock (rise edge)                                          30.00      30.00
+  clock network delay (ideal)                                       0.00      30.00
+  clock uncertainty                                                -0.10      29.90
+  mem_stage_0/rb0/retire_queue_reg[26][data][55]/CLK (dffcs1)       0.00      29.90 r
+  library setup time                                               -0.35      29.55
+  data required time                                                          29.55
+  ------------------------------------------------------------------------------------
+  data required time                                                          29.55
+  data arrival time                                                          -23.32
+  ------------------------------------------------------------------------------------
+  slack (MET)                                                                  6.23
+
+
+  Startpoint: reset (input port clocked by clock)
+  Endpoint: iq0/inst_queue_reg[6][ir][22]
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: input_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                       Fanout     Trans      Incr       Path
+  ------------------------------------------------------------------------------------
+  clock clock (rise edge)                                           0.00       0.00
+  clock network delay (ideal)                                       0.00       0.00
+  input external delay                                              0.10       0.10 r
+  reset (in)                                              0.00      0.00       0.10 r
+  reset (net)                                1781                   0.00       0.10 r
+  CDB_0/reset (CDB)                                                 0.00       0.10 r
+  CDB_0/reset (net)                                                 0.00       0.10 r
+  CDB_0/U10/DIN (ib1s2)                                   0.00      0.00       0.10 r
+  CDB_0/U10/Q (ib1s2)                                     0.24      0.11       0.21 f
+  CDB_0/n1 (net)                                9                   0.00       0.21 f
+  CDB_0/U8/DIN2 (and2s2)                                  0.24      0.00       0.21 f
+  CDB_0/U8/Q (and2s2)                                     0.17      0.22       0.43 f
+  CDB_0/CDB_tag_out[0] (net)                    6                   0.00       0.43 f
+  CDB_0/CDB_tag_out[0] (CDB)                                        0.00       0.43 f
+  CDB_tag_out[0] (net)                                              0.00       0.43 f
+  R0/CDB_tag_in[0][0] (ROB)                                         0.00       0.43 f
+  R0/CDB_tag_in[0][0] (net)                                         0.00       0.43 f
+  R0/U19837/DIN (i1s9)                                    0.17      0.00       0.43 f
+  R0/U19837/Q (i1s9)                                      0.09      0.16       0.60 r
+  R0/n23692 (net)                              15                   0.00       0.60 r
+  R0/U24998/DIN1 (xor2s1)                                 0.09      0.00       0.60 r
+  R0/U24998/Q (xor2s1)                                    0.17      0.22       0.81 r
+  R0/n17339 (net)                               1                   0.00       0.81 r
+  R0/U21599/DIN1 (and2s2)                                 0.17      0.00       0.82 r
+  R0/U21599/Q (and2s2)                                    0.08      0.10       0.91 r
+  R0/n13014 (net)                               1                   0.00       0.91 r
+  R0/U14927/DIN2 (and2s1)                                 0.08      0.00       0.91 r
+  R0/U14927/Q (and2s1)                                    0.14      0.13       1.04 r
+  R0/n13009 (net)                               1                   0.00       1.04 r
+  R0/U24972/DIN1 (nnd2s1)                                 0.14      0.00       1.04 r
+  R0/U24972/Q (nnd2s1)                                    0.23      0.07       1.11 f
+  R0/n17346 (net)                               1                   0.00       1.11 f
+  R0/U25428/DIN2 (oai221s2)                               0.23      0.00       1.11 f
+  R0/U25428/Q (oai221s2)                                  0.59      0.23       1.34 r
+  R0/N1736 (net)                                2                   0.00       1.34 r
+  R0/U24996/DIN1 (and2s2)                                 0.59      0.00       1.34 r
+  R0/U24996/Q (and2s2)                                    0.12      0.13       1.48 r
+  R0/n16182 (net)                               1                   0.00       1.48 r
+  R0/U14444/DIN1 (aoi22s3)                                0.12      0.00       1.48 r
+  R0/U14444/Q (aoi22s3)                                   0.31      0.08       1.56 f
+  R0/n13608 (net)                               1                   0.00       1.56 f
+  R0/U22018/DIN4 (and4s3)                                 0.31      0.00       1.56 f
+  R0/U22018/Q (and4s3)                                    0.12      0.19       1.76 f
+  R0/n13604 (net)                               2                   0.00       1.76 f
+  R0/U24488/DIN2 (nnd2s3)                                 0.12      0.00       1.76 f
+  R0/U24488/Q (nnd2s3)                                    0.17      0.08       1.84 r
+  R0/N1890 (net)                                2                   0.00       1.84 r
+  R0/U15172/DIN1 (nnd4s1)                                 0.17      0.00       1.85 r
+  R0/U15172/Q (nnd4s1)                                    0.52      0.12       1.97 f
+  R0/n16041 (net)                               3                   0.00       1.97 f
+  R0/U24541/DIN (i1s8)                                    0.52      0.00       1.97 f
+  R0/U24541/Q (i1s8)                                      0.20      0.25       2.22 r
+  R0/n16043 (net)                              32                   0.00       2.22 r
+  R0/U16969/DIN2 (nnd2s3)                                 0.20      0.00       2.23 r
+  R0/U16969/Q (nnd2s3)                                    0.17      0.07       2.30 f
+  R0/n16762 (net)                               4                   0.00       2.30 f
+  R0/U15397/DIN1 (oai21s2)                                0.17      0.00       2.30 f
+  R0/U15397/Q (oai21s2)                                   0.46      0.19       2.49 r
+  R0/n24218 (net)                               3                   0.00       2.49 r
+  R0/U25065/DIN3 (oai22s3)                                0.46      0.00       2.49 r
+  R0/U25065/Q (oai22s3)                                   0.25      0.20       2.69 f
+  R0/n16766 (net)                               1                   0.00       2.69 f
+  R0/U25093/DIN1 (nor2s3)                                 0.25      0.01       2.70 f
+  R0/U25093/Q (nor2s3)                                    0.27      0.12       2.82 r
+  R0/n16779 (net)                               1                   0.00       2.82 r
+  R0/U16980/DIN4 (mxi41s3)                                0.27      0.01       2.83 r
+  R0/U16980/Q (mxi41s3)                                   0.21      0.20       3.03 f
+  R0/n16820 (net)                               2                   0.00       3.03 f
+  R0/U25061/DIN1 (nnd2s3)                                 0.21      0.00       3.04 f
+  R0/U25061/Q (nnd2s3)                                    0.21      0.09       3.12 r
+  R0/n16819 (net)                               4                   0.00       3.12 r
+  R0/U15161/DIN (hi1s1)                                   0.21      0.00       3.13 r
+  R0/U15161/Q (hi1s1)                                     0.23      0.11       3.24 f
+  R0/n11929 (net)                               1                   0.00       3.24 f
+  R0/U15162/DIN (i1s1)                                    0.23      0.00       3.24 f
+  R0/U15162/Q (i1s1)                                      0.18      0.08       3.32 r
+  R0/n11930 (net)                               2                   0.00       3.32 r
+  R0/U17222/DIN (hi1s1)                                   0.18      0.00       3.32 r
+  R0/U17222/Q (hi1s1)                                     0.35      0.17       3.49 f
+  R0/n12860 (net)                               2                   0.00       3.49 f
+  R0/U17223/DIN (i1s1)                                    0.35      0.00       3.49 f
+  R0/U17223/Q (i1s1)                                      0.30      0.15       3.64 r
+  R0/n12861 (net)                               1                   0.00       3.64 r
+  R0/U17202/DIN1 (xor2s3)                                 0.30      0.01       3.65 r
+  R0/U17202/Q (xor2s3)                                    0.23      0.25       3.90 r
+  R0/n16832 (net)                               7                   0.00       3.90 r
+  R0/U17009/SIN0 (mxi41s3)                                0.23      0.00       3.90 r
+  R0/U17009/Q (mxi41s3)                                   0.19      0.25       4.15 f
+  R0/n16815 (net)                               1                   0.00       4.15 f
+  R0/U17270/DIN1 (nnd2s3)                                 0.19      0.01       4.16 f
+  R0/U17270/Q (nnd2s3)                                    0.27      0.11       4.27 r
+  R0/n16817 (net)                               2                   0.00       4.27 r
+  R0/U25066/DIN (ib1s6)                                   0.27      0.01       4.28 r
+  R0/U25066/Q (ib1s6)                                     0.06      0.04       4.32 f
+  R0/n24226 (net)                               7                   0.00       4.32 f
+  R0/U17013/SIN (mxi21s3)                                 0.06      0.00       4.32 f
+  R0/U17013/Q (mxi21s3)                                   0.17      0.16       4.48 r
+  R0/n27430 (net)                               4                   0.00       4.48 r
+  R0/U14464/DIN (i1s8)                                    0.17      0.00       4.48 r
+  R0/U14464/Q (i1s8)                                      0.07      0.15       4.63 f
+  R0/n24179 (net)                               4                   0.00       4.63 f
+  R0/U24552/DIN (ib1s6)                                   0.07      0.01       4.64 f
+  R0/U24552/Q (ib1s6)                                     0.04      0.03       4.67 r
+  R0/tail_next_out[1] (net)                     2                   0.00       4.67 r
+  R0/U20332/DIN2 (and2s2)                                 0.04      0.00       4.67 r
+  R0/U20332/Q (and2s2)                                    0.11      0.11       4.78 r
+  R0/n12968 (net)                               4                   0.00       4.78 r
+  R0/U24575/DIN3 (oai21s1)                                0.11      0.00       4.78 r
+  R0/U24575/Q (oai21s1)                                   0.35      0.16       4.93 f
+  R0/n24224 (net)                               1                   0.00       4.93 f
+  R0/U17110/DIN2 (and4s3)                                 0.35      0.00       4.94 f
+  R0/U17110/Q (and4s3)                                    0.15      0.24       5.18 f
+  R0/n12773 (net)                               1                   0.00       5.18 f
+  R0/U14484/DIN3 (mxi41s3)                                0.15      0.01       5.19 f
+  R0/U14484/Q (mxi41s3)                                   0.16      0.17       5.37 r
+  R0/n24289 (net)                               3                   0.00       5.37 r
+  R0/U24534/DIN6 (oai322s1)                               0.16      0.00       5.37 r
+  R0/U24534/Q (oai322s1)                                  0.40      0.17       5.54 f
+  R0/n27399 (net)                               1                   0.00       5.54 f
+  R0/U24532/DIN (i1s8)                                    0.40      0.00       5.54 f
+  R0/U24532/Q (i1s8)                                      0.08      0.19       5.73 r
+  R0/n16034 (net)                               1                   0.00       5.73 r
+  R0/U24533/DIN (ib1s6)                                   0.08      0.01       5.74 r
+  R0/U24533/Q (ib1s6)                                     0.02      0.02       5.76 f
+  R0/free_rows_next[4] (net)                    1                   0.00       5.76 f
+  R0/free_rows_next[4] (ROB)                                        0.00       5.76 f
+  rob_free_rows_next_out[4] (net)                                   0.00       5.76 f
+  U16746/DIN1 (or5s1)                                     0.02      0.00       5.76 f
+  U16746/Q (or5s1)                                        0.14      0.21       5.97 f
+  n7427 (net)                                   1                   0.00       5.97 f
+  U16741/DIN3 (and4s1)                                    0.14      0.00       5.97 f
+  U16741/Q (and4s1)                                       0.27      0.30       6.27 f
+  dispatch_no_hazard_comb (net)                 5                   0.00       6.27 f
+  iq0/dispatch_no_hazard (IQ)                                       0.00       6.27 f
+  iq0/dispatch_no_hazard (net)                                      0.00       6.27 f
+  iq0/U8243/DIN1 (nnd2s1)                                 0.27      0.00       6.27 f
+  iq0/U8243/Q (nnd2s1)                                    0.23      0.09       6.36 r
+  iq0/n5098 (net)                               1                   0.00       6.36 r
+  iq0/U8665/DIN1 (nor2s1)                                 0.23      0.00       6.36 r
+  iq0/U8665/Q (nor2s1)                                    0.32      0.18       6.54 f
+  iq0/n5252 (net)                               1                   0.00       6.54 f
+  iq0/U8705/DIN2 (nnd3s3)                                 0.32      0.01       6.55 f
+  iq0/U8705/Q (nnd3s3)                                    0.25      0.14       6.69 r
+  iq0/n5977 (net)                               4                   0.00       6.69 r
+  iq0/U7902/DIN1 (and2s2)                                 0.25      0.00       6.69 r
+  iq0/U7902/Q (and2s2)                                    0.17      0.14       6.83 r
+  iq0/n5053 (net)                               5                   0.00       6.83 r
+  iq0/U8721/DIN1 (oai21s2)                                0.17      0.00       6.83 r
+  iq0/U8721/Q (oai21s2)                                   0.21      0.12       6.95 f
+  iq0/n5990 (net)                               1                   0.00       6.95 f
+  iq0/U9416/DIN (i1s8)                                    0.21      0.00       6.95 f
+  iq0/U9416/Q (i1s8)                                      0.11      0.18       7.13 r
+  iq0/n9149 (net)                               4                   0.00       7.13 r
+  iq0/U8761/DIN (ib1s6)                                   0.11      0.01       7.14 r
+  iq0/U8761/Q (ib1s6)                                     0.05      0.03       7.17 f
+  iq0/n5596 (net)                               4                   0.00       7.17 f
+  iq0/U7595/DIN1 (nnd2s1)                                 0.05      0.00       7.17 f
+  iq0/U7595/Q (nnd2s1)                                    0.39      0.06       7.24 r
+  iq0/n5340 (net)                               1                   0.00       7.24 r
+  iq0/U7850/DIN1 (and2s2)                                 0.39      0.00       7.24 r
+  iq0/U7850/Q (and2s2)                                    0.13      0.12       7.36 r
+  iq0/n5042 (net)                               1                   0.00       7.36 r
+  iq0/U7882/DIN1 (nnd2s2)                                 0.13      0.00       7.36 r
+  iq0/U7882/Q (nnd2s2)                                    0.12      0.05       7.42 f
+  iq0/n8138 (net)                               1                   0.00       7.42 f
+  iq0/U7896/DIN3 (aoi21s3)                                0.12      0.00       7.42 f
+  iq0/U7896/Q (aoi21s3)                                   0.18      0.04       7.46 r
+  iq0/n9247 (net)                               1                   0.00       7.46 r
+  iq0/inst_queue_reg[6][ir][22]/SETB (dffss2)             0.18      0.00       7.46 r
+  data arrival time                                                            7.46
+
+  clock clock (rise edge)                                          30.00      30.00
+  clock network delay (ideal)                                       0.00      30.00
+  clock uncertainty                                                -0.10      29.90
+  iq0/inst_queue_reg[6][ir][22]/CLK (dffss2)                        0.00      29.90 r
+  library setup time                                               -0.47      29.43
+  data required time                                                          29.43
+  ------------------------------------------------------------------------------------
+  data required time                                                          29.43
+  data arrival time                                                           -7.46
+  ------------------------------------------------------------------------------------
+  slack (MET)                                                                 21.96
+
+
+  Startpoint: reset (input port clocked by clock)
+  Endpoint: iq0/inst_queue_reg[1][ir][18]
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: input_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                       Fanout     Trans      Incr       Path
+  ------------------------------------------------------------------------------------
+  clock clock (rise edge)                                           0.00       0.00
+  clock network delay (ideal)                                       0.00       0.00
+  input external delay                                              0.10       0.10 r
+  reset (in)                                              0.00      0.00       0.10 r
+  reset (net)                                1781                   0.00       0.10 r
+  CDB_0/reset (CDB)                                                 0.00       0.10 r
+  CDB_0/reset (net)                                                 0.00       0.10 r
+  CDB_0/U10/DIN (ib1s2)                                   0.00      0.00       0.10 r
+  CDB_0/U10/Q (ib1s2)                                     0.24      0.11       0.21 f
+  CDB_0/n1 (net)                                9                   0.00       0.21 f
+  CDB_0/U8/DIN2 (and2s2)                                  0.24      0.00       0.21 f
+  CDB_0/U8/Q (and2s2)                                     0.17      0.22       0.43 f
+  CDB_0/CDB_tag_out[0] (net)                    6                   0.00       0.43 f
+  CDB_0/CDB_tag_out[0] (CDB)                                        0.00       0.43 f
+  CDB_tag_out[0] (net)                                              0.00       0.43 f
+  R0/CDB_tag_in[0][0] (ROB)                                         0.00       0.43 f
+  R0/CDB_tag_in[0][0] (net)                                         0.00       0.43 f
+  R0/U19837/DIN (i1s9)                                    0.17      0.00       0.43 f
+  R0/U19837/Q (i1s9)                                      0.09      0.16       0.60 r
+  R0/n23692 (net)                              15                   0.00       0.60 r
+  R0/U24998/DIN1 (xor2s1)                                 0.09      0.00       0.60 r
+  R0/U24998/Q (xor2s1)                                    0.17      0.22       0.81 r
+  R0/n17339 (net)                               1                   0.00       0.81 r
+  R0/U21599/DIN1 (and2s2)                                 0.17      0.00       0.82 r
+  R0/U21599/Q (and2s2)                                    0.08      0.10       0.91 r
+  R0/n13014 (net)                               1                   0.00       0.91 r
+  R0/U14927/DIN2 (and2s1)                                 0.08      0.00       0.91 r
+  R0/U14927/Q (and2s1)                                    0.14      0.13       1.04 r
+  R0/n13009 (net)                               1                   0.00       1.04 r
+  R0/U24972/DIN1 (nnd2s1)                                 0.14      0.00       1.04 r
+  R0/U24972/Q (nnd2s1)                                    0.23      0.07       1.11 f
+  R0/n17346 (net)                               1                   0.00       1.11 f
+  R0/U25428/DIN2 (oai221s2)                               0.23      0.00       1.11 f
+  R0/U25428/Q (oai221s2)                                  0.59      0.23       1.34 r
+  R0/N1736 (net)                                2                   0.00       1.34 r
+  R0/U24996/DIN1 (and2s2)                                 0.59      0.00       1.34 r
+  R0/U24996/Q (and2s2)                                    0.12      0.13       1.48 r
+  R0/n16182 (net)                               1                   0.00       1.48 r
+  R0/U14444/DIN1 (aoi22s3)                                0.12      0.00       1.48 r
+  R0/U14444/Q (aoi22s3)                                   0.31      0.08       1.56 f
+  R0/n13608 (net)                               1                   0.00       1.56 f
+  R0/U22018/DIN4 (and4s3)                                 0.31      0.00       1.56 f
+  R0/U22018/Q (and4s3)                                    0.12      0.19       1.76 f
+  R0/n13604 (net)                               2                   0.00       1.76 f
+  R0/U24488/DIN2 (nnd2s3)                                 0.12      0.00       1.76 f
+  R0/U24488/Q (nnd2s3)                                    0.17      0.08       1.84 r
+  R0/N1890 (net)                                2                   0.00       1.84 r
+  R0/U15172/DIN1 (nnd4s1)                                 0.17      0.00       1.85 r
+  R0/U15172/Q (nnd4s1)                                    0.52      0.12       1.97 f
+  R0/n16041 (net)                               3                   0.00       1.97 f
+  R0/U24541/DIN (i1s8)                                    0.52      0.00       1.97 f
+  R0/U24541/Q (i1s8)                                      0.20      0.25       2.22 r
+  R0/n16043 (net)                              32                   0.00       2.22 r
+  R0/U16969/DIN2 (nnd2s3)                                 0.20      0.00       2.23 r
+  R0/U16969/Q (nnd2s3)                                    0.17      0.07       2.30 f
+  R0/n16762 (net)                               4                   0.00       2.30 f
+  R0/U15397/DIN1 (oai21s2)                                0.17      0.00       2.30 f
+  R0/U15397/Q (oai21s2)                                   0.46      0.19       2.49 r
+  R0/n24218 (net)                               3                   0.00       2.49 r
+  R0/U25065/DIN3 (oai22s3)                                0.46      0.00       2.49 r
+  R0/U25065/Q (oai22s3)                                   0.25      0.20       2.69 f
+  R0/n16766 (net)                               1                   0.00       2.69 f
+  R0/U25093/DIN1 (nor2s3)                                 0.25      0.01       2.70 f
+  R0/U25093/Q (nor2s3)                                    0.27      0.12       2.82 r
+  R0/n16779 (net)                               1                   0.00       2.82 r
+  R0/U16980/DIN4 (mxi41s3)                                0.27      0.01       2.83 r
+  R0/U16980/Q (mxi41s3)                                   0.21      0.20       3.03 f
+  R0/n16820 (net)                               2                   0.00       3.03 f
+  R0/U25061/DIN1 (nnd2s3)                                 0.21      0.00       3.04 f
+  R0/U25061/Q (nnd2s3)                                    0.21      0.09       3.12 r
+  R0/n16819 (net)                               4                   0.00       3.12 r
+  R0/U15161/DIN (hi1s1)                                   0.21      0.00       3.13 r
+  R0/U15161/Q (hi1s1)                                     0.23      0.11       3.24 f
+  R0/n11929 (net)                               1                   0.00       3.24 f
+  R0/U15162/DIN (i1s1)                                    0.23      0.00       3.24 f
+  R0/U15162/Q (i1s1)                                      0.18      0.08       3.32 r
+  R0/n11930 (net)                               2                   0.00       3.32 r
+  R0/U17222/DIN (hi1s1)                                   0.18      0.00       3.32 r
+  R0/U17222/Q (hi1s1)                                     0.35      0.17       3.49 f
+  R0/n12860 (net)                               2                   0.00       3.49 f
+  R0/U17223/DIN (i1s1)                                    0.35      0.00       3.49 f
+  R0/U17223/Q (i1s1)                                      0.30      0.15       3.64 r
+  R0/n12861 (net)                               1                   0.00       3.64 r
+  R0/U17202/DIN1 (xor2s3)                                 0.30      0.01       3.65 r
+  R0/U17202/Q (xor2s3)                                    0.23      0.25       3.90 r
+  R0/n16832 (net)                               7                   0.00       3.90 r
+  R0/U17009/SIN0 (mxi41s3)                                0.23      0.00       3.90 r
+  R0/U17009/Q (mxi41s3)                                   0.19      0.25       4.15 f
+  R0/n16815 (net)                               1                   0.00       4.15 f
+  R0/U17270/DIN1 (nnd2s3)                                 0.19      0.01       4.16 f
+  R0/U17270/Q (nnd2s3)                                    0.27      0.11       4.27 r
+  R0/n16817 (net)                               2                   0.00       4.27 r
+  R0/U25066/DIN (ib1s6)                                   0.27      0.01       4.28 r
+  R0/U25066/Q (ib1s6)                                     0.06      0.04       4.32 f
+  R0/n24226 (net)                               7                   0.00       4.32 f
+  R0/U17013/SIN (mxi21s3)                                 0.06      0.00       4.32 f
+  R0/U17013/Q (mxi21s3)                                   0.18      0.15       4.47 f
+  R0/n27430 (net)                               4                   0.00       4.47 f
+  R0/U24548/DIN2 (or2s2)                                  0.18      0.00       4.47 f
+  R0/U24548/Q (or2s2)                                     0.14      0.18       4.66 f
+  R0/n24248 (net)                               5                   0.00       4.66 f
+  R0/U30087/DIN4 (and4s3)                                 0.14      0.00       4.66 f
+  R0/U30087/Q (and4s3)                                    0.10      0.16       4.81 f
+  R0/n24171 (net)                               1                   0.00       4.81 f
+  R0/U30089/DIN2 (oai21s3)                                0.10      0.00       4.82 f
+  R0/U30089/Q (oai21s3)                                   0.42      0.15       4.97 r
+  R0/n24276 (net)                               4                   0.00       4.97 r
+  R0/U24536/DIN2 (or5s2)                                  0.42      0.00       4.97 r
+  R0/U24536/Q (or5s2)                                     0.26      0.26       5.23 r
+  R0/n24288 (net)                               4                   0.00       5.23 r
+  R0/U14452/DIN2 (nnd2s3)                                 0.26      0.00       5.23 r
+  R0/U14452/Q (nnd2s3)                                    0.13      0.06       5.29 f
+  R0/n24294 (net)                               3                   0.00       5.29 f
+  R0/U24534/DIN1 (oai322s1)                               0.13      0.00       5.29 f
+  R0/U24534/Q (oai322s1)                                  0.74      0.31       5.60 r
+  R0/n27399 (net)                               1                   0.00       5.60 r
+  R0/U24532/DIN (i1s8)                                    0.74      0.00       5.60 r
+  R0/U24532/Q (i1s8)                                      0.07      0.18       5.78 f
+  R0/n16034 (net)                               1                   0.00       5.78 f
+  R0/U24533/DIN (ib1s6)                                   0.07      0.01       5.80 f
+  R0/U24533/Q (ib1s6)                                     0.04      0.03       5.82 r
+  R0/free_rows_next[4] (net)                    1                   0.00       5.82 r
+  R0/free_rows_next[4] (ROB)                                        0.00       5.82 r
+  rob_free_rows_next_out[4] (net)                                   0.00       5.82 r
+  U16746/DIN1 (or5s1)                                     0.04      0.00       5.83 r
+  U16746/Q (or5s1)                                        0.17      0.19       6.01 r
+  n7427 (net)                                   1                   0.00       6.01 r
+  U16741/DIN3 (and4s1)                                    0.17      0.00       6.01 r
+  U16741/Q (and4s1)                                       0.48      0.32       6.33 r
+  dispatch_no_hazard_comb (net)                 5                   0.00       6.33 r
+  iq0/dispatch_no_hazard (IQ)                                       0.00       6.33 r
+  iq0/dispatch_no_hazard (net)                                      0.00       6.33 r
+  iq0/U8245/DIN1 (nnd2s3)                                 0.48      0.00       6.34 r
+  iq0/U8245/Q (nnd2s3)                                    0.28      0.13       6.47 f
+  iq0/n9180 (net)                               3                   0.00       6.47 f
+  iq0/U8246/DIN (ib1s6)                                   0.28      0.01       6.48 f
+  iq0/U8246/Q (ib1s6)                                     0.11      0.08       6.56 r
+  iq0/n6008 (net)                              15                   0.00       6.56 r
+  iq0/U8576/DIN4 (nnd4s2)                                 0.11      0.00       6.56 r
+  iq0/U8576/Q (nnd4s2)                                    0.34      0.18       6.74 f
+  iq0/n5390 (net)                               3                   0.00       6.74 f
+  iq0/U8528/DIN1 (and2s2)                                 0.34      0.00       6.74 f
+  iq0/U8528/Q (and2s2)                                    0.10      0.17       6.91 f
+  iq0/n5422 (net)                               2                   0.00       6.91 f
+  iq0/U8178/DIN4 (oai22s1)                                0.10      0.00       6.91 f
+  iq0/U8178/Q (oai22s1)                                   0.47      0.15       7.06 r
+  iq0/n8288 (net)                               1                   0.00       7.06 r
+  iq0/U8177/DIN (i1s8)                                    0.47      0.00       7.06 r
+  iq0/U8177/Q (i1s8)                                      0.11      0.19       7.25 f
+  iq0/n5085 (net)                               3                   0.00       7.25 f
+  iq0/U8724/DIN (ib1s6)                                   0.11      0.01       7.27 f
+  iq0/U8724/Q (ib1s6)                                     0.14      0.09       7.35 r
+  iq0/n5298 (net)                              10                   0.00       7.35 r
+  iq0/U11140/DIN4 (aoi221s1)                              0.14      0.00       7.36 r
+  iq0/U11140/Q (aoi221s1)                                 0.65      0.20       7.55 f
+  iq0/n9341 (net)                               1                   0.00       7.55 f
+  iq0/inst_queue_reg[1][ir][18]/SETB (dffss1)             0.65      0.00       7.56 f
+  data arrival time                                                            7.56
+
+  clock clock (rise edge)                                          30.00      30.00
+  clock network delay (ideal)                                       0.00      30.00
+  clock uncertainty                                                -0.10      29.90
+  iq0/inst_queue_reg[1][ir][18]/CLK (dffss1)                        0.00      29.90 r
+  library setup time                                               -0.38      29.52
+  data required time                                                          29.52
+  ------------------------------------------------------------------------------------
+  data required time                                                          29.52
+  data arrival time                                                           -7.56
+  ------------------------------------------------------------------------------------
+  slack (MET)                                                                 21.97
+
+
+  Startpoint: rob_retire_out_is_store_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: evicted_valid[0]
+            (output port clocked by clock)
+  Path Group: output_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                       Fanout     Trans      Incr       Path
+  ------------------------------------------------------------------------------------
+  rob_retire_out_is_store_reg/CLK (dffs2)                 0.00      0.00 #     0.00 r
+  rob_retire_out_is_store_reg/Q (dffs2)                   0.30      0.26       0.26 f
+  rob_retire_out_is_store (net)                18                   0.00       0.26 f
+  store_queue/rt_en (SQ)                                            0.00       0.26 f
+  store_queue/rt_en (net)                                           0.00       0.26 f
+  store_queue/U13042/DIN2 (and2s2)                        0.30      0.00       0.26 f
+  store_queue/U13042/Q (and2s2)                           0.12      0.20       0.46 f
+  store_queue/n7041 (net)                       2                   0.00       0.46 f
+  store_queue/U7128/DIN1 (nnd2s3)                         0.12      0.00       0.46 f
+  store_queue/U7128/Q (nnd2s3)                            0.19      0.07       0.53 r
+  store_queue/n5072 (net)                       3                   0.00       0.53 r
+  store_queue/U13229/DIN2 (xor2s2)                        0.19      0.00       0.54 r
+  store_queue/U13229/Q (xor2s2)                           0.14      0.17       0.70 r
+  store_queue/n7706 (net)                       2                   0.00       0.70 r
+  store_queue/U13236/DIN1 (xnr2s2)                        0.14      0.00       0.70 r
+  store_queue/U13236/Q (xnr2s2)                           0.14      0.19       0.89 f
+  store_queue/n7562 (net)                       1                   0.00       0.89 f
+  store_queue/U8346/DIN1 (nnd3s2)                         0.14      0.00       0.89 f
+  store_queue/U8346/Q (nnd3s2)                            0.22      0.07       0.96 r
+  store_queue/n7564 (net)                       1                   0.00       0.96 r
+  store_queue/U8345/DIN2 (oai21s2)                        0.22      0.00       0.96 r
+  store_queue/U8345/Q (oai21s2)                           0.22      0.09       1.06 f
+  store_queue/n7568 (net)                       1                   0.00       1.06 f
+  store_queue/U8344/DIN (i1s8)                            0.22      0.00       1.06 f
+  store_queue/U8344/Q (i1s8)                              0.12      0.18       1.24 r
+  store_queue/n7584 (net)                      11                   0.00       1.24 r
+  store_queue/U13177/DIN2 (nnd2s3)                        0.12      0.00       1.24 r
+  store_queue/U13177/Q (nnd2s3)                           0.28      0.10       1.34 f
+  store_queue/n7567 (net)                       2                   0.00       1.34 f
+  store_queue/U8216/DIN (ib1s6)                           0.28      0.01       1.35 f
+  store_queue/U8216/Q (ib1s6)                             0.09      0.07       1.42 r
+  store_queue/n7582 (net)                       7                   0.00       1.42 r
+  store_queue/U7905/DIN1 (nnd3s2)                         0.09      0.00       1.42 r
+  store_queue/U7905/Q (nnd3s2)                            0.35      0.09       1.51 f
+  store_queue/n7062 (net)                       2                   0.00       1.51 f
+  store_queue/U8121/DIN3 (oai211s1)                       0.35      0.00       1.51 f
+  store_queue/U8121/Q (oai211s1)                          0.45      0.20       1.71 r
+  store_queue/N491 (net)                        1                   0.00       1.71 r
+  store_queue/U8119/DIN (i1s8)                            0.45      0.00       1.71 r
+  store_queue/U8119/Q (i1s8)                              0.09      0.18       1.89 f
+  store_queue/n5260 (net)                       6                   0.00       1.89 f
+  store_queue/U7895/DIN2 (nnd2s2)                         0.09      0.00       1.89 f
+  store_queue/U7895/Q (nnd2s2)                            0.16      0.08       1.97 r
+  store_queue/n7752 (net)                       3                   0.00       1.97 r
+  store_queue/U8768/DIN (hi1s1)                           0.16      0.00       1.97 r
+  store_queue/U8768/Q (hi1s1)                             0.28      0.14       2.11 f
+  store_queue/n7766 (net)                       2                   0.00       2.11 f
+  store_queue/U8182/DIN1 (nnd2s1)                         0.28      0.00       2.11 f
+  store_queue/U8182/Q (nnd2s1)                            0.23      0.12       2.22 r
+  store_queue/n7887 (net)                       3                   0.00       2.22 r
+  store_queue/U8446/DIN (hi1s1)                           0.23      0.00       2.23 r
+  store_queue/U8446/Q (hi1s1)                             0.50      0.24       2.46 f
+  store_queue/n7884 (net)                       2                   0.00       2.46 f
+  store_queue/U14745/DIN1 (nnd2s2)                        0.50      0.00       2.47 f
+  store_queue/U14745/Q (nnd2s2)                           0.25      0.13       2.60 r
+  store_queue/n7974 (net)                       2                   0.00       2.60 r
+  store_queue/U8562/DIN (ib1s1)                           0.25      0.00       2.60 r
+  store_queue/U8562/Q (ib1s1)                             0.17      0.08       2.69 f
+  store_queue/n7899 (net)                       2                   0.00       2.69 f
+  store_queue/U14748/DIN5 (oai33s1)                       0.17      0.00       2.69 f
+  store_queue/U14748/Q (oai33s1)                          0.60      0.26       2.95 r
+  store_queue/n7903 (net)                       1                   0.00       2.95 r
+  store_queue/U14749/DIN1 (aoi13s2)                       0.60      0.00       2.95 r
+  store_queue/U14749/Q (aoi13s2)                          0.29      0.12       3.08 f
+  store_queue/n7904 (net)                       1                   0.00       3.08 f
+  store_queue/U14750/DIN4 (oai211s2)                      0.29      0.00       3.08 f
+  store_queue/U14750/Q (oai211s2)                         0.34      0.15       3.23 r
+  store_queue/n7917 (net)                       1                   0.00       3.23 r
+  store_queue/U14755/DIN2 (oai13s2)                       0.34      0.00       3.23 r
+  store_queue/U14755/Q (oai13s2)                          0.31      0.16       3.39 f
+  store_queue/n7930 (net)                       1                   0.00       3.39 f
+  store_queue/U14757/DIN2 (oai1112s2)                     0.31      0.00       3.40 f
+  store_queue/U14757/Q (oai1112s2)                        0.54      0.22       3.61 r
+  store_queue/n7967 (net)                       1                   0.00       3.61 r
+  store_queue/U14765/DIN2 (oai13s2)                       0.54      0.00       3.61 r
+  store_queue/U14765/Q (oai13s2)                          0.39      0.20       3.82 f
+  store_queue/n7971 (net)                       1                   0.00       3.82 f
+  store_queue/U14767/DIN1 (nnd2s2)                        0.39      0.00       3.82 f
+  store_queue/U14767/Q (nnd2s2)                           0.29      0.15       3.97 r
+  store_queue/store_data_stall (net)            4                   0.00       3.97 r
+  store_queue/U8911/DIN (ib1s1)                           0.29      0.00       3.98 r
+  store_queue/U8911/Q (ib1s1)                             0.12      0.05       4.03 f
+  store_queue/n7983 (net)                       1                   0.00       4.03 f
+  store_queue/U14770/DIN3 (oai211s2)                      0.12      0.00       4.03 f
+  store_queue/U14770/Q (oai211s2)                         0.38      0.15       4.18 r
+  store_queue/n7986 (net)                       1                   0.00       4.18 r
+  store_queue/U8904/DIN (ib1s1)                           0.38      0.00       4.18 r
+  store_queue/U8904/Q (ib1s1)                             0.30      0.16       4.34 f
+  store_queue/rd_valid (net)                    5                   0.00       4.34 f
+  store_queue/rd_valid (SQ)                                         0.00       4.34 f
+  sq_data_valid (net)                                               0.00       4.34 f
+  mem_stage_0/sq_data_valid (mem_stage)                             0.00       4.34 f
+  mem_stage_0/sq_data_valid (net)                                   0.00       4.34 f
+  mem_stage_0/U57151/DIN1 (or3s1)                         0.30      0.00       4.34 f
+  mem_stage_0/U57151/Q (or3s1)                            0.40      0.37       4.71 f
+  mem_stage_0/n70218 (net)                      9                   0.00       4.71 f
+  mem_stage_0/U67361/DIN (ib1s1)                          0.40      0.00       4.71 f
+  mem_stage_0/U67361/Q (ib1s1)                            0.99      0.43       5.14 r
+  mem_stage_0/n69224 (net)                     18                   0.00       5.14 r
+  mem_stage_0/U56970/DIN (ib1s1)                          0.99      0.00       5.14 r
+  mem_stage_0/U56970/Q (ib1s1)                            0.30      0.09       5.23 f
+  mem_stage_0/n59499 (net)                      1                   0.00       5.23 f
+  mem_stage_0/U106553/DIN (ib1s1)                         0.30      0.00       5.23 f
+  mem_stage_0/U106553/Q (ib1s1)                           1.01      0.42       5.65 r
+  mem_stage_0/n59498 (net)                     17                   0.00       5.65 r
+  mem_stage_0/U106663/DIN1 (nnd4s1)                       1.01      0.00       5.65 r
+  mem_stage_0/U106663/Q (nnd4s1)                          0.41      0.12       5.77 f
+  mem_stage_0/n68833 (net)                      1                   0.00       5.77 f
+  mem_stage_0/U106666/DIN4 (or5s1)                        0.41      0.00       5.78 f
+  mem_stage_0/U106666/Q (or5s1)                           0.18      0.23       6.00 f
+  mem_stage_0/n70123 (net)                      2                   0.00       6.00 f
+  mem_stage_0/U106667/DIN8 (oai2222s3)                    0.18      0.00       6.01 f
+  mem_stage_0/U106667/Q (oai2222s3)                       0.11      0.37       6.38 r
+  mem_stage_0/n68837 (net)                      1                   0.00       6.38 r
+  mem_stage_0/U70295/DIN (ib1s1)                          0.11      0.00       6.38 r
+  mem_stage_0/U70295/Q (ib1s1)                            0.20      0.10       6.48 f
+  mem_stage_0/n69091 (net)                      3                   0.00       6.48 f
+  mem_stage_0/U106668/DIN2 (nnd2s2)                       0.20      0.00       6.49 f
+  mem_stage_0/U106668/Q (nnd2s2)                          0.36      0.16       6.65 r
+  mem_stage_0/dcache0/N616 (net)                5                   0.00       6.65 r
+  mem_stage_0/U65736/DIN (ib1s1)                          0.36      0.00       6.65 r
+  mem_stage_0/U65736/Q (ib1s1)                            0.39      0.21       6.86 f
+  mem_stage_0/n52986 (net)                      6                   0.00       6.86 f
+  mem_stage_0/U99425/DIN2 (nnd2s2)                        0.39      0.00       6.87 f
+  mem_stage_0/U99425/Q (nnd2s2)                           0.20      0.11       6.98 r
+  mem_stage_0/n52988 (net)                      1                   0.00       6.98 r
+  mem_stage_0/U56037/DIN (ib1s1)                          0.20      0.00       6.98 r
+  mem_stage_0/U56037/Q (ib1s1)                            0.55      0.27       7.25 f
+  mem_stage_0/n51690 (net)                     13                   0.00       7.25 f
+  mem_stage_0/U56347/DIN (ib1s1)                          0.55      0.00       7.25 f
+  mem_stage_0/U56347/Q (ib1s1)                            0.29      0.16       7.40 r
+  mem_stage_0/n53156 (net)                      3                   0.00       7.40 r
+  mem_stage_0/U58904/DIN (ib1s1)                          0.29      0.00       7.40 r
+  mem_stage_0/U58904/Q (ib1s1)                            0.51      0.26       7.67 f
+  mem_stage_0/n53157 (net)                     11                   0.00       7.67 f
+  mem_stage_0/U99427/DIN4 (aoi22s1)                       0.51      0.00       7.67 f
+  mem_stage_0/U99427/Q (aoi22s1)                          0.39      0.23       7.89 r
+  mem_stage_0/n51693 (net)                      1                   0.00       7.89 r
+  mem_stage_0/U97488/DIN1 (nnd2s2)                        0.39      0.00       7.90 r
+  mem_stage_0/U97488/Q (nnd2s2)                           0.18      0.07       7.96 f
+  mem_stage_0/dcache0/N710 (net)                1                   0.00       7.96 f
+  mem_stage_0/U106555/DIN2 (nnd2s2)                       0.18      0.00       7.97 f
+  mem_stage_0/U106555/Q (nnd2s2)                          0.25      0.12       8.09 r
+  mem_stage_0/n68633 (net)                      3                   0.00       8.09 r
+  mem_stage_0/U67157/DIN1 (nnd2s2)                        0.25      0.00       8.09 r
+  mem_stage_0/U67157/Q (nnd2s2)                           0.39      0.18       8.28 f
+  mem_stage_0/dcache0/fifo_hit_idx[0][0] (net)     9                0.00       8.28 f
+  mem_stage_0/U55720/DIN (ib1s1)                          0.39      0.00       8.28 f
+  mem_stage_0/U55720/Q (ib1s1)                            0.92      0.40       8.68 r
+  mem_stage_0/dcache0/N15444 (net)             15                   0.00       8.68 r
+  mem_stage_0/U64858/DIN2 (and2s1)                        0.92      0.00       8.68 r
+  mem_stage_0/U64858/Q (and2s1)                           0.48      0.28       8.96 r
+  mem_stage_0/n50746 (net)                      5                   0.00       8.96 r
+  mem_stage_0/U56349/DIN (ib1s1)                          0.48      0.00       8.96 r
+  mem_stage_0/U56349/Q (ib1s1)                            0.29      0.15       9.11 f
+  mem_stage_0/n51680 (net)                      4                   0.00       9.11 f
+  mem_stage_0/U58905/DIN (ib1s1)                          0.29      0.00       9.11 f
+  mem_stage_0/U58905/Q (ib1s1)                            0.76      0.32       9.44 r
+  mem_stage_0/n51681 (net)                     14                   0.00       9.44 r
+  mem_stage_0/U97250/DIN4 (aoi22s2)                       0.76      0.00       9.44 r
+  mem_stage_0/U97250/Q (aoi22s2)                          0.44      0.19       9.63 f
+  mem_stage_0/n51510 (net)                      1                   0.00       9.63 f
+  mem_stage_0/U97248/DIN1 (nnd2s2)                        0.44      0.00       9.63 f
+  mem_stage_0/U97248/Q (nnd2s2)                           0.26      0.12       9.76 r
+  mem_stage_0/dcache0/N725 (net)                1                   0.00       9.76 r
+  mem_stage_0/U70085/DIN1 (mxi21s2)                       0.26      0.00       9.76 r
+  mem_stage_0/U70085/Q (mxi21s2)                          0.47      0.28      10.05 f
+  mem_stage_0/n71868 (net)                      9                   0.00      10.05 f
+  mem_stage_0/U67353/DIN (ib1s1)                          0.47      0.00      10.05 f
+  mem_stage_0/U67353/Q (ib1s1)                            0.58      0.28      10.33 r
+  mem_stage_0/dcache0/memory/N997 (net)         9                   0.00      10.33 r
+  mem_stage_0/U101868/DIN2 (nor2s1)                       0.58      0.00      10.33 r
+  mem_stage_0/U101868/Q (nor2s1)                          0.34      0.20      10.53 f
+  mem_stage_0/n55256 (net)                      2                   0.00      10.53 f
+  mem_stage_0/U64866/DIN1 (nnd2s2)                        0.34      0.00      10.53 f
+  mem_stage_0/U64866/Q (nnd2s2)                           0.29      0.14      10.67 r
+  mem_stage_0/n50749 (net)                      4                   0.00      10.67 r
+  mem_stage_0/U61199/DIN (ib1s1)                          0.29      0.00      10.67 r
+  mem_stage_0/U61199/Q (ib1s1)                            0.18      0.09      10.76 f
+  mem_stage_0/n56612 (net)                      2                   0.00      10.76 f
+  mem_stage_0/U56328/DIN (ib1s1)                          0.18      0.00      10.76 f
+  mem_stage_0/U56328/Q (ib1s1)                            0.48      0.20      10.96 r
+  mem_stage_0/n56614 (net)                      9                   0.00      10.96 r
+  mem_stage_0/U57888/DIN (ib1s1)                          0.48      0.00      10.96 r
+  mem_stage_0/U57888/Q (ib1s1)                            0.58      0.31      11.27 f
+  mem_stage_0/n56627 (net)                     15                   0.00      11.27 f
+  mem_stage_0/U102066/DIN4 (aoi22s1)                      0.58      0.00      11.27 f
+  mem_stage_0/U102066/Q (aoi22s1)                         0.36      0.21      11.49 r
+  mem_stage_0/n55413 (net)                      1                   0.00      11.49 r
+  mem_stage_0/U102067/DIN4 (nnd4s1)                       0.36      0.00      11.49 r
+  mem_stage_0/U102067/Q (nnd4s1)                          0.46      0.21      11.70 f
+  mem_stage_0/dcache0/memory/wr_cam_table_in[1][3][0][0] (net)     2     0.00    11.70 f
+  mem_stage_0/U67359/DIN2 (xnr2s1)                        0.46      0.01      11.71 f
+  mem_stage_0/U67359/Q (xnr2s1)                           0.21      0.28      11.99 f
+  mem_stage_0/n68974 (net)                      1                   0.00      11.99 f
+  mem_stage_0/U106756/DIN5 (or5s1)                        0.21      0.00      11.99 f
+  mem_stage_0/U106756/Q (or5s1)                           0.13      0.18      12.17 f
+  mem_stage_0/n68979 (net)                      1                   0.00      12.17 f
+  mem_stage_0/U106757/DIN5 (or5s1)                        0.13      0.00      12.17 f
+  mem_stage_0/U106757/Q (or5s1)                           0.15      0.17      12.34 f
+  mem_stage_0/n70220 (net)                      2                   0.00      12.34 f
+  mem_stage_0/U106758/DIN1 (oai13s2)                      0.15      0.00      12.34 f
+  mem_stage_0/U106758/Q (oai13s2)                         0.47      0.12      12.46 r
+  mem_stage_0/n68987 (net)                      1                   0.00      12.46 r
+  mem_stage_0/U106759/DIN2 (nnd2s2)                       0.47      0.00      12.46 r
+  mem_stage_0/U106759/Q (nnd2s2)                          0.32      0.12      12.59 f
+  mem_stage_0/n70244 (net)                      4                   0.00      12.59 f
+  mem_stage_0/U65659/DIN3 (oai21s2)                       0.32      0.00      12.59 f
+  mem_stage_0/U65659/Q (oai21s2)                          0.51      0.24      12.82 r
+  mem_stage_0/n70221 (net)                      3                   0.00      12.82 r
+  mem_stage_0/U64844/DIN (ib1s1)                          0.51      0.00      12.83 r
+  mem_stage_0/U64844/Q (ib1s1)                            0.20      0.09      12.92 f
+  mem_stage_0/n68989 (net)                      1                   0.00      12.92 f
+  mem_stage_0/U64843/DIN1 (nnd2s2)                        0.20      0.00      12.92 f
+  mem_stage_0/U64843/Q (nnd2s2)                           0.81      0.31      13.23 r
+  mem_stage_0/n70340 (net)                     18                   0.00      13.23 r
+  mem_stage_0/U108219/DIN2 (oai21s2)                      0.81      0.00      13.23 r
+  mem_stage_0/U108219/Q (oai21s2)                         0.49      0.12      13.35 f
+  mem_stage_0/n70234 (net)                      1                   0.00      13.35 f
+  mem_stage_0/U65673/DIN (ib1s1)                          0.49      0.00      13.35 f
+  mem_stage_0/U65673/Q (ib1s1)                            0.46      0.23      13.58 r
+  mem_stage_0/n70331 (net)                      8                   0.00      13.58 r
+  mem_stage_0/U108261/DIN1 (oai21s2)                      0.46      0.00      13.59 r
+  mem_stage_0/U108261/Q (oai21s2)                         0.40      0.21      13.80 f
+  mem_stage_0/dcache0/memory/N13356 (net)       3                   0.00      13.80 f
+  mem_stage_0/U100538/DIN3 (aoi22s1)                      0.40      0.00      13.80 f
+  mem_stage_0/U100538/Q (aoi22s1)                         0.35      0.19      13.99 r
+  mem_stage_0/n54028 (net)                      1                   0.00      13.99 r
+  mem_stage_0/U100539/DIN4 (nnd4s1)                       0.35      0.00      13.99 r
+  mem_stage_0/U100539/Q (nnd4s1)                          0.68      0.30      14.29 f
+  mem_stage_0/dcache0/memory/N13491 (net)       8                   0.00      14.29 f
+  mem_stage_0/U65677/DIN1 (oai22s2)                       0.68      0.00      14.29 f
+  mem_stage_0/U65677/Q (oai22s2)                          0.55      0.20      14.49 r
+  mem_stage_0/dcache0/memory/N13555 (net)       2                   0.00      14.49 r
+  mem_stage_0/U101863/DIN3 (aoi22s2)                      0.55      0.00      14.49 r
+  mem_stage_0/U101863/Q (aoi22s2)                         0.38      0.19      14.68 f
+  mem_stage_0/n54032 (net)                      1                   0.00      14.68 f
+  mem_stage_0/U64842/DIN4 (nnd4s1)                        0.38      0.00      14.68 f
+  mem_stage_0/U64842/Q (nnd4s1)                           1.15      0.51      15.19 r
+  mem_stage_0/dcache0/memory/N13517 (net)      14                   0.00      15.19 r
+  mem_stage_0/U61362/DIN (ib1s1)                          1.15      0.00      15.19 r
+  mem_stage_0/U61362/Q (ib1s1)                            0.76      0.40      15.59 f
+  mem_stage_0/dcache0/memory/N1008 (net)       14                   0.00      15.59 f
+  mem_stage_0/U106554/DIN2 (aoi22s2)                      0.76      0.00      15.60 f
+  mem_stage_0/U106554/Q (aoi22s2)                         0.55      0.25      15.84 r
+  mem_stage_0/n44424 (net)                      2                   0.00      15.84 r
+  mem_stage_0/U39136/DIN1 (nnd2s2)                        0.55      0.00      15.85 r
+  mem_stage_0/U39136/Q (nnd2s2)                           0.44      0.19      16.04 f
+  mem_stage_0/n44400 (net)                      8                   0.00      16.04 f
+  mem_stage_0/U65725/DIN2 (oai22s2)                       0.44      0.00      16.04 f
+  mem_stage_0/U65725/Q (oai22s2)                          0.53      0.17      16.21 r
+  mem_stage_0/dcache0/memory/N13561 (net)       2                   0.00      16.21 r
+  mem_stage_0/U100556/DIN3 (aoi22s1)                      0.53      0.00      16.21 r
+  mem_stage_0/U100556/Q (aoi22s1)                         0.40      0.20      16.42 f
+  mem_stage_0/n54044 (net)                      1                   0.00      16.42 f
+  mem_stage_0/U100557/DIN4 (nnd4s1)                       0.40      0.00      16.42 f
+  mem_stage_0/U100557/Q (nnd4s1)                          0.39      0.22      16.63 r
+  mem_stage_0/dcache0/memory/N13607 (net)       1                   0.00      16.63 r
+  mem_stage_0/U64845/DIN3 (oai22s2)                       0.39      0.00      16.64 r
+  mem_stage_0/U64845/Q (oai22s2)                          0.57      0.26      16.89 f
+  mem_stage_0/dcache0/memory/N1007 (net)        4                   0.00      16.89 f
+  mem_stage_0/U61189/DIN (ib1s1)                          0.57      0.00      16.90 f
+  mem_stage_0/U61189/Q (ib1s1)                            0.22      0.11      17.00 r
+  mem_stage_0/n53347 (net)                      2                   0.00      17.00 r
+  mem_stage_0/U55736/DIN1 (or2s1)                         0.22      0.00      17.01 r
+  mem_stage_0/U55736/Q (or2s1)                            0.34      0.23      17.24 r
+  mem_stage_0/n49949 (net)                      4                   0.00      17.24 r
+  mem_stage_0/U57310/DIN (ib1s1)                          0.34      0.00      17.24 r
+  mem_stage_0/U57310/Q (ib1s1)                            0.44      0.23      17.47 f
+  mem_stage_0/n53356 (net)                     11                   0.00      17.47 f
+  mem_stage_0/U99651/DIN4 (aoi22s1)                       0.44      0.00      17.47 f
+  mem_stage_0/U99651/Q (aoi22s1)                          0.33      0.20      17.67 r
+  mem_stage_0/n53343 (net)                      1                   0.00      17.67 r
+  mem_stage_0/U99652/DIN2 (nnd2s1)                        0.33      0.00      17.67 r
+  mem_stage_0/U99652/Q (nnd2s1)                           0.21      0.09      17.76 f
+  mem_stage_0/dcache0/memory/N13996 (net)       1                   0.00      17.76 f
+  mem_stage_0/U29018/DIN1 (nnd2s2)                        0.21      0.00      17.76 f
+  mem_stage_0/U29018/Q (nnd2s2)                           0.37      0.12      17.88 r
+  mem_stage_0/n36234 (net)                      4                   0.00      17.88 r
+  mem_stage_0/U65732/DIN1 (xor2s1)                        0.37      0.00      17.88 r
+  mem_stage_0/U65732/Q (xor2s1)                           0.27      0.30      18.18 r
+  mem_stage_0/n36929 (net)                      1                   0.00      18.18 r
+  mem_stage_0/U65731/DIN2 (xnr2s1)                        0.27      0.01      18.19 r
+  mem_stage_0/U65731/Q (xnr2s1)                           0.20      0.24      18.43 r
+  mem_stage_0/dcache0/victim_memory/N1966 (net)     3               0.00      18.43 r
+  mem_stage_0/U67162/DIN1 (nor2s1)                        0.20      0.00      18.43 r
+  mem_stage_0/U67162/Q (nor2s1)                           0.40      0.21      18.64 f
+  mem_stage_0/n36917 (net)                      4                   0.00      18.64 f
+  mem_stage_0/U65672/DIN2 (or2s1)                         0.40      0.00      18.64 f
+  mem_stage_0/U65672/Q (or2s1)                            0.13      0.21      18.85 f
+  mem_stage_0/n36916 (net)                      1                   0.00      18.85 f
+  mem_stage_0/U65671/DIN2 (aoi22s2)                       0.13      0.00      18.86 f
+  mem_stage_0/U65671/Q (aoi22s2)                          0.45      0.16      19.01 r
+  mem_stage_0/n36915 (net)                      1                   0.00      19.01 r
+  mem_stage_0/U65670/DIN2 (xnr2s1)                        0.45      0.01      19.02 r
+  mem_stage_0/U65670/Q (xnr2s1)                           0.20      0.25      19.27 r
+  mem_stage_0/n36914 (net)                      1                   0.00      19.27 r
+  mem_stage_0/U28990/DIN2 (nnd2s2)                        0.20      0.00      19.27 r
+  mem_stage_0/U28990/Q (nnd2s2)                           0.30      0.10      19.37 f
+  mem_stage_0/n36406 (net)                      4                   0.00      19.37 f
+  mem_stage_0/U28399/DIN1 (nnd2s2)                        0.30      0.00      19.38 f
+  mem_stage_0/U28399/Q (nnd2s2)                           0.65      0.28      19.65 r
+  mem_stage_0/evicted_valid_out[1] (net)        4                   0.00      19.65 r
+  mem_stage_0/U65658/DIN (ib1s1)                          0.65      0.00      19.66 r
+  mem_stage_0/U65658/Q (ib1s1)                            0.23      0.09      19.74 f
+  mem_stage_0/n68991 (net)                      1                   0.00      19.74 f
+  mem_stage_0/U55711/DIN2 (and2s2)                        0.23      0.00      19.74 f
+  mem_stage_0/U55711/Q (and2s2)                           0.23      0.24      19.99 f
+  mem_stage_0/n49927 (net)                     10                   0.00      19.99 f
+  mem_stage_0/U56372/DIN (ib1s1)                          0.23      0.00      19.99 f
+  mem_stage_0/U56372/Q (ib1s1)                            0.71      0.29      20.28 r
+  mem_stage_0/evicted_valid_out[0] (net)        4                   0.00      20.28 r
+  mem_stage_0/evicted_valid_out[0] (mem_stage)                      0.00      20.28 r
+  evicted_valid[0] (net)                                            0.00      20.28 r
+  evicted_valid[0] (out)                                  0.71      0.02      20.31 r
+  data arrival time                                                           20.31
+
+  max_delay                                                        30.00      30.00
+  clock uncertainty                                                -0.10      29.90
+  output external delay                                            -0.10      29.80
+  data required time                                                          29.80
+  ------------------------------------------------------------------------------------
+  data required time                                                          29.80
+  data arrival time                                                          -20.31
+  ------------------------------------------------------------------------------------
+  slack (MET)                                                                  9.49
+
+
+  Startpoint: rob_retire_out_is_store_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: evicted_valid[2]
+            (output port clocked by clock)
+  Path Group: output_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                       Fanout     Trans      Incr       Path
+  ------------------------------------------------------------------------------------
+  rob_retire_out_is_store_reg/CLK (dffs2)                 0.00      0.00 #     0.00 r
+  rob_retire_out_is_store_reg/Q (dffs2)                   0.30      0.26       0.26 f
+  rob_retire_out_is_store (net)                18                   0.00       0.26 f
+  store_queue/rt_en (SQ)                                            0.00       0.26 f
+  store_queue/rt_en (net)                                           0.00       0.26 f
+  store_queue/U13042/DIN2 (and2s2)                        0.30      0.00       0.26 f
+  store_queue/U13042/Q (and2s2)                           0.12      0.20       0.46 f
+  store_queue/n7041 (net)                       2                   0.00       0.46 f
+  store_queue/U7128/DIN1 (nnd2s3)                         0.12      0.00       0.46 f
+  store_queue/U7128/Q (nnd2s3)                            0.19      0.07       0.53 r
+  store_queue/n5072 (net)                       3                   0.00       0.53 r
+  store_queue/U13229/DIN2 (xor2s2)                        0.19      0.00       0.54 r
+  store_queue/U13229/Q (xor2s2)                           0.14      0.17       0.70 r
+  store_queue/n7706 (net)                       2                   0.00       0.70 r
+  store_queue/U13236/DIN1 (xnr2s2)                        0.14      0.00       0.70 r
+  store_queue/U13236/Q (xnr2s2)                           0.14      0.19       0.89 f
+  store_queue/n7562 (net)                       1                   0.00       0.89 f
+  store_queue/U8346/DIN1 (nnd3s2)                         0.14      0.00       0.89 f
+  store_queue/U8346/Q (nnd3s2)                            0.22      0.07       0.96 r
+  store_queue/n7564 (net)                       1                   0.00       0.96 r
+  store_queue/U8345/DIN2 (oai21s2)                        0.22      0.00       0.96 r
+  store_queue/U8345/Q (oai21s2)                           0.22      0.09       1.06 f
+  store_queue/n7568 (net)                       1                   0.00       1.06 f
+  store_queue/U8344/DIN (i1s8)                            0.22      0.00       1.06 f
+  store_queue/U8344/Q (i1s8)                              0.12      0.18       1.24 r
+  store_queue/n7584 (net)                      11                   0.00       1.24 r
+  store_queue/U13177/DIN2 (nnd2s3)                        0.12      0.00       1.24 r
+  store_queue/U13177/Q (nnd2s3)                           0.28      0.10       1.34 f
+  store_queue/n7567 (net)                       2                   0.00       1.34 f
+  store_queue/U8216/DIN (ib1s6)                           0.28      0.01       1.35 f
+  store_queue/U8216/Q (ib1s6)                             0.09      0.07       1.42 r
+  store_queue/n7582 (net)                       7                   0.00       1.42 r
+  store_queue/U7905/DIN1 (nnd3s2)                         0.09      0.00       1.42 r
+  store_queue/U7905/Q (nnd3s2)                            0.35      0.09       1.51 f
+  store_queue/n7062 (net)                       2                   0.00       1.51 f
+  store_queue/U8121/DIN3 (oai211s1)                       0.35      0.00       1.51 f
+  store_queue/U8121/Q (oai211s1)                          0.45      0.20       1.71 r
+  store_queue/N491 (net)                        1                   0.00       1.71 r
+  store_queue/U8119/DIN (i1s8)                            0.45      0.00       1.71 r
+  store_queue/U8119/Q (i1s8)                              0.09      0.18       1.89 f
+  store_queue/n5260 (net)                       6                   0.00       1.89 f
+  store_queue/U7895/DIN2 (nnd2s2)                         0.09      0.00       1.89 f
+  store_queue/U7895/Q (nnd2s2)                            0.16      0.08       1.97 r
+  store_queue/n7752 (net)                       3                   0.00       1.97 r
+  store_queue/U8768/DIN (hi1s1)                           0.16      0.00       1.97 r
+  store_queue/U8768/Q (hi1s1)                             0.28      0.14       2.11 f
+  store_queue/n7766 (net)                       2                   0.00       2.11 f
+  store_queue/U8182/DIN1 (nnd2s1)                         0.28      0.00       2.11 f
+  store_queue/U8182/Q (nnd2s1)                            0.23      0.12       2.22 r
+  store_queue/n7887 (net)                       3                   0.00       2.22 r
+  store_queue/U8446/DIN (hi1s1)                           0.23      0.00       2.23 r
+  store_queue/U8446/Q (hi1s1)                             0.50      0.24       2.46 f
+  store_queue/n7884 (net)                       2                   0.00       2.46 f
+  store_queue/U14745/DIN1 (nnd2s2)                        0.50      0.00       2.47 f
+  store_queue/U14745/Q (nnd2s2)                           0.25      0.13       2.60 r
+  store_queue/n7974 (net)                       2                   0.00       2.60 r
+  store_queue/U8562/DIN (ib1s1)                           0.25      0.00       2.60 r
+  store_queue/U8562/Q (ib1s1)                             0.17      0.08       2.69 f
+  store_queue/n7899 (net)                       2                   0.00       2.69 f
+  store_queue/U14748/DIN5 (oai33s1)                       0.17      0.00       2.69 f
+  store_queue/U14748/Q (oai33s1)                          0.60      0.26       2.95 r
+  store_queue/n7903 (net)                       1                   0.00       2.95 r
+  store_queue/U14749/DIN1 (aoi13s2)                       0.60      0.00       2.95 r
+  store_queue/U14749/Q (aoi13s2)                          0.29      0.12       3.08 f
+  store_queue/n7904 (net)                       1                   0.00       3.08 f
+  store_queue/U14750/DIN4 (oai211s2)                      0.29      0.00       3.08 f
+  store_queue/U14750/Q (oai211s2)                         0.34      0.15       3.23 r
+  store_queue/n7917 (net)                       1                   0.00       3.23 r
+  store_queue/U14755/DIN2 (oai13s2)                       0.34      0.00       3.23 r
+  store_queue/U14755/Q (oai13s2)                          0.31      0.16       3.39 f
+  store_queue/n7930 (net)                       1                   0.00       3.39 f
+  store_queue/U14757/DIN2 (oai1112s2)                     0.31      0.00       3.40 f
+  store_queue/U14757/Q (oai1112s2)                        0.54      0.22       3.61 r
+  store_queue/n7967 (net)                       1                   0.00       3.61 r
+  store_queue/U14765/DIN2 (oai13s2)                       0.54      0.00       3.61 r
+  store_queue/U14765/Q (oai13s2)                          0.39      0.20       3.82 f
+  store_queue/n7971 (net)                       1                   0.00       3.82 f
+  store_queue/U14767/DIN1 (nnd2s2)                        0.39      0.00       3.82 f
+  store_queue/U14767/Q (nnd2s2)                           0.29      0.15       3.97 r
+  store_queue/store_data_stall (net)            4                   0.00       3.97 r
+  store_queue/U8911/DIN (ib1s1)                           0.29      0.00       3.98 r
+  store_queue/U8911/Q (ib1s1)                             0.12      0.05       4.03 f
+  store_queue/n7983 (net)                       1                   0.00       4.03 f
+  store_queue/U14770/DIN3 (oai211s2)                      0.12      0.00       4.03 f
+  store_queue/U14770/Q (oai211s2)                         0.38      0.15       4.18 r
+  store_queue/n7986 (net)                       1                   0.00       4.18 r
+  store_queue/U8904/DIN (ib1s1)                           0.38      0.00       4.18 r
+  store_queue/U8904/Q (ib1s1)                             0.30      0.16       4.34 f
+  store_queue/rd_valid (net)                    5                   0.00       4.34 f
+  store_queue/rd_valid (SQ)                                         0.00       4.34 f
+  sq_data_valid (net)                                               0.00       4.34 f
+  mem_stage_0/sq_data_valid (mem_stage)                             0.00       4.34 f
+  mem_stage_0/sq_data_valid (net)                                   0.00       4.34 f
+  mem_stage_0/U57151/DIN1 (or3s1)                         0.30      0.00       4.34 f
+  mem_stage_0/U57151/Q (or3s1)                            0.40      0.37       4.71 f
+  mem_stage_0/n70218 (net)                      9                   0.00       4.71 f
+  mem_stage_0/U67361/DIN (ib1s1)                          0.40      0.00       4.71 f
+  mem_stage_0/U67361/Q (ib1s1)                            0.99      0.43       5.14 r
+  mem_stage_0/n69224 (net)                     18                   0.00       5.14 r
+  mem_stage_0/U56970/DIN (ib1s1)                          0.99      0.00       5.14 r
+  mem_stage_0/U56970/Q (ib1s1)                            0.30      0.09       5.23 f
+  mem_stage_0/n59499 (net)                      1                   0.00       5.23 f
+  mem_stage_0/U106553/DIN (ib1s1)                         0.30      0.00       5.23 f
+  mem_stage_0/U106553/Q (ib1s1)                           1.01      0.42       5.65 r
+  mem_stage_0/n59498 (net)                     17                   0.00       5.65 r
+  mem_stage_0/U106663/DIN1 (nnd4s1)                       1.01      0.00       5.65 r
+  mem_stage_0/U106663/Q (nnd4s1)                          0.41      0.12       5.77 f
+  mem_stage_0/n68833 (net)                      1                   0.00       5.77 f
+  mem_stage_0/U106666/DIN4 (or5s1)                        0.41      0.00       5.78 f
+  mem_stage_0/U106666/Q (or5s1)                           0.18      0.23       6.00 f
+  mem_stage_0/n70123 (net)                      2                   0.00       6.00 f
+  mem_stage_0/U106667/DIN8 (oai2222s3)                    0.18      0.00       6.01 f
+  mem_stage_0/U106667/Q (oai2222s3)                       0.11      0.37       6.38 r
+  mem_stage_0/n68837 (net)                      1                   0.00       6.38 r
+  mem_stage_0/U70295/DIN (ib1s1)                          0.11      0.00       6.38 r
+  mem_stage_0/U70295/Q (ib1s1)                            0.20      0.10       6.48 f
+  mem_stage_0/n69091 (net)                      3                   0.00       6.48 f
+  mem_stage_0/U106668/DIN2 (nnd2s2)                       0.20      0.00       6.49 f
+  mem_stage_0/U106668/Q (nnd2s2)                          0.36      0.16       6.65 r
+  mem_stage_0/dcache0/N616 (net)                5                   0.00       6.65 r
+  mem_stage_0/U65736/DIN (ib1s1)                          0.36      0.00       6.65 r
+  mem_stage_0/U65736/Q (ib1s1)                            0.39      0.21       6.86 f
+  mem_stage_0/n52986 (net)                      6                   0.00       6.86 f
+  mem_stage_0/U99425/DIN2 (nnd2s2)                        0.39      0.00       6.87 f
+  mem_stage_0/U99425/Q (nnd2s2)                           0.20      0.11       6.98 r
+  mem_stage_0/n52988 (net)                      1                   0.00       6.98 r
+  mem_stage_0/U56037/DIN (ib1s1)                          0.20      0.00       6.98 r
+  mem_stage_0/U56037/Q (ib1s1)                            0.55      0.27       7.25 f
+  mem_stage_0/n51690 (net)                     13                   0.00       7.25 f
+  mem_stage_0/U56347/DIN (ib1s1)                          0.55      0.00       7.25 f
+  mem_stage_0/U56347/Q (ib1s1)                            0.29      0.16       7.40 r
+  mem_stage_0/n53156 (net)                      3                   0.00       7.40 r
+  mem_stage_0/U58904/DIN (ib1s1)                          0.29      0.00       7.40 r
+  mem_stage_0/U58904/Q (ib1s1)                            0.51      0.26       7.67 f
+  mem_stage_0/n53157 (net)                     11                   0.00       7.67 f
+  mem_stage_0/U99427/DIN4 (aoi22s1)                       0.51      0.00       7.67 f
+  mem_stage_0/U99427/Q (aoi22s1)                          0.39      0.23       7.89 r
+  mem_stage_0/n51693 (net)                      1                   0.00       7.89 r
+  mem_stage_0/U97488/DIN1 (nnd2s2)                        0.39      0.00       7.90 r
+  mem_stage_0/U97488/Q (nnd2s2)                           0.18      0.07       7.96 f
+  mem_stage_0/dcache0/N710 (net)                1                   0.00       7.96 f
+  mem_stage_0/U106555/DIN2 (nnd2s2)                       0.18      0.00       7.97 f
+  mem_stage_0/U106555/Q (nnd2s2)                          0.25      0.12       8.09 r
+  mem_stage_0/n68633 (net)                      3                   0.00       8.09 r
+  mem_stage_0/U67157/DIN1 (nnd2s2)                        0.25      0.00       8.09 r
+  mem_stage_0/U67157/Q (nnd2s2)                           0.39      0.18       8.28 f
+  mem_stage_0/dcache0/fifo_hit_idx[0][0] (net)     9                0.00       8.28 f
+  mem_stage_0/U55720/DIN (ib1s1)                          0.39      0.00       8.28 f
+  mem_stage_0/U55720/Q (ib1s1)                            0.92      0.40       8.68 r
+  mem_stage_0/dcache0/N15444 (net)             15                   0.00       8.68 r
+  mem_stage_0/U64858/DIN2 (and2s1)                        0.92      0.00       8.68 r
+  mem_stage_0/U64858/Q (and2s1)                           0.48      0.28       8.96 r
+  mem_stage_0/n50746 (net)                      5                   0.00       8.96 r
+  mem_stage_0/U56349/DIN (ib1s1)                          0.48      0.00       8.96 r
+  mem_stage_0/U56349/Q (ib1s1)                            0.29      0.15       9.11 f
+  mem_stage_0/n51680 (net)                      4                   0.00       9.11 f
+  mem_stage_0/U58905/DIN (ib1s1)                          0.29      0.00       9.11 f
+  mem_stage_0/U58905/Q (ib1s1)                            0.76      0.32       9.44 r
+  mem_stage_0/n51681 (net)                     14                   0.00       9.44 r
+  mem_stage_0/U97250/DIN4 (aoi22s2)                       0.76      0.00       9.44 r
+  mem_stage_0/U97250/Q (aoi22s2)                          0.44      0.19       9.63 f
+  mem_stage_0/n51510 (net)                      1                   0.00       9.63 f
+  mem_stage_0/U97248/DIN1 (nnd2s2)                        0.44      0.00       9.63 f
+  mem_stage_0/U97248/Q (nnd2s2)                           0.26      0.12       9.76 r
+  mem_stage_0/dcache0/N725 (net)                1                   0.00       9.76 r
+  mem_stage_0/U70085/DIN1 (mxi21s2)                       0.26      0.00       9.76 r
+  mem_stage_0/U70085/Q (mxi21s2)                          0.47      0.28      10.05 f
+  mem_stage_0/n71868 (net)                      9                   0.00      10.05 f
+  mem_stage_0/U67353/DIN (ib1s1)                          0.47      0.00      10.05 f
+  mem_stage_0/U67353/Q (ib1s1)                            0.58      0.28      10.33 r
+  mem_stage_0/dcache0/memory/N997 (net)         9                   0.00      10.33 r
+  mem_stage_0/U101868/DIN2 (nor2s1)                       0.58      0.00      10.33 r
+  mem_stage_0/U101868/Q (nor2s1)                          0.34      0.20      10.53 f
+  mem_stage_0/n55256 (net)                      2                   0.00      10.53 f
+  mem_stage_0/U64866/DIN1 (nnd2s2)                        0.34      0.00      10.53 f
+  mem_stage_0/U64866/Q (nnd2s2)                           0.29      0.14      10.67 r
+  mem_stage_0/n50749 (net)                      4                   0.00      10.67 r
+  mem_stage_0/U61199/DIN (ib1s1)                          0.29      0.00      10.67 r
+  mem_stage_0/U61199/Q (ib1s1)                            0.18      0.09      10.76 f
+  mem_stage_0/n56612 (net)                      2                   0.00      10.76 f
+  mem_stage_0/U56328/DIN (ib1s1)                          0.18      0.00      10.76 f
+  mem_stage_0/U56328/Q (ib1s1)                            0.48      0.20      10.96 r
+  mem_stage_0/n56614 (net)                      9                   0.00      10.96 r
+  mem_stage_0/U57888/DIN (ib1s1)                          0.48      0.00      10.96 r
+  mem_stage_0/U57888/Q (ib1s1)                            0.58      0.31      11.27 f
+  mem_stage_0/n56627 (net)                     15                   0.00      11.27 f
+  mem_stage_0/U102066/DIN4 (aoi22s1)                      0.58      0.00      11.27 f
+  mem_stage_0/U102066/Q (aoi22s1)                         0.36      0.21      11.49 r
+  mem_stage_0/n55413 (net)                      1                   0.00      11.49 r
+  mem_stage_0/U102067/DIN4 (nnd4s1)                       0.36      0.00      11.49 r
+  mem_stage_0/U102067/Q (nnd4s1)                          0.46      0.21      11.70 f
+  mem_stage_0/dcache0/memory/wr_cam_table_in[1][3][0][0] (net)     2     0.00    11.70 f
+  mem_stage_0/U67359/DIN2 (xnr2s1)                        0.46      0.01      11.71 f
+  mem_stage_0/U67359/Q (xnr2s1)                           0.21      0.28      11.99 f
+  mem_stage_0/n68974 (net)                      1                   0.00      11.99 f
+  mem_stage_0/U106756/DIN5 (or5s1)                        0.21      0.00      11.99 f
+  mem_stage_0/U106756/Q (or5s1)                           0.13      0.18      12.17 f
+  mem_stage_0/n68979 (net)                      1                   0.00      12.17 f
+  mem_stage_0/U106757/DIN5 (or5s1)                        0.13      0.00      12.17 f
+  mem_stage_0/U106757/Q (or5s1)                           0.15      0.17      12.34 f
+  mem_stage_0/n70220 (net)                      2                   0.00      12.34 f
+  mem_stage_0/U106758/DIN1 (oai13s2)                      0.15      0.00      12.34 f
+  mem_stage_0/U106758/Q (oai13s2)                         0.47      0.12      12.46 r
+  mem_stage_0/n68987 (net)                      1                   0.00      12.46 r
+  mem_stage_0/U106759/DIN2 (nnd2s2)                       0.47      0.00      12.46 r
+  mem_stage_0/U106759/Q (nnd2s2)                          0.32      0.12      12.59 f
+  mem_stage_0/n70244 (net)                      4                   0.00      12.59 f
+  mem_stage_0/U65659/DIN3 (oai21s2)                       0.32      0.00      12.59 f
+  mem_stage_0/U65659/Q (oai21s2)                          0.51      0.24      12.82 r
+  mem_stage_0/n70221 (net)                      3                   0.00      12.82 r
+  mem_stage_0/U64844/DIN (ib1s1)                          0.51      0.00      12.83 r
+  mem_stage_0/U64844/Q (ib1s1)                            0.20      0.09      12.92 f
+  mem_stage_0/n68989 (net)                      1                   0.00      12.92 f
+  mem_stage_0/U64843/DIN1 (nnd2s2)                        0.20      0.00      12.92 f
+  mem_stage_0/U64843/Q (nnd2s2)                           0.81      0.31      13.23 r
+  mem_stage_0/n70340 (net)                     18                   0.00      13.23 r
+  mem_stage_0/U108219/DIN2 (oai21s2)                      0.81      0.00      13.23 r
+  mem_stage_0/U108219/Q (oai21s2)                         0.49      0.12      13.35 f
+  mem_stage_0/n70234 (net)                      1                   0.00      13.35 f
+  mem_stage_0/U65673/DIN (ib1s1)                          0.49      0.00      13.35 f
+  mem_stage_0/U65673/Q (ib1s1)                            0.46      0.23      13.58 r
+  mem_stage_0/n70331 (net)                      8                   0.00      13.58 r
+  mem_stage_0/U108261/DIN1 (oai21s2)                      0.46      0.00      13.59 r
+  mem_stage_0/U108261/Q (oai21s2)                         0.40      0.21      13.80 f
+  mem_stage_0/dcache0/memory/N13356 (net)       3                   0.00      13.80 f
+  mem_stage_0/U100538/DIN3 (aoi22s1)                      0.40      0.00      13.80 f
+  mem_stage_0/U100538/Q (aoi22s1)                         0.35      0.19      13.99 r
+  mem_stage_0/n54028 (net)                      1                   0.00      13.99 r
+  mem_stage_0/U100539/DIN4 (nnd4s1)                       0.35      0.00      13.99 r
+  mem_stage_0/U100539/Q (nnd4s1)                          0.68      0.30      14.29 f
+  mem_stage_0/dcache0/memory/N13491 (net)       8                   0.00      14.29 f
+  mem_stage_0/U65677/DIN1 (oai22s2)                       0.68      0.00      14.29 f
+  mem_stage_0/U65677/Q (oai22s2)                          0.55      0.20      14.49 r
+  mem_stage_0/dcache0/memory/N13555 (net)       2                   0.00      14.49 r
+  mem_stage_0/U101863/DIN3 (aoi22s2)                      0.55      0.00      14.49 r
+  mem_stage_0/U101863/Q (aoi22s2)                         0.38      0.19      14.68 f
+  mem_stage_0/n54032 (net)                      1                   0.00      14.68 f
+  mem_stage_0/U64842/DIN4 (nnd4s1)                        0.38      0.00      14.68 f
+  mem_stage_0/U64842/Q (nnd4s1)                           1.15      0.51      15.19 r
+  mem_stage_0/dcache0/memory/N13517 (net)      14                   0.00      15.19 r
+  mem_stage_0/U61362/DIN (ib1s1)                          1.15      0.00      15.19 r
+  mem_stage_0/U61362/Q (ib1s1)                            0.76      0.40      15.59 f
+  mem_stage_0/dcache0/memory/N1008 (net)       14                   0.00      15.59 f
+  mem_stage_0/U106554/DIN2 (aoi22s2)                      0.76      0.00      15.60 f
+  mem_stage_0/U106554/Q (aoi22s2)                         0.55      0.25      15.84 r
+  mem_stage_0/n44424 (net)                      2                   0.00      15.84 r
+  mem_stage_0/U39136/DIN1 (nnd2s2)                        0.55      0.00      15.85 r
+  mem_stage_0/U39136/Q (nnd2s2)                           0.44      0.19      16.04 f
+  mem_stage_0/n44400 (net)                      8                   0.00      16.04 f
+  mem_stage_0/U65725/DIN2 (oai22s2)                       0.44      0.00      16.04 f
+  mem_stage_0/U65725/Q (oai22s2)                          0.53      0.17      16.21 r
+  mem_stage_0/dcache0/memory/N13561 (net)       2                   0.00      16.21 r
+  mem_stage_0/U100556/DIN3 (aoi22s1)                      0.53      0.00      16.21 r
+  mem_stage_0/U100556/Q (aoi22s1)                         0.40      0.20      16.42 f
+  mem_stage_0/n54044 (net)                      1                   0.00      16.42 f
+  mem_stage_0/U100557/DIN4 (nnd4s1)                       0.40      0.00      16.42 f
+  mem_stage_0/U100557/Q (nnd4s1)                          0.39      0.22      16.63 r
+  mem_stage_0/dcache0/memory/N13607 (net)       1                   0.00      16.63 r
+  mem_stage_0/U64845/DIN3 (oai22s2)                       0.39      0.00      16.64 r
+  mem_stage_0/U64845/Q (oai22s2)                          0.57      0.26      16.89 f
+  mem_stage_0/dcache0/memory/N1007 (net)        4                   0.00      16.89 f
+  mem_stage_0/U61189/DIN (ib1s1)                          0.57      0.00      16.90 f
+  mem_stage_0/U61189/Q (ib1s1)                            0.22      0.11      17.00 r
+  mem_stage_0/n53347 (net)                      2                   0.00      17.00 r
+  mem_stage_0/U55736/DIN1 (or2s1)                         0.22      0.00      17.01 r
+  mem_stage_0/U55736/Q (or2s1)                            0.34      0.23      17.24 r
+  mem_stage_0/n49949 (net)                      4                   0.00      17.24 r
+  mem_stage_0/U57310/DIN (ib1s1)                          0.34      0.00      17.24 r
+  mem_stage_0/U57310/Q (ib1s1)                            0.44      0.23      17.47 f
+  mem_stage_0/n53356 (net)                     11                   0.00      17.47 f
+  mem_stage_0/U99651/DIN4 (aoi22s1)                       0.44      0.00      17.47 f
+  mem_stage_0/U99651/Q (aoi22s1)                          0.33      0.20      17.67 r
+  mem_stage_0/n53343 (net)                      1                   0.00      17.67 r
+  mem_stage_0/U99652/DIN2 (nnd2s1)                        0.33      0.00      17.67 r
+  mem_stage_0/U99652/Q (nnd2s1)                           0.21      0.09      17.76 f
+  mem_stage_0/dcache0/memory/N13996 (net)       1                   0.00      17.76 f
+  mem_stage_0/U29018/DIN1 (nnd2s2)                        0.21      0.00      17.76 f
+  mem_stage_0/U29018/Q (nnd2s2)                           0.37      0.12      17.88 r
+  mem_stage_0/n36234 (net)                      4                   0.00      17.88 r
+  mem_stage_0/U65732/DIN1 (xor2s1)                        0.37      0.00      17.88 r
+  mem_stage_0/U65732/Q (xor2s1)                           0.27      0.30      18.18 r
+  mem_stage_0/n36929 (net)                      1                   0.00      18.18 r
+  mem_stage_0/U65731/DIN2 (xnr2s1)                        0.27      0.01      18.19 r
+  mem_stage_0/U65731/Q (xnr2s1)                           0.20      0.24      18.43 r
+  mem_stage_0/dcache0/victim_memory/N1966 (net)     3               0.00      18.43 r
+  mem_stage_0/U67162/DIN1 (nor2s1)                        0.20      0.00      18.43 r
+  mem_stage_0/U67162/Q (nor2s1)                           0.40      0.21      18.64 f
+  mem_stage_0/n36917 (net)                      4                   0.00      18.64 f
+  mem_stage_0/U65672/DIN2 (or2s1)                         0.40      0.00      18.64 f
+  mem_stage_0/U65672/Q (or2s1)                            0.13      0.21      18.85 f
+  mem_stage_0/n36916 (net)                      1                   0.00      18.85 f
+  mem_stage_0/U65671/DIN2 (aoi22s2)                       0.13      0.00      18.86 f
+  mem_stage_0/U65671/Q (aoi22s2)                          0.45      0.16      19.01 r
+  mem_stage_0/n36915 (net)                      1                   0.00      19.01 r
+  mem_stage_0/U65670/DIN2 (xnr2s1)                        0.45      0.01      19.02 r
+  mem_stage_0/U65670/Q (xnr2s1)                           0.20      0.25      19.27 r
+  mem_stage_0/n36914 (net)                      1                   0.00      19.27 r
+  mem_stage_0/U28990/DIN2 (nnd2s2)                        0.20      0.00      19.27 r
+  mem_stage_0/U28990/Q (nnd2s2)                           0.30      0.10      19.37 f
+  mem_stage_0/n36406 (net)                      4                   0.00      19.37 f
+  mem_stage_0/U66049/DIN3 (oai21s2)                       0.30      0.00      19.37 f
+  mem_stage_0/U66049/Q (oai21s2)                          1.57      0.62      20.00 r
+  mem_stage_0/evicted_valid_out[2] (net)        3                   0.00      20.00 r
+  mem_stage_0/evicted_valid_out[2] (mem_stage)                      0.00      20.00 r
+  evicted_valid[2] (net)                                            0.00      20.00 r
+  evicted_valid[2] (out)                                  1.57      0.02      20.02 r
+  data arrival time                                                           20.02
+
+  max_delay                                                        30.00      30.00
+  clock uncertainty                                                -0.10      29.90
+  output external delay                                            -0.10      29.80
+  data required time                                                          29.80
+  ------------------------------------------------------------------------------------
+  data required time                                                          29.80
+  data arrival time                                                          -20.02
+  ------------------------------------------------------------------------------------
+  slack (MET)                                                                  9.78
+
+
+1
+ 
+****************************************
+Report : constraint
+        -verbose
+        -max_delay
+Design : pipeline
+Version: O-2018.06
+Date   : Tue Apr 23 22:17:27 2019
+****************************************
+
+
+  Startpoint: rob_retire_out_is_store_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: mem_stage_0/rb0/retire_queue_reg[25][data][55]
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: clock
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clock (rise edge)                                 0.00       0.00
+  clock network delay (ideal)                             0.00       0.00
+  rob_retire_out_is_store_reg/CLK (dffs2)                 0.00 #     0.00 r
+  rob_retire_out_is_store_reg/Q (dffs2)                   0.26       0.26 f
+  store_queue/U13042/Q (and2s2)                           0.20       0.46 f
+  store_queue/U7128/Q (nnd2s3)                            0.07       0.53 r
+  store_queue/U13229/Q (xor2s2)                           0.17       0.70 r
+  store_queue/U13236/Q (xnr2s2)                           0.19       0.89 f
+  store_queue/U8346/Q (nnd3s2)                            0.07       0.96 r
+  store_queue/U8345/Q (oai21s2)                           0.09       1.06 f
+  store_queue/U8344/Q (i1s8)                              0.18       1.24 r
+  store_queue/U13177/Q (nnd2s3)                           0.10       1.34 f
+  store_queue/U8216/Q (ib1s6)                             0.08       1.42 r
+  store_queue/U7905/Q (nnd3s2)                            0.09       1.51 f
+  store_queue/U8121/Q (oai211s1)                          0.20       1.71 r
+  store_queue/U8119/Q (i1s8)                              0.18       1.89 f
+  store_queue/U7895/Q (nnd2s2)                            0.08       1.97 r
+  store_queue/U8768/Q (hi1s1)                             0.14       2.11 f
+  store_queue/U8182/Q (nnd2s1)                            0.12       2.22 r
+  store_queue/U8446/Q (hi1s1)                             0.24       2.46 f
+  store_queue/U14745/Q (nnd2s2)                           0.14       2.60 r
+  store_queue/U8562/Q (ib1s1)                             0.09       2.69 f
+  store_queue/U14748/Q (oai33s1)                          0.26       2.95 r
+  store_queue/U14749/Q (aoi13s2)                          0.13       3.08 f
+  store_queue/U14750/Q (oai211s2)                         0.15       3.23 r
+  store_queue/U14755/Q (oai13s2)                          0.16       3.39 f
+  store_queue/U14757/Q (oai1112s2)                        0.22       3.61 r
+  store_queue/U14765/Q (oai13s2)                          0.21       3.82 f
+  store_queue/U14767/Q (nnd2s2)                           0.16       3.97 r
+  store_queue/U8911/Q (ib1s1)                             0.06       4.03 f
+  store_queue/U14770/Q (oai211s2)                         0.15       4.18 r
+  store_queue/U8904/Q (ib1s1)                             0.17       4.34 f
+  mem_stage_0/U57151/Q (or3s1)                            0.37       4.71 f
+  mem_stage_0/U67361/Q (ib1s1)                            0.43       5.14 r
+  mem_stage_0/U56970/Q (ib1s1)                            0.09       5.23 f
+  mem_stage_0/U106553/Q (ib1s1)                           0.42       5.65 r
+  mem_stage_0/U106663/Q (nnd4s1)                          0.13       5.77 f
+  mem_stage_0/U106666/Q (or5s1)                           0.23       6.00 f
+  mem_stage_0/U106667/Q (oai2222s3)                       0.37       6.38 r
+  mem_stage_0/U70295/Q (ib1s1)                            0.10       6.48 f
+  mem_stage_0/U106668/Q (nnd2s2)                          0.17       6.65 r
+  mem_stage_0/U65736/Q (ib1s1)                            0.21       6.86 f
+  mem_stage_0/U99425/Q (nnd2s2)                           0.12       6.98 r
+  mem_stage_0/U56037/Q (ib1s1)                            0.27       7.25 f
+  mem_stage_0/U56347/Q (ib1s1)                            0.16       7.40 r
+  mem_stage_0/U58904/Q (ib1s1)                            0.26       7.67 f
+  mem_stage_0/U99427/Q (aoi22s1)                          0.23       7.89 r
+  mem_stage_0/U97488/Q (nnd2s2)                           0.07       7.96 f
+  mem_stage_0/U106555/Q (nnd2s2)                          0.12       8.09 r
+  mem_stage_0/U67157/Q (nnd2s2)                           0.19       8.28 f
+  mem_stage_0/U55720/Q (ib1s1)                            0.40       8.68 r
+  mem_stage_0/U64858/Q (and2s1)                           0.28       8.96 r
+  mem_stage_0/U56349/Q (ib1s1)                            0.15       9.11 f
+  mem_stage_0/U58905/Q (ib1s1)                            0.32       9.44 r
+  mem_stage_0/U97250/Q (aoi22s2)                          0.19       9.63 f
+  mem_stage_0/U97248/Q (nnd2s2)                           0.13       9.76 r
+  mem_stage_0/U70085/Q (mxi21s2)                          0.29      10.05 f
+  mem_stage_0/U67353/Q (ib1s1)                            0.28      10.33 r
+  mem_stage_0/U101868/Q (nor2s1)                          0.20      10.53 f
+  mem_stage_0/U64866/Q (nnd2s2)                           0.14      10.67 r
+  mem_stage_0/U61199/Q (ib1s1)                            0.09      10.76 f
+  mem_stage_0/U56328/Q (ib1s1)                            0.20      10.96 r
+  mem_stage_0/U57888/Q (ib1s1)                            0.31      11.27 f
+  mem_stage_0/U102066/Q (aoi22s1)                         0.22      11.49 r
+  mem_stage_0/U102067/Q (nnd4s1)                          0.22      11.70 f
+  mem_stage_0/U67359/Q (xnr2s1)                           0.29      11.99 f
+  mem_stage_0/U106756/Q (or5s1)                           0.18      12.17 f
+  mem_stage_0/U106757/Q (or5s1)                           0.17      12.34 f
+  mem_stage_0/U106758/Q (oai13s2)                         0.12      12.46 r
+  mem_stage_0/U106759/Q (nnd2s2)                          0.12      12.59 f
+  mem_stage_0/U65659/Q (oai21s2)                          0.24      12.82 r
+  mem_stage_0/U64844/Q (ib1s1)                            0.09      12.92 f
+  mem_stage_0/U64843/Q (nnd2s2)                           0.31      13.23 r
+  mem_stage_0/U108219/Q (oai21s2)                         0.12      13.35 f
+  mem_stage_0/U65673/Q (ib1s1)                            0.24      13.58 r
+  mem_stage_0/U108261/Q (oai21s2)                         0.22      13.80 f
+  mem_stage_0/U100538/Q (aoi22s1)                         0.19      13.99 r
+  mem_stage_0/U100539/Q (nnd4s1)                          0.30      14.29 f
+  mem_stage_0/U65677/Q (oai22s2)                          0.20      14.49 r
+  mem_stage_0/U101863/Q (aoi22s2)                         0.19      14.68 f
+  mem_stage_0/U64842/Q (nnd4s1)                           0.51      15.19 r
+  mem_stage_0/U61362/Q (ib1s1)                            0.40      15.59 f
+  mem_stage_0/U106554/Q (aoi22s2)                         0.25      15.84 r
+  mem_stage_0/U39136/Q (nnd2s2)                           0.19      16.04 f
+  mem_stage_0/U65725/Q (oai22s2)                          0.18      16.21 r
+  mem_stage_0/U100556/Q (aoi22s1)                         0.20      16.42 f
+  mem_stage_0/U100557/Q (nnd4s1)                          0.22      16.63 r
+  mem_stage_0/U64845/Q (oai22s2)                          0.26      16.89 f
+  mem_stage_0/U61189/Q (ib1s1)                            0.11      17.00 r
+  mem_stage_0/U55736/Q (or2s1)                            0.23      17.24 r
+  mem_stage_0/U57310/Q (ib1s1)                            0.23      17.47 f
+  mem_stage_0/U99651/Q (aoi22s1)                          0.20      17.67 r
+  mem_stage_0/U99652/Q (nnd2s1)                           0.09      17.76 f
+  mem_stage_0/U29018/Q (nnd2s2)                           0.12      17.88 r
+  mem_stage_0/U65732/Q (xor2s1)                           0.30      18.18 r
+  mem_stage_0/U65731/Q (xnr2s1)                           0.25      18.43 r
+  mem_stage_0/U67162/Q (nor2s1)                           0.21      18.64 f
+  mem_stage_0/U65672/Q (or2s1)                            0.21      18.85 f
+  mem_stage_0/U65671/Q (aoi22s2)                          0.16      19.01 r
+  mem_stage_0/U65670/Q (xnr2s1)                           0.25      19.27 r
+  mem_stage_0/U28990/Q (nnd2s2)                           0.11      19.37 f
+  mem_stage_0/U28399/Q (nnd2s2)                           0.28      19.65 r
+  mem_stage_0/U65658/Q (ib1s1)                            0.09      19.74 f
+  mem_stage_0/U55711/Q (and2s2)                           0.25      19.99 f
+  mem_stage_0/U56346/Q (ib1s1)                            0.40      20.39 r
+  mem_stage_0/U55712/Q (and3s1)                           0.28      20.67 r
+  mem_stage_0/U66102/Q (ib1s1)                            0.36      21.03 f
+  mem_stage_0/U66069/Q (or2s1)                            0.36      21.39 f
+  mem_stage_0/U56494/Q (ib1s1)                            0.14      21.53 r
+  mem_stage_0/U61229/Q (ib1s1)                            0.43      21.96 f
+  mem_stage_0/U55858/Q (and2s1)                           0.41      22.37 f
+  mem_stage_0/U57397/Q (ib1s1)                            0.38      22.75 r
+  mem_stage_0/U50532/Q (oai222s1)                         0.24      23.00 f
+  mem_stage_0/U76257/Q (aoi22s2)                          0.18      23.18 r
+  mem_stage_0/U76256/Q (oai22s2)                          0.14      23.32 f
+  mem_stage_0/rb0/retire_queue_reg[25][data][55]/CLRB (dffcs1)     0.00    23.32 f
+  data arrival time                                                 23.32
+
+  clock clock (rise edge)                                30.00      30.00
+  clock network delay (ideal)                             0.00      30.00
+  clock uncertainty                                      -0.10      29.90
+  mem_stage_0/rb0/retire_queue_reg[25][data][55]/CLK (dffcs1)     0.00    29.90 r
+  library setup time                                     -0.35      29.55
+  data required time                                                29.55
+  --------------------------------------------------------------------------
+  data required time                                                29.55
+  data arrival time                                                -23.32
+  --------------------------------------------------------------------------
+  slack (MET)                                                        6.23
+
+
+  Startpoint: reset (input port clocked by clock)
+  Endpoint: iq0/inst_queue_reg[6][ir][22]
+            (rising edge-triggered flip-flop clocked by clock)
+  Path Group: input_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clock (rise edge)                                 0.00       0.00
+  clock network delay (ideal)                             0.00       0.00
+  input external delay                                    0.10       0.10 r
+  reset (in)                                              0.00       0.10 r
+  CDB_0/U10/Q (ib1s2)                                     0.11       0.21 f
+  CDB_0/U8/Q (and2s2)                                     0.22       0.43 f
+  R0/U19837/Q (i1s9)                                      0.16       0.60 r
+  R0/U24998/Q (xor2s1)                                    0.22       0.81 r
+  R0/U21599/Q (and2s2)                                    0.10       0.91 r
+  R0/U14927/Q (and2s1)                                    0.13       1.04 r
+  R0/U24972/Q (nnd2s1)                                    0.07       1.11 f
+  R0/U25428/Q (oai221s2)                                  0.23       1.34 r
+  R0/U24996/Q (and2s2)                                    0.14       1.48 r
+  R0/U14444/Q (aoi22s3)                                   0.09       1.56 f
+  R0/U22018/Q (and4s3)                                    0.20       1.76 f
+  R0/U24488/Q (nnd2s3)                                    0.09       1.84 r
+  R0/U15172/Q (nnd4s1)                                    0.12       1.97 f
+  R0/U24541/Q (i1s8)                                      0.25       2.22 r
+  R0/U16969/Q (nnd2s3)                                    0.08       2.30 f
+  R0/U15397/Q (oai21s2)                                   0.19       2.49 r
+  R0/U25065/Q (oai22s3)                                   0.20       2.69 f
+  R0/U25093/Q (nor2s3)                                    0.13       2.82 r
+  R0/U16980/Q (mxi41s3)                                   0.22       3.03 f
+  R0/U25061/Q (nnd2s3)                                    0.09       3.12 r
+  R0/U15161/Q (hi1s1)                                     0.11       3.24 f
+  R0/U15162/Q (i1s1)                                      0.08       3.32 r
+  R0/U17222/Q (hi1s1)                                     0.17       3.49 f
+  R0/U17223/Q (i1s1)                                      0.15       3.64 r
+  R0/U17202/Q (xor2s3)                                    0.26       3.90 r
+  R0/U17009/Q (mxi41s3)                                   0.26       4.15 f
+  R0/U17270/Q (nnd2s3)                                    0.11       4.27 r
+  R0/U25066/Q (ib1s6)                                     0.05       4.32 f
+  R0/U17013/Q (mxi21s3)                                   0.16       4.48 r
+  R0/U14464/Q (i1s8)                                      0.15       4.63 f
+  R0/U24552/Q (ib1s6)                                     0.04       4.67 r
+  R0/U20332/Q (and2s2)                                    0.11       4.78 r
+  R0/U24575/Q (oai21s1)                                   0.16       4.93 f
+  R0/U17110/Q (and4s3)                                    0.25       5.18 f
+  R0/U14484/Q (mxi41s3)                                   0.19       5.37 r
+  R0/U24534/Q (oai322s1)                                  0.17       5.54 f
+  R0/U24532/Q (i1s8)                                      0.19       5.73 r
+  R0/U24533/Q (ib1s6)                                     0.03       5.76 f
+  U16746/Q (or5s1)                                        0.21       5.97 f
+  U16741/Q (and4s1)                                       0.30       6.27 f
+  iq0/U8243/Q (nnd2s1)                                    0.09       6.36 r
+  iq0/U8665/Q (nor2s1)                                    0.18       6.54 f
+  iq0/U8705/Q (nnd3s3)                                    0.14       6.69 r
+  iq0/U7902/Q (and2s2)                                    0.14       6.83 r
+  iq0/U8721/Q (oai21s2)                                   0.12       6.95 f
+  iq0/U9416/Q (i1s8)                                      0.18       7.13 r
+  iq0/U8761/Q (ib1s6)                                     0.04       7.17 f
+  iq0/U7595/Q (nnd2s1)                                    0.07       7.24 r
+  iq0/U7850/Q (and2s2)                                    0.13       7.36 r
+  iq0/U7882/Q (nnd2s2)                                    0.06       7.42 f
+  iq0/U7896/Q (aoi21s3)                                   0.04       7.46 r
+  iq0/inst_queue_reg[6][ir][22]/SETB (dffss2)             0.00       7.46 r
+  data arrival time                                                  7.46
+
+  clock clock (rise edge)                                30.00      30.00
+  clock network delay (ideal)                             0.00      30.00
+  clock uncertainty                                      -0.10      29.90
+  iq0/inst_queue_reg[6][ir][22]/CLK (dffss2)              0.00      29.90 r
+  library setup time                                     -0.47      29.43
+  data required time                                                29.43
+  --------------------------------------------------------------------------
+  data required time                                                29.43
+  data arrival time                                                 -7.46
+  --------------------------------------------------------------------------
+  slack (MET)                                                       21.96
+
+
+  Startpoint: rob_retire_out_is_store_reg
+              (rising edge-triggered flip-flop clocked by clock)
+  Endpoint: evicted_valid[0]
+            (output port clocked by clock)
+  Path Group: output_grp
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  pipeline           tsmcwire              lec25dscc25_TT
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  rob_retire_out_is_store_reg/CLK (dffs2)                 0.00 #     0.00 r
+  rob_retire_out_is_store_reg/Q (dffs2)                   0.26       0.26 f
+  store_queue/U13042/Q (and2s2)                           0.20       0.46 f
+  store_queue/U7128/Q (nnd2s3)                            0.07       0.53 r
+  store_queue/U13229/Q (xor2s2)                           0.17       0.70 r
+  store_queue/U13236/Q (xnr2s2)                           0.19       0.89 f
+  store_queue/U8346/Q (nnd3s2)                            0.07       0.96 r
+  store_queue/U8345/Q (oai21s2)                           0.09       1.06 f
+  store_queue/U8344/Q (i1s8)                              0.18       1.24 r
+  store_queue/U13177/Q (nnd2s3)                           0.10       1.34 f
+  store_queue/U8216/Q (ib1s6)                             0.08       1.42 r
+  store_queue/U7905/Q (nnd3s2)                            0.09       1.51 f
+  store_queue/U8121/Q (oai211s1)                          0.20       1.71 r
+  store_queue/U8119/Q (i1s8)                              0.18       1.89 f
+  store_queue/U7895/Q (nnd2s2)                            0.08       1.97 r
+  store_queue/U8768/Q (hi1s1)                             0.14       2.11 f
+  store_queue/U8182/Q (nnd2s1)                            0.12       2.22 r
+  store_queue/U8446/Q (hi1s1)                             0.24       2.46 f
+  store_queue/U14745/Q (nnd2s2)                           0.14       2.60 r
+  store_queue/U8562/Q (ib1s1)                             0.09       2.69 f
+  store_queue/U14748/Q (oai33s1)                          0.26       2.95 r
+  store_queue/U14749/Q (aoi13s2)                          0.13       3.08 f
+  store_queue/U14750/Q (oai211s2)                         0.15       3.23 r
+  store_queue/U14755/Q (oai13s2)                          0.16       3.39 f
+  store_queue/U14757/Q (oai1112s2)                        0.22       3.61 r
+  store_queue/U14765/Q (oai13s2)                          0.21       3.82 f
+  store_queue/U14767/Q (nnd2s2)                           0.16       3.97 r
+  store_queue/U8911/Q (ib1s1)                             0.06       4.03 f
+  store_queue/U14770/Q (oai211s2)                         0.15       4.18 r
+  store_queue/U8904/Q (ib1s1)                             0.17       4.34 f
+  mem_stage_0/U57151/Q (or3s1)                            0.37       4.71 f
+  mem_stage_0/U67361/Q (ib1s1)                            0.43       5.14 r
+  mem_stage_0/U56970/Q (ib1s1)                            0.09       5.23 f
+  mem_stage_0/U106553/Q (ib1s1)                           0.42       5.65 r
+  mem_stage_0/U106663/Q (nnd4s1)                          0.13       5.77 f
+  mem_stage_0/U106666/Q (or5s1)                           0.23       6.00 f
+  mem_stage_0/U106667/Q (oai2222s3)                       0.37       6.38 r
+  mem_stage_0/U70295/Q (ib1s1)                            0.10       6.48 f
+  mem_stage_0/U106668/Q (nnd2s2)                          0.17       6.65 r
+  mem_stage_0/U65736/Q (ib1s1)                            0.21       6.86 f
+  mem_stage_0/U99425/Q (nnd2s2)                           0.12       6.98 r
+  mem_stage_0/U56037/Q (ib1s1)                            0.27       7.25 f
+  mem_stage_0/U56347/Q (ib1s1)                            0.16       7.40 r
+  mem_stage_0/U58904/Q (ib1s1)                            0.26       7.67 f
+  mem_stage_0/U99427/Q (aoi22s1)                          0.23       7.89 r
+  mem_stage_0/U97488/Q (nnd2s2)                           0.07       7.96 f
+  mem_stage_0/U106555/Q (nnd2s2)                          0.12       8.09 r
+  mem_stage_0/U67157/Q (nnd2s2)                           0.19       8.28 f
+  mem_stage_0/U55720/Q (ib1s1)                            0.40       8.68 r
+  mem_stage_0/U64858/Q (and2s1)                           0.28       8.96 r
+  mem_stage_0/U56349/Q (ib1s1)                            0.15       9.11 f
+  mem_stage_0/U58905/Q (ib1s1)                            0.32       9.44 r
+  mem_stage_0/U97250/Q (aoi22s2)                          0.19       9.63 f
+  mem_stage_0/U97248/Q (nnd2s2)                           0.13       9.76 r
+  mem_stage_0/U70085/Q (mxi21s2)                          0.29      10.05 f
+  mem_stage_0/U67353/Q (ib1s1)                            0.28      10.33 r
+  mem_stage_0/U101868/Q (nor2s1)                          0.20      10.53 f
+  mem_stage_0/U64866/Q (nnd2s2)                           0.14      10.67 r
+  mem_stage_0/U61199/Q (ib1s1)                            0.09      10.76 f
+  mem_stage_0/U56328/Q (ib1s1)                            0.20      10.96 r
+  mem_stage_0/U57888/Q (ib1s1)                            0.31      11.27 f
+  mem_stage_0/U102066/Q (aoi22s1)                         0.22      11.49 r
+  mem_stage_0/U102067/Q (nnd4s1)                          0.22      11.70 f
+  mem_stage_0/U67359/Q (xnr2s1)                           0.29      11.99 f
+  mem_stage_0/U106756/Q (or5s1)                           0.18      12.17 f
+  mem_stage_0/U106757/Q (or5s1)                           0.17      12.34 f
+  mem_stage_0/U106758/Q (oai13s2)                         0.12      12.46 r
+  mem_stage_0/U106759/Q (nnd2s2)                          0.12      12.59 f
+  mem_stage_0/U65659/Q (oai21s2)                          0.24      12.82 r
+  mem_stage_0/U64844/Q (ib1s1)                            0.09      12.92 f
+  mem_stage_0/U64843/Q (nnd2s2)                           0.31      13.23 r
+  mem_stage_0/U108219/Q (oai21s2)                         0.12      13.35 f
+  mem_stage_0/U65673/Q (ib1s1)                            0.24      13.58 r
+  mem_stage_0/U108261/Q (oai21s2)                         0.22      13.80 f
+  mem_stage_0/U100538/Q (aoi22s1)                         0.19      13.99 r
+  mem_stage_0/U100539/Q (nnd4s1)                          0.30      14.29 f
+  mem_stage_0/U65677/Q (oai22s2)                          0.20      14.49 r
+  mem_stage_0/U101863/Q (aoi22s2)                         0.19      14.68 f
+  mem_stage_0/U64842/Q (nnd4s1)                           0.51      15.19 r
+  mem_stage_0/U61362/Q (ib1s1)                            0.40      15.59 f
+  mem_stage_0/U106554/Q (aoi22s2)                         0.25      15.84 r
+  mem_stage_0/U39136/Q (nnd2s2)                           0.19      16.04 f
+  mem_stage_0/U65725/Q (oai22s2)                          0.18      16.21 r
+  mem_stage_0/U100556/Q (aoi22s1)                         0.20      16.42 f
+  mem_stage_0/U100557/Q (nnd4s1)                          0.22      16.63 r
+  mem_stage_0/U64845/Q (oai22s2)                          0.26      16.89 f
+  mem_stage_0/U61189/Q (ib1s1)                            0.11      17.00 r
+  mem_stage_0/U55736/Q (or2s1)                            0.23      17.24 r
+  mem_stage_0/U57310/Q (ib1s1)                            0.23      17.47 f
+  mem_stage_0/U99651/Q (aoi22s1)                          0.20      17.67 r
+  mem_stage_0/U99652/Q (nnd2s1)                           0.09      17.76 f
+  mem_stage_0/U29018/Q (nnd2s2)                           0.12      17.88 r
+  mem_stage_0/U65732/Q (xor2s1)                           0.30      18.18 r
+  mem_stage_0/U65731/Q (xnr2s1)                           0.25      18.43 r
+  mem_stage_0/U67162/Q (nor2s1)                           0.21      18.64 f
+  mem_stage_0/U65672/Q (or2s1)                            0.21      18.85 f
+  mem_stage_0/U65671/Q (aoi22s2)                          0.16      19.01 r
+  mem_stage_0/U65670/Q (xnr2s1)                           0.25      19.27 r
+  mem_stage_0/U28990/Q (nnd2s2)                           0.11      19.37 f
+  mem_stage_0/U28399/Q (nnd2s2)                           0.28      19.65 r
+  mem_stage_0/U65658/Q (ib1s1)                            0.09      19.74 f
+  mem_stage_0/U55711/Q (and2s2)                           0.25      19.99 f
+  mem_stage_0/U56372/Q (ib1s1)                            0.29      20.28 r
+  evicted_valid[0] (out)                                  0.02      20.31 r
+  data arrival time                                                 20.31
+
+  max_delay                                              30.00      30.00
+  clock uncertainty                                      -0.10      29.90
+  output external delay                                  -0.10      29.80
+  data required time                                                29.80
+  --------------------------------------------------------------------------
+  data required time                                                29.80
+  data arrival time                                                -20.31
+  --------------------------------------------------------------------------
+  slack (MET)                                                        9.49
+
+
+1
+Information: Updating graph... (UID-83)
+Warning: Design 'pipeline' contains 2 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
+ 
+****************************************
+Report : reference
+Design : pipeline
+Version: O-2018.06
+Date   : Tue Apr 23 22:17:44 2019
+****************************************
+
+Attributes:
+    b - black box (unknown)
+   bo - allows boundary optimization
+    d - dont_touch
+   mo - map_only
+    h - hierarchical
+    n - noncombinational
+    r - removable
+    s - synthetic operator
+    u - contains unmapped logic
+
+Reference          Library       Unit Area   Count    Total Area   Attributes
+-----------------------------------------------------------------------------
+Arch_Map_Table                97343.107483       1  97343.107483  h, n
+BP2                           723196.782024       1 723196.782024 h, n
+CDB                             646.963188       1    646.963188  h
+Free_List                     235929.333538       1 235929.333538 h, n
+IQ                            748135.524380       1 748135.524380 h, n
+LQ                            1101680.839054       1 1101680.839054 h, n
+Map_Table                     165705.566292       1 165705.566292 h, n
+ROB                           1512891.961884       1 1512891.961884 h, n
+RS                            1526764.468189       1 1526764.468189 h, n
+SQ                            786659.461090       1 786659.461090 h, n
+and2s1             lec25dscc25_TT    49.766399    1456 72459.877502
+and2s2             lec25dscc25_TT    58.060799      15   870.911980
+and3s1             lec25dscc25_TT    66.355202       2   132.710403
+and4s1             lec25dscc25_TT    74.649597      20  1492.991943
+aoi21s1            lec25dscc25_TT    49.766399       6   298.598396
+aoi21s2            lec25dscc25_TT    49.766399      34  1692.057579
+aoi22s1            lec25dscc25_TT    58.060799      95  5515.775871
+aoi22s2            lec25dscc25_TT    58.060799    1796 104277.194366
+aoi23s2            lec25dscc25_TT    66.355202       1    66.355202
+aoi211s1           lec25dscc25_TT    58.060799       2   116.121597
+aoi221s1           lec25dscc25_TT    74.649597     157 11719.986755
+aoi222s1           lec25dscc25_TT    82.944000     150 12441.600037
+dffcs1             lec25dscc25_TT   165.888000    2152 356990.977051 n
+dffcs2             lec25dscc25_TT   182.477005     648 118245.099243 n
+dffs1              lec25dscc25_TT   157.593994      86 13553.083496 n
+dffs2              lec25dscc25_TT   174.182007      66 11496.012451 n
+dffss1             lec25dscc25_TT   199.065994     241 47974.904617 n
+dffss2             lec25dscc25_TT   207.360001      60 12441.600037 n
+ex_stage                      2066226.450745       1 2066226.450745 h, n
+hi1s1              lec25dscc25_TT    33.177601       8   265.420807
+hnb1s1             lec25dscc25_TT    58.060799       3   174.182396
+i1s1               lec25dscc25_TT    33.177601      21   696.729618
+i1s3               lec25dscc25_TT    41.472000      18   746.496002
+ib1s1              lec25dscc25_TT    33.177601    2400 79626.242065
+icache                        1229021.134884       1 1229021.134884 h, n
+id_stage                       9231.666847       1   9231.666847  h
+if_stage                      51060.339005       1  51060.339005  h, n
+mem_controller                49567.334648       1  49567.334648  h, n
+mem_stage                     5800422.483776       1 5800422.483776 h, n
+nb1s1              lec25dscc25_TT    41.472000      84  3483.648010
+nb1s2              lec25dscc25_TT    49.766399    1602 79725.771812
+nb1s3              lec25dscc25_TT    66.355202      13   862.617622
+nnd2s1             lec25dscc25_TT    41.472000      25  1036.800003
+nnd2s2             lec25dscc25_TT    41.472000     187  7755.264023
+nnd3s2             lec25dscc25_TT    49.766399       5   248.831997
+nnd4s1             lec25dscc25_TT    58.060799      25  1451.519966
+nor2s1             lec25dscc25_TT    41.472000     116  4810.752014
+nor3s1             lec25dscc25_TT    82.944000       1    82.944000
+nor4s1             lec25dscc25_TT    82.944000       1    82.944000
+oai13s2            lec25dscc25_TT    58.060799       1    58.060799
+oai21s1            lec25dscc25_TT    49.766399      12   597.196793
+oai21s2            lec25dscc25_TT    49.766399     118  5872.435127
+oai22s1            lec25dscc25_TT    58.060799       4   232.243195
+oai22s2            lec25dscc25_TT    58.060799     128  7431.782227
+oai211s2           lec25dscc25_TT    58.060799     145  8418.815804
+oai221s2           lec25dscc25_TT    74.649597      64  4777.574219
+oai222s1           lec25dscc25_TT    82.944000      64  5308.416016
+oai321s2           lec25dscc25_TT   110.543999       1   110.543999
+oai1112s2          lec25dscc25_TT    66.355202       8   530.841614
+or2s1              lec25dscc25_TT    49.766399      23  1144.627186
+or2s2              lec25dscc25_TT    58.060799       3   174.182396
+or4s1              lec25dscc25_TT    82.944000       1    82.944000
+or5s1              lec25dscc25_TT    91.238403       4   364.953613
+or5s3              lec25dscc25_TT   182.477005       1   182.477005
+phys_regfile                  3093810.916462       1 3093810.916462 h, n
+pipeline_DW01_cmp6_0           6743.347000       1   6743.347000  h
+pipeline_DW01_sub_0            8136.806381       1   8136.806381  h
+psel_generic                   1119.743607       1   1119.743607  h
+xnr2s1             lec25dscc25_TT    82.944000       1    82.944000
+-----------------------------------------------------------------------------
+Total 69 references                                 20202500.291332
+1

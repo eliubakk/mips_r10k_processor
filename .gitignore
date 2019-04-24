@@ -13,12 +13,9 @@ vc_hdrs.h
 dve_simv
 dve_syn_simv
 DVEfiles
-*.vg
-*.rep
 *.db
 *.chk
 *command.log
-*.ddc
 *.log
 *.swp
 synth/*
