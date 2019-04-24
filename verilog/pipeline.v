@@ -87,8 +87,7 @@ module pipeline (
 
 
 	output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
-	output VIC_CACHE_T [2:0] evicted_data,
-	output logic [2:0] evicted_valid,
+  output VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out,
 	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue,
 	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
 
@@ -370,7 +369,7 @@ logic [63:0] retire_reg_wr_data;
   logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
   logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
-  logic [3:0]  Dmem2proc_tag, Imem2proc_tag;
+  logic [3:0]  Dmem2proc_tag, Imem2proc_tag, Rmem2proc_tag;
   
   // Icache wires
   logic [63:0] Icache_data_out, proc2Icache_addr;
@@ -414,6 +413,7 @@ logic tag_in_lq;
     .Imem2proc_data(Imem2proc_data), 
     .Imem2proc_tag(Imem2proc_tag),
     .Rmem2proc_response(Rmem2proc_response),
+    .Rmem2proc_tag(Rmem2proc_tag),
     .proc2mem_command(proc2mem_command), 
     .proc2mem_addr(proc2mem_addr), 
     .proc2mem_data(proc2mem_data)
@@ -1379,13 +1379,13 @@ assign lq_pop_en = ~mem_co_stall;
      .Dmem2proc_tag(Dmem2proc_tag),
      .Dmem2proc_response(Dmem2proc_response),
      .Rmem2proc_response   (Rmem2proc_response),
+     .Rmem2proc_tag        (Rmem2proc_tag),
      .sq_data_not_found(sq_data_not_found),   // addresses in store are not ready
      .sq_data_valid(sq_data_valid),           // adddress not found
      
      // Outputs
      .sets_out(dcache_data),
-  	.evicted_out(evicted_data),
-  	.evicted_valid_out(evicted_valid),
+     .vic_queue_out(vic_queue_out),
   	.retire_queue_out(retire_queue),
   	.retire_queue_tail_out(retire_queue_tail),
      .mem_result_out(mem_result_out),

@@ -59,6 +59,7 @@ const VIC_CACHE_T EMPTY_VIC_CACHE =
 typedef struct packed {
   logic [63:0] address;
   logic [63:0] data;
+  logic [3:0] mem_tag;
   logic valid;
 } RETIRE_BUF_T;
 
@@ -66,6 +67,7 @@ const RETIRE_BUF_T EMPTY_RETIRE_BUF =
 {
   64'b0,
   64'b0,
+  4'b0,
   1'b0
 };
 
