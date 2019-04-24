@@ -1,4 +1,5 @@
 `include "../../sys_defs.vh"
+`include "../../cache_defs.vh"
 
 `define DEBUG
 

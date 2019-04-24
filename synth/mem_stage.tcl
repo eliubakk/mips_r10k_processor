@@ -12,10 +12,10 @@
 
 set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
 set misc_files [glob "../../verilog/misc/*"]
-read_file -f ddc [list "../../synth/dcache/dcache.ddc"]
-set_dont_touch dcache
+#read_file -f ddc [list "../../synth/dcache/dcache.ddc"]
+#set_dont_touch dcache
 
-analyze -f sverilog [concat "../../verilog/mem_stage.v" "../../verilog/retire_buffer.v" $misc_files]
+analyze -f sverilog [concat "../../verilog/mem_stage.v" "../../verilog/dcache.v" "../../verilog/retire_buffer.v" "../../verilog/vic_cache.v" "../../verilog/cachemem.v" "../../verilog/encoder.v" $misc_files]
 elaborate mem_stage
 
 set design_name mem_stage

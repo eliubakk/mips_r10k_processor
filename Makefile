@@ -101,10 +101,10 @@ $(MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v sys_defs.vh cache_defs.vh
 $(MISC_MODULES_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/misc/%.v sys_defs.vh cache_defs.vh
 	make $*.vg
 
-#$(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh cache_defs.vh
-#	make $*.vg
-synth/pipeline.vg: $(VERILOG_DIR)/%.v synth/pipeline.tcl sys_defs.vh cache_defs.vh
-	cd synth && dc_shell-t -f ./pipeline.tcl | tee pipeline_synth.out
+$(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_defs.vh cache_defs.vh
+	make $*.vg
+#synth/pipeline.vg: $(VERILOG_DIR)/%.v synth/pipeline.tcl sys_defs.vh cache_defs.vh
+#	cd synth && dc_shell-t -f ./pipeline.tcl | tee pipeline_synth.out
 
 .PHONY: $(MODULES_VG)
 .PHONY: $(MISC_MODULES_VG)
@@ -174,13 +174,13 @@ dve_$(PIPELINE_NAME): $(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_pr
 dve:	$(SIMFILES) $(TESTBENCH)
 	$(VCS) +memcbk $(TESTBENCH) $(SIMFILES) -o dve -R -gui
 
-#syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
-#	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
-#	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
-#	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
-#	mv ** ../../.
-syn_simv: synth/pipeline.vg  $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
-	$(VCS_PIPE) testbench/pipeline_test.v synth/pipeline.vg $(LIB) -o syn_simv
+syn_simv: $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
+	make $(SYN_DIR)/$(PIPELINE_NAME)/$(PIPELINE_NAME).vg && \
+	cd $(SYN_DIR)/$(PIPELINE_NAME) && \
+	$(VCS_PIPE) $(PIPELINE_NAME).vg $(patsubst %,../../%,$^) $(LIB) -o $@ && \
+	mv ** ../../.
+#syn_simv: synth/pipeline.vg  $(TEST_DIR)/$(PIPELINE_NAME)_test.v $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v 
+#	$(VCS_PIPE) testbench/pipeline_test.v synth/pipeline.vg $(LIB) -o syn_simv
 
 
 vis_simv:	$(PIPELINE) $(MISC_SRC) $(VERILOG_SRC) $(TEST_DIR)/pipe_print.c $(TEST_DIR)/mem.v $(TEST_DIR)/visual_testbench.v $(TEST_DIR)/visual_c_hooks.c
