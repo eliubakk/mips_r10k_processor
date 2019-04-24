@@ -628,11 +628,11 @@ assign if_stage_dispatch_en = !inst_queue_full;
 			if(ret_branch_inst.cond & ret_branch_inst.direct) begin
 				ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC) & (ret_branch_inst.prediction == rob_retire_out_take_branch);
 			end else if ( !ret_branch_inst.cond) begin
-				if(!ret_branch_inst.ret) begin
+			//	if(!ret_branch_inst.ret) begin
 					ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC);
-				end else begin
-					ret_pred_correct = 1'b1;// No need to flush when the instructon is return
-				end
+			//	end else begin
+			//		ret_pred_correct = 1'b1;
+			//	end
 			end
 		end
 	end

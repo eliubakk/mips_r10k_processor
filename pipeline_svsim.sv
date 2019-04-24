@@ -56,10 +56,9 @@ module pipeline_svsim (
                 
                 
 	output CACHE_SET_T [((32/4) - 1):0] dcache_data,
-	output VIC_CACHE_T [2:0] evicted_data,
-	output logic [2:0] evicted_valid,
-	output RETIRE_BUF_T [(50 - 1):0] retire_queue,
-	output logic [$clog2(50):0] retire_queue_tail,
+  output VIC_CACHE_T [(4-1):0] vic_queue_out,
+	output RETIRE_BUF_T [(20 - 1):0] retire_queue,
+	output logic [$clog2(20):0] retire_queue_tail,
 
 
           output logic mem_co_valid_inst,   
@@ -113,16 +112,16 @@ module pipeline_svsim (
         {>>{ rs_table_out_inst_opcode }}, {>>{ rs_table_out_inst_valid_inst }}, 
         {>>{ issue_reg_npc }}, {>>{ issue_reg_inst_opcode }}, 
         {>>{ issue_reg_inst_valid_inst }}, {>>{ issue_next }}, 
-        {>>{ dcache_data }}, {>>{ evicted_data }}, {>>{ evicted_valid }}, 
-        {>>{ retire_queue }}, {>>{ retire_queue_tail }}, 
-        {>>{ mem_co_valid_inst }}, {>>{ mem_co_NPC }}, {>>{ mem_co_IR }}, 
-        {>>{ ex_co_NPC }}, {>>{ ex_co_IR }}, {>>{ ex_co_valid_inst }}, 
-        {>>{ co_ret_NPC }}, {>>{ co_ret_IR }}, {>>{ co_ret_valid_inst }}, 
-        {>>{ rs_table_out }}, {>>{ arch_table }}, {>>{ ROB_table_out }}, 
-        {>>{ map_table_out }}, {>>{ free_list_out }}, {>>{ if_id_enable }}, 
-        {>>{ RS_enable }}, {>>{ is_pr_enable }}, {>>{ CDB_enable }}, 
-        {>>{ ROB_enable }}, {>>{ mem_co_enable }}, {>>{ co_ret_enable }}, 
-        {>>{ dispatch_en }}, {>>{ branch_not_taken }}, {>>{ is_ex_enable }}, 
-        {>>{ ex_co_enable }} );
+        {>>{ dcache_data }}, {>>{ vic_queue_out }}, {>>{ retire_queue }}, 
+        {>>{ retire_queue_tail }}, {>>{ mem_co_valid_inst }}, 
+        {>>{ mem_co_NPC }}, {>>{ mem_co_IR }}, {>>{ ex_co_NPC }}, 
+        {>>{ ex_co_IR }}, {>>{ ex_co_valid_inst }}, {>>{ co_ret_NPC }}, 
+        {>>{ co_ret_IR }}, {>>{ co_ret_valid_inst }}, {>>{ rs_table_out }}, 
+        {>>{ arch_table }}, {>>{ ROB_table_out }}, {>>{ map_table_out }}, 
+        {>>{ free_list_out }}, {>>{ if_id_enable }}, {>>{ RS_enable }}, 
+        {>>{ is_pr_enable }}, {>>{ CDB_enable }}, {>>{ ROB_enable }}, 
+        {>>{ mem_co_enable }}, {>>{ co_ret_enable }}, {>>{ dispatch_en }}, 
+        {>>{ branch_not_taken }}, {>>{ is_ex_enable }}, {>>{ ex_co_enable }}
+ );
 endmodule
 `endif
