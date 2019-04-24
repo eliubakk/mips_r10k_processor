@@ -29,18 +29,18 @@ module mem_stage(
     input         sq_data_not_found,   // store addresses in the store queue not calculated
     input         sq_data_valid,       //address not found for forwarding
 
-    output [63:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
-    output        mem_rd_stall,
-    output        mem_stall_out,
-    output [63:0] mem_rd_miss_addr_out,
-    output [63:0] mem_rd_miss_data_out,
+    output logic [63:0] mem_result_out,      // outgoing instruction result (to MEM/WB)
+    output logic  mem_rd_stall,
+    output logic  mem_stall_out,
+    output logic [63:0] mem_rd_miss_addr_out,
+    output logic [63:0] mem_rd_miss_data_out,
     output logic  mem_rd_miss_valid_out,
-    output [1:0] proc2Dmem_command,
-    output [63:0] proc2Dmem_addr,      // Address sent to data-memory
-    output [63:0] proc2Dmem_data,      // Data sent to data-memory
-    output [1:0]  proc2Rmem_command,
-    output [63:0] proc2Rmem_addr,      // Address sent to data-memory
-    output [63:0] proc2Rmem_data,
+    output logic [1:0] proc2Dmem_command,
+    output logic [63:0] proc2Dmem_addr,      // Address sent to data-memory
+    output logic [63:0] proc2Dmem_data,      // Data sent to data-memory
+    output logic [1:0]  proc2Rmem_command,
+    output logic [63:0] proc2Rmem_addr,      // Address sent to data-memory
+    output logic [63:0] proc2Rmem_data,
 	// signals used for flushing
 	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
 	output VIC_CACHE_T [2:0] evicted_out,

@@ -45,7 +45,7 @@ module vic_cache(clock, reset,
 
     //update logic variables
     logic [(`VIC_SIZE-1):0][(`NUM_VIC_BITS-1):0] vic_num_shift;
-    logic [(`NUM_VIC_BITS-1):0] num_evict;
+    logic [(`NUM_VIC_BITS):0] num_evict;
 
     //assign rd CAM variables
     genvar ig, jg;
@@ -55,7 +55,7 @@ module vic_cache(clock, reset,
 	for (ig = 0; ig < `VIC_SIZE; ++ig) begin
 		assign vic_queue_cam_table_in[ig][0] = {vic_queue[ig].line.tag, vic_queue[ig].idx};
         for (jg = 0; jg < RD_PORTS; ++jg) begin
-            assign rd_vic_hits[jg][ig] = vic_cam_hits[ig][jg] & vic_queue[ig].line.valid;
+            assign rd_vic_hits[jg][ig] = vic_cam_hits[ig][0][jg] & vic_queue[ig].line.valid;
         end
 	end
 
@@ -122,18 +122,32 @@ module vic_cache(clock, reset,
             evicted_valid[i] = (num_evict > i);
         end
 
-        //wr vic to queue
-        for(int i = 0; i < WR_PORTS; ++i) begin
-            if(i < num_evict) begin
+        for(int i = 0; i < `VIC_SIZE; ++i) begin
+            if((i+num_evict) < `VIC_SIZE) begin
                 vic_queue_next[i] = vic_queue_next[i+num_evict];
-                vic_queue_next[WR_PORTS+i].line = vic[i];
-                vic_queue_next[WR_PORTS+i].idx = vic_idx[i];
-            end else if(vic_valid[i]) begin
-                vic_queue_next[vic_queue_tail_next+i].line = vic[i];
-                vic_queue_next[vic_queue_tail_next+i].idx = vic_idx[i];
+            end else begin
+                vic_queue_next[i] = EMPTY_VIC_CACHE;
             end
         end
-        vic_queue_tail_next = (num_evict > 0)? `VIC_SIZE : vic_queue_tail_next + BIT_COUNT_LUT[vic_valid];
+        vic_queue_tail_next -= num_evict;
+
+        //wr vic to queue
+        for(int i = 0; i < WR_PORTS; ++i) begin
+            // if(i < num_evict) begin
+            //     vic_queue_next[i] = vic_queue_next[i+num_evict];
+            //     vic_queue_next[WR_PORTS+i].line = vic[i];
+            //     vic_queue_next[WR_PORTS+i].idx = vic_idx[i];
+            // end else if(vic_valid[i]) begin
+            //     vic_queue_next[vic_queue_tail_next+i].line = vic[i];
+            //     vic_queue_next[vic_queue_tail_next+i].idx = vic_idx[i];
+            // end
+            if(vic_valid[i]) begin
+                vic_queue_next[vic_queue_tail_next].line = vic[i];
+                vic_queue_next[vic_queue_tail_next].idx = vic_idx[i];
+                vic_queue_tail_next += 1'b1;
+            end
+        end
+        //vic_queue_tail_next = (num_evict > 0)? `VIC_SIZE : vic_queue_tail_next + BIT_COUNT_LUT[vic_valid];
     end
 
      // synopsys sync_set_reset "reset"     
