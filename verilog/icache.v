@@ -1,5 +1,5 @@
 `include "../../sys_defs.vh"
-`include "../../cache_defs.vh"
+//`include "../../cache_defs.vh"
 //`define INST_BUFFER_LEN 6
 //`define NUM_INST_PREFETCH 4
 module icache(clock, reset,
@@ -7,10 +7,10 @@ module icache(clock, reset,
               Imem2proc_response, Imem2proc_data, Imem2proc_tag,
               Icache_data_out, Icache_valid_out,
               proc2Imem_command, proc2Imem_addr);
-  parameter NUM_WAYS = 4;
+  //parameter NUM_WAYS = 4;
   parameter RD_PORTS = 1;
 
-  `define NUM_WAYS NUM_WAYS
+  //`define NUM_WAYS NUM_WAYS
   //`include "../../cache_defs.vh"
 
   input clock, reset;
@@ -60,7 +60,7 @@ module icache(clock, reset,
   logic cache_wr_miss_valid;
 
   cachemem #(
-    .NUM_WAYS(4),
+    //.NUM_WAYS(4),
     .RD_PORTS(RD_PORTS+2),
     .WR_PORTS(1)) 
   memory(
@@ -159,18 +159,18 @@ module icache(clock, reset,
   //cache rd PC_in
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
     assign cache_rd_en[ig] = 1'b1;
-    assign {cache_rd_tag[ig], cache_rd_idx[ig]} = PC_in[31:3];
+    assign {cache_rd_tag[ig], cache_rd_idx[ig]} = PC_in[(`MEM_ADDR_BITS-1):3];
     assign Icache_data_out = cache_rd_data[ig];
     assign Icache_valid_out = cache_rd_valid[ig];
   end
 
   //cache rd front of queue
   assign cache_rd_en[RD_PORTS] = (PC_queue_tail != 0)? 1'b1 : 1'b0;
-  assign {cache_rd_tag[RD_PORTS], cache_rd_idx[RD_PORTS]} = PC_queue[0].address[31:3];
+  assign {cache_rd_tag[RD_PORTS], cache_rd_idx[RD_PORTS]} = PC_queue[0].address[(`MEM_ADDR_BITS-1):3];
 
   //cache rd PC_queue entry to send to main memory
   assign cache_rd_en[RD_PORTS+1] = (send_req_ptr < PC_queue_tail)? 1'b1 : 1'b0;
-  assign {cache_rd_tag[RD_PORTS+1], cache_rd_idx[RD_PORTS+1]} = PC_queue[send_req_ptr].address[31:3];
+  assign {cache_rd_tag[RD_PORTS+1], cache_rd_idx[RD_PORTS+1]} = PC_queue[send_req_ptr].address[(`MEM_ADDR_BITS-1):3];
 
   assign unanswered_miss = send_request? (Imem2proc_response == 0) :
                            (PC_queue_tail == 0) & changed_addr? cache_rd_en[0] & ~cache_rd_valid[0] : 
@@ -248,7 +248,7 @@ module icache(clock, reset,
       mem_waiting_ptr <= `SD {$clog2(`INST_BUFFER_LEN){1'b0}};
       cache_wr_en     <= `SD 1'b0;
       cache_wr_data   <= `SD 64'b0;
-      {cache_wr_tag, cache_wr_idx} <= `SD 29'b0;
+      {cache_wr_tag, cache_wr_idx} <= `SD {(`NUM_TAG_BITS+`NUM_SET_BITS){1'b0}};
     end else begin
       last_PC_in      <= `SD PC_in;
       send_request    <= `SD unanswered_miss;
@@ -259,11 +259,11 @@ module icache(clock, reset,
       if(mem_done) begin
         cache_wr_en   <= `SD 1'b1;
         cache_wr_data <= `SD Imem2proc_data;
-        {cache_wr_tag, cache_wr_idx} <= `SD PC_queue[0].address[31:3];
+        {cache_wr_tag, cache_wr_idx} <= `SD PC_queue[0].address[(`MEM_ADDR_BITS-1):3];
       end else begin
         cache_wr_en   <= `SD 1'b0;
         cache_wr_data <= `SD 64'b0;
-        {cache_wr_tag, cache_wr_idx} <= `SD 29'b0;
+        {cache_wr_tag, cache_wr_idx} <= `SD {(`NUM_TAG_BITS+`NUM_SET_BITS){1'b0}};
       end
     end
   end

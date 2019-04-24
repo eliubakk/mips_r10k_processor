@@ -1,5 +1,5 @@
 `include "../../sys_defs.vh"
-`include "../../cache_defs.vh"
+//`include "../../cache_defs.vh"
 
 `define DEBUG
 
@@ -8,7 +8,7 @@ module vic_cache(clock, reset,
               rd_en, rd_idx, rd_tag,
               evicted_vic, evicted_valid,
               rd_vic, rd_valid, vic_queue_out);
-    parameter NUM_WAYS = 4;
+    //parameter NUM_WAYS = 4;
     parameter RD_PORTS = 2;
     parameter WR_PORTS = 3;
 

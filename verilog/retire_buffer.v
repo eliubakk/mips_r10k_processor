@@ -4,9 +4,9 @@ module retire_buffer(clock, reset,
               Rmem2proc_tag, Rmem2proc_response,
               proc2Rmem_command, proc2Rmem_addr, proc2Rmem_data,
               full, retire_queue_out, retire_queue_tail_out);
-	parameter NUM_WAYS = 4;
+	//parameter NUM_WAYS = 4;
 	parameter WR_PORTS = 1;
-	`include "../../cache_defs.vh"
+	//`include "../../cache_defs.vh"
 
 	//inputs
 	input clock, reset;
@@ -20,7 +20,7 @@ module retire_buffer(clock, reset,
 	output logic [63:0] proc2Rmem_addr;
 	output logic [63:0] proc2Rmem_data;
 	output logic full;
-	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue_out;
+	output RETIRE_BUF_T [(`RETIRE_SIZE-1):0] retire_queue_out;
 	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail_out;
 
 	RETIRE_BUF_T [(`RETIRE_SIZE-1):0] retire_queue, retire_queue_next;
@@ -79,7 +79,7 @@ module retire_buffer(clock, reset,
 
 		for(int i = 0; i < WR_PORTS; ++i) begin
 			if(evicted_valid[i] & evicted[i].line.dirty & ~full) begin
-				retire_queue_next[retire_queue_tail_next].address = {32'b0, 
+				retire_queue_next[retire_queue_tail_next].address = {{(64-`MEM_ADDR_BITS){1'b0}}, 
 																evicted[i].line.tag, 
 																evicted[i].idx,
 																3'b0};

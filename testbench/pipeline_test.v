@@ -15,12 +15,12 @@
 // `endif
 `ifndef SYN
 `include "../../sys_defs.vh"
-`define NUM_WAYS 4
-`include "../../cache_defs.vh"
+//`define NUM_WAYS 4
+//`include "../../cache_defs.vh"
 `else
 `include "sys_defs.vh"
-`define NUM_WAYS 4
-`include "cache_defs.vh"
+//`define NUM_WAYS 4
+//`include "cache_defs.vh"
 `endif
 extern void print_header(string str);
 extern void print_cycles(int valid);
@@ -338,9 +338,9 @@ logic		unanswered_miss_out;
 		// handle evicted_data
 		//$display("evicted_valid[%d] = %b", i, evicted_valid[i]);
     //$display("evicted[i]",);
-		if (vic_queue_out[i].line.valid & vic_queue_out[i].line.dirty) begin
-			memory.unified_memory[{vic_queue_out[i].line.tag, vic_queue_out[i].idx}] = vic_queue_out[i].line.data;
-		end
+		//if (vic_queue_out[i].line.valid & vic_queue_out[i].line.dirty) begin
+		//	memory.unified_memory[{vic_queue_out[i].line.tag, vic_queue_out[i].idx}] = vic_queue_out[i].line.data;
+		//end
 	end
 
 	for (int i = 0; i < `RETIRE_SIZE; ++i) begin
@@ -374,8 +374,8 @@ logic		unanswered_miss_out;
 				$finish;
 			 end
 			//$display("\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-			$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
-			$display("Pipeline Assigns");
+			//$display("------------------------------------------------------------------------------Cycle: %d-----------------------------------------------------------------------", clock_count);
+			//$display("Pipeline Assigns");
 			//display_icache;
 			//$display("proc2mem_command: %d proc2mem_addr %d Dmem2proc_response: %d Imem2proc_response: %d", pipeline_0.proc2mem_command, pipeline_0.proc2mem_addr, pipeline_0.Dmem2proc_response, pipeline_0.Imem2proc_response);
 			//display_memory;
@@ -420,7 +420,7 @@ logic		unanswered_miss_out;
 		//	$display("branch_not_taken : %d, pred_incorrect : %d", pipeline_0.branch_not_taken, !pipeline_0.ret_pred_correct);
 			
 			//$display("halt : %b", pipeline_0.head_halt);
-			$display("\n");
+			//$display("\n");
 
 		end
 	endtask

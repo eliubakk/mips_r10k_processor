@@ -8,7 +8,7 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
-`include "../../cache_defs.vh"
+//`include "../../cache_defs.vh"
 `define DEBUG
 `define SD #1
 
@@ -684,7 +684,7 @@ end
 		if12_branch_inst.direct = 1'b0;
 		if12_branch_inst.ret = 1'b0;
 		if12_branch_inst.pc = 64'h0;
-		if12_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){0}};
+		if12_branch_inst.br_idx = {($clog2(`OBQ_SIZE)){1'b0}};
 		if12_branch_inst.prediction = 0;
 
 		if(if12_valid_inst_out) begin // 
@@ -988,10 +988,10 @@ end
 	// synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
       if (reset | branch_not_taken) begin
-        id_di_rega    <= `SD 0;
-        id_di_regb    <= `SD 0;
+        id_di_rega    <= `SD `ZERO_REG;
+        id_di_regb    <= `SD `ZERO_REG;
         id_di_inst_in <= `SD EMPTY_ROW;
-        id_di_NPC     <= `SD 0;
+        id_di_NPC     <= `SD 64'b0;
         id_di_IR      <= `SD `NOOP_INST;
         id_di_valid_inst  <=`SD `FALSE;
        
@@ -1001,8 +1001,8 @@ end
 	id_di_branch_inst.ret	 	<= `SD 1'b0;
 	id_di_branch_inst.pc 		<= `SD 64'h0;
 	id_di_branch_inst.pred_pc	<= `SD 64'h0;
-	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	id_di_branch_inst.prediction 	<= `SD 0;
+	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
+	id_di_branch_inst.prediction 	<= `SD 1'b0;
 
 
       end else if(id_di_enable) begin // Update the value
@@ -1016,10 +1016,10 @@ end
 	id_di_branch_inst <= `SD if_id_branch_inst;
 
      end else  begin
-        id_di_rega    <= `SD 0;
-        id_di_regb    <= `SD 0;
+        id_di_rega    <= `SD `ZERO_REG;
+        id_di_regb    <= `SD `ZERO_REG;
         id_di_inst_in <= `SD EMPTY_ROW;
-        id_di_NPC     <= `SD 0;
+        id_di_NPC     <= `SD 64'b0;
         id_di_IR      <= `SD `NOOP_INST;
         id_di_valid_inst  <=`SD `FALSE;
         
@@ -1029,8 +1029,8 @@ end
 	id_di_branch_inst.ret	 	<= `SD 1'b0;
 	id_di_branch_inst.pc 		<= `SD 64'h0;
 	id_di_branch_inst.pred_pc	<= `SD 64'h0;
-	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	id_di_branch_inst.prediction 	<= `SD 0;
+	id_di_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
+	id_di_branch_inst.prediction 	<= `SD 1'b0;
 
 
 	end
@@ -1171,14 +1171,14 @@ ex_stage ex_stage_0 (
 always_ff @(posedge clock) begin
 	if(reset | branch_not_taken) begin
 		for(integer i=0 ; i<3; ++i) begin
-			ex_mult_reg[i].npc <= `SD 0;
+			ex_mult_reg[i].npc <= `SD 64'b0;
 			ex_mult_reg[i].inst_opcode <= `SD `NOOP_INST;
 			ex_mult_reg[i].T <= `SD `ZERO_REG;
-			ex_mult_reg[i].inst.wr_mem <= `SD 0;
+			ex_mult_reg[i].inst.wr_mem <= `SD 1'b0;
 			
-			ex_mult_reg[i].inst.halt<= `SD 0;
-			ex_mult_reg[i].inst.illegal <= `SD 0;
-			ex_mult_reg[i].inst.valid_inst <= `SD 0;
+			ex_mult_reg[i].inst.halt<= `SD 1'b0;
+			ex_mult_reg[i].inst.illegal <= `SD 1'b0;
+			ex_mult_reg[i].inst.valid_inst <= `SD 1'b0;
 		end
 	end else begin
 		ex_mult_reg <=  `SD {ex_mult_reg[1],ex_mult_reg[0],issue_reg[3]};
@@ -1239,16 +1239,16 @@ end
   always_ff @(posedge clock) begin//Initialize all registers once
     for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin
       if (reset | branch_not_taken) begin
-          ex_co_NPC[i]          <= `SD 0;
+          ex_co_NPC[i]          <= `SD 64'b0;
           ex_co_IR[i]           <= `SD `NOOP_INST;
           ex_co_dest_reg_idx[i] <= `SD `ZERO_REG;
-          ex_co_rd_mem[i]       <= `SD 0;
-          ex_co_wr_mem[i]       <= `SD 0;
-          ex_co_halt[i]         <= `SD 0;
-          ex_co_illegal[i]      <= `SD 0;
-          ex_co_valid_inst[i]   <= `SD 0;
+          ex_co_rd_mem[i]       <= `SD 1'b0;
+          ex_co_wr_mem[i]       <= `SD 1'b0;
+          ex_co_halt[i]         <= `SD 1'b0;
+          ex_co_illegal[i]      <= `SD 1'b0;
+          ex_co_valid_inst[i]   <= `SD 1'b0;
           //ex_co_rega[i]         <= `SD 0;
-          ex_co_alu_result[i]   <= `SD 0;
+          ex_co_alu_result[i]   <= `SD 64'b0;
           // ex_co_sq_idx[0] <= `SD 0;
           // ex_co_sq_idx[1] <= `SD 0;
 	  //ex_co_done		<= `SD 1'b0;
@@ -1287,8 +1287,8 @@ end
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
-      ex_co_sq_idx[0] <= `SD 0;
-      ex_co_sq_idx[1] <= `SD 0;
+      ex_co_sq_idx[0] <= `SD {`SQ_SIZE_BITS{1'b0}};
+      ex_co_sq_idx[1] <= `SD {`SQ_SIZE_BITS{1'b0}};
     end else begin
       if (ex_co_enable[FU_LD_IDX]) begin
         ex_co_sq_idx[1] <= `SD issue_reg[FU_LD_IDX].sq_idx;
@@ -1308,11 +1308,11 @@ end
      ex_co_rega_st <= `SD 64'b0;
      // ex_co_rd_mem <= `SD 0;
      // ex_c0_wr_mem <= `SD 0;
-      ex_co_take_branch  <= `SD 0;
-      ex_co_branch_index <= `SD {$clog2(`OBQ_SIZE){0}};
-      ex_co_unconditional_branch <= `SD 0;
+      ex_co_take_branch  <= `SD 1'b0;
+      ex_co_branch_index <= `SD {$clog2(`OBQ_SIZE){1'b0}};
+      ex_co_unconditional_branch <= `SD 1'b0;
       ex_co_br_wr_data <= `SD 64'b0;
-      ex_co_branch_target <= `SD 0;
+      ex_co_branch_target <= `SD 1'b0;
     end
     if(ex_co_enable[4]) begin
       ex_co_rega <= `SD is_ex_T1_value[2];
@@ -1439,11 +1439,11 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   // synopsys sync_set_reset "reset"
  always_ff @(posedge clock) begin
     if (reset | branch_not_taken ) begin
-      mem_co_valid_inst   <= `SD 0;
-      mem_co_NPC          <= `SD 0;
+      mem_co_valid_inst   <= `SD 1'b0;
+      mem_co_NPC          <= `SD 64'b0;
       mem_co_IR          <= `SD `NOOP_INST;
-      mem_co_halt         <= `SD 0;
-      mem_co_illegal      <= `SD 0;
+      mem_co_halt         <= `SD 1'b0;
+      mem_co_illegal      <= `SD 1'b0;
       mem_co_dest_reg_idx <= `SD `DUMMY_REG;
       mem_co_alu_result   <= `SD 64'b0;
     end else if (mem_co_enable & ~mem_co_stall) begin
@@ -1473,11 +1473,11 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
       
       
      end else begin
-      mem_co_valid_inst   <= `SD 0;
-      mem_co_NPC          <= `SD 0;
+      mem_co_valid_inst   <= `SD 1'b0;
+      mem_co_NPC          <= `SD 64'b0;
       mem_co_IR           <= `SD `NOOP_INST;
-      mem_co_halt         <= `SD 0;
-      mem_co_illegal      <= `SD 0;
+      mem_co_halt         <= `SD 1'b0;
+      mem_co_illegal      <= `SD 1'b0;
       mem_co_dest_reg_idx <= `SD `DUMMY_REG;
       mem_co_alu_result   <= `SD 64'b0;
      end
@@ -1515,7 +1515,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
             co_alu_result_selected      =    0;
             co_branch_valid = 1'b0;
             co_take_branch_selected = 1'b0;
-            co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+            co_branch_index = {($clog2(`OBQ_SIZE)){1'b0}};
             co_branch_target = 32'h0;
 
 
@@ -1535,7 +1535,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 
               co_branch_valid = 1'b0;
               co_take_branch_selected = 1'b0;
-              co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+              co_branch_index = {($clog2(`OBQ_SIZE)){1'b0}};
               co_branch_target = 32'h0;
 
             end else begin
@@ -1554,7 +1554,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
               end else begin
                 co_branch_valid = 1'b0;
                 co_take_branch_selected = 1'b0;
-                co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+                co_branch_index = {($clog2(`OBQ_SIZE)){1'b0}};
                 co_branch_target = 32'h0;
               end
             end
@@ -1570,7 +1570,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
           co_alu_result_selected      =    0;
         	 co_branch_valid = 1'b0;
         	 co_take_branch_selected = 1'b0;
-        	 co_branch_index = {($clog2(`OBQ_SIZE)){0}};
+        	 co_branch_index = {($clog2(`OBQ_SIZE)){1'b0}};
         	 co_branch_target = 32'h0;
 
       end
@@ -1618,16 +1618,16 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
-      co_ret_NPC          <= `SD 0;
+      co_ret_NPC          <= `SD 64'b0;
       co_ret_IR           <= `SD `NOOP_INST;
-      co_ret_halt         <= `SD 0;
-      co_ret_illegal      <= `SD 0;
-      co_ret_valid_inst   <= `SD 0;
+      co_ret_halt         <= `SD 1'b0;
+      co_ret_illegal      <= `SD 1'b0;
+      co_ret_valid_inst   <= `SD 1'b0;
       co_ret_dest_reg_idx <= `SD `ZERO_REG;
-      co_ret_take_branch  <= `SD 0;
-      co_ret_result       <= `SD 0;
-      co_ret_branch_valid       <= 'SD 0;
-      co_ret_branch_prediction  <= `SD 0;
+      co_ret_take_branch  <= `SD 1'b0;
+      co_ret_result       <= `SD 64'b0;
+      co_ret_branch_valid       <= `SD 1'b0;
+      co_ret_branch_prediction  <= `SD 1'b0;
     end else if (co_ret_enable) begin
       // these are forwarded directly from EX/MEM latches
       co_ret_NPC          <= `SD co_NPC_selected;
@@ -1653,7 +1653,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   // synopsys sync_set_reset "reset"
  always_ff @(posedge clock) begin
     if(reset | branch_not_taken) begin
-      retire_is_store_next <= `SD 0;
+      retire_is_store_next <= `SD 1'b0;
     end else begin
       retire_is_store_next <= `SD retire_is_store;
     end
@@ -1728,16 +1728,16 @@ assign rob_retire_out_is_store_comb = rob_retire_out.is_store & rob_retire_out.b
   // synopsys sync_set_reset "reset"
 always_ff @ (posedge clock) begin
 	if(reset | branch_not_taken) begin
-		retire_inst_busy <= `SD 0;
+		retire_inst_busy <= `SD 1'b0;
 		retire_reg_wr_idx <= `SD `ZERO_REG;
-		retire_reg_wr_en <= `SD 0;
+		retire_reg_wr_en <= `SD 1'b0;
 		retire_reg_NPC <= `SD 64'h4;
-		retire_reg_phys <= `SD 0;
-		rob_retire_out_halt <= `SD 0;
-		rob_retire_out_take_branch <= `SD 0;
+		retire_reg_phys <= `SD `DUMMY_REG;
+		rob_retire_out_halt <= `SD 1'b0;
+		rob_retire_out_take_branch <= `SD 1'b0;
 		rob_retire_out_T_new <= `SD `DUMMY_REG;
 		rob_retire_out_T_old <= `SD `DUMMY_REG;
-    rob_retire_opcode <= `SD {32{0}};
+    rob_retire_opcode <= `SD {32{1'b0}};
 	
 	ret_branch_inst.en 		<= `SD 1'b0;
 	ret_branch_inst.cond 		<= `SD 1'b0;
@@ -1745,8 +1745,8 @@ always_ff @ (posedge clock) begin
 	ret_branch_inst.ret 	<= `SD 1'b0;
 	ret_branch_inst.pc 		<= `SD 64'h0;
 	ret_branch_inst.pred_pc	<= `SD 64'h0;
-	ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-	ret_branch_inst.prediction 	<= `SD 0;
+	ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
+	ret_branch_inst.prediction 	<= `SD 1'b0;
 	//ret_branch_inst.taken 	<= `SD 0;
 
 
@@ -1754,7 +1754,7 @@ always_ff @ (posedge clock) begin
     rob_retire_opcode <= `SD rob_retire_out.opcode;
 		retire_inst_busy <= rob_retire_out.busy;
 		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
-		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `ZERO_REG) & !rob_retire_out.halt);
+		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `DUMMY_REG) & !rob_retire_out.halt);
 		retire_reg_NPC <= `SD rob_retire_out.npc;
 		retire_reg_phys <= `SD rob_retire_out.T_new;
 		rob_retire_out_halt <= `SD rob_retire_out.halt;
@@ -1779,8 +1779,8 @@ always_ff @ (posedge clock) begin
 			ret_branch_inst.ret 	<= `SD 1'b0;
 			ret_branch_inst.pc 		<= `SD 64'h0;
 			ret_branch_inst.pred_pc	<= `SD 64'h0;
-			ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){0}};
-			ret_branch_inst.prediction 	<= `SD 0;
+			ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
+			ret_branch_inst.prediction 	<= `SD 1'b0;
 	
 		end
 	end
