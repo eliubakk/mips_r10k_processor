@@ -1,9 +1,7 @@
 simv/*
 simv
 csrc/*
-*.mem
 *.key
-*.out
 vis_simv
 *.daidir
 syn_simv*
@@ -14,7 +12,6 @@ dve_simv
 dve_syn_simv
 DVEfiles
 *.db
-*.chk
 *command.log
 *.log
 *.swp

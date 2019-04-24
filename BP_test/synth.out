@@ -1,0 +1,769 @@
+
+                           Design Compiler Graphical 
+                                 DC Ultra (TM)
+                                  DFTMAX (TM)
+                              Power Compiler (TM)
+                                 DesignWare (R)
+                                 DC Expert (TM)
+                               Design Vision (TM)
+                               HDL Compiler (TM)
+                               VHDL Compiler (TM)
+                                  DFT Compiler
+                               Design Compiler(R)
+
+                 Version O-2018.06 for linux64 - May 21, 2018 
+
+                    Copyright (c) 1988 - 2018 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+Initializing...
+#
+# Written by : DC-Transcript, Version X-2005.09-SP2 -- Jan 03, 2006
+# Date       : Tue Aug 29 17:09:34 2006
+#
+#
+# Translation of script: tut_synth.scr
+#
+#/***********************************************************/
+#/* The following five lines must be updated for every      */
+#/* new design                                              */
+#/***********************************************************/
+set search_path [ list "./" "/afs/umich.edu/class/eecs470/lib/synopsys/"]
+./ /afs/umich.edu/class/eecs470/lib/synopsys/
+analyze -f sverilog "BP.v BTB.v GSHARE.v OBQ.v sys_defs.vh"
+Running PRESTO HDLC
+Compiling source file ./BP.v
+Opening include file sys_defs.vh
+Compiling source file ./BTB.v
+Compiling source file ./GSHARE.v
+Compiling source file ./OBQ.v
+Compiling source file ./sys_defs.vh
+Presto compilation completed successfully.
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+1
+elaborate BP
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/gtech.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/standard.sldb'
+  Loading link library 'gtech'
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+Running PRESTO HDLC
+
+Inferred memory devices in process
+	in routine BP line 172 in file
+		'./BP.v'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|  next_pc_valid_reg  | Flip-flop |   1   |  N  | N  | N  | N  | N  | N  | N  |
+|     next_pc_reg     | Flip-flop |  32   |  Y  | N  | N  | N  | N  | N  | N  |
+|  next_pc_index_reg  | Flip-flop |   5   |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Presto compilation completed successfully.
+Elaborated 1 design.
+Current design is now 'BP'.
+Warning: Can't read link_library file 'your_library.db'. (UID-3)
+Information: Building the design 'BTB'. (HDL-193)
+
+Inferred memory devices in process
+	in routine BTB line 97 in file
+		'./BTB.v'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+| target_address_reg  | Flip-flop |  192  |  Y  | N  | N  | N  | N  | N  | N  |
+|      valid_reg      | Flip-flop |  16   |  Y  | N  | N  | N  | N  | N  | N  |
+|       tag_reg       | Flip-flop |  160  |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|      BTB/86      |   16   |    1    |      4       |
+|      BTB/86      |   16   |   10    |      4       |
+|      BTB/88      |   16   |   12    |      4       |
+======================================================
+Presto compilation completed successfully.
+Information: Building the design 'OBQ'. (HDL-193)
+Warning:  ./OBQ.v:89: signed to unsigned conversion occurs. (VER-318)
+Warning:  ./OBQ.v:139: signed to unsigned conversion occurs. (VER-318)
+Warning:  ./OBQ.v:173: signed to unsigned conversion occurs. (VER-318)
+Warning:  ./OBQ.v:192: signed to unsigned conversion occurs. (VER-318)
+
+Inferred memory devices in process
+	in routine OBQ line 214 in file
+		'./OBQ.v'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|  row_tag_index_reg  | Flip-flop |   5   |  Y  | N  | N  | N  | N  | N  | N  |
+|       obq_reg       | Flip-flop |  160  |  Y  | N  | N  | N  | N  | N  | N  |
+|      tail_reg       | Flip-flop |   5   |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|      OBQ/51      |   16   |   10    |      4       |
+|      OBQ/98      |   16   |    1    |      4       |
+|     OBQ/100      |   16   |    1    |      4       |
+|     OBQ/125      |   16   |    1    |      4       |
+|     OBQ/184      |   16   |    1    |      4       |
+|     OBQ/207      |   16   |    1    |      4       |
+======================================================
+Presto compilation completed successfully.
+Information: Building the design 'GSHARE'. (HDL-193)
+
+Inferred memory devices in process
+	in routine GSHARE line 90 in file
+		'./GSHARE.v'.
+===============================================================================
+|    Register Name    |   Type    | Width | Bus | MB | AR | AS | SR | SS | ST |
+===============================================================================
+|       ght_reg       | Flip-flop |  10   |  Y  | N  | N  | N  | N  | N  | N  |
+|       pht_reg       | Flip-flop | 1024  |  Y  | N  | N  | N  | N  | N  | N  |
+===============================================================================
+Statistics for MUX_OPs
+======================================================
+| block name/line  | Inputs | Outputs | # sel inputs |
+======================================================
+|    GSHARE/65     |  1024  |    1    |      10      |
+|    GSHARE/78     |  1024  |    1    |      10      |
+======================================================
+Presto compilation completed successfully.
+1
+set design_name BP
+BP
+##############################################
+set clock_name clock
+clock
+set reset_name reset
+reset
+set CLK_PERIOD 10
+10
+#/***********************************************************/
+#/* The rest of this file may be left alone for most small  */
+#/* to moderate sized designs.  You may need to alter it    */
+#/* when synthesizing your final project.                   */
+#/***********************************************************/
+set SYN_DIR ./
+./
+set search_path "/afs/umich.edu/class/eecs470/lib/synopsys/"
+/afs/umich.edu/class/eecs470/lib/synopsys/
+set target_library "lec25dscc25_TT.db"
+lec25dscc25_TT.db
+set link_library [concat  "*" $target_library]
+* lec25dscc25_TT.db
+#/***********************************************************/
+#/* Set some flags for optimisation */
+set compile_top_all_paths "true"
+true
+set auto_wire_load_selection "false"
+false
+#/***********************************************************/
+#/*  Clk Periods/uncertainty/transition                     */
+set CLK_TRANSITION 0.1
+0.1
+set CLK_UNCERTAINTY 0.1
+0.1
+set CLK_LATENCY 0.1
+0.1
+#/* Input/output Delay values */
+set AVG_INPUT_DELAY 0.1
+0.1
+set AVG_OUTPUT_DELAY 0.1
+0.1
+#/* Critical Range (ns) */
+set CRIT_RANGE 1.0
+1.0
+#/***********************************************************/
+#/* Design Constrains: Not all used                         */
+set MAX_TRANSITION 1.0
+1.0
+set FAST_TRANSITION 0.1
+0.1
+set MAX_FANOUT 32
+32
+set MID_FANOUT 8
+8
+set LOW_FANOUT 1
+1
+set HIGH_DRIVE 0
+0
+set HIGH_LOAD 1.0
+1.0
+set AVG_LOAD 0.1
+0.1
+set AVG_FANOUT_LOAD 10
+10
+#/***********************************************************/
+#/*BASIC_INPUT = cb18os120_tsmc_max/nd02d1/A1
+#BASIC_OUTPUT = cb18os120_tsmc_max/nd02d1/ZN*/
+set DRIVING_CELL dffacs1
+dffacs1
+#/* DONT_USE_LIST = {   } */
+#/*************operation cons**************/
+#/*OP_WCASE = WCCOM;
+#OP_BCASE = BCCOM;*/
+set WIRE_LOAD "tsmcwire"
+tsmcwire
+set LOGICLIB lec25dscc25_TT
+lec25dscc25_TT
+#/*****************************/
+#/* Sourcing the file that sets the Search path and the libraries(target,link) */
+set sys_clk $clock_name
+clock
+set netlist_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".vg"]
+./BP.vg
+set db_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".db"]
+./BP.db
+set rep_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".rep"]
+./BP.rep
+set dc_shell_status [ set chk_file [format "%s%s"  [format "%s%s"  $SYN_DIR $design_name] ".chk"] ]
+./BP.chk
+#/* if we didnt find errors at this point, run */
+if {  $dc_shell_status != [list] } {
+   current_design $design_name
+  link
+  set_wire_load_model -name $WIRE_LOAD -lib $LOGICLIB $design_name
+  set_wire_load_mode top
+  set_fix_multiple_port_nets -outputs -buffer_constants
+  create_clock -period $CLK_PERIOD -name $sys_clk [find port $sys_clk]
+  set_clock_uncertainty $CLK_UNCERTAINTY $sys_clk
+  set_fix_hold $sys_clk
+  group_path -from [all_inputs] -name input_grp
+  group_path -to [all_outputs] -name output_grp
+  set_driving_cell  -lib_cell $DRIVING_CELL [all_inputs]
+  remove_driving_cell [find port $sys_clk]
+  set_fanout_load $AVG_FANOUT_LOAD [all_outputs]
+  set_load $AVG_LOAD [all_outputs]
+  set_input_delay $AVG_INPUT_DELAY -clock $sys_clk [all_inputs]
+  remove_input_delay -clock $sys_clk [find port $sys_clk]
+  set_output_delay $AVG_OUTPUT_DELAY -clock $sys_clk [all_outputs]
+  set_dont_touch reset_name
+  set_resistance 0 reset_name
+  set_drive 0 reset_name
+  set_critical_range $CRIT_RANGE [current_design]
+  set_max_delay $CLK_PERIOD [all_outputs]
+  set MAX_FANOUT $MAX_FANOUT
+  set MAX_TRANSITION $MAX_TRANSITION
+  uniquify
+  redirect $chk_file { check_design }
+  compile -map_effort medium
+  write -hier -format verilog -output $netlist_file $design_name
+  write -hier -format db -output $db_file $design_name
+  redirect $rep_file { report_design -nosplit }
+  redirect -append $rep_file { report_area }
+  redirect -append $rep_file { report_timing -max_paths 2 -input_pins -nets -transition_time -nosplit }
+  redirect -append $rep_file { report_constraint -all_violators -verbose -nosplit }
+  remove_design -all
+  read_file -format verilog $netlist_file
+  current_design $design_name
+  redirect -append $rep_file { report_reference -nosplit }
+  quit
+} else {
+   quit
+}
+Current design is 'BP'.
+Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
+
+  Linking design 'BP'
+  Using the following designs and libraries:
+  --------------------------------------------------------------------------
+  * (4 designs)               /afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/BP_test/BP.db, etc
+  lec25dscc25_TT (library)    /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db
+
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Design rule attributes from the driving cell will be
+	set on the port. (UID-401)
+Warning: Can't find object 'reset_name' in design 'BP'. (UID-95)
+Error: Value for list 'object_list' must have 1 elements. (CMD-036)
+Warning: Can't find net 'reset_name' in design 'BP'. (UID-95)
+Error: Value for list 'net_list' must have 1 elements. (CMD-036)
+Warning: Can't find port 'reset_name' in design 'BP'. (UID-95)
+Error: Value for list 'port_list' must have 1 elements. (CMD-036)
+Current design is 'BP'.
+Information: Evaluating DesignWare library utilization. (UISN-27)
+
+============================================================================
+| DesignWare Building Block Library  |         Version         | Available |
+============================================================================
+| Basic DW Building Blocks           | O-2018.06-DWBB_201806.0 |     *     |
+| Licensed DW Building Blocks        |                         |           |
+============================================================================
+
+
+Information: There are 192 potential problems in your design. Please run 'check_design' for more information. (LINT-99)
+
+
+
+  Beginning Pass 1 Mapping
+  ------------------------
+  Processing 'GSHARE'
+  Processing 'OBQ'
+  Processing 'BTB'
+  Processing 'BP'
+
+  Updating timing information
+Information: Updating design information... (UID-85)
+
+  Beginning Implementation Selection
+  ----------------------------------
+  Processing 'BP_DW01_add_0'
+  Processing 'OBQ_DW01_sub_0'
+  Processing 'OBQ_DW01_sub_1'
+  Processing 'OBQ_DW01_dec_0'
+  Processing 'OBQ_DW01_cmp2_0'
+  Processing 'OBQ_DW01_sub_2'
+  Processing 'OBQ_DW01_dec_1'
+  Processing 'OBQ_DW01_dec_2'
+  Processing 'OBQ_DW01_dec_3'
+  Processing 'OBQ_DW01_sub_3'
+  Processing 'OBQ_DW01_cmp2_1'
+  Processing 'OBQ_DW01_sub_4'
+  Processing 'OBQ_DW01_dec_4'
+  Processing 'OBQ_DW01_sub_5'
+  Processing 'OBQ_DW01_cmp2_2'
+  Processing 'OBQ_DW01_sub_6'
+  Processing 'OBQ_DW01_dec_5'
+  Processing 'OBQ_DW01_sub_7'
+  Processing 'OBQ_DW01_cmp2_3'
+  Processing 'OBQ_DW01_sub_8'
+  Processing 'OBQ_DW01_dec_6'
+  Processing 'OBQ_DW01_sub_9'
+  Processing 'OBQ_DW01_cmp2_4'
+  Processing 'OBQ_DW01_sub_10'
+  Processing 'OBQ_DW01_dec_7'
+  Processing 'OBQ_DW01_sub_11'
+  Processing 'OBQ_DW01_cmp2_5'
+  Processing 'OBQ_DW01_sub_12'
+  Processing 'OBQ_DW01_dec_8'
+  Processing 'OBQ_DW01_sub_13'
+  Processing 'OBQ_DW01_cmp2_6'
+  Processing 'OBQ_DW01_sub_14'
+  Processing 'OBQ_DW01_dec_9'
+  Processing 'OBQ_DW01_sub_15'
+  Processing 'OBQ_DW01_cmp2_7'
+  Processing 'OBQ_DW01_sub_16'
+  Processing 'OBQ_DW01_dec_10'
+  Processing 'OBQ_DW01_sub_17'
+  Processing 'OBQ_DW01_cmp2_8'
+  Processing 'OBQ_DW01_sub_18'
+  Processing 'OBQ_DW01_dec_11'
+  Processing 'OBQ_DW01_sub_19'
+  Processing 'OBQ_DW01_cmp2_9'
+  Processing 'OBQ_DW01_sub_20'
+  Processing 'OBQ_DW01_dec_12'
+  Processing 'OBQ_DW01_sub_21'
+  Processing 'OBQ_DW01_cmp2_10'
+  Processing 'OBQ_DW01_sub_22'
+  Processing 'OBQ_DW01_dec_13'
+  Processing 'OBQ_DW01_sub_23'
+  Processing 'OBQ_DW01_cmp2_11'
+  Processing 'OBQ_DW01_sub_24'
+  Processing 'OBQ_DW01_dec_14'
+  Processing 'OBQ_DW01_sub_25'
+  Processing 'OBQ_DW01_cmp2_12'
+  Processing 'OBQ_DW01_sub_26'
+  Processing 'OBQ_DW01_dec_15'
+  Processing 'OBQ_DW01_sub_27'
+  Processing 'OBQ_DW01_cmp2_13'
+  Processing 'OBQ_DW01_sub_28'
+  Processing 'OBQ_DW01_dec_16'
+  Processing 'OBQ_DW01_sub_29'
+  Processing 'OBQ_DW01_cmp2_14'
+  Processing 'OBQ_DW01_sub_30'
+  Processing 'OBQ_DW01_dec_17'
+  Processing 'OBQ_DW01_sub_31'
+  Processing 'OBQ_DW01_cmp2_15'
+  Processing 'OBQ_DW01_sub_32'
+  Processing 'OBQ_DW01_dec_18'
+  Processing 'OBQ_DW01_sub_33'
+  Processing 'OBQ_DW01_cmp2_16'
+  Processing 'OBQ_DW01_sub_34'
+  Processing 'OBQ_DW01_inc_0'
+  Processing 'OBQ_DW01_inc_1'
+  Processing 'OBQ_DW01_sub_35'
+  Processing 'OBQ_DW01_sub_36'
+  Processing 'OBQ_DW01_cmp6_0'
+  Processing 'OBQ_DW01_cmp2_17'
+  Processing 'OBQ_DW01_cmp2_18'
+  Processing 'BTB_DW01_cmp6_0'
+  Processing 'DW01_sub_width4'
+  Processing 'DW01_add_width4'
+  Processing 'OBQ_DW01_sub_37'
+  Processing 'OBQ_DW01_sub_38'
+  Processing 'DW01_sub_width4'
+  Processing 'DW01_sub_width4'
+
+  Beginning Mapping Optimizations  (Medium effort)
+  -------------------------------
+  Mapping Optimization (Phase 1)
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:24 1542337.5      0.00       0.0      27.3                                0.00  
+    0:00:24 1542337.5      0.00       0.0      27.3                                0.00  
+    0:00:24 1542337.5      0.00       0.0      27.3                                0.00  
+    0:00:25 1542337.5      0.00       0.0      27.3                                0.00  
+    0:00:25 1542337.5      0.00       0.0      27.3                                0.00  
+    0:00:28 1021213.5      0.00       0.0       7.5                                0.00  
+    0:00:28 1016875.6      0.00       0.0       7.5                                0.00  
+    0:00:29 1016875.6      0.00       0.0       7.4                                0.00  
+    0:00:29 1016875.6      0.00       0.0       7.4                                0.00  
+    0:00:29 1016875.6      0.00       0.0       7.4                                0.00  
+    0:00:29 1016875.6      0.00       0.0       7.4                                0.00  
+    0:00:29 1016875.6      0.00       0.0       7.4                                0.00  
+    0:00:30 1017132.7      0.00       0.0       4.8                                0.00  
+    0:00:30 1016079.3      0.00       0.0       4.1                                0.00  
+    0:00:30 1015847.1      0.00       0.0       3.7                                0.00  
+    0:00:30 1015465.5      0.00       0.0       3.5                                0.00  
+    0:00:30 1015034.2      0.00       0.0       3.2                                0.00  
+    0:00:30 1015034.2      0.00       0.0       3.2                                0.00  
+    0:00:30 1015034.2      0.00       0.0       3.2                                0.00  
+    0:00:30 1015034.2      0.00       0.0       3.2                                0.00  
+
+
+
+  Beginning Delay Optimization Phase
+  ----------------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:30 1015034.2      0.00       0.0       3.2                                0.00  
+    0:00:30 1015034.2      0.00       0.0       3.2                                0.00  
+    0:00:32 1004127.2      0.00       0.0     229.5                                0.00  
+
+
+  Beginning Design Rule Fixing  (min_path)  (max_transition)  (max_fanout)
+  ----------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:32 1004127.2      0.00       0.0     229.5                               -0.60  
+    0:00:32 1005794.4      0.00       0.0     105.7 obq0/obq_out[12][branch_history][9]     -0.60  
+    0:00:32 1007254.2      0.00       0.0      98.2 obq0/obq_out[10][branch_history][6]     -0.60  
+    0:00:33 1007834.8      0.00       0.0      91.6 obq0/obq_out[9][branch_history][8]     -0.60  
+    0:00:33 1008216.3      0.00       0.0      85.4 obq0/obq_out[7][branch_history][3]     -0.60  
+    0:00:33 1008614.4      0.00       0.0      78.9 obq0/obq_out[4][branch_history][6]     -0.60  
+    0:00:33 1009029.1      0.00       0.0      72.3 obq0/obq_out[3][branch_history][8]     -0.60  
+    0:00:33 1010455.8      0.00       0.0      64.6 rt_calculated_pc[8]           -0.60  
+    0:00:34 1012122.9      0.00       0.0      56.3 obq0/obq_out[3][branch_history][9]     -0.64  
+    0:00:34 1012288.8      0.00       0.0       0.0                               -0.64  
+
+
+  Beginning Critical Range Optimization
+  -------------------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:34 1012288.8      0.00       0.0       0.0                               -0.64  
+
+
+  Beginning Area-Recovery Phase  (cleanup)
+  -----------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:34 1012288.8      0.00       0.0       0.0                               -0.64  
+    0:00:34 1012288.8      0.00       0.0       0.0                               -0.64  
+    0:00:35  999125.6      0.00       0.0       0.0                               -0.64  
+    0:00:35  993361.0      0.00       0.0       0.0                               -0.64  
+    0:00:36  991834.8      0.00       0.0       0.0                               -0.64  
+    0:00:36  991005.4      0.00       0.0       0.0                               -0.64  
+    0:00:36  990773.1      0.00       0.0       0.0                               -0.64  
+    0:00:36  990607.2      0.00       0.0       0.0                               -0.64  
+    0:00:36  990441.3      0.00       0.0       0.0                               -0.64  
+    0:00:36  990308.6      0.00       0.0       0.0                               -0.64  
+    0:00:37  990209.1      0.00       0.0       0.0                               -0.64  
+    0:00:37  990109.6      0.00       0.0       0.0                               -0.64  
+    0:00:37  990001.7      0.00       0.0       0.0                               -0.64  
+    0:00:37  989893.9      0.00       0.0       0.0                               -0.64  
+    0:00:37  989786.1      0.00       0.0       0.0                               -0.64  
+    0:00:37  989678.3      0.00       0.0       0.0                               -0.64  
+    0:00:37  989570.4      0.00       0.0       0.0                               -0.64  
+    0:00:37  989462.6      0.00       0.0       0.0                               -0.64  
+    0:00:37  989462.6      0.00       0.0       0.0                               -0.64  
+    0:00:37  989462.6      0.00       0.0       0.0                               -0.64  
+    0:00:38  988826.7      0.00       0.0       0.0                               -0.64  
+    0:00:38  988826.7      0.00       0.0       0.0                               -0.64  
+    0:00:38  988826.7      0.00       0.0       0.0                               -0.64  
+    0:00:38  988826.7      0.00       0.0       0.0                               -0.64  
+    0:00:38  988826.7      0.00       0.0       0.0                               -0.64  
+    0:00:38  988826.7      0.00       0.0       0.0                               -0.64  
+    0:00:38  989117.0      0.00       0.0       0.0                                0.00  
+
+
+  Beginning Critical Range Optimization
+  -------------------------------------
+
+                                  TOTAL                                                  
+   ELAPSED            WORST NEG   SETUP    DESIGN                              MIN DELAY 
+    TIME      AREA      SLACK     COST    RULE COST         ENDPOINT             COST    
+  --------- --------- --------- --------- --------- ------------------------- -----------
+    0:00:38  989117.0      0.00       0.0       0.0                                0.00  
+    0:00:38  989117.0      0.00       0.0       0.0                                0.00  
+Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
+
+
+Note: Symbol # after min delay cost means estimated hold TNS across all active scenarios 
+
+
+  Optimization Complete
+  ---------------------
+Warning: Design 'BP' contains 1 high-fanout nets. A fanout number of 1000 will be used for delay calculations involving these nets. (TIM-134)
+     Net 'gshare0/clock': 1610 load(s), 1 driver(s)
+Writing verilog file '/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/BP_test/BP.vg'.
+Warning: Verilog 'assign' or 'tran' statements are written out. (VO-4)
+Error: Writing designs in DB format is no longer supported. (UID-530)
+Removing design 'BP'
+Removing design 'BP_DW01_add_0'
+Removing design 'BTB'
+Removing design 'OBQ'
+Removing design 'OBQ_DW01_sub_37'
+Removing design 'GSHARE'
+Removing library 'gtech'
+Removing library 'lec25dscc25_TT'
+Removing library 'standard.sldb'
+Loading db file '/afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/gtech.db'
+Loading db file '/usr/caen/synopsys-synth-2018.06/libraries/syn/standard.sldb'
+  Loading link library 'lec25dscc25_TT'
+  Loading link library 'gtech'
+Loading verilog file '/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/BP_test/BP.vg'
+Detecting input file type automatically (-rtl or -netlist).
+Running DC verilog reader
+Performing 'read' command.
+Compiling source file /afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/BP_test/BP.vg
+Reading with netlist reader (equivalent to -netlist option).
+Verilog netlist reader completed successfully.
+Current design is now '/afs/umich.edu/user/h/e/heewoo/Desktop/eecs470/FINAL/group10w19/BP_test/BTB.db:BTB'
+Loaded 6 designs.
+Current design is 'BTB'.
+Current design is 'BP'.
+
+Thank you...
