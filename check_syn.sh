@@ -5,7 +5,7 @@
 OUTPUT_DIR="test_output_files"
 CORRECT_DIR="correct_outputs"
 DIFF_DIR="diff_outputs"
-TIMEOUT=10
+TIMEOUT=20
 
 # create output directory
 rm -rf $OUTPUT_DIR
@@ -35,6 +35,7 @@ do
 
 	# run test case
 	make clean
+	cp pipeline.vg	synth/pipeline/pipeline.vg
 	make syn
 	timeout $TIMEOUT make all
 	echo "Saving $file output"
