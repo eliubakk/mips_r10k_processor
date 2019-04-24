@@ -21,23 +21,32 @@
 */
 	data = 0x1000
 	lda	$r5,0xbad
-	lda	$r1,data
-	stq	$r5,0($r1)
-	stq	$r5,4($r1)
-	stq	$r5,8($r1)
-	stq	$r5,12($r1)
-	stq	$r5,16($r1)
-	stq	$r5,20($r1)
-	stq	$r5,24($r1)
-	stq	$r5,28($r1)
-	stq	$r5,32($r1)
-	stq	$r5,36($r1)
-	stq	$r5,40($r1)
-	stq	$r5,44($r1)
-	stq	$r5,48($r1)
-	stq	$r5,52($r1)
-	stq	$r5,56($r1)
-	stq	$r5,60($r1)
-	stq	$r5,64($r1)
+	lda $r2,0x10
+loop1:	lda	$r1,data
+		mulq $r2,0x10,$r3
+		addq $r1,$r3,$r1
+		stq	$r5,0($r1)
+		stq	$r5,8($r1)
+		stq	$r5,16($r1)
+		stq	$r5,24($r1)
+		stq	$r5,32($r1)
+		stq	$r5,40($r1)
+		stq	$r5,48($r1)
+		stq	$r5,56($r1)
+		stq	$r5,64($r1)
+		addq $r1,$r1,$r1
+		stq	$r5,0($r1)
+		stq	$r5,8($r1)
+		stq	$r5,16($r1)
+		stq	$r5,24($r1)
+		stq	$r5,32($r1)
+		stq	$r5,40($r1)
+		stq	$r5,48($r1)
+		stq $r5,56($r1)
+		stq	$r5,64($r1)
+		addq $r5,0x1,$r5
+		subq $r2,0x1,$r2
+		cmpeq $r2,0,$r6
+		beq $r6, loop1
 	call_pal        0x555
 
