@@ -17,7 +17,7 @@ elaborate mem_controller
 set design_name mem_controller
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 6
+set CLK_PERIOD 2.1
 
 
 

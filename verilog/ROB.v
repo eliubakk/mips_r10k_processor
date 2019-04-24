@@ -250,10 +250,11 @@ module ROB(
 	end
 
 	//UPDATE_FLIP_FLOPS
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
 			for (int i = 0; i < `ROB_SIZE; i += 1) begin
-				ROB_table[i] = EMPTY_ROB_ROW;
+				ROB_table[i] <= `SD EMPTY_ROB_ROW;
 				// ROB_table[i].T_new <= `SD `DUMMY_REG;
 				// ROB_table[i].T_old <= `SD `DUMMY_REG;
 				// ROB_table[i].halt <= `SD 1'b0;

@@ -8,11 +8,9 @@
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
+`include "../../cache_defs.vh"
 `define DEBUG
 `define SD #1
-
-`define NUM_WAYS 4
-`include "../../cache_defs.vh"
 
 module pipeline (
     //input   PHYS_REG [`FL_SIZE-1:0] free_check_point,    
@@ -27,6 +25,13 @@ module pipeline (
     output logic [1:0]  proc2mem_command,    // command sent to memory
     output logic [63:0] proc2mem_addr,      // Address sent to memory
     output logic [63:0] proc2mem_data,      // Data sent to memory
+
+   
+    output logic [1:0]	proc2Rmem_command_out,	// For synthesize debugging
+    output logic [1:0]	proc2Dmem_command_out,	// For synthesize debugging
+    output logic [1:0]	proc2Imem_command_out,	// For synthesize debugging
+    output logic	send_request_out,
+    output logic	unanswered_miss_out,
 
     output logic [3:0]  pipeline_completed_insts,
     output ERROR_CODE   pipeline_error_status,
@@ -85,16 +90,16 @@ module pipeline (
     // output logic [4:0] ex_mem_IR,
     // output logic [4:0]       ex_mem_valid_inst,
 
-
 	output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
   output VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out,
 	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue,
 	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
 
+
     // Outputs from MEM/COMP Pipeline Register
-    output logic mem_co_valid_inst,   
-    output logic [63:0] mem_co_NPC ,        
-    output logic [31:0] mem_co_IR ,         
+      output logic mem_co_valid_inst,   
+      output logic [63:0] mem_co_NPC ,        
+      output logic [31:0] mem_co_IR ,         
  
     // Outputs from EX/COM Pipeline Register
     output logic [`NUM_FU_TOTAL-1:0][63:0] ex_co_NPC,
@@ -131,7 +136,6 @@ module pipeline (
   parameter [0:(`NUM_TYPE_FU - 1)][1:0] NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01, 2'b01};
 
 
- 
 // --------------------------Fetch1 signals  
 
 
@@ -237,8 +241,6 @@ module pipeline (
   logic [63:0] mem_co_NPC_comb;        
   logic [31:0] mem_co_IR_comb;    
 
- // // Outputs from MEM/WB Pipeline Register
- logic stall_struc;
 
 
 // ---------------------------------Complete stage
@@ -307,23 +309,6 @@ ROB_ROW_T rob_retire_out;
 	logic fr_empty; 
   PHYS_REG fr_free_reg_T;
 
-  
-   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  //logic	       retire_inst_busy;
-//  logic [63:0] retire_reg_NPC;
-logic [63:0] retire_reg_wr_data;
-  logic  [5:0] retire_reg_wr_idx;
-  logic        retire_reg_wr_en;
-  logic  [5:0] retire_reg_phys;;
-	logic head_halt;
-  logic rob_retire_out_halt;
-  logic rob_retire_out_take_branch;
-  logic rob_retire_out_T_new; 
-  logic rob_retire_out_T_old; 
-  logic rob_retire_out_is_store;
-  logic [31:0] rob_retire_opcode;
- 
-
 // ------------------------------Signals from modules
 
   //Outputs from the arch map
@@ -363,9 +348,10 @@ logic [63:0] retire_reg_wr_data;
   logic rob_retire_out_T_new; 
   logic rob_retire_out_T_old; 	
   logic [31:0] rob_retire_opcode;
+logic rob_retire_out_is_store;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
-  logic [63:0] proc2Rmem_data;
+  logic [63:0] proc2Rmem_data, proc2Dmem_data;
   logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
   logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
@@ -380,7 +366,12 @@ logic [63:0] retire_reg_wr_data;
                                   rob_retire_out_halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
-  
+  //---------------------------For synthesis debugging
+
+assign proc2Rmem_command_out = proc2Rmem_command;
+assign proc2Dmem_command_out = proc2Dmem_command;
+assign proc2Imem_command_out = proc2Imem_command;
+ 
 	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
 	// FOR MEMORY INSTRUCTIONS
 //	assign proc2Dmem_command = mem_co_enable ? BUS_LOAD : BUS_NONE;
@@ -425,9 +416,8 @@ logic tag_in_lq;
   // assign Imem2proc_response = (proc2Dmem_command == BUS_NONE) ? mem2proc_response : 0;
   // assign Imem2proc_data = !tag_in_lq ? mem2proc_data : 0;
   // assign Imem2proc_tag = !tag_in_lq ? mem2proc_tag : 0;
-
-  // assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
-  // assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
+  //assign Dmem2proc_data = tag_in_lq ? mem2proc_data : 0;
+  //assign Dmem2proc_tag = tag_in_lq ? mem2proc_tag : 0;
   // assign Dmem2proc_tag = (proc2Dmem_command == BUS_LOAD) ? mem2proc_tag : 0;
 
 	icache inst_memory(
@@ -495,6 +485,7 @@ logic tag_in_lq;
   SQ store_queue(
     .clock(clock),
     .reset(reset),
+
     .branch_incorrect(branch_not_taken),
     .rd_en(load_wants_store),
     .addr_rd(load_rd_addr),
@@ -526,7 +517,7 @@ logic tag_in_lq;
     .full(sq_full)
   );
 
-  // Load queue signals
+// Load queue signals
   LQ_ROW_T lq_load_in;
   logic lq_write_en;
   logic lq_pop_en;
@@ -555,6 +546,7 @@ logic tag_in_lq;
     .read_valid(lq_read_valid),
     .full(lq_full)
   );
+
 
   //////////////////////////////////////////////////
   //                                              //
@@ -909,7 +901,7 @@ end
   );
 
   // Instantiating the map table
-  Map_Table m1( //Inputs
+ Map_Table m1( //Inputs
     .clock(clock),
   	.reset(reset),
   	.enable(fr_read_en),		// Should not read during stalling for structural hazard
@@ -927,6 +919,7 @@ end
   	.T2(id_inst_out.T2), 		// Output for Dispatch and goes to RS
   	.T_old(T_old) 		// Output for Dispatch and goes to RS and ROB
   );
+
 
   //Instantiating the freelist
   
@@ -1332,7 +1325,7 @@ end
       ex_co_branch_target <=`SD ex_alu_result_out[4]; 
     end
     if (ex_co_enable[5]) begin
-      ex_co_rega_st <= `SD is_ex_T1_value[FU_ST_IDX];
+      ex_co_rega_st <= `SD is_ex_T1_value[5];
     end
 		//ex_co_done <= `SD 0;
 
@@ -1353,10 +1346,11 @@ end
                             mem_rd_stall? 64'b0 : mem_result_out;
   assign lq_load_in.data_valid = sq_data_valid | ~mem_rd_stall;
   assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & ((mem_rd_stall & ~sq_data_valid & ~sq_data_not_found) | mem_co_stall);
+
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_valid & 
 	// assign lq_write_en = ex_co_enable[FU_LD_IDX] & !sq_data_valid & ex_co_valid_inst[FU_LD_IDX];
   // assign lq_write_en = ex_co_valid_inst[FU_LD_IDX] & !sq_data_not_found & !sq_data_valid;
-  // assign lq_pop_en = ~mem_stall_out; // tag_in_lq;
+  //assign lq_pop_en = tag_in_lq;
   // assign lq_mem_tag = Dmem2proc_response;
 
 //   //////////////////////////////////////////////////
@@ -1367,7 +1361,8 @@ end
    
 assign lq_pop_en = ~mem_co_stall;
   
-  mem_stage mem_stage_0 (// Inputs
+ 
+ mem_stage mem_stage_0 (// Inputs
      .clock(clock),
      .reset(reset),
      .rd_mem(ex_co_rd_mem[FU_LD_IDX]),
@@ -1402,6 +1397,7 @@ assign lq_pop_en = ~mem_co_stall;
      .proc2Rmem_data       (proc2Rmem_data)
   );
 
+
   wire [5:0] mem_dest_reg_idx_out =
              mem_rd_stall ? `DUMMY_REG : ex_co_dest_reg_idx[2];
   wire mem_valid_inst_out = ex_co_valid_inst[2] & ~mem_rd_stall;
@@ -1410,7 +1406,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
 
 
 
-  //////////////////////////////////////////////////_
+  //////////////////////////////////////////////////
   //                                              //
   //           mem/co stage                   //
   //                                              //
@@ -1419,7 +1415,7 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   logic mem_co_comb;
   assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.data_valid; 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst & lq_pop_en; 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
@@ -1723,6 +1719,8 @@ assign stall_struc= ((ex_co_rd_mem[2] & ~ex_co_wr_mem[2]) | (~ex_co_rd_mem[2] & 
   assign pipeline_branch_en = ret_branch_inst.en; 
   assign pipeline_branch_pred_correct =  ret_branch_inst.en & ret_pred_correct;
 
+logic rob_retire_out_is_store_comb;
+assign rob_retire_out_is_store_comb = rob_retire_out.is_store & rob_retire_out.busy;
 
   
 // FF between complete and retire
@@ -1763,7 +1761,7 @@ always_ff @ (posedge clock) begin
     rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
 		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
 		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
-		rob_retire_out_is_store <= `SD (rob_retire_out.is_store & rob_retire_out.busy);
+		rob_retire_out_is_store <= `SD rob_retire_out_is_store_comb;
 		if(rob_retire_out.branch_inst.en) begin // For branch retire
 			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
 			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;
@@ -1807,3 +1805,4 @@ assign arch_enable = rob_retire_out.busy & !branch_not_taken;
  );
 
 endmodule  // module verisimple
+

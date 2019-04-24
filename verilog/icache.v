@@ -1,4 +1,6 @@
 `include "../../sys_defs.vh"
+//`define INST_BUFFER_LEN 6
+//`define NUM_INST_PREFETCH 4
 module icache(clock, reset,
               proc2Icache_addr,
               Imem2proc_response, Imem2proc_data, Imem2proc_tag,
@@ -8,7 +10,7 @@ module icache(clock, reset,
   parameter RD_PORTS = 1;
 
   `define NUM_WAYS NUM_WAYS
-  `include "../../cache_defs.vh"
+  //`include "../../cache_defs.vh"
 
   input clock, reset;
 

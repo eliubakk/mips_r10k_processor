@@ -243,7 +243,8 @@ module RS
 	//        Update the flip flops			        //
 	//                                              //
 	//////////////////////////////////////////////////
-	always_ff @(posedge clock) begin
+  // synopsys sync_set_reset "reset"	
+always_ff @(posedge clock) begin
 		if (reset | branch_not_taken) begin
 			for(j=0; j<`RS_SIZE; j=j+1) begin // Other way to do this?
 				rs_table[j] <= `SD EMPTY_ROW;

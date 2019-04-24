@@ -87,7 +87,7 @@ module Arch_Map_Table(
 			end
 		end
 	end
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			for(int i = 0; i < `NUM_GEN_REG - 1; i += 1) begin

@@ -23,9 +23,9 @@ module phys_regfile(
   
   logic[`NUM_PHYS_REG-1:0][63:0] phys_registers;   // 64, 64-bit Physical Registers
 
-  //`ifdef DEBUG
+  `ifdef DEBUG
   	assign phys_registers_out = phys_registers;
-  //`endif
+  `endif
 
   genvar ig, jg;
   for(ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
@@ -41,7 +41,7 @@ module phys_regfile(
   //
   //
   //
-
+  // synopsys sync_set_reset "reset"
   always_ff @(posedge wr_clk) begin
     for(int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
       if (wr_en[i]) begin

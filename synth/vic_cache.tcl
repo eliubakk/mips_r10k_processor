@@ -20,7 +20,7 @@ elaborate vic_cache
 set design_name vic_cache
 set clock_name clock
 set reset_name reset
-set CLK_PERIOD 2.9
+set CLK_PERIOD 3.7
 
 
 

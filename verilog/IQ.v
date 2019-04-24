@@ -47,7 +47,8 @@ module IQ(
 	//assign inst_queue_full 	= (tail >= `IQ_SIZE-1) & !(dispatch_no_hazard);
 	//assign fetch_en		= fetch_valid & !duplicate_fetch; 
 	assign fetch_en		= fetch_valid;
-	assign inst_queue_full_out = inst_queue_full;
+
+	assign inst_queue_full_out = inst_queue_full;
 
 	always_comb begin
 		next_inst_queue = inst_queue;
@@ -78,7 +79,7 @@ module IQ(
 		end
 	end
 
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if (reset | branch_incorrect ) begin
 			for (int i = 0; i < `IQ_SIZE; i += 1) begin
@@ -91,11 +92,12 @@ module IQ(
 				inst_queue[i].branch_inst.ret		<= `SD 1'b0;
 				inst_queue[i].branch_inst.pc		<= `SD 64'h0;
 				inst_queue[i].branch_inst.pred_pc	<= `SD 64'h0;
-				inst_queue[i].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				inst_queue[i].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 				inst_queue[i].branch_inst.prediction	<= `SD 1'b0;
 			end	
-				tail 				<= `SD 0;
-				inst_queue_full			<= `SD 1'b0;
+				tail 				<= `SD 1'b0;
+
+				inst_queue_full			<= `SD 1'b0;
 				
 				if_inst_out.valid_inst 		<= `SD 1'b0;
 				if_inst_out.npc			<= `SD 64'h0;
@@ -106,7 +108,7 @@ module IQ(
 				if_inst_out.branch_inst.ret		<= `SD 1'b0;
 				if_inst_out.branch_inst.pc		<= `SD 64'h0;
 				if_inst_out.branch_inst.pred_pc	<= `SD 64'h0;
-				if_inst_out.branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+				if_inst_out.branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 				if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 
 		end else begin
@@ -125,7 +127,7 @@ module IQ(
 					inst_queue[`IQ_SIZE-1].branch_inst.ret		<= `SD 1'b0;
 					inst_queue[`IQ_SIZE-1].branch_inst.pc		<= `SD 64'h0;
 					inst_queue[`IQ_SIZE-1].branch_inst.pred_pc	<= `SD 64'h0;
-					inst_queue[`IQ_SIZE-1].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){0}};
+					inst_queue[`IQ_SIZE-1].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 					inst_queue[`IQ_SIZE-1].branch_inst.prediction	<= `SD 1'b0;
 
 
@@ -143,11 +145,12 @@ module IQ(
 					if_inst_out.branch_inst.ret		<= `SD 1'b0;
 					if_inst_out.branch_inst.pc		<= `SD 64'h0;
 					if_inst_out.branch_inst.pred_pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){0}};
+					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 					if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 					inst_queue				<= `SD next_inst_queue;
 					tail 					<= `SD next_tail;
-					inst_queue_full				<= `SD next_inst_queue_full;
+
+					inst_queue_full				<= `SD next_inst_queue_full;
 					
 				end
 
@@ -161,7 +164,7 @@ module IQ(
 					if_inst_out.branch_inst.ret		<= `SD 1'b0;
 					if_inst_out.branch_inst.pc		<= `SD 64'h0;
 					if_inst_out.branch_inst.pred_pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){0}};
+					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
 					if_inst_out.branch_inst.prediction	<= `SD 1'b0;
 					inst_queue				<= `SD next_inst_queue;
 					tail 					<= `SD next_tail;

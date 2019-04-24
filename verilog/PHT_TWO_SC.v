@@ -85,7 +85,7 @@ module PHT_TWO_SC(
 		end
 	end
 
-
+  // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
 		if(reset) begin
 			for(i=0; i<`PHT_ROW;++i) begin
