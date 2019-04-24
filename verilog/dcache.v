@@ -374,10 +374,10 @@ module dcache(clock, reset,
   //cache input logic
   for(ig = 0; ig < WR_PORTS; ig += 1) begin
     //requested wr
-    assign cache_wr_en[ig] = wr_en[ig];
-    assign {cache_wr_tag[ig], cache_wr_idx[ig]} = proc2Dcache_wr_addr[ig][31:3];
-    assign cache_wr_data[ig] = proc2Dcache_wr_data[ig];
-    assign cache_wr_dirty[ig] = 1'b1;
+    assign cache_wr_en[1+RD_PORTS+ig] = wr_en[ig];
+    assign {cache_wr_tag[1+RD_PORTS+ig], cache_wr_idx[1+RD_PORTS+ig]} = proc2Dcache_wr_addr[ig][31:3];
+    assign cache_wr_data[1+RD_PORTS+ig] = proc2Dcache_wr_data[ig];
+    assign cache_wr_dirty[1+RD_PORTS+ig] = 1'b1;
 
     //remove wr's from vic cache
     assign vic_rd_en[RD_PORTS+ig] = wr_en[ig];
@@ -386,14 +386,14 @@ module dcache(clock, reset,
 
   for(ig = 0; ig < RD_PORTS; ig += 1) begin
     //wr from victim cache or fifo if rd miss found
-    assign cache_wr_en[WR_PORTS+ig]     = vic_rd_valid[ig] | fifo_hit_idx_valid[ig];
-    assign cache_wr_idx[WR_PORTS+ig]    = vic_rd_valid[ig]? vic_rd_out[ig].idx :
+    assign cache_wr_en[1+ig]     = vic_rd_valid[ig] | fifo_hit_idx_valid[ig];
+    assign cache_wr_idx[1+ig]    = vic_rd_valid[ig]? vic_rd_out[ig].idx :
                                                             fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].idx;
-    assign cache_wr_tag[WR_PORTS+ig]    = vic_rd_valid[ig]? vic_rd_out[ig].line.tag :
+    assign cache_wr_tag[1+ig]    = vic_rd_valid[ig]? vic_rd_out[ig].line.tag :
                                                             fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].tag;
-    assign cache_wr_data[WR_PORTS+ig]   = vic_rd_valid[ig]? vic_rd_out[ig].line.data :
+    assign cache_wr_data[1+ig]   = vic_rd_valid[ig]? vic_rd_out[ig].line.data :
                                                             fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].data;
-    assign cache_wr_dirty[WR_PORTS+ig]  = vic_rd_valid[ig]? vic_rd_out[ig].line.dirty :
+    assign cache_wr_dirty[1+ig]  = vic_rd_valid[ig]? vic_rd_out[ig].line.dirty :
                                                             fifo[fifo_hit_num[ig]][fifo_hit_idx[ig]].dirty;
 
     //requested rd
@@ -421,9 +421,9 @@ module dcache(clock, reset,
                     (mem_req_queue[mem_waiting_ptr].req.mem_tag != 0);
 
   //write from memory
-  assign {cache_wr_tag[RD_PORTS+WR_PORTS], cache_wr_idx[RD_PORTS+WR_PORTS]} = (mem_waiting_ptr > 0)? mem_req_queue[mem_waiting_ptr-1].req.address[31:3] : 29'b0;
-  assign cache_wr_dirty[RD_PORTS+WR_PORTS] = 1'b0;
-  assign cache_wr_data[RD_PORTS+WR_PORTS] = mem_rd_data;
+  assign {cache_wr_tag[0], cache_wr_idx[0]} = (mem_waiting_ptr > 0)? mem_req_queue[mem_waiting_ptr-1].req.address[31:3] : 29'b0;
+  assign cache_wr_dirty[0] = 1'b0;
+  assign cache_wr_data[0] = mem_rd_data;
 
   //send rd data from memory to LQ
   //not valid if we fetched from memory for fifo buffers 
@@ -630,7 +630,7 @@ module dcache(clock, reset,
       send_req_ptr    <= `SD 0;
       mem_waiting_ptr <= `SD 0;
       mem_rd_data <= `SD 64'b0;
-      cache_wr_en[RD_PORTS+WR_PORTS] <= `SD 1'b0;
+      cache_wr_en[0] <= `SD 1'b0;
       Dcache_rd_miss_valid_out <= `SD 1'b0;
     end else begin
       fifo <= `SD fifo_next;
@@ -649,11 +649,11 @@ module dcache(clock, reset,
 
       if(mem_done) begin
         mem_rd_data <= `SD Dmem2proc_data;
-        cache_wr_en[RD_PORTS+WR_PORTS] <= `SD mem_req_queue_next[mem_waiting_ptr].wr_to_cache;
+        cache_wr_en[0] <= `SD mem_req_queue_next[mem_waiting_ptr].wr_to_cache;
         Dcache_rd_miss_valid_out <= `SD mem_req_queue_next[mem_waiting_ptr].wr_to_cache;
       end else begin
         mem_rd_data <= `SD 64'b0;
-        cache_wr_en[RD_PORTS+WR_PORTS] <= `SD 1'b0;
+        cache_wr_en[0] <= `SD 1'b0;
         Dcache_rd_miss_valid_out <= `SD 1'b0;
       end
     end

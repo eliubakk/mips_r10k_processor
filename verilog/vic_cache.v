@@ -81,7 +81,7 @@ module vic_cache(clock, reset,
         assign rd_vic[ig] = vic_queue[rd_vic_idx[ig]];
     end
     assign rd_valid = rd_vic_idx_valid;
-
+    assign vic_queue_out = vic_queue;
     //update logic
     always_comb begin
         vic_queue_next = vic_queue;

@@ -10,7 +10,7 @@ module mem_controller(clock, reset,
                         Dmem2proc_response, Dmem2proc_data, Dmem2proc_tag,
                        // `ifdef DEBUG state, next_state, `endif
                         Imem2proc_response, Imem2proc_data, Imem2proc_tag,
-                        Rmem2proc_response,
+                        Rmem2proc_response, Rmem2proc_tag,
                         proc2mem_command, proc2mem_addr, proc2mem_data);
 
     input clock;
@@ -38,6 +38,7 @@ module mem_controller(clock, reset,
     output logic [63:0] Imem2proc_data;       
     output logic [3:0]  Imem2proc_tag;
     output logic [3:0]  Rmem2proc_response;
+    output logic [3:0]  Rmem2proc_tag;
     output logic [1:0] proc2mem_command;
     output logic [63:0] proc2mem_addr;
     output logic [63:0] proc2mem_data;
@@ -47,16 +48,16 @@ module mem_controller(clock, reset,
     // `endif
 
     // internal data
-    logic  [1:0]  Dmem2proc_response_next;
+    logic  [3:0]  Dmem2proc_response_next;
     logic  [63:0] Dmem2proc_data_next;
-    logic  [63:0] Dmem2proc_tag_next;
+    logic  [3:0] Dmem2proc_tag_next;
 
-    logic  [1:0]  Imem2proc_response_next;
+    logic  [3:0]  Imem2proc_response_next;
     logic  [63:0] Imem2proc_data_next;
-    logic  [63:0] Imem2proc_tag_next;
+    logic  [3:0] Imem2proc_tag_next;
 
-    logic  [1:0]  Rmem2proc_response_next;
-
+    logic  [3:0]  Rmem2proc_response_next;
+    logic  [3:0]  Rmem2proc_tag_next;
     //logic  [3:0]  proc2mem_command_next;
     //logic  [63:0] proc2mem_addr_next;       
     //logic  [3:0]  proc2mem_data_next;    
@@ -70,9 +71,9 @@ module mem_controller(clock, reset,
     assign Dmem2proc_tag_next = mem2proc_tag;
     assign Imem2proc_data_next = mem2proc_data;
     assign Imem2proc_tag_next = mem2proc_tag;
-
+    assign Rmem2proc_tag_next = mem2proc_tag;
     always_comb begin 
-        next_state 	= state;
+        next_state  = state;
         Dmem2proc_response_next = Dmem2proc_response;
         Imem2proc_response_next = Imem2proc_response;
         Rmem2proc_response_next = Rmem2proc_response;
@@ -123,7 +124,7 @@ module mem_controller(clock, reset,
                 Rmem2proc_response_next = 0;
             end
             RMEM:begin
-                next_state = (mem2proc_response == 0) & (proc2Rmem_command != BUS_NONE) ? RMEM :
+                next_state = (proc2Rmem_command != BUS_NONE) ? RMEM :
                              (proc2Dmem_command != BUS_NONE) ? DMEM :
                              (proc2Imem_command != BUS_NONE) ? IMEM : IDLE;
                 proc2mem_command = proc2Rmem_command;
@@ -139,7 +140,7 @@ module mem_controller(clock, reset,
   // synopsys sync_set_reset "reset"
     always_ff @(posedge clock) begin
         if(reset) begin
-            state 	   <= `SD IDLE;
+            state      <= `SD IDLE;
             Dmem2proc_response <= `SD 4'b0;
             Dmem2proc_data <= `SD 64'b0;
             Dmem2proc_tag <= `SD 4'b0;
@@ -147,11 +148,12 @@ module mem_controller(clock, reset,
             Imem2proc_data <= `SD 64'b0;
             Imem2proc_tag <= `SD 4'b0;
             Rmem2proc_response <= `SD 4'b0;
+            Rmem2proc_tag <= `SD 4'b0;
             //proc2mem_command <= `SD 0;
             //proc2mem_addr <= `SD 0;
             //proc2mem_data <= `SD 0;
         end else begin
-            state 	   <= `SD next_state;
+            state      <= `SD next_state;
             Dmem2proc_response <= `SD Dmem2proc_response_next;
             Dmem2proc_data <= `SD Dmem2proc_data_next;
             Dmem2proc_tag <= `SD Dmem2proc_tag_next;
@@ -159,6 +161,7 @@ module mem_controller(clock, reset,
             Imem2proc_data <= `SD Imem2proc_data_next;
             Imem2proc_tag <= `SD Imem2proc_tag_next;
             Rmem2proc_response <= `SD Rmem2proc_response_next;
+            Rmem2proc_tag <= `SD Rmem2proc_tag_next;
             //proc2mem_command <= `SD proc2mem_command_next;
             //proc2mem_addr <= `SD proc2mem_addr_next;
             //proc2mem_data <= `SD proc2mem_data_next;

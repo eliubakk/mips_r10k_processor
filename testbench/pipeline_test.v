@@ -135,8 +135,9 @@ logic		unanswered_miss_out;
   logic [63:0] mem_co_NPC ;        
   logic [31:0] mem_co_IR ;
 	CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data;
-	VIC_CACHE_T [2:0] evicted_data;
-	logic [2:0] evicted_valid;
+  VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out;
+	//VIC_CACHE_T [2:0] evicted_data;
+	//logic [2:0] evicted_valid;
 	RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue;
 	logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail;
  
@@ -179,8 +180,9 @@ logic		unanswered_miss_out;
     .retire_inst_busy(retire_inst_busy),
     .retire_reg_NPC(retire_reg_NPC),
 	.dcache_data(dcache_data),
-	.evicted_data(evicted_data),
-	.evicted_valid(evicted_valid),
+	//.evicted_data(evicted_data),
+	//.evicted_valid(evicted_valid),
+  .vic_queue_out(vic_queue_out),
 	.retire_queue(retire_queue),
 	.retire_queue_tail(retire_queue_tail),
 
@@ -320,26 +322,28 @@ logic		unanswered_miss_out;
 			set_idx = i;
 			//$display("set = %d way = %d valid = %b dirty = %b", i, j, dcache_data[i].cache_lines[j].valid, dcache_data[i].cache_lines[j].dirty);
 			//$display("tag = %d data = %d", dcache_data[i].cache_lines[j].tag, dcache_data[i].cache_lines[j].data);
-			if (dcache_data[i].cache_lines[j].valid /*&& dcache_data[i].cache_lines[j].dirty*/) begin
+			if (dcache_data[i].cache_lines[j].valid && dcache_data[i].cache_lines[j].dirty) begin
 				//$display("valid and dirty");
 				memory.unified_memory[{dcache_data[i].cache_lines[j].tag, set_idx}] = dcache_data[i].cache_lines[j].data;
 			end
 		end
 	end
 
-	for (int i = 0; i < 3; ++i) begin
+	for (int i = 0; i < `VIC_SIZE; ++i) begin
 		// handle evicted_data
 		//$display("evicted_valid[%d] = %b", i, evicted_valid[i]);
-		if (evicted_valid[i]) begin
-			memory.unified_memory[{evicted_data[i].line.tag, evicted_data[i].idx}] = evicted_data[i].line.data;
+    //$display("evicted[i]",);
+		if (vic_queue_out[i].line.valid & vic_queue_out[i].line.dirty) begin
+			memory.unified_memory[{vic_queue_out[i].line.tag, vic_queue_out[i].idx}] = vic_queue_out[i].line.data;
 		end
 	end
 
 	for (int i = 0; i < `RETIRE_SIZE; ++i) begin
 		// handle retire buffer
 		//$display("retire_queue[%d].valid = %b", i, retire_queue[i].valid);
+    //$display("retire_queue[%d].address = %h, retire_queue[%d].data = %d", i, retire_queue[i].address, i, retire_queue[i].data);
 		if (retire_queue[i].valid) begin
-			memory.unified_memory[retire_queue[i].address] = retire_queue[i].data;
+			memory.unified_memory[retire_queue[i].address[31:3]] = retire_queue[i].data;
 		end
 	end
 
