@@ -15,13 +15,8 @@ mkdir $OUTPUT_DIR
 rm -rf $DIFF_DIR
 mkdir $DIFF_DIR
 
-<<<<<<< HEAD
 kill_syn() {
 	for pid in `lsof +D . | grep "syn_simv" | awk {'print $2'}` ; 
-=======
-kill_simv() {
-	for pid in `lsof +D . | grep "simv" | awk {'print $2'}` ; 
->>>>>>> 9f68d034b6fd2176bdaab23738a2f7db8d501ab7
 	do 
 		kill $pid; 
 	done
@@ -39,15 +34,8 @@ do
 	echo "Running $file"
 
 	# run test case
-<<<<<<< HEAD
 	make syn_simv
 	timeout $TIMEOUT ./syn_simv | tee program.out
-=======
-	make clean
-	cp pipeline.vg	synth/pipeline/pipeline.vg
-	make syn
-	timeout $TIMEOUT make all
->>>>>>> 9f68d034b6fd2176bdaab23738a2f7db8d501ab7
 	echo "Saving $file output"
 
 	# kill simv if its still running
