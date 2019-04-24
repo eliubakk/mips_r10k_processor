@@ -444,7 +444,7 @@ logic tag_in_lq;
   // store to load forwarding signals from memory stage
   logic load_wants_store;
   logic [31:0] load_rd_addr;
-  logic [$clog2(`SQ_SIZE) - 1:0] load_spos_tail;
+  logic [$clog2(`SQ_SIZE)-1:0] load_spos_tail;
 
   // store dispatch signals
   logic dispatch_is_store;
@@ -455,7 +455,7 @@ logic tag_in_lq;
 
   // store execute signals
   logic execute_is_store;
-  logic [$clog2(`SQ_SIZE) - 1:0] store_spos_tail;
+  logic [$clog2(`SQ_SIZE)-1:0] store_spos_tail;
   logic [31:0] ex_store_addr;
   logic ex_store_addr_valid;
   logic [63:0] ex_store_data;
@@ -468,7 +468,7 @@ logic tag_in_lq;
   // store queue output 
   logic [63:0] sq_data_out;
   logic sq_data_valid;
-  logic [$clog2(`SQ_SIZE) - 1:0] sq_tail;
+  logic [$clog2(`SQ_SIZE)-1:0] sq_tail;
   logic sq_full;
   logic sq_data_not_found; // define logic
   logic [63:0] sq_head_address, sq_head_data; // define logic
@@ -486,6 +486,7 @@ logic tag_in_lq;
     .clock(clock),
     .reset(reset),
 
+    .branch_incorrect(branch_not_taken),
     .rd_en(load_wants_store),
     .addr_rd(load_rd_addr),
     .ld_pos(load_spos_tail),
@@ -532,8 +533,8 @@ logic tag_in_lq;
 
   LQ load_queue(
     .clock(clock),
-    .reset(reset | branch_not_taken),
-
+    .reset(reset),
+    .branch_incorrect(branch_not_taken),
     .load_in(lq_load_in),
     .write_en(lq_write_en),
     .pop_en(lq_pop_en),

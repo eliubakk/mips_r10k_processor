@@ -4,11 +4,11 @@
 module SQ(
 	input clock,
 	input reset,
-
+	input branch_incorrect,
 	// read signals
 	input rd_en, // load queue wants to read data at an address in SQ
 	input [31:0] addr_rd, // the address the load queue wants to read
-	input SQ_INDEX_T ld_pos, // the tail of the sq at the time the load was dispatched
+	input [$clog2(`SQ_SIZE)-1:0] ld_pos, // the tail of the sq at the time the load was dispatched
 
 	// dispatch signals
 	input dispatch_en, // 1 when a store is getting dispatched
@@ -19,7 +19,7 @@ module SQ(
 	
 	// execute signals
 	input ex_en, // 1 when a store is being executed
-	input SQ_INDEX_T ex_index, // the index/tag of the store that is being executed
+	input [$clog2(`SQ_SIZE)-1:0] ex_index, // the index/tag of the store that is being executed
 	input [31:0] ex_addr, // the address calculated during execute
 	input ex_addr_en, // 1 if want to use ex_addr for the address (direct vs indirect store)
 	input [63:0] ex_data, // the data calculated during execute
@@ -34,7 +34,7 @@ module SQ(
 	output logic [`SQ_SIZE-1:0] addr_ready_out,
 	output logic [`SQ_SIZE-1:0] [63:0] data_out,
 	output logic [`SQ_SIZE-1:0] data_ready_out,
-	output SQ_INDEX_T head_out,
+	output logic [$clog2(`SQ_SIZE)-1:0] head_out,
 	`endif
 
 	// read outputs
@@ -46,7 +46,7 @@ module SQ(
 	output logic store_data_stall,
 
 	// general outputs
-	output SQ_INDEX_T tail_out, // the index of the store being dispatched
+	output logic [$clog2(`SQ_SIZE)-1:0] tail_out, // the index of the store being dispatched
 	output logic full
 );
 
@@ -63,14 +63,14 @@ module SQ(
 	logic [`SQ_SIZE-1:0] data_ready;
 	logic [`SQ_SIZE-1:0] data_ready_next;
 
-	SQ_INDEX_T head;
-	SQ_INDEX_T head_next;
+	logic [$clog2(`SQ_SIZE)-1:0] head;
+	logic [$clog2(`SQ_SIZE)-1:0] head_next;
 
-	SQ_INDEX_T tail;
-	SQ_INDEX_T tail_next;
+	logic [$clog2(`SQ_SIZE)-1:0] tail;
+	logic [$clog2(`SQ_SIZE)-1:0] tail_next;
 
 	
-	logic addr_rd_ready;
+	//logic addr_rd_ready;
 
 	logic [`SQ_SIZE-1:0] stall_req;
 
@@ -97,10 +97,10 @@ module SQ(
 	);
 
 	// assigns
-	assign data_rd = data_next[data_rd_idx];
-	assign rd_valid = |load_req & !store_data_stall;
+	assign data_rd = (branch_incorrect)? 64'b0 : data_next[data_rd_idx];
+	assign rd_valid = (branch_incorrect)? 1'b0 : |load_req & !store_data_stall;
 	assign tail_out = tail_next;
-	assign full = (tail + 1'b1 == head);
+	assign full = (branch_incorrect)? 1'b0 : (tail + 1'b1 == head);
 
 	assign addr_out = addr;
 	assign addr_ready_out = addr_ready;
@@ -108,11 +108,11 @@ module SQ(
 	assign data_ready_out = data_ready;
 	assign head_out = head;
 
-	assign store_head_data = data[head];
-	assign store_head_addr = addr[head];
+	assign store_head_data = (branch_incorrect)? 64'b0 : data[head];
+	assign store_head_addr = (branch_incorrect)? 64'b0 : addr[head];
 
 	for (genvar i = 0; i < `SQ_SIZE; ++i) begin
-	  assign stall_req[i] = ((i < ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next))) & ~addr_ready_next[i];
+	  assign stall_req[i] = (branch_incorrect)? 1'b0 : ((i < ld_pos) & (head_next <= tail_next ? (head_next <= i & i < tail_next) : (head_next <= i | i < tail_next))) & ~addr_ready_next[i];
 	end
 	assign store_data_stall = |stall_req;
 
@@ -173,7 +173,7 @@ module SQ(
 	end
   // synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset) begin
+		if (reset | branch_incorrect) begin
 			for (int i = 0; i < `SQ_SIZE; ++i) begin
 				addr[i] <= `SD 0;
 				addr_ready[i] <= `SD 0;
