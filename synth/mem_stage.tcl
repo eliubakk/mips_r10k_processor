@@ -15,14 +15,14 @@ set misc_files [glob "../../verilog/misc/*"]
 #read_file -f ddc [list "../../synth/dcache/dcache.ddc"]
 #set_dont_touch dcache
 
-analyze -f sverilog [concat "../../verilog/mem_stage.v" "../../verilog/dcache.v" "../../verilog/retire_buffer.v" "../../verilog/vic_cache.v" "../../verilog/cachemem.v" "../../verilog/encoder.v" $misc_files]
+analyze -f sverilog [concat "../../verilog/mem_stage.v" "../../verilog/dcache.v" "../../verilog/retire_buffer.v" $misc_files]
 elaborate mem_stage
 
 set design_name mem_stage
 set clock_name clock
 set reset_name reset
 #SINGLESCALAR
-set CLK_PERIOD 13
+set CLK_PERIOD 15
 #SUPERSCALAR
 #set CLK_PERIOD 10
 

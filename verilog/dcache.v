@@ -1,4 +1,5 @@
 `include "../../sys_defs.vh"
+`include "../../cache_defs.vh"
 `define DEBUG
 
 module dcache(clock, reset,
@@ -15,7 +16,7 @@ module dcache(clock, reset,
   parameter WR_PORTS = 1;
 
   `define NUM_WAYS NUM_WAYS
-  `include "../../cache_defs.vh"
+  //`include "../../cache_defs.vh"
   
   input clock, reset;
 

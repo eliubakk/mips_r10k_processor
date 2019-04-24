@@ -1,6 +1,6 @@
 `include "../../sys_defs.vh"
 `include "../../cache_defs.vh"
-`define DEBUG
+/*`define DEBUG
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define NUM_RAND_ITER 500
@@ -14,9 +14,7 @@ module testbench;
 
 
 endmodule
-/*
-`include "../../sys_defs.vh"
->>>>>>> 5a18927e118c3ffb458110d063ca5c6d99fbdbd5
+*/
 `define DELAY #2
 `define CLOCK_PERIOD #10
 `define DEBUG
@@ -177,7 +175,7 @@ module testbench;
     initial begin
         // monitor wires
         // $monitor("clock: %b reset: %b search_index: %b search_tag: %b", clock, reset, search_index, search_tag);
-	$monitor("clock: %b reset: %b");
+	$monitor("clock: %b reset: %b",clock, reset);
 
         // intial values
         clock = 0;

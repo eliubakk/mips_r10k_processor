@@ -12,7 +12,7 @@ module vic_cache(clock, reset,
     parameter RD_PORTS = 2;
     parameter WR_PORTS = 3;
 
-    `include "../../cache_defs.vh"
+    //`include "../../cache_defs.vh"
     
     input clock;
     input reset;
