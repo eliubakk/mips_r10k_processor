@@ -3,7 +3,7 @@
 Report : resources
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:28 2019
+Date   : Tue Apr 23 23:19:33 2019
 ****************************************
 
 Resource Sharing Report for design pipeline in file ../../verilog/pipeline.v
@@ -753,18 +753,18 @@ Resource Sharing Report for design phys_regfile in file
 |          |              |            | Contained     |                      |
 | Resource | Module       | Parameters | Resources     | Contained Operations |
 ===============================================================================
-| r1357    | DW01_cmp6    | width=6    |               | eq_33_2              |
-| r1359    | DW01_cmp6    | width=6    |               | eq_33_2_G2_G1        |
-| r1361    | DW01_cmp6    | width=6    |               | eq_33_2_G2           |
-| r1363    | DW01_cmp6    | width=6    |               | eq_33_2_G2_G2        |
-| r1365    | DW01_cmp6    | width=6    |               | eq_33_2_G3           |
-| r1367    | DW01_cmp6    | width=6    |               | eq_33_2_G2_G3        |
-| r1369    | DW01_cmp6    | width=6    |               | eq_33_2_G4           |
-| r1371    | DW01_cmp6    | width=6    |               | eq_33_2_G2_G4        |
-| r1373    | DW01_cmp6    | width=6    |               | eq_33_2_G5           |
-| r1375    | DW01_cmp6    | width=6    |               | eq_33_2_G2_G5        |
-| r1377    | DW01_cmp6    | width=6    |               | eq_33_2_G6           |
-| r1379    | DW01_cmp6    | width=6    |               | eq_33_2_G2_G6        |
+| r1357    | DW01_cmp6    | width=6    |               | eq_32_2              |
+| r1359    | DW01_cmp6    | width=6    |               | eq_32_2_G2_G1        |
+| r1361    | DW01_cmp6    | width=6    |               | eq_32_2_G2           |
+| r1363    | DW01_cmp6    | width=6    |               | eq_32_2_G2_G2        |
+| r1365    | DW01_cmp6    | width=6    |               | eq_32_2_G3           |
+| r1367    | DW01_cmp6    | width=6    |               | eq_32_2_G2_G3        |
+| r1369    | DW01_cmp6    | width=6    |               | eq_32_2_G4           |
+| r1371    | DW01_cmp6    | width=6    |               | eq_32_2_G2_G4        |
+| r1373    | DW01_cmp6    | width=6    |               | eq_32_2_G5           |
+| r1375    | DW01_cmp6    | width=6    |               | eq_32_2_G2_G5        |
+| r1377    | DW01_cmp6    | width=6    |               | eq_32_2_G6           |
+| r1379    | DW01_cmp6    | width=6    |               | eq_32_2_G2_G6        |
 ===============================================================================
 
 

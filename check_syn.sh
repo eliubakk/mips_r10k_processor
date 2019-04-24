@@ -15,8 +15,8 @@ mkdir $OUTPUT_DIR
 rm -rf $DIFF_DIR
 mkdir $DIFF_DIR
 
-kill_syn() {
-	for pid in `lsof +D . | grep "syn" | awk {'print $2'}` ; 
+kill_simv() {
+	for pid in `lsof +D . | grep "simv" | awk {'print $2'}` ; 
 	do 
 		kill $pid; 
 	done
@@ -34,12 +34,13 @@ do
 	echo "Running $file"
 
 	# run test case
+	make clean
 	make syn
 	timeout $TIMEOUT make all
 	echo "Saving $file output"
 
 	# kill simv if its still running
-	kill_syn
+	kill_simv
 	
 	# save the output
 	cp writeback.out $OUTPUT_DIR/$file.writeback.out
@@ -113,4 +114,3 @@ done
 correct=`expr $total - $wrong`
 message="$message\nPASSED $correct/$total"
 echo -e $message | tee grade.txt
-

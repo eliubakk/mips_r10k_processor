@@ -34,8 +34,8 @@ module cachemem(clock, reset,
                 wr_miss_idx, wr_miss_tag, wr_miss_valid,
                 vic_idx, victim, victim_valid);
   parameter NUM_WAYS = 4;
-  parameter RD_PORTS = 1;
-  parameter WR_PORTS = 3;
+  parameter RD_PORTS = 2;
+  parameter WR_PORTS = 2;
 
 //`define NUM_WAYS NUM_WAYS
 //`include "../../cache_defs.vh"

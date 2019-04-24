@@ -111,7 +111,7 @@ $(PIPELINE_VG): $(SYN_DIR)/%.tcl $(VERILOG_DIR)/%.v $(PIPELINE_SYN_FILES) sys_de
 .PHONY: $(PIPELINE_VG)
 
 $(SYN_SIMV): syn_simv_%: $(TEST_DIR)/%_test.v
-	make -j $(SYN_DIR)/$*/$*.vg && \
+	make $(SYN_DIR)/$*/$*.vg && \
 	cd $(SYN_DIR)/$* && \
 	$(VCS) $*.vg ../../$(TEST_DIR)/$*_test.v $(LIB) -o $@
 

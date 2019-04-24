@@ -5,7 +5,7 @@ Warning: Design 'pipeline' contains 1 high-fanout nets. A fanout number of 1000 
 Report : design
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 23:19:32 2019
 ****************************************
 
 Design allows ideal nets on clock nets.
@@ -87,7 +87,7 @@ Design Parameters:
 Report : area
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 23:19:32 2019
 ****************************************
 
 Library(s) Used:
@@ -95,22 +95,22 @@ Library(s) Used:
     lec25dscc25_TT (File: /afs/umich.edu/class/eecs470/lib/synopsys/lec25dscc25_TT.db)
 
 Number of ports:                        77760
-Number of nets:                        338103
-Number of cells:                       273754
-Number of combinational cells:         230783
-Number of sequential cells:             42814
+Number of nets:                        341890
+Number of cells:                       273701
+Number of combinational cells:         233866
+Number of sequential cells:             39678
 Number of macros/black boxes:               0
-Number of buf/inv:                      47608
-Number of references:                      69
+Number of buf/inv:                      49276
+Number of references:                      70
 
-Combinational area:           13571034.234051
-Buf/Inv area:                  1797338.558010
-Noncombinational area:         6631466.057281
+Combinational area:           13737768.239014
+Buf/Inv area:                  1852678.796246
+Noncombinational area:         6639959.119781
 Macro/Black Box area:                0.000000
-Net Interconnect area:          183329.830456
+Net Interconnect area:          185352.116423
 
-Total cell area:              20202500.291332
-Total area:                   20385830.121788
+Total cell area:              20377727.358795
+Total area:                   20563079.475218
 1
  
 ****************************************
@@ -123,7 +123,7 @@ Report : timing
         -transition_time
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 23:19:32 2019
 ****************************************
 
  * Some/all delay information is back-annotated.
@@ -1018,11 +1018,11 @@ Wire Load Model Mode: top
   R0/free_rows_next[4] (net)                    1                   0.00       5.76 f
   R0/free_rows_next[4] (ROB)                                        0.00       5.76 f
   rob_free_rows_next_out[4] (net)                                   0.00       5.76 f
-  U16746/DIN1 (or5s1)                                     0.02      0.00       5.76 f
-  U16746/Q (or5s1)                                        0.14      0.21       5.97 f
+  U14007/DIN1 (or5s1)                                     0.02      0.00       5.76 f
+  U14007/Q (or5s1)                                        0.14      0.21       5.97 f
   n7427 (net)                                   1                   0.00       5.97 f
-  U16741/DIN3 (and4s1)                                    0.14      0.00       5.97 f
-  U16741/Q (and4s1)                                       0.27      0.30       6.27 f
+  U14002/DIN3 (and4s1)                                    0.14      0.00       5.97 f
+  U14002/Q (and4s1)                                       0.27      0.30       6.27 f
   dispatch_no_hazard_comb (net)                 5                   0.00       6.27 f
   iq0/dispatch_no_hazard (IQ)                                       0.00       6.27 f
   iq0/dispatch_no_hazard (net)                                      0.00       6.27 f
@@ -1211,11 +1211,11 @@ Wire Load Model Mode: top
   R0/free_rows_next[4] (net)                    1                   0.00       5.82 r
   R0/free_rows_next[4] (ROB)                                        0.00       5.82 r
   rob_free_rows_next_out[4] (net)                                   0.00       5.82 r
-  U16746/DIN1 (or5s1)                                     0.04      0.00       5.83 r
-  U16746/Q (or5s1)                                        0.17      0.19       6.01 r
+  U14007/DIN1 (or5s1)                                     0.04      0.00       5.83 r
+  U14007/Q (or5s1)                                        0.17      0.19       6.01 r
   n7427 (net)                                   1                   0.00       6.01 r
-  U16741/DIN3 (and4s1)                                    0.17      0.00       6.01 r
-  U16741/Q (and4s1)                                       0.48      0.32       6.33 r
+  U14002/DIN3 (and4s1)                                    0.17      0.00       6.01 r
+  U14002/Q (and4s1)                                       0.48      0.32       6.33 r
   dispatch_no_hazard_comb (net)                 5                   0.00       6.33 r
   iq0/dispatch_no_hazard (IQ)                                       0.00       6.33 r
   iq0/dispatch_no_hazard (net)                                      0.00       6.33 r
@@ -1940,7 +1940,7 @@ Report : constraint
         -max_delay
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:27 2019
+Date   : Tue Apr 23 23:19:33 2019
 ****************************************
 
 
@@ -2142,8 +2142,8 @@ Date   : Tue Apr 23 22:17:27 2019
   R0/U24534/Q (oai322s1)                                  0.17       5.54 f
   R0/U24532/Q (i1s8)                                      0.19       5.73 r
   R0/U24533/Q (ib1s6)                                     0.03       5.76 f
-  U16746/Q (or5s1)                                        0.21       5.97 f
-  U16741/Q (and4s1)                                       0.30       6.27 f
+  U14007/Q (or5s1)                                        0.21       5.97 f
+  U14002/Q (and4s1)                                       0.30       6.27 f
   iq0/U8243/Q (nnd2s1)                                    0.09       6.36 r
   iq0/U8665/Q (nor2s1)                                    0.18       6.54 f
   iq0/U8705/Q (nnd3s3)                                    0.14       6.69 r
@@ -2309,7 +2309,7 @@ Warning: Design 'pipeline' contains 2 high-fanout nets. A fanout number of 1000 
 Report : reference
 Design : pipeline
 Version: O-2018.06
-Date   : Tue Apr 23 22:17:44 2019
+Date   : Tue Apr 23 23:19:49 2019
 ****************************************
 
 Attributes:
@@ -2335,7 +2335,7 @@ Map_Table                     165705.566292       1 165705.566292 h, n
 ROB                           1512891.961884       1 1512891.961884 h, n
 RS                            1526764.468189       1 1526764.468189 h, n
 SQ                            786659.461090       1 786659.461090 h, n
-and2s1             lec25dscc25_TT    49.766399    1456 72459.877502
+and2s1             lec25dscc25_TT    49.766399    1475 73405.439091
 and2s2             lec25dscc25_TT    58.060799      15   870.911980
 and3s1             lec25dscc25_TT    66.355202       2   132.710403
 and4s1             lec25dscc25_TT    74.649597      20  1492.991943
@@ -2346,7 +2346,7 @@ aoi22s2            lec25dscc25_TT    58.060799    1796 104277.194366
 aoi23s2            lec25dscc25_TT    66.355202       1    66.355202
 aoi211s1           lec25dscc25_TT    58.060799       2   116.121597
 aoi221s1           lec25dscc25_TT    74.649597     157 11719.986755
-aoi222s1           lec25dscc25_TT    82.944000     150 12441.600037
+aoi222s1           lec25dscc25_TT    82.944000    1174 97376.256287
 dffcs1             lec25dscc25_TT   165.888000    2152 356990.977051 n
 dffcs2             lec25dscc25_TT   182.477005     648 118245.099243 n
 dffs1              lec25dscc25_TT   157.593994      86 13553.083496 n
@@ -2354,11 +2354,11 @@ dffs2              lec25dscc25_TT   174.182007      66 11496.012451 n
 dffss1             lec25dscc25_TT   199.065994     241 47974.904617 n
 dffss2             lec25dscc25_TT   207.360001      60 12441.600037 n
 ex_stage                      2066226.450745       1 2066226.450745 h, n
-hi1s1              lec25dscc25_TT    33.177601       8   265.420807
+hi1s1              lec25dscc25_TT    33.177601      10   331.776009
 hnb1s1             lec25dscc25_TT    58.060799       3   174.182396
 i1s1               lec25dscc25_TT    33.177601      21   696.729618
 i1s3               lec25dscc25_TT    41.472000      18   746.496002
-ib1s1              lec25dscc25_TT    33.177601    2400 79626.242065
+ib1s1              lec25dscc25_TT    33.177601    2530 83939.330177
 icache                        1229021.134884       1 1229021.134884 h, n
 id_stage                       9231.666847       1   9231.666847  h
 if_stage                      51060.339005       1  51060.339005  h, n
@@ -2367,11 +2367,11 @@ mem_stage                     5800422.483776       1 5800422.483776 h, n
 nb1s1              lec25dscc25_TT    41.472000      84  3483.648010
 nb1s2              lec25dscc25_TT    49.766399    1602 79725.771812
 nb1s3              lec25dscc25_TT    66.355202      13   862.617622
-nnd2s1             lec25dscc25_TT    41.472000      25  1036.800003
-nnd2s2             lec25dscc25_TT    41.472000     187  7755.264023
+nnd2s1             lec25dscc25_TT    41.472000      29  1202.688004
+nnd2s2             lec25dscc25_TT    41.472000     230  9538.560028
 nnd3s2             lec25dscc25_TT    49.766399       5   248.831997
-nnd4s1             lec25dscc25_TT    58.060799      25  1451.519966
-nor2s1             lec25dscc25_TT    41.472000     116  4810.752014
+nnd4s1             lec25dscc25_TT    58.060799     281 16315.084419
+nor2s1             lec25dscc25_TT    41.472000     121  5018.112015
 nor3s1             lec25dscc25_TT    82.944000       1    82.944000
 nor4s1             lec25dscc25_TT    82.944000       1    82.944000
 oai13s2            lec25dscc25_TT    58.060799       1    58.060799
@@ -2387,13 +2387,14 @@ oai1112s2          lec25dscc25_TT    66.355202       8   530.841614
 or2s1              lec25dscc25_TT    49.766399      23  1144.627186
 or2s2              lec25dscc25_TT    58.060799       3   174.182396
 or4s1              lec25dscc25_TT    82.944000       1    82.944000
+or4s3              lec25dscc25_TT   132.710007      64  8493.440430
 or5s1              lec25dscc25_TT    91.238403       4   364.953613
 or5s3              lec25dscc25_TT   182.477005       1   182.477005
-phys_regfile                  3093810.916462       1 3093810.916462 h, n
+phys_regfile                  3153264.773884       1 3153264.773884 h, n
 pipeline_DW01_cmp6_0           6743.347000       1   6743.347000  h
 pipeline_DW01_sub_0            8136.806381       1   8136.806381  h
 psel_generic                   1119.743607       1   1119.743607  h
 xnr2s1             lec25dscc25_TT    82.944000       1    82.944000
 -----------------------------------------------------------------------------
-Total 69 references                                 20202500.291332
+Total 70 references                                 20377727.358795
 1
