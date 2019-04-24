@@ -369,7 +369,7 @@ logic		unanswered_miss_out;
   endtask  // task show_mem_with_decimal
 	task display_stages;
 		begin
-			 if (clock_count == 100000) begin
+			 if (clock_count == 10000) begin
        show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
 				$finish;
 			 end
@@ -613,13 +613,13 @@ logic		unanswered_miss_out;
        if(pipeline_completed_insts>0) begin
          if(pipeline_commit_wr_en)
 //, PHYS_REG=%d, PHYS_REG_FROM_ARCH=%d, Cycle : %d
-           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x",
+           $fdisplay(wb_fileno, "PC=%x, REG[%d]=%x, PHYS_REG=%d, PHYS_REG_FROM_ARCH=%d, Cycle : %d",
                      pipeline_commit_NPC,
                      pipeline_commit_wr_idx,
-                     pipeline_commit_wr_data/*,
+                     pipeline_commit_wr_data,
 		    pipeline_commit_phys_reg,
 			pipeline_commit_phys_from_arch,
-			clock_count*/
+			clock_count
 		     );
         else
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC);
