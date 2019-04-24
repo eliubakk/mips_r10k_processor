@@ -13,9 +13,9 @@
 #	stq	$r4,24($r0)
 	.align 3	
 	ldq	$r5,0($r0)
-	ldq	$r5,8($r0)
-	ldq	$r5,16($r0)
-	ldq	$r5,24($r0)
+	#ldq	$r5,8($r0)
+	#ldq	$r5,16($r0)
+	#ldq	$r5,24($r0)
 	 
 	call_pal 0x555
 
