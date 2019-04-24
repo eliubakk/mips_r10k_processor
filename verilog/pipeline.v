@@ -1404,6 +1404,16 @@ assign lq_pop_en = ~mem_co_stall;
 
 assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex_co_rd_mem[FU_LD_IDX] & ex_co_wr_mem[FU_LD_IDX])) & (ex_co_valid_inst[FU_LD_IDX]) ;
 
+logic co_lq_miss_valid;
+
+//synopsys sync_set_reset "reset"
+always_ff @(posedge clock) begin
+		if(reset | branch_not_taken) begin
+			co_lq_miss_valid <= `SD 1'b0;
+		end else begin
+			co_lq_miss_valid <= `SD lq_miss_valid;
+		end
+	end
 
 
   //////////////////////////////////////////////////
@@ -1415,7 +1425,7 @@ assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex
   logic mem_co_comb;
   assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : lq_load_out.valid_inst; 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : (lq_load_out.valid_inst & co_lq_miss_valid); 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
@@ -1427,11 +1437,7 @@ assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex
 
   
                                    // mem2proc_data; // lq_load_out.alu_result;
-  
-
-  
-  
-  
+   
   
   
   assign mem_co_enable= ((~mem_co_valid_inst) | (mem_co_valid_inst  & co_selected[FU_LD_IDX]));
@@ -1447,7 +1453,7 @@ assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex
       mem_co_dest_reg_idx <= `SD `DUMMY_REG;
       mem_co_alu_result   <= `SD 64'b0;
     end else if (mem_co_enable & ~mem_co_stall) begin
-      mem_co_valid_inst   <= `SD mem_co_valid_inst_comb ;
+      mem_co_valid_inst   <= `SD mem_co_valid_inst_comb;
       mem_co_NPC          <= `SD mem_co_NPC_comb;
       mem_co_IR           <= `SD mem_co_IR_comb;
       mem_co_halt         <= `SD mem_co_halt_comb;

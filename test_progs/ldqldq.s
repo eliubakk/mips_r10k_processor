@@ -13,6 +13,16 @@
 #	stq	$r4,24($r0)
 	.align 3	
 	ldq	$r5,0($r0)
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
 	#ldq	$r5,8($r0)
 	#ldq	$r5,16($r0)
 	#ldq	$r5,24($r0)
