@@ -1448,10 +1448,14 @@ always_ff @(posedge clock) begin
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
   assign mem_co_illegal_comb = mem_co_comb ? ex_co_illegal[FU_LD_IDX]  : lq_load_out.illegal;
   assign mem_co_dest_reg_idx_comb= mem_co_comb ? ex_co_dest_reg_idx[FU_LD_IDX]  : lq_load_out.dest_reg;
-  assign mem_co_alu_result_comb = (ex_co_valid_inst[FU_LD_IDX] & sq_data_valid) ? sq_data_out :
-                                  (ex_co_valid_inst[FU_LD_IDX] & ~mem_rd_stall) ? mem_result_out : lq_load_out.data; 
+ //assign mem_co_alu_result_comb = (ex_co_valid_inst[FU_LD_IDX] & sq_data_valid) ? sq_data_out :
+   //                               (ex_co_valid_inst[FU_LD_IDX] & ~mem_rd_stall) ? mem_result_out : lq_load_out.data; 
+ assign mem_co_alu_result_comb = ( ex_co_valid_inst[FU_LD_IDX] & sq_data_valid ) ? sq_data_out : 
+				( ex_co_valid_inst[FU_LD_IDX] & ~sq_data_valid & ~mem_rd_stall ) ? mem_result_out : lq_load_out.data;
+//   assign mem_co_alu_result_comb = mem_co_comb ? mem_result_out : lq_load_out.data;
 
-
+  // assign lq_load_in.data = sq_data_valid? sq_data_out :
+    //                        mem_rd_stall? 64'b0 : mem_result_out;
   
                                    // mem2proc_data; // lq_load_out.alu_result;
    

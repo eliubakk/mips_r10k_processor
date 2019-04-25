@@ -1,6 +1,6 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 25 16:02 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 25 17:42 2019
 @@
 @@
 @@                     0  Asserting System reset......
@@ -108,5 +108,5 @@ $finish called from file "../../testbench/pipeline_test.v", line 661.
 $finish at simulation time                55510
            V C S   S i m u l a t i o n   R e p o r t 
 Time: 5551000 ps
-CPU Time:      0.290 seconds;       Data structure size:   0.4Mb
-Thu Apr 25 16:02:49 2019
+CPU Time:      0.300 seconds;       Data structure size:   0.4Mb
+Thu Apr 25 17:42:41 2019
