@@ -13,15 +13,15 @@ Checking for correct memory...
 	halt.program.out 			PASSED
 	insertion.program.out 			PASSED
 	mult_no_lsq.program.out 			PASSED
-	mult.program.out 			FAILED
+	mult.program.out 			PASSED
 	objsort.program.out 			FAILED
 	parallel_long.program.out 			PASSED
 	parallel.program.out 			PASSED
 	parsort.program.out 			FAILED
 	saxpy.program.out 			FAILED
 	sort.program.out 			PASSED
-	test_sq_stress.program.out 			FAILED
-PASSED: 14/20
+	test_sq_stress.program.out 			PASSED
+PASSED: 16/20
 Checking for correct writeback...
 	btest1.writeback.out 			PASSED
 	btest2.writeback.out 			PASSED
