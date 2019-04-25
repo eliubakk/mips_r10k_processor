@@ -19,9 +19,9 @@ Checking for correct memory...
 	parallel.program.out 			PASSED
 	parsort.program.out 			FAILED
 	saxpy.program.out 			FAILED
-	sort.program.out 			FAILED
+	sort.program.out 			PASSED
 	test_sq_stress.program.out 			FAILED
-PASSED: 12/20
+PASSED: 13/20
 Checking for correct writeback...
 	btest1.writeback.out 			PASSED
 	btest2.writeback.out 			PASSED
@@ -41,6 +41,6 @@ Checking for correct writeback...
 	parallel.writeback.out 			PASSED
 	parsort.writeback.out 			FAILED
 	saxpy.writeback.out 			FAILED
-	sort.writeback.out 			FAILED
+	sort.writeback.out 			PASSED
 	test_sq_stress.writeback.out 			PASSED
-PASSED 70/76
+PASSED 71/76

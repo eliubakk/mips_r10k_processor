@@ -67,8 +67,10 @@ module mem_controller(clock, reset,
 
     // assign statements
 
-    assign Dmem2proc_data_next = (mem2proc_tag>=2) ? mem2proc_data : 64'h0;
-    assign Dmem2proc_tag_next = (mem2proc_tag>=2) ? mem2proc_tag : 0;
+    //assign Dmem2proc_data_next = (mem2proc_tag>=2) ? mem2proc_data : 64'h0;
+    //assign Dmem2proc_tag_next = (mem2proc_tag>=2) ? mem2proc_tag : 0;
+    assign Dmem2proc_data_next = mem2proc_data;
+    assign Dmem2proc_tag_next = mem2proc_tag;
     assign Imem2proc_data_next = mem2proc_data;
     assign Imem2proc_tag_next = mem2proc_tag;
     assign Rmem2proc_tag_next = mem2proc_tag;
