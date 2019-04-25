@@ -1404,35 +1404,6 @@ assign lq_pop_en = ~mem_co_stall;
 
 assign stall_struc= ((ex_co_rd_mem[FU_LD_IDX] & ~ex_co_wr_mem[FU_LD_IDX]) | (~ex_co_rd_mem[FU_LD_IDX] & ex_co_wr_mem[FU_LD_IDX])) & (ex_co_valid_inst[FU_LD_IDX]) ;
 
-logic mem_lq_miss_valid;
-logic [63:0] mem_lq_miss_addr;
-logic [63:0] mem_lq_miss_data;
-
-//synopsys sync_set_reset "reset"
-always_ff @(posedge clock) begin
-		if(reset | branch_not_taken) begin
-			mem_lq_miss_valid <= `SD 1'b0;
-			mem_lq_miss_addr <= `SD 64'h0;
-			mem_lq_miss_data <= `SD 64'h0;
-	/*	mem_lq_load_out.valid_inst <= `SD 1'b0;
-           	mem_lq_load_out.NPC <= `SD 32'b0;
-            	mem_lq_load_out.IR <= `SD 32'b0;
-            	mem_lq_load_out.halt <= `SD 1'b0;
-            	mem_lq_load_out.illegal <= `SD 1'b0;
-            	mem_lq_load_out.dest_reg <= `SD `DUMMY_REG;
-            	mem_lq_load_out.alu_result <= `SD 64'b0;
-            	mem_lq_load_out.data   <= `SD 64'b0;
-            	mem_lq_load_out.data_valid   <= `SD 1'b0;*/
-            
-		end else begin
-			mem_lq_miss_valid <= `SD lq_miss_valid;
-			mem_lq_miss_addr <= `SD lq_miss_addr;
-			mem_lq_miss_data <= `SD lq_miss_data;
-			//mem_lq_load_out	<= `SD lq_load_out;
-		end
-	end
-
-
   //////////////////////////////////////////////////
   //                                              //
   //           mem/co stage                   //
