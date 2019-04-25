@@ -11,7 +11,7 @@ Checking for correct memory...
 	fib.program.out 			PASSED
 	fib_rec.program.out 			FAILED
 	halt.program.out 			PASSED
-	insertion.program.out 			FAILED
+	insertion.program.out 			PASSED
 	mult_no_lsq.program.out 			PASSED
 	mult.program.out 			FAILED
 	objsort.program.out 			FAILED
@@ -21,7 +21,7 @@ Checking for correct memory...
 	saxpy.program.out 			FAILED
 	sort.program.out 			PASSED
 	test_sq_stress.program.out 			FAILED
-PASSED: 13/20
+PASSED: 14/20
 Checking for correct writeback...
 	btest1.writeback.out 			PASSED
 	btest2.writeback.out 			PASSED
@@ -33,7 +33,7 @@ Checking for correct writeback...
 	fib_rec.writeback.out 			FAILED
 	fib.writeback.out 			PASSED
 	halt.writeback.out 			PASSED
-	insertion.writeback.out 			FAILED
+	insertion.writeback.out 			PASSED
 	mult_no_lsq.writeback.out 			PASSED
 	mult.writeback.out 			PASSED
 	objsort.writeback.out 			FAILED
@@ -43,4 +43,4 @@ Checking for correct writeback...
 	saxpy.writeback.out 			FAILED
 	sort.writeback.out 			PASSED
 	test_sq_stress.writeback.out 			PASSED
-PASSED 71/76
+PASSED 72/76

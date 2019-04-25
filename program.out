@@ -1,22 +1,22 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 25 17:42 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 25 17:54 2019
 @@
 @@
 @@                     0  Asserting System reset......
 @@
-@@                   100 : System STILL at reset, can't show anything
+@@                    98 : System STILL at reset, can't show anything
 @@
 @@
-@@                   200 : System STILL at reset, can't show anything
+@@                   196 : System STILL at reset, can't show anything
 @@
 @@
-@@                   300 : System STILL at reset, can't show anything
+@@                   294 : System STILL at reset, can't show anything
 @@
 @@
-@@                   400 : System STILL at reset, can't show anything
+@@                   392 : System STILL at reset, can't show anything
 @@
-@@                   460  Deasserting System reset......
+@@                   451  Deasserting System reset......
 @@
 @@
 @@@ Unified Memory contents hex on left, decimal on right: 
@@ -92,21 +92,21 @@ Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;
 @@@ mem[ 8768] = 0000000000000bad : 2989
 @@@
 @@@
-@@                 55420 : System halted
+@@                 54410 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
 @@
-@@  549 cycles / 418 instrs = 1.313397 CPI
+@@  550 cycles / 418 instrs = 1.315789 CPI
 @@
-@@  16470.00 ns total time to execute
+@@  16500.00 ns total time to execute
 @@
 
 
 -------------Branch prediction accuracy : 14 correct / 16 branch instrs = 87.5000 percent
 $finish called from file "../../testbench/pipeline_test.v", line 661.
-$finish at simulation time                55510
+$finish at simulation time                54498
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 5551000 ps
-CPU Time:      0.300 seconds;       Data structure size:   0.4Mb
-Thu Apr 25 17:42:41 2019
+Time: 5449800 ps
+CPU Time:      0.330 seconds;       Data structure size:   0.4Mb
+Thu Apr 25 17:54:09 2019
