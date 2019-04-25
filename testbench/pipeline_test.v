@@ -53,8 +53,8 @@ module testbench;
   logic        clock;
   logic        reset;
   logic	       enable;
-  logic [31:0] clock_count;
-  logic [31:0] instr_count;
+  logic [31:0] clock_count, clock_count_out;
+  logic [31:0] instr_count, instr_count_out;
   int          wb_fileno;
 
 	// For synth debugging
@@ -72,7 +72,7 @@ logic		unanswered_miss_out;
   logic  [3:0] mem2proc_tag;
 
   logic  [3:0] pipeline_completed_insts;
-  ERROR_CODE   pipeline_error_status;
+  ERROR_CODE   pipeline_error_status, pipeline_error_status_finish;
   logic  [4:0] pipeline_commit_wr_idx;
   logic [63:0] pipeline_commit_wr_data;
   logic        pipeline_commit_wr_en;
@@ -298,11 +298,11 @@ logic		unanswered_miss_out;
     real cpi;
 
     begin
-      cpi = (clock_count + 0.0) / (instr_count+0.0);
+      cpi = (clock_count_out + 0.0) / (instr_count_out+0.0);
       $display("@@  %0d cycles / %0d instrs = %f CPI\n@@",
-                clock_count, instr_count, cpi);
+                clock_count_out, instr_count_out, cpi);
       $display("@@  %4.2f ns total time to execute\n@@\n",
-                clock_count*`VIRTUAL_CLOCK_PERIOD);
+                clock_count_out*`VIRTUAL_CLOCK_PERIOD);
     end
   endtask  // task show_clk_count
 
@@ -478,10 +478,18 @@ logic		unanswered_miss_out;
     if(reset) begin
       clock_count <= `SD 0;
       instr_count <= `SD 0;
+      clock_count_out <= `SD 0;
+      instr_count <= `SD 0;
     end else begin
       clock_count <= `SD (clock_count + 1);
       instr_count <= `SD (instr_count + pipeline_completed_insts);
     end
+
+    if( pipeline_error_status == HALTED_ON_HALT ) begin
+	clock_count_out <= `SD clock_count;
+	instr_count_out	<= `SD instr_count;	
+
+	end 
 	`SD;
 	display_stages;
 	/* if (clock_count == 100000) begin
@@ -625,14 +633,18 @@ logic		unanswered_miss_out;
           $fdisplay(wb_fileno, "PC=%x, ---",pipeline_commit_NPC);
       end
 
+	pipeline_error_status_finish = NO_ERROR;
       // deal with any halting conditions
       if(pipeline_error_status != NO_ERROR) begin
         // for (int i = 0; i < 10; ++i) begin
         //   @(posedge clock);
         // end
+	pipeline_error_status_finish = pipeline_error_status;
 
 	// write cache to main mem
-	
+	for (integer i = 0; i<20; i++) begin
+		@(posedge clock);
+	end
 
         $display("@@@ Unified Memory contents hex on left, decimal on right: ");
         show_mem_with_decimal(0,`MEM_64BIT_LINES - 1); 
@@ -640,7 +652,7 @@ logic		unanswered_miss_out;
 
         $display("@@  %t : System halted\n@@", $realtime);
 
-        case(pipeline_error_status)
+        case(pipeline_error_status_finish)
           HALTED_ON_MEMORY_ERROR:  
               $display("@@@ System halted on memory error");
           HALTED_ON_HALT:          
@@ -649,7 +661,7 @@ logic		unanswered_miss_out;
               $display("@@@ System halted on illegal instruction");
           default: 
               $display("@@@ System halted on unknown error code %x",
-                       pipeline_error_status);
+                       pipeline_error_status_finish);
         endcase
         $display("@@@\n@@");
         show_clk_count;

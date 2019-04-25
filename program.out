@@ -1,6 +1,6 @@
 Chronologic VCS simulator copyright 1991-2017
 Contains Synopsys proprietary information.
-Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 25 17:54 2019
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  Apr 25 18:29 2019
 @@
 @@
 @@                     0  Asserting System reset......
@@ -92,7 +92,7 @@ Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;
 @@@ mem[ 8768] = 0000000000000bad : 2989
 @@@
 @@@
-@@                 54410 : System halted
+@@                 56301 : System halted
 @@
 @@@ System halted on HALT instruction
 @@@
@@ -104,9 +104,9 @@ Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;
 
 
 -------------Branch prediction accuracy : 14 correct / 16 branch instrs = 87.5000 percent
-$finish called from file "../../testbench/pipeline_test.v", line 661.
-$finish at simulation time                54498
+$finish called from file "../../testbench/pipeline_test.v", line 673.
+$finish at simulation time                56458
            V C S   S i m u l a t i o n   R e p o r t 
-Time: 5449800 ps
-CPU Time:      0.330 seconds;       Data structure size:   0.4Mb
-Thu Apr 25 17:54:09 2019
+Time: 5645800 ps
+CPU Time:      0.300 seconds;       Data structure size:   0.4Mb
+Thu Apr 25 18:29:44 2019
