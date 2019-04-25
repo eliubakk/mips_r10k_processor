@@ -81,8 +81,8 @@ module LQ(
             load_queue[i].illegal <= `SD 1'b0;
             load_queue[i].dest_reg <= `SD `DUMMY_REG;
             load_queue[i].alu_result <= `SD 64'b0;
-            load_queue[i].data   <= 64'b0;
-            load_queue[i].data_valid   <= 1'b0;
+            load_queue[i].data   <= `SD 64'b0;
+            load_queue[i].data_valid   <= `SD 1'b0;
             // load_queue[i].mem_response <= `SD 4'b0;
         end 
         head <= `SD {`lq_index_t{1'b0}};

@@ -525,8 +525,8 @@ logic tag_in_lq;
   logic [63:0] lq_miss_addr;
   logic lq_miss_valid;
 
-  LQ_ROW_T lq_load_out;
-  logic lq_read_valid;
+  LQ_ROW_T lq_load_out, mem_lq_load_out;
+  logic lq_read_valid, mem_lq_read_valid;
   logic lq_full;
 
   //assign lq_pop_en = mem_stall_out;
@@ -1414,10 +1414,21 @@ always_ff @(posedge clock) begin
 			mem_lq_miss_valid <= `SD 1'b0;
 			mem_lq_miss_addr <= `SD 64'h0;
 			mem_lq_miss_data <= `SD 64'h0;
+	/*	mem_lq_load_out.valid_inst <= `SD 1'b0;
+           	mem_lq_load_out.NPC <= `SD 32'b0;
+            	mem_lq_load_out.IR <= `SD 32'b0;
+            	mem_lq_load_out.halt <= `SD 1'b0;
+            	mem_lq_load_out.illegal <= `SD 1'b0;
+            	mem_lq_load_out.dest_reg <= `SD `DUMMY_REG;
+            	mem_lq_load_out.alu_result <= `SD 64'b0;
+            	mem_lq_load_out.data   <= `SD 64'b0;
+            	mem_lq_load_out.data_valid   <= `SD 1'b0;*/
+            
 		end else begin
 			mem_lq_miss_valid <= `SD lq_miss_valid;
 			mem_lq_miss_addr <= `SD lq_miss_addr;
 			mem_lq_miss_data <= `SD lq_miss_data;
+			//mem_lq_load_out	<= `SD lq_load_out;
 		end
 	end
 
@@ -1431,7 +1442,7 @@ always_ff @(posedge clock) begin
   logic mem_co_comb;
   assign mem_co_comb = ex_co_valid_inst[FU_LD_IDX] & ( sq_data_valid | ~mem_rd_stall);
 
-  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : (lq_load_out.valid_inst & mem_lq_miss_valid); 
+  assign mem_co_valid_inst_comb= mem_co_comb ? ex_co_valid_inst[FU_LD_IDX] : (lq_load_out.valid_inst & lq_read_valid); 
   assign mem_co_NPC_comb = mem_co_comb ? ex_co_NPC[FU_LD_IDX]  : lq_load_out.NPC;
   assign mem_co_IR_comb = mem_co_comb ? ex_co_IR[FU_LD_IDX]  : lq_load_out.IR;
   assign mem_co_halt_comb = mem_co_comb ? ex_co_halt[FU_LD_IDX]  : lq_load_out.halt;
