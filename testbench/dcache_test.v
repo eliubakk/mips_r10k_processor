@@ -1,5 +1,5 @@
 `include "../../sys_defs.vh"
-`include "../../cache_defs.vh"
+//`include "../../cache_defs.vh"
 /*`define DEBUG
 `define DELAY #2
 `define CLOCK_PERIOD #10
