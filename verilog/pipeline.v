@@ -175,7 +175,6 @@ module pipeline (
   PHYS_REG 		T1; // Output for Dispatch and goes to RS
 	PHYS_REG 		T2; // Output for Dispatch and goes to RS
   PHYS_REG    T_old;	// Output for Dispatch and goes to ROB
-  INST_
 
   // --------------------------------Dispatch stage
 

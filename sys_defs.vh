@@ -18,6 +18,13 @@
 `define DUT(mod) mod
 `endif
 
+//
+// useful boolean single-bit definitions
+//
+`define FALSE	1'h0
+`define TRUE	1'h1
+
+
 //////////////////////////////////////////////
 //
 // Memory/testbench attribute definitions
@@ -405,12 +412,6 @@ typedef enum logic [1:0] {
   BUS_LOAD     = 2'h1,
   BUS_STORE    = 2'h2
 } BUS_COMMAND;
-
-//
-// useful boolean single-bit definitions
-//
-`define FALSE	1'h0
-`define TRUE	1'h1
 
 typedef enum logic [1:0] {
   NOOP_OPCODE,
