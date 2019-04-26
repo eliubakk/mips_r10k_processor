@@ -2,7 +2,7 @@
 //`include "../../cache_defs.vh"
 //`define INST_BUFFER_LEN 6
 //`define NUM_INST_PREFETCH 4
-module icache(clock, reset,
+module icache(clock, reset, branch_not_taken,
               proc2Icache_addr,
               Imem2proc_response, Imem2proc_data, Imem2proc_tag,
               Icache_data_out, Icache_valid_out,
@@ -14,7 +14,7 @@ module icache(clock, reset,
   //`include "../../cache_defs.vh"
 
   input clock, reset;
-
+  input branch_not_taken;
   //////////////
   //  INPUTS  //
   //////////////
@@ -237,7 +237,7 @@ module icache(clock, reset,
 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
-    if(reset) begin
+    if(reset | branch_not_taken) begin
       last_PC_in   <= `SD -1;     
       send_request <= `SD 1'b0;
       for(int i = 0; i < `INST_BUFFER_LEN; i += 1) begin

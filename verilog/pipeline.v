@@ -423,7 +423,7 @@ logic tag_in_lq;
 	icache inst_memory(
 				.clock(clock),
 				.reset(reset),
-        
+       				.branch_not_taken(branch_not_taken), 
         //inputs
         //from if_stage
         .proc2Icache_addr(proc2Icache_addr),
