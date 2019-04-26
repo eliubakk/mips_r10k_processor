@@ -17,7 +17,7 @@ module phys_regfile(
   input [`NUM_FU_TOTAL-1:0]       wr_en, 
   input wr_clk,
 
-    output logic [`NUM_PHYS_REG-1:0][63:0] phys_registers_out,
+  output logic [`NUM_PHYS_REG-1:0][63:0] phys_registers_out,
   output logic [`NUM_FU_TOTAL-1:0][1:0][63:0] rd_out  // read data
 );
   

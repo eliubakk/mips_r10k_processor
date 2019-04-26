@@ -50,7 +50,9 @@ module Free_List(
 
 
 	assign empty = (tail == 0);
-	assign free_reg = id_no_dest_reg? {1'b0, {$clog2(`NUM_PHYS_REG){1'b1}}} : free_list[0]; // What heewoo added
+	assign free_reg = ~dispatch_en? `DUMMY_REG :
+					  id_no_dest_reg? {1'b0, {$clog2(`NUM_PHYS_REG){1'b1}}} :
+					  				  free_list[0]; // What heewoo added
 	assign num_free_entries = tail;
 	`ifdef DEBUG
 	assign free_list_out = free_list;

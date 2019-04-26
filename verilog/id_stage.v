@@ -16,7 +16,6 @@
   // This is a *combinational* module (basically a PLA).
   //
 module decoder(
-
     input [31:0] inst,
     input valid_inst_in,  // ignore inst when low, outputs will
                           // reflect noop (except valid_inst)
@@ -35,9 +34,9 @@ module decoder(
                             // keeping track of when to allow the next
                             // instruction out of fetch
                             // 0 for HALT and illegal instructions (die on halt)
-    output logic [4:0] ra_idx,
-    output logic [4:0] rb_idx,
-    output logic [4:0] rdest_idx
+    output GEN_REG ra_idx,
+    output GEN_REG rb_idx,
+    output GEN_REG rdest_idx
   );
   
   assign valid_inst = valid_inst_in && !illegal;
@@ -240,37 +239,37 @@ endmodule // decoder
 
 
 module id_stage(
-             
-        input         clock,                // system clock
-        input         reset,                // system reset
-        input  [31:0] if_id_IR,             // incoming instruction
-        //input         wb_reg_wr_en_out,     // Reg write enable from WB Stage
-        //input   [4:0] wb_reg_wr_idx_out,    // Reg write index from WB Stage
-       // input  [63:0] wb_reg_wr_data_out,   // Reg write data from WB Stage
-        input         if_id_valid_inst,
-       // output logic [63:0] id_ra_value_out,      // reg A value
-        //output logic [63:0] id_rb_value_out,      // reg B value
+    input         clock,                // system clock
+    input         reset,                // system reset
+    input  [31:0] if_id_IR,             // incoming instruction
+    //input         wb_reg_wr_en_out,     // Reg write enable from WB Stage
+    //input   [4:0] wb_reg_wr_idx_out,    // Reg write index from WB Stage
+    // input  [63:0] wb_reg_wr_data_out,   // Reg write data from WB Stage
+    input         if_id_valid_inst,
+    // output logic [63:0] id_ra_value_out,      // reg A value
+    //output logic [63:0] id_rb_value_out,      // reg B value
 
-        output ALU_OPA_SELECT id_opa_select_out,    // ALU opa mux select (ALU_OPA_xxx *)
-        output ALU_OPB_SELECT id_opb_select_out,    // ALU opb mux select (ALU_OPB_xxx *)
-        output DEST_REG_SEL id_dest_reg_select_out,
-        //output logic  [4:0] id_dest_reg_idx_out,  // destination (writeback) register index
-        // (ZERO_REG if no writeback)
-        output ALU_FUNC     id_alu_func_out,      // ALU function select (ALU_xxx *)
-        output FU_NAME      id_fu_name_out,           // Function unit name
-        output logic        id_rd_mem_out,        // does inst read memory?
-        output logic        id_wr_mem_out,        // does inst write memory?
-        output logic        id_ldl_mem_out,       // load-lock inst?
-        output logic        id_stc_mem_out,       // store-conditional inst?
-        output logic        id_cond_branch_out,   // is inst a conditional branch?
-        output logic        id_uncond_branch_out, // is inst an unconditional branch 
-        // or jump?
-        output logic        id_halt_out,
-        output logic        id_cpuid_out,         // get CPUID inst?
-        output logic        id_illegal_out,
-        output logic        id_valid_inst_out,     // is inst a valid instruction to be 
-        output GEN_REG ra_idx, rb_idx, rdest_idx       //for giving input for the maptable                                // counted for CPI calculations?
-            );
+    //output ALU_OPA_SELECT id_opa_select_out,    // ALU opa mux select (ALU_OPA_xxx *)
+    //output ALU_OPB_SELECT id_opb_select_out,    // ALU opb mux select (ALU_OPB_xxx *)
+    //output DEST_REG_SEL id_dest_reg_select_out,
+    //output logic  [4:0] id_dest_reg_idx_out,  // destination (writeback) register index
+    // (ZERO_REG if no writeback)
+    output DECODED_INST id_inst_out,
+    // output ALU_FUNC     id_alu_func_out,      // ALU function select (ALU_xxx *)
+    // output FU_NAME      id_fu_name_out,           // Function unit name
+    // output logic        id_rd_mem_out,        // does inst read memory?
+    // output logic        id_wr_mem_out,        // does inst write memory?
+    // output logic        id_ldl_mem_out,       // load-lock inst?
+    // output logic        id_stc_mem_out,       // store-conditional inst?
+    // output logic        id_cond_branch_out,   // is inst a conditional branch?
+    // output logic        id_uncond_branch_out, // is inst an unconditional branch 
+    // // or jump?
+    // output logic        id_halt_out,
+    // output logic        id_cpuid_out,         // get CPUID inst?
+    // output logic        id_illegal_out,
+    // output logic        id_valid_inst_out,     // is inst a valid instruction to be 
+    output GEN_REG ra_idx, rb_idx, rdest_idx       //for giving input for the maptable                                // counted for CPI calculations?
+);
    
   //DEST_REG_SEL dest_reg_select;
 
@@ -304,25 +303,25 @@ module id_stage(
     .valid_inst_in(if_id_valid_inst),
 
     // Outputs
-    .opa_select(id_opa_select_out),
-    .opb_select(id_opb_select_out),
-    .dest_reg(id_dest_reg_select_out),
-    .alu_func(id_alu_func_out),
+    .opa_select(id_inst_out.opa_select),
+    .opb_select(id_inst_out.opb_select),
+    .dest_reg(id_inst_out.dest_reg),
+    .alu_func(id_inst_out.alu_func),
     .ra_idx(ra_idx),
     .rb_idx(rb_idx),
     .rdest_idx(rdest_idx),
-    .fu_name(id_fu_name_out),
+    .fu_name(id_inst_out.fu_name),
     //.dest_reg(dest_reg_select),
-    .rd_mem(id_rd_mem_out),
-    .wr_mem(id_wr_mem_out),
-    .ldl_mem(id_ldl_mem_out),
-    .stc_mem(id_stc_mem_out),
-    .cond_branch(id_cond_branch_out),
-    .uncond_branch(id_uncond_branch_out),
-    .halt(id_halt_out),
-    .cpuid(id_cpuid_out),
-    .illegal(id_illegal_out),
-    .valid_inst(id_valid_inst_out)
+    .rd_mem(id_inst_out.rd_mem),
+    .wr_mem(id_inst_out.wr_mem),
+    .ldl_mem(id_inst_out.ldl_mem),
+    .stc_mem(id_inst_out.stc_mem),
+    .cond_branch(id_inst_out.cond_branch),
+    .uncond_branch(id_inst_out.uncond_branch),
+    .halt(id_inst_out.halt),
+    .cpuid(id_inst_out.cpuid),
+    .illegal(id_inst_out.illegal),
+    .valid_inst(id_inst_out.valid_inst)
   );
 
   // mux to generate dest_reg_idx based on

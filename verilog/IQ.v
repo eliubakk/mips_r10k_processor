@@ -16,16 +16,15 @@ module IQ(
 	input 		reset,
 	input 		fetch_valid, // Fetched instruction is valid
 	input INST_Q	if_inst_in,	
-	input 		dispatch_no_hazard, // No structural hazard in ROB, RS, and Free list
+	input 			dispatch_no_hazard, // No structural hazard in ROB, RS, and Free list
 	input	        branch_incorrect, // Flushing due to branch misprediction(branch not taken)	
 
 	`ifdef DEBUG
 	output INST_Q [`IQ_SIZE-1:0] inst_queue_out,
-	output	[$clog2(`IQ_SIZE):0] inst_queue_entry,	
+	output  [$clog2(`IQ_SIZE):0] inst_queue_entry,	
 	`endif
-	output		inst_queue_full_out,
-	output INST_Q	if_inst_out
-
+	output		  inst_queue_full_out,
+	output INST_Q if_inst_out
 );
 
 
@@ -69,108 +68,40 @@ module IQ(
 		end
 */
 	
-		if( fetch_en ) begin
-			if (tail != `IQ_SIZE ) begin
+		if(fetch_en) begin
+			if (tail != `IQ_SIZE) begin
 				next_inst_queue[tail]	= if_inst_in;
-				next_tail		= tail + 1;
-				next_inst_queue_full	= (tail >= `IQ_SIZE -2 );
+				next_tail				= tail + 1;
+				next_inst_queue_full	= (tail >= `IQ_SIZE-2);
 			end
 
 		end
 	end
 
-  // synopsys sync_set_reset "reset"
+  	// synopsys sync_set_reset "reset"
 	always_ff @(posedge clock) begin
-		if (reset | branch_incorrect ) begin
+		if (reset | branch_incorrect) begin
 			for (int i = 0; i < `IQ_SIZE; i += 1) begin
-				inst_queue[i].valid_inst 		<= `SD 1'b0;
-				inst_queue[i].npc			<= `SD 64'h0;
-				inst_queue[i].ir			<= `SD `NOOP_INST;
-				inst_queue[i].branch_inst.en		<= `SD 1'b0; 
-				inst_queue[i].branch_inst.cond		<= `SD 1'b0;    		
-				inst_queue[i].branch_inst.direct	<= `SD 1'b0;
-				inst_queue[i].branch_inst.ret		<= `SD 1'b0;
-				inst_queue[i].branch_inst.pc		<= `SD 64'h0;
-				inst_queue[i].branch_inst.pred_pc	<= `SD 64'h0;
-				inst_queue[i].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-				inst_queue[i].branch_inst.prediction	<= `SD 1'b0;
+				inst_queue[i] <= `SD EMPTY_INST_Q;
 			end	
-				tail 				<= `SD 1'b0;
-
-				inst_queue_full			<= `SD 1'b0;
-				
-				if_inst_out.valid_inst 		<= `SD 1'b0;
-				if_inst_out.npc			<= `SD 64'h0;
-				if_inst_out.ir			<= `SD `NOOP_INST;
-				if_inst_out.branch_inst.en		<= `SD 1'b0; 
-				if_inst_out.branch_inst.cond		<= `SD 1'b0;    		
-				if_inst_out.branch_inst.direct	<= `SD 1'b0;
-				if_inst_out.branch_inst.ret		<= `SD 1'b0;
-				if_inst_out.branch_inst.pc		<= `SD 64'h0;
-				if_inst_out.branch_inst.pred_pc	<= `SD 64'h0;
-				if_inst_out.branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-				if_inst_out.branch_inst.prediction	<= `SD 1'b0;
-
-		end else begin
-			if(dispatch_no_hazard) begin
-				if(next_tail !=0 ) begin // Fetched instruction in IQ
-					if_inst_out		<= `SD next_inst_queue[0];
-					for (int i=0; i< `IQ_SIZE; i=i+1) begin
-						inst_queue[i] 	<= `SD next_inst_queue[i+1];
-					end
-					inst_queue[`IQ_SIZE-1].valid_inst 		<= `SD 1'b0;
-					inst_queue[`IQ_SIZE-1].npc			<= `SD 64'h0;
-					inst_queue[`IQ_SIZE-1].ir			<= `SD `NOOP_INST;
-					inst_queue[`IQ_SIZE-1].branch_inst.en		<= `SD 1'b0; 
-					inst_queue[`IQ_SIZE-1].branch_inst.cond		<= `SD 1'b0;    		
-					inst_queue[`IQ_SIZE-1].branch_inst.direct	<= `SD 1'b0;
-					inst_queue[`IQ_SIZE-1].branch_inst.ret		<= `SD 1'b0;
-					inst_queue[`IQ_SIZE-1].branch_inst.pc		<= `SD 64'h0;
-					inst_queue[`IQ_SIZE-1].branch_inst.pred_pc	<= `SD 64'h0;
-					inst_queue[`IQ_SIZE-1].branch_inst.br_idx	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-					inst_queue[`IQ_SIZE-1].branch_inst.prediction	<= `SD 1'b0;
-
-
-					tail			<= `SD next_tail - 1;
-					inst_queue_full		<= `SD (next_tail >= `IQ_SIZE -1 );
-				end else begin 		// IQ is empty
-							
-					
-					if_inst_out.valid_inst 			<= `SD 1'b0;
-					if_inst_out.npc				<= `SD 64'h0;
-					if_inst_out.ir				<= `SD `NOOP_INST;
-					if_inst_out.branch_inst.en		<= `SD 1'b0;
-					if_inst_out.branch_inst.cond		<= `SD 1'b0;    		
-					if_inst_out.branch_inst.direct		<= `SD 1'b0;
-					if_inst_out.branch_inst.ret		<= `SD 1'b0;
-					if_inst_out.branch_inst.pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.pred_pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-					if_inst_out.branch_inst.prediction	<= `SD 1'b0;
-					inst_queue				<= `SD next_inst_queue;
-					tail 					<= `SD next_tail;
-
-					inst_queue_full				<= `SD next_inst_queue_full;
-					
-				end
-
-			end else begin // There is dispatch hazard, no dispatch
-					if_inst_out.valid_inst 			<= `SD 1'b0;
-					if_inst_out.npc				<= `SD 64'h0;
-					if_inst_out.ir				<= `SD `NOOP_INST;
-					if_inst_out.branch_inst.en		<= `SD 1'b0;
-					if_inst_out.branch_inst.cond		<= `SD 1'b0;    		
-					if_inst_out.branch_inst.direct		<= `SD 1'b0;
-					if_inst_out.branch_inst.ret		<= `SD 1'b0;
-					if_inst_out.branch_inst.pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.pred_pc		<= `SD 64'h0;
-					if_inst_out.branch_inst.br_idx		<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-					if_inst_out.branch_inst.prediction	<= `SD 1'b0;
-					inst_queue				<= `SD next_inst_queue;
-					tail 					<= `SD next_tail;
-					inst_queue_full				<= `SD next_inst_queue_full;
-
+			tail 			<= `SD {`IQ_SIZE{1'b0}};
+			inst_queue_full	<= `SD 1'b0;
+			if_inst_out 	<= `SD EMPTY_INST_Q;
+		end else if(dispatch_no_hazard & (next_tail != 0)) begin
+			// Fetched instruction in IQ
+			if_inst_out	<= `SD next_inst_queue[0];
+			for (int i=0; i< `IQ_SIZE; i=i+1) begin
+				inst_queue[i] <= `SD next_inst_queue[i+1];
 			end
+			inst_queue[`IQ_SIZE-1] <= EMPTY_INST_Q;
+			tail			<= `SD next_tail-1;
+			inst_queue_full	<= `SD (next_tail >= `IQ_SIZE-1);
+		end else begin 
+			// There is dispatch hazard or queue is empty, no dispatch
+			if_inst_out		<= `SD EMPTY_INST_Q;
+			inst_queue		<= `SD next_inst_queue;
+			tail 			<= `SD next_tail;
+			inst_queue_full	<= `SD next_inst_queue_full;
 		end
 	end
 

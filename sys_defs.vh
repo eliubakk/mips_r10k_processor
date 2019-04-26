@@ -26,6 +26,7 @@
 
 
 `define NUM_MEM_TAGS           15
+typedef logic [$clog2(NUM_MEM_TAGS)-1:0] MEM_TAG;
 
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)
@@ -180,6 +181,12 @@ const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
 //   1'b0
 // };
 
+//
+// Basic NOOP instruction.  Allows pipline registers to clearly be reset with
+// an instruction that does nothing instead of Zero which is really a PAL_INST
+//
+`define NOOP_INST 32'h47ff041f
+
 //////////////////////////////////////////////
 //
 // Pipeline Parameters
@@ -201,9 +208,11 @@ const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
 `define NUM_GEN_REG 32
 typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
 
-`define NUM_PHYS_REG `ROB_SIZE + `NUM_GEN_REG
+`define NUM_PHYS_REG (`ROB_SIZE+`NUM_GEN_REG)
 //`define NUM_PHYS_REG 48
-`define phys_index_t ($clog2(`NUM_PHYS_REG) - 1) 
+`define READY_BIT_IDX $clog2(`NUM_PHYS_REG)
+`define PHYS_IDX ($clog2(`NUM_PHYS_REG)-1):0
+
 typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
 
@@ -230,6 +239,9 @@ typedef struct packed {
   logic [`BH_SIZE-1:0] branch_history;
 } OBQ_ROW_T;
 
+typedef logic [$clog2(`OBQ_SIZE)-1:0] BR_IDX_REG;
+`define ZERO_BR_IDX {$clog2(`OBQ_SIZE){1'b0}}
+
 // RAS
 `define RAS_SIZE 2**6
 
@@ -241,10 +253,10 @@ typedef struct packed{
   logic ret;
   logic [63:0] pc;	// Current pc, NOT NEXT PC!
   logic [63:0] pred_pc; // Predicted pc, used to check the flushing condition
-  logic [$clog2(`OBQ_SIZE)-1:0] br_idx;  
+  logic pred_pc_valid;
+  BR_IDX_REG br_idx;  
   logic prediction; 	// prediction, 1: predict to be taken, 0 : predict not taken
   //logic taken;		// 1: branch actual taken, 0: branch actual not taken
-  
 } BR_SIG;
 
 const BR_SIG EMPTY_BR_SIG =
@@ -255,29 +267,45 @@ const BR_SIG EMPTY_BR_SIG =
   1'b0,
   64'b0,
   64'b0,
-  {$clog2(`OBQ_SIZE){1'b0}},
+  1'b0,
+  `ZERO_BR_IDX,
   1'b0
 };
 
-
 // PHT_TWO_SC
-
 `define PHT_ROW 8
-
-
 
 //////////////////////////////////////////////////
 //
 //	Instruction Queue
 //
 //////////////////////////////////////////////////
+typedef struct packed{
+  logic [63:0] pc;
+  logic [63:0] npc;
+  logic [31:0] ir;
+  logic valid_inst;
+} FETCHED_INST_T;
+
+const FETCHED_INST_T EMPTY_FETCHED_INST = 
+{
+  64'b0,
+  64'b0,
+  `NOOP_INST,
+  `FALSE
+};
+
 `define IQ_SIZE 10
 typedef struct packed{
-	logic 		valid_inst;
-	logic 	[63:0]	npc; 
-	logic	  [31:0]	ir;
-	BR_SIG		branch_inst;
+	FETCHED_INST_T fetched_inst;
+	BR_SIG	branch_inst;
 } INST_Q;
+
+const INST_Q EMPTY_INST_Q =
+{
+  EMPTY_FETCHED_INST,
+  EMPTY_BR_SIG
+};
 
 
 //////////////////////////////////////////////
@@ -367,7 +395,7 @@ typedef enum logic [4:0] {
 // the Alpha register file zero register, any read of this register always
 // returns a zero value, and any write to this register is thrown away
 //
-`define ZERO_REG        5'd31
+`define ZERO_REG 5'd31
 
 //
 // Memory bus commands control signals
@@ -390,12 +418,6 @@ typedef enum logic [1:0] {
   LDA_OPCODE,
   LDAH_OPCODE
 } OPCODE;
-
-//
-// Basic NOOP instruction.  Allows pipline registers to clearly be reset with
-// an instruction that does nothing instead of Zero which is really a PAL_INST
-//
-`define NOOP_INST 32'h47ff041f
 
 //
 // top level opcodes, used by the IF stage to decode Alpha instructions
@@ -560,7 +582,7 @@ const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001,
 typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
 
 // the number of functional units of each specific type we instantiate.
-const logic [0:(`NUM_TYPE_FU - 1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
+const logic [0:(`NUM_TYPE_FU-1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
 
 typedef enum logic [2:0]{
   FU_ALU,
@@ -570,7 +592,7 @@ typedef enum logic [2:0]{
   FU_ST
 } FU_NAME;
 
-const FU_NAME [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
+const FU_NAME [0:(`NUM_TYPE_FU-1)] GLOBAL_FU_NAME_VAL = {FU_ALU, FU_LD, FU_MULT, FU_BR};
 
 typedef enum logic [3:0]{
   FU_ALU_IDX = 0,
@@ -581,7 +603,7 @@ typedef enum logic [3:0]{
   FU_ST_IDX = 5
 } FU_IDX;
 
-const FU_IDX [0:(`NUM_TYPE_FU - 1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
+const FU_IDX [0:(`NUM_TYPE_FU-1)] GLOBAL_FU_BASE_IDX = {FU_ALU_IDX, FU_LD_IDX, FU_MULT_IDX, FU_BR_IDX};
 
 typedef struct packed {
   PHYS_REG phys_tag;
@@ -602,7 +624,7 @@ typedef struct packed{
   logic [31:0] opcode;
   logic take_branch;      
   //logic branch_valid;     //  Same as branch_inst.valid
-  logic [4:0] wr_idx;
+  GEN_REG wr_idx;
   logic [63:0] npc;
   logic is_store;
   SQ_INDEX_T sq_idx;
@@ -641,6 +663,19 @@ typedef struct packed {
   logic data_valid;
   // logic [3:0] mem_response;
 } LQ_ROW_T;
+
+const LQ_ROW_T EMPTY_LQ_ROW =
+{
+  1'b0,
+  31'b0,
+  31'b0,
+  1'b0,
+  1'b0,
+  `DUMMY_REG,
+  64'b0,
+  64'b0,
+  1'b0
+};
 
 typedef struct packed {
   ALU_OPA_SELECT opa_select; // use this for T1 valid
@@ -681,10 +716,10 @@ typedef struct packed{
   PHYS_REG     T1;
   PHYS_REG     T2;
   logic        busy;
-  logic [31:0]  inst_opcode;
-  logic [63:0]  npc;
+  logic [31:0] ir;
+  logic [63:0] npc;
   SQ_INDEX_T sq_idx; // ld_pos;
-  logic [$clog2(`OBQ_SIZE) -1 :0] br_idx;  //*****Heewoo :  Added for branch instruction
+  BR_IDX_REG br_idx;  //*****Heewoo :  Added for branch instruction
 } RS_ROW_T;
 
 const RS_ROW_T EMPTY_ROW = 
@@ -697,8 +732,7 @@ const RS_ROW_T EMPTY_ROW =
   `NOOP_INST,
   64'b0,
   `NULL_LD_POS,
-  {$clog2(`OBQ_SIZE){1'b0}}
-  
+  ZERO_BR_IDX
 };
 
 `endif
