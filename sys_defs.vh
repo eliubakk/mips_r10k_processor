@@ -33,7 +33,7 @@
 
 
 `define NUM_MEM_TAGS           15
-typedef logic [$clog2(NUM_MEM_TAGS)-1:0] MEM_TAG;
+typedef logic [$clog2(`NUM_MEM_TAGS)-1:0] MEM_TAG;
 
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)

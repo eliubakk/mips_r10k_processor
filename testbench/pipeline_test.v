@@ -261,7 +261,7 @@ logic		unanswered_miss_out;
   always_comb begin
     for(integer i=0; i< `NUM_FU_TOTAL; i=i+1) begin
       issue_next_npc[i] = issue_next[i].npc;
-      issue_next_inst_opcode[i] = issue_next[i].inst_opcode;
+      issue_next_inst_opcode[i] = issue_next[i].ir;
       issue_next_valid_inst[i] = issue_next[i].inst.valid_inst;
     end
   end

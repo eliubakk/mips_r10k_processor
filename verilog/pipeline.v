@@ -42,6 +42,23 @@ module pipeline (
     output PHYS_REG     pipeline_commit_phys_reg,
     output PHYS_REG     pipeline_commit_phys_from_arch,
 
+
+	// testbench outputs
+	output logic [63:0] if_NPC_out,
+	output logic [31:0] if_IR_out,
+	output logic if_valid_inst_out,
+	output logic [63:0] if_id_NPC,
+	output logic [31:0] if_id_IR,
+	output logic if_id_valid_inst,
+	output logic [63:0] id_di_NPC,
+	output logic [31:0] id_di_IR,
+	output logic id_di_valid_inst,
+	output logic [`RS_SIZE - 1:0] [63:0] rs_table_out_npc,
+	output logic [`RS_SIZE - 1:0] [31:0] rs_table_out_inst_opcode,
+	output logic [`RS_SIZE - 1:0] rs_table_out_inst_valid_inst,
+	output logic [`NUM_FU_TOTAL - 1:0] [63:0] issue_reg_npc,
+	output logic [`NUM_FU_TOTAL - 1:0] [31:0] issue_reg_inst_opcode,
+	output logic [`NUM_FU_TOTAL - 1:0] issue_reg_inst_valid_inst,
     // To record the branch prediction accuracy
 
     output logic	pipeline_branch_en,
@@ -610,6 +627,9 @@ module pipeline (
   	end
   end
 
+	assign if_IR_out = if1_if2_fetched_inst.ir;
+	assign if_valid_inst_out = if1_if2_fetched_inst.valid_inst;
+
   ///////////////////////////////////////////////////////////////////////////////////
   //										//
   //		 Branch predictor stage (Fetch 2)
@@ -739,6 +759,10 @@ module pipeline (
 		.if_inst_out(if_id_inst)
 	);
 
+	assign if_NPC_out = if_id_inst.fetched_inst.npc;
+	assign if_id_NPC = if_id_inst.fetched_inst.npc;
+	assign if_id_IR = if_id_inst.fetched_inst.ir;
+	assign if_id_valid_inst = if_id_inst.fetched_inst.valid_inst;
   //////////////////////////////////////////////////
   //                                              //
   //                  ID-Stage                    //
@@ -766,8 +790,10 @@ module pipeline (
 
   assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0) | (sq_hazard)); 
   assign dispatch_no_hazard = dispatch_no_hazard_comb; // CHECK THIS CAUSE OF CONFLICT
-
-  assign id_di_enable = (id_inst_out.inst.valid_inst & dispatch_no_hazard); 
+	assign id_di_NPC = id_di_iq_inst.fetched_inst.npc;
+	assign id_di_IR = id_di_iq_inst.fetched_inst.ir;
+	assign id_di_valid_inst = id_di_iq_inst.fetched_inst.valid_inst;
+  assign id_di_enable = (id_inst_out.valid_inst & dispatch_no_hazard); 
   //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
@@ -794,7 +820,7 @@ module pipeline (
   //////////////////////////////////////////////////
   
   //Instantiating the freelist
-	assign fr_read_en = (id_di_inst.valid_inst & dispatch_no_hazard); // Should not read during stalling for structural hazard
+	assign fr_read_en = (id_di_inst.inst.valid_inst & dispatch_no_hazard); // Should not read during stalling for structural hazard
 	assign fr_wr_en = (& rob_retire_out.T_old[`PHYS_IDX])? 0 : 1; 
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
@@ -855,7 +881,7 @@ module pipeline (
   // store queue tail assignment
   //assign id_inst_out.sq_idx = sq_tail;
 
-  assign dispatch_is_store = (id_di_inst.fu_name == FU_ST & id_di_inst.valid_inst);
+  assign dispatch_is_store = (id_di_inst.inst.fu_name == FU_ST & id_di_inst.inst.valid_inst);
   assign dispatch_store_addr = 64'b0; 
   assign dispatch_store_addr_ready = 1'b0; 
   assign dispatch_store_data = 64'b0;
@@ -927,6 +953,12 @@ module pipeline (
     .free_rows_next(rs_free_rows_next_out),
     .rs_full(rs_full)
   );
+	always_comb begin
+		for (int i = 0; i < `RS_SIZE; ++i) begin
+			rs_table_out_inst_opcode[i] = rs_table_out[i].ir;
+			rs_table_out_inst_valid_inst[i] = rs_table_out[i].inst.valid_inst;
+		end
+	end
  
   //////////////////////////////////////////////////
   //                                              //
@@ -935,7 +967,7 @@ module pipeline (
   //////////////////////////////////////////////////
   always_comb begin
     for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
-      is_ex_enable[i] = (~issue_reg[i].inst.busy | (issue_reg[i].inst.busy & ex_co_enable[i])); // always enabled - Original stuff
+      is_ex_enable[i] = (~issue_reg[i].busy | (issue_reg[i].busy & ex_co_enable[i])); // always enabled - Original stuff
     end
   end
 
@@ -964,6 +996,9 @@ module pipeline (
   for(genvar ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
     assign issue_reg_tags[ig][0] = issue_reg[ig].T1[`PHYS_IDX];
     assign issue_reg_tags[ig][1] = issue_reg[ig].T2[`PHYS_IDX];
+	assign issue_reg_npc[ig] = issue_reg[ig].npc;
+	assign issue_reg_inst_opcode[ig] = issue_reg[ig].inst_opcode;
+	assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
   end
 
   // Multiplication : Write after execution 
@@ -1101,7 +1136,7 @@ module pipeline (
 //   //////////////////////////////////////////////////
 
   //signals from ld fu to sq
-  assign load_wants_store = ex_co_inst[FU_LD_IDX].inst.busy;
+  assign load_wants_store = ex_co_inst[FU_LD_IDX].busy;
   assign load_spos_tail = ex_co_inst[FU_LD_IDX].sq_idx;
   assign load_rd_addr = ex_co_alu_result[FU_LD_IDX];
 
@@ -1219,11 +1254,11 @@ module pipeline (
                        mem_co_load_out.valid_inst |
                        done | 
                        ex_co_inst[FU_BR_IDX].inst.valid_inst |
-                       ex_co_inst[FU_ST_IDX].valid_inst; // ask the use of wor
+                       ex_co_inst[FU_ST_IDX].inst.valid_inst; // ask the use of wor
   //priority encoder to select the results of the execution stage to put in cdb
   //Mult has the priority
   psel_generic #(.WIDTH(`NUM_FU_TOTAL), .NUM_REQS(1)) psel(
-		.req({ex_co_done, ex_co_inst[FU_ST_IDX].busy, ex_co_inst[FU_BR_IDX].inst.busy, mem_co_load_out.valid_inst, ex_co_inst[FU_ALU2_IDX].inst.busy, ex_co_inst[FU_ALU_IDX].inst.busy}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+		.req({ex_co_done, ex_co_inst[FU_ST_IDX].busy, ex_co_inst[FU_BR_IDX].busy, mem_co_load_out.valid_inst, ex_co_inst[FU_ALU2_IDX].busy, ex_co_inst[FU_ALU_IDX].busy}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
 		.gnt({co_selected[FU_MULT_IDX], co_selected[FU_ST_IDX], co_selected[FU_BR_IDX], co_selected[FU_LD_IDX:FU_ALU_IDX]}),
     .gnt_bus({gnt_bus[FU_MULT_IDX], gnt_bus[FU_ST_IDX], gnt_bus[FU_BR_IDX], gnt_bus[FU_LD_IDX:FU_ALU_IDX]})
