@@ -18,6 +18,13 @@
 `define DUT(mod) mod
 `endif
 
+//
+// useful boolean single-bit definitions
+//
+`define FALSE	1'h0
+`define TRUE	1'h1
+
+
 //////////////////////////////////////////////
 //
 // Memory/testbench attribute definitions
