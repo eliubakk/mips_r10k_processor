@@ -8,6 +8,7 @@ module ROB(
 		input PHYS_REG [`SS_SIZE-1:0] T_old_in, // Comes from Map Table During Dispatch
 		input PHYS_REG [`SS_SIZE-1:0] T_new_in, // Comes from Free List During Dispatch
 		input 		   [`SS_SIZE-1:0] halt_in,
+		input 		   [`SS_SIZE-1:0] illegal_in,
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
 		input						  CDB_br_valid, // ** Heewoo added ,need a way to deal with multiple branches
@@ -228,6 +229,7 @@ module ROB(
 				ROB_table_next[dispatch_idx[i]].T_new = T_new_in[i];
 				ROB_table_next[dispatch_idx[i]].T_old = T_old_in[i];
 				ROB_table_next[dispatch_idx[i]].halt = halt_in[i];
+				ROB_table_next[dispatch_idx[i]].illegal = illegal_in[i];
 				ROB_table_next[dispatch_idx[i]].busy = 1'b1;
 				ROB_table_next[dispatch_idx[i]].opcode = opcode[i];
 				ROB_table_next[dispatch_idx[i]].take_branch = take_branch;

@@ -626,6 +626,7 @@ typedef struct packed{
   PHYS_REG T_new;
   PHYS_REG T_old;
   logic busy;
+  logic illegal;
   logic halt;
   logic [31:0] opcode;
   logic take_branch;      
@@ -641,6 +642,7 @@ const ROB_ROW_T EMPTY_ROB_ROW =
 {
   `DUMMY_REG,
   `DUMMY_REG,
+  1'b0,
   1'b0,
   1'b0,
   `NOOP_INST,

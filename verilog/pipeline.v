@@ -911,6 +911,7 @@ module pipeline (
     .dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
     .branch_not_taken(branch_not_taken),
     .halt_in(di_inst_in.inst.halt),
+    .illegal_in          (di_inst_in.inst.illegal),
     .opcode(di_inst_in.ir),
     .take_branch(co_take_branch_selected),
     //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
