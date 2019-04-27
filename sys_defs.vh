@@ -186,6 +186,11 @@ const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
 // an instruction that does nothing instead of Zero which is really a PAL_INST
 //
 `define NOOP_INST 32'h47ff041f
+//
+// useful boolean single-bit definitions
+//
+`define FALSE 1'h0
+`define TRUE  1'h1
 
 //////////////////////////////////////////////
 //
@@ -405,12 +410,6 @@ typedef enum logic [1:0] {
   BUS_LOAD     = 2'h1,
   BUS_STORE    = 2'h2
 } BUS_COMMAND;
-
-//
-// useful boolean single-bit definitions
-//
-`define FALSE	1'h0
-`define TRUE	1'h1
 
 typedef enum logic [1:0] {
   NOOP_OPCODE,
@@ -732,7 +731,7 @@ const RS_ROW_T EMPTY_ROW =
   `NOOP_INST,
   64'b0,
   `NULL_LD_POS,
-  ZERO_BR_IDX
+  `ZERO_BR_IDX
 };
 
 `endif

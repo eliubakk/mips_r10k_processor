@@ -55,44 +55,17 @@ module pipeline (
     // the synthesized version) data is tested by looking at
     // the final values in memory
 
-    // Outputs from IF-Stage 
-    output logic [63:0] if_NPC_out,
-    output logic [31:0] if_IR_out,
-    output logic        if_valid_inst_out,
-
-    // Outputs from IF/ID Pipeline Register
-    output logic [63:0] if_id_NPC,
-    output logic [31:0] if_id_IR,
-    output logic        if_id_valid_inst,
-
-    //outputs from ID/DI Pipeline Register
-    output logic [63:0] id_di_NPC,
-    output logic [31:0] id_di_IR,
-    output logic        id_di_valid_inst,
-
     // Outputs from DI/IS Pipeline Register       // can output the values from the RS
-    output logic [`RS_SIZE-1:0][63:0] rs_table_out_npc,
-    output logic [`RS_SIZE-1:0][31:0] rs_table_out_inst_opcode,
-    output logic [`RS_SIZE-1:0]       rs_table_out_inst_valid_inst,
 
     // Outputs from IS/EX Pipeline Register   
-    output logic [`NUM_FU_TOTAL-1:0][63:0] issue_reg_npc,
-    output logic [`NUM_FU_TOTAL-1:0][31:0] issue_reg_inst_opcode,
-    output logic [`NUM_FU_TOTAL-1:0]       issue_reg_inst_valid_inst,
     output RS_ROW_T [`NUM_FU_TOTAL-1:0]		 issue_next,
     // // Outputs from ID/EX Pipeline Register
-    // output logic [63:0] id_ex_NPC,
-    // output logic [31:0] id_ex_IR,
-    // output logic        id_ex_valid_inst,
 
     // // Outputs from EX/MEM Pipeline Register
-    // output logic [4:0][63:0] ex_mem_NPC,
-    // output logic [4:0] ex_mem_IR,
-    // output logic [4:0]       ex_mem_valid_inst,
 
-    output CACHE_SET_T [(`NUM_SETS - 1):0] dcache_data,
+    output CACHE_SET_T [(`NUM_SETS-1):0] dcache_data,
     output VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out,
-    output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue,
+    output RETIRE_BUF_T [(`RETIRE_SIZE-1):0] retire_queue,
     output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail,
 
     // Outputs from MEM/COMP Pipeline Register
@@ -175,7 +148,6 @@ module pipeline (
   PHYS_REG 		T1; // Output for Dispatch and goes to RS
 	PHYS_REG 		T2; // Output for Dispatch and goes to RS
   PHYS_REG    T_old;	// Output for Dispatch and goes to ROB
-  INST_
 
   // --------------------------------Dispatch stage
 
@@ -183,6 +155,7 @@ module pipeline (
   INST_Q   id_di_iq_inst;
   GEN_REG  id_di_ra_idx, id_di_rb_idx, id_di_rdest_idx;
   
+  RS_ROW_T id_di_inst;
   RS_ROW_T di_inst_in;
 
   logic dispatch_no_hazard;
@@ -207,7 +180,7 @@ module pipeline (
   logic [`NUM_FU_TOTAL-1:0][63:0] is_ex_T1_value;
   logic [`NUM_FU_TOTAL-1:0][63:0] is_ex_T2_value;
   logic [`NUM_FU_TOTAL-1:0][1:0][63:0] pr_tags_values; 
-  logic [`NUM_FU_TOTAL-1:0][1:0][$clog2(`NUM_PHYS_REG)-1:0] issue_reg_tags;
+  logic [`NUM_FU_TOTAL-1:0][1:0][`PHYS_IDX] issue_reg_tags;
 	logic [`NUM_PHYS_REG-1:0][63:0] phys_reg;
 
   // Outputs from EX-Stage
@@ -215,29 +188,29 @@ module pipeline (
   logic ex_take_branch_out;
 	logic done;
 
-  logic [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_reg_tags;
-  logic [`NUM_FU_TOTAL-1:0]				ex_reg_valid;
+  logic [`NUM_FU_TOTAL-1:0][`PHYS_IDX] ex_reg_tags;
+  logic [`NUM_FU_TOTAL-1:0]				     ex_reg_valid;
   
- RS_ROW_T [3:0] ex_mult_reg; // multiplicationn registers
+  RS_ROW_T [3:0] ex_mult_reg; // multiplicationn registers
 
-// ------------------------------------Mem stage
+  // ------------------------------------Mem stage
 
   // // Outputs from MEM-Stage
    logic [63:0] mem_result_out;
    logic        mem_stall_out;
    logic        mem_rd_stall;
 
-// Outputs from MEM/COM Pipeline Register
+  // Outputs from MEM/COM Pipeline Register
   logic  mem_co_halt;
   logic  mem_co_illegal;
-  logic [$clog2(`NUM_PHYS_REG)-1:0]   mem_co_dest_reg_idx;
+  logic [`PHYS_IDX]   mem_co_dest_reg_idx;
   logic [63:0] mem_co_alu_result;
   
   LQ_ROW_T mem_co_load_out;
   
   logic  mem_co_halt_comb;
   logic  mem_co_illegal_comb;
-  logic [$clog2(`NUM_PHYS_REG)-1:0]   mem_co_dest_reg_idx_comb;
+  logic [`PHYS_IDX]   mem_co_dest_reg_idx_comb;
   logic [63:0] mem_co_alu_result_comb;
   logic mem_co_valid_inst_comb;   
   logic [63:0] mem_co_NPC_comb;        
@@ -251,7 +224,7 @@ module pipeline (
   RS_ROW_T [`NUM_FU_TOTAL-1:0] ex_co_inst;
   FU_REG              ex_co_halt;
   FU_REG              ex_co_illegal;
-  logic  [`NUM_FU_TOTAL-1:0][$clog2(`NUM_PHYS_REG)-1:0] ex_co_dest_reg_idx;
+  logic  [`NUM_FU_TOTAL-1:0][`PHYS_IDX] ex_co_dest_reg_idx;
   logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_alu_result;
   logic  [`NUM_FU_TOTAL-1:0][63:0]  ex_co_br_disp;
   logic  [63:0]       ex_co_br_wr_data;
@@ -296,11 +269,11 @@ module pipeline (
   logic [63:0]  co_ret_NPC;
   logic [31:0]  co_ret_IR;
 
-logic branch_valid_disp;  //branch_valid_disp
+  logic branch_valid_disp;  //branch_valid_disp
   
 // Retire signals from ROB
 
-ROB_ROW_T rob_retire_out;
+  ROB_ROW_T rob_retire_out;
   logic [$clog2(`ROB_SIZE):0] rob_free_rows_next_out;
   logic							          rob_full_out;
   ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out;
@@ -342,17 +315,18 @@ ROB_ROW_T rob_retire_out;
   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
   logic	       retire_inst_busy;
   logic [63:0] retire_reg_wr_data;
-  logic  [5:0] retire_reg_wr_idx;
-  logic        retire_reg_wr_en;
+  logic [`PHYS_IDX] retire_reg_wr_idx;
+  logic             retire_reg_wr_en;
   logic [63:0] retire_reg_NPC;
-  logic  [5:0] retire_reg_phys;;
+  logic [`PHYS_IDX] retire_reg_phys;
 	logic head_halt;
   logic rob_retire_out_halt;
+  logic rob_retire_out_illegal;
   logic rob_retire_out_take_branch;
   logic rob_retire_out_T_new; 
   logic rob_retire_out_T_old; 	
   logic [31:0] rob_retire_opcode;
-logic rob_retire_out_is_store;
+  logic rob_retire_out_is_store;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
   logic [63:0] proc2Rmem_data, proc2Dmem_data;
@@ -366,21 +340,21 @@ logic rob_retire_out_is_store;
   logic        Icache_valid_out;
 
   assign pipeline_completed_insts = {3'b0, retire_inst_busy};
-  assign pipeline_error_status =  co_ret_illegal  ? HALTED_ON_ILLEGAL :
+  assign pipeline_error_status =  rob_retire_out_illegal  ? HALTED_ON_ILLEGAL :
                                   rob_retire_out_halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
   //---------------------------For synthesis debugging
 
-assign proc2Rmem_command_out = proc2Rmem_command;
-assign proc2Dmem_command_out = proc2Dmem_command;
-assign proc2Imem_command_out = proc2Imem_command;
+  assign proc2Rmem_command_out = proc2Rmem_command;
+  assign proc2Dmem_command_out = proc2Dmem_command;
+  assign proc2Imem_command_out = proc2Imem_command;
  
 	// TEMPORARY HACK, DEFINITELY CHANGE THIS WHEN WE ADD THE MEMORY STAGE
 	// FOR MEMORY INSTRUCTIONS
 //	assign proc2Dmem_command = mem_co_enable ? BUS_LOAD : BUS_NONE;
 
-logic tag_in_lq;
+  logic tag_in_lq;
 
   mem_controller memory(
     .clock(clock), 
@@ -427,7 +401,7 @@ logic tag_in_lq;
 	icache inst_memory(
 				.clock(clock),
 				.reset(reset),
-       				.branch_not_taken(branch_not_taken), 
+       	.branch_not_taken(branch_not_taken), 
         //inputs
         //from if_stage
         .proc2Icache_addr(proc2Icache_addr),
@@ -551,7 +525,6 @@ logic tag_in_lq;
     .full(lq_full)
   );
 
-
   //////////////////////////////////////////////////
   //                                              //
   //                  IF-Stage (Fetch 1)          //
@@ -581,9 +554,9 @@ logic tag_in_lq;
     // Inputs
     .clock (clock),
     .reset (reset),
-    .co_ret_valid_inst(retire_inst_busy),		// ret_branch_inst.en
+    .co_ret_valid_inst(rob_retire_out.busy),		// ret_branch_inst.en
     .co_ret_take_branch(branch_not_taken),	// ret_branch_inst.taken
-    .co_ret_target_pc(retire_reg_NPC),			// 
+    .co_ret_target_pc(rob_retire_out.npc),			// 
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_stage_dispatch_en),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
@@ -602,12 +575,12 @@ logic tag_in_lq;
  
 	always_comb begin 
 		ret_pred_correct = 1'b1;
-		if(ret_branch_inst.en) begin
-			if(ret_branch_inst.cond & ret_branch_inst.direct) begin
-				ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC) & (ret_branch_inst.prediction == rob_retire_out_take_branch);
-			end else if ( !ret_branch_inst.cond) begin
+		if(rob_retire_out.branch_inst.en) begin
+			if(rob_retire_out.branch_inst.cond & rob_retire_out.branch_inst.direct) begin
+				ret_pred_correct = (rob_retire_out.branch_inst.pred_pc == rob_retire_out.npc) & (rob_retire_out.branch_inst.prediction == rob_retire_out.take_branch);
+			end else if (!rob_retire_out.branch_inst.cond) begin
 			//	if(!ret_branch_inst.ret) begin
-					ret_pred_correct = (ret_branch_inst.pred_pc == retire_reg_NPC);
+					ret_pred_correct = (rob_retire_out.branch_inst.pred_pc == rob_retire_out.npc);
 			//	end else begin
 			//		ret_pred_correct = 1'b1;
 			//	end
@@ -616,7 +589,7 @@ logic tag_in_lq;
 	end
 
   //Flushing condition : During the branch retirement, When the prediction is incorrect
-  assign branch_not_taken = ret_branch_inst.en & (~ret_pred_correct); //
+  assign branch_not_taken = rob_retire_out.branch_inst.en & (~ret_pred_correct); //
   //should change this, chk1
   //assign branch_not_taken = ret_branch_inst.en & rob_retire_out_take_branch; 
  
@@ -630,7 +603,7 @@ logic tag_in_lq;
   always_ff @(posedge clock) begin
   	if(reset | branch_not_taken | if2_branch_inst.pred_pc_valid) begin
       if1_if2_fetched_inst <= `SD EMPTY_FETCHED_INST;
-  	end else if(if1_valid_inst_out) begin
+  	end else if(if1_fetched_inst_out.valid_inst) begin
       if1_if2_fetched_inst <= `SD if1_fetched_inst_out;
   	end else begin
   		if1_if2_fetched_inst <= `SD EMPTY_FETCHED_INST;
@@ -705,15 +678,15 @@ logic tag_in_lq;
 		.if_return_branch(if2_branch_inst.ret), 
 		.if_pc_in(if1_if2_fetched_inst.pc[31:0]),
 
-		.rt_en_branch(ret_branch_inst.en),			//Get value from retire_inst_busy
-		.rt_cond_branch(ret_branch_inst.cond),			
-		.rt_direct_branch(ret_branch_inst.direct),		 
-		.rt_return_branch(ret_branch_inst.ret),
-		.rt_pc(ret_branch_inst.pc[31:0]),
-		.rt_branch_taken(rob_retire_out_take_branch),		// Get value from ret_branch_inst.taken
+		.rt_en_branch(rob_retire_out.branch_inst.en),			//Get value from retire_inst_busy
+		.rt_cond_branch(rob_retire_out.branch_inst.cond),			
+		.rt_direct_branch(rob_retire_out.branch_inst.direct),		 
+		.rt_return_branch(rob_retire_out.branch_inst.ret),
+		.rt_pc(rob_retire_out.branch_inst.pc[31:0]),
+		.rt_branch_taken(rob_retire_out.take_branch),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
-		.rt_calculated_pc(retire_reg_NPC[31:0]),			// This is not come from ret_branc_inst 
-		.rt_branch_index(ret_branch_inst.br_idx),		
+		.rt_calculated_pc(rob_retire_out.npc[31:0]),			// This is not come from ret_branc_inst 
+		.rt_branch_index(rob_retire_out.branch_inst.br_idx),		
 
 		// outputs 
 		`ifdef DEBUG
@@ -822,7 +795,7 @@ logic tag_in_lq;
   
   //Instantiating the freelist
 	assign fr_read_en = (id_di_inst.valid_inst & dispatch_no_hazard); // Should not read during stalling for structural hazard
-	assign fr_wr_en = (& rob_retire_out.T_old[PHYS_IDX])? 0 : 1; 
+	assign fr_wr_en = (& rob_retire_out.T_old[`PHYS_IDX])? 0 : 1; 
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
 	assign id_no_dest_reg = (id_di_rdest_idx == `ZERO_REG);
@@ -907,8 +880,8 @@ logic tag_in_lq;
     .CAM_en(CDB_enable), // Comes from CDB during Commit
     .CDB_br_valid(co_branch_valid),// ****Heewoo, branch valid signal
     .CDB_br_idx(co_branch_index), // ******Heewoo, comes from CDB during commit, branch index
-    .CDB_sq_valid(ex_co_valid_inst[FU_ST_IDX]),
-    .CDB_sq_idx(ex_co_sq_idx[0]),
+    .CDB_sq_valid(ex_co_inst[FU_ST_IDX].busy),
+    .CDB_sq_idx(ex_co_inst[FU_ST_IDX].sq_idx),
     .dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
     .branch_not_taken(branch_not_taken),
     .halt_in(di_inst_in.inst.halt),
@@ -954,16 +927,6 @@ logic tag_in_lq;
     .free_rows_next(rs_free_rows_next_out),
     .rs_full(rs_full)
   );
-
-  //genvar j;
-  
-  // always_comb begin
-  //   for(int i = 0; i < `RS_SIZE; i += 1) begin
-  //     rs_table_out_npc[i] = rs_table_out[i].npc;
-  //     rs_table_out_inst_opcode[i] = rs_table_out[i].inst_opcode;
-  //     rs_table_out_inst_valid_inst[i] = rs_table_out[i].inst.valid_inst;
-  //   end
-  // end
  
   //////////////////////////////////////////////////
   //                                              //
@@ -999,8 +962,8 @@ logic tag_in_lq;
   //////////////////////////////////////////////////
   //genvar ig; // Input of physreg
   for(genvar ig = 0; ig < `NUM_FU_TOTAL; ig += 1) begin
-    assign issue_reg_tags[ig][0] = issue_reg[ig].T1[PHYS_IDX];
-    assign issue_reg_tags[ig][1] = issue_reg[ig].T2[PHYS_IDX];;
+    assign issue_reg_tags[ig][0] = issue_reg[ig].T1[`PHYS_IDX];
+    assign issue_reg_tags[ig][1] = issue_reg[ig].T2[`PHYS_IDX];
   end
 
   // Multiplication : Write after execution 
@@ -1031,10 +994,9 @@ logic tag_in_lq;
               ex_co_alu_result[FU_ALU2_IDX:0]})
   );
 
-  //genvar ik;
   for(genvar ig = 0; ig < `NUM_FU_TOTAL; ++ig) begin
-  	assign is_ex_T1_value[ig] = (reset) ? 64'b0 : pr_tags_values[ik][0];
-  	assign is_ex_T2_value[ig] = (reset) ? 64'b0 : pr_tags_values[ik][1];  
+  	assign is_ex_T1_value[ig] = (reset) ? 64'b0 : pr_tags_values[ig][0];
+  	assign is_ex_T2_value[ig] = (reset) ? 64'b0 : pr_tags_values[ig][1];  
   end
 
   ex_stage ex_stage_0(
@@ -1096,17 +1058,16 @@ logic tag_in_lq;
 
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin//Initialize all registers once
-    for (integer i = 0; i < `NUM_FU_TOTAL; i += 1) begin
+    for (int i = 0; i < `NUM_FU_TOTAL; i += 1) begin
       if (reset | branch_not_taken) begin
-        ex_co_inst[i] <= `SD EMPTY_ROW;
-        ex_co_alu_result[i]   <= `SD 64'b0;
+        ex_co_inst[i]       <= `SD EMPTY_ROW;
+        ex_co_alu_result[i] <= `SD 64'b0;
       end else if (ex_co_enable[i]) begin
         // these are forwarded directly from ID/EX latches
         ex_co_inst[i]       <= (i == FU_MULT_IDX)? ex_mult_reg[3] : issue_reg[i];
    		  ex_co_alu_result[i] <= `SD ex_alu_result_out[i];
       end 
     end // for loop end
-
   end // always
 
   // synopsys sync_set_reset "reset"
@@ -1121,7 +1082,7 @@ logic tag_in_lq;
       ex_co_branch_target <= `SD 1'b0;
     end 
     if(ex_co_enable[FU_BR_IDX]) begin
-      ex_co_rega          <= `SD is_ex_T1_value[2];
+      ex_co_rega          <= `SD is_ex_T1_value[FU_BR_IDX];
       ex_co_take_branch   <= `SD ex_take_branch_out;
       ex_co_branch_index  <= `SD issue_reg[FU_BR_IDX].br_idx;
       ex_co_unconditional_branch <= `SD issue_reg[FU_BR_IDX].inst.uncond_branch;
@@ -1140,7 +1101,7 @@ logic tag_in_lq;
 //   //////////////////////////////////////////////////
 
   //signals from ld fu to sq
-  assign load_wants_store = ex_co_inst[FU_LD_IDX].inst.valid_inst;
+  assign load_wants_store = ex_co_inst[FU_LD_IDX].inst.busy;
   assign load_spos_tail = ex_co_inst[FU_LD_IDX].sq_idx;
   assign load_rd_addr = ex_co_alu_result[FU_LD_IDX];
 
@@ -1262,80 +1223,41 @@ logic tag_in_lq;
   //priority encoder to select the results of the execution stage to put in cdb
   //Mult has the priority
   psel_generic #(.WIDTH(`NUM_FU_TOTAL), .NUM_REQS(1)) psel(
-		.req({ex_co_done, ex_co_inst[FU_ST_IDX].valid_inst, ex_co_inst[FU_BR_IDX].inst.valid_inst, mem_co_load_out.valid_inst, ex_co_inst[FU_ALU2_IDX].inst.valid_inst, ex_co_inst[FU_ALU_IDX].inst.valid_inst}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
+		.req({ex_co_done, ex_co_inst[FU_ST_IDX].busy, ex_co_inst[FU_BR_IDX].inst.busy, mem_co_load_out.valid_inst, ex_co_inst[FU_ALU2_IDX].inst.busy, ex_co_inst[FU_ALU_IDX].inst.busy}),  // becasue the valid bit of mult will not be the request signal instead the done signal will be
 		.en(psel_enable),
 		.gnt({co_selected[FU_MULT_IDX], co_selected[FU_ST_IDX], co_selected[FU_BR_IDX], co_selected[FU_LD_IDX:FU_ALU_IDX]}),
     .gnt_bus({gnt_bus[FU_MULT_IDX], gnt_bus[FU_ST_IDX], gnt_bus[FU_BR_IDX], gnt_bus[FU_LD_IDX:FU_ALU_IDX]})
 	);
   
-    always_comb begin
-      co_inst_selected = EMPTY_ROW;
-      co_lq_load_selected = EMPTY_LQ_ROW;
-      co_alu_result_selected = 64'b0;
-      co_branch_valid = 1'b0;
-      co_take_branch_selected = 1'b0;
-      co_branch_index = `ZERO_BR_IDX;
-      co_branch_target = 64'b0;
+  always_comb begin
+    co_inst_selected = EMPTY_ROW;
+    co_lq_load_selected = EMPTY_LQ_ROW;
+    co_alu_result_selected = 64'b0;
+    co_branch_valid = 1'b0;
+    co_take_branch_selected = 1'b0;
+    co_branch_index = `ZERO_BR_IDX;
+    co_branch_target = 64'b0;
 
-      if (|co_selected) begin
-        for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
-          if(co_selected[i]) begin
-            if(i == FU_LD_IDX) begin
-              co_lq_load_selected = mem_co_load_out;
-              co_alu_result_selected = mem_co_load_out.alu_result;
-              // co_NPC_selected         =    mem_co_NPC;
-              // co_IR_selected          =    mem_co_IR;
-              // co_halt_selected        =    mem_co_halt;
-              // co_illegal_selected           =    mem_co_illegal;
-              // co_valid_inst_selected        =    mem_co_valid_inst;
-              // co_reg_wr_idx_out             =    mem_co_dest_reg_idx;
-              // co_alu_result_selected        =    mem_co_alu_result;
-
-            end else begin
-              co_inst_selected =  ex_co_inst[i];
-              // co_NPC_selected               =    ex_co_NPC[i];
-              // co_IR_selected                =    ex_co_IR[i];
-              // co_halt_selected              =    ex_co_halt[i];
-              // co_illegal_selected           =    ex_co_illegal[i];
-              // co_valid_inst_selected        =    ex_co_valid_inst[i];
-              // co_reg_wr_idx_out             =    ex_co_dest_reg_idx[i];
-              co_alu_result_selected = ex_co_alu_result[i];
-              if(i == FU_BR_IDX) begin // For branch
-                ex_co_take_branch  <= `SD ex_take_branch_out;
-                ex_co_branch_index <= `SD issue_reg[FU_BR_IDX].br_idx;
-                ex_co_unconditional_branch <= `SD issue_reg[FU_BR_IDX].inst.uncond_branch;
-                ex_co_br_wr_data <= `SD (issue_reg[FU_BR_IDX].inst.uncond_branch)? issue_reg[FU_BR_IDX].npc : ex_alu_result_out[FU_BR_IDX];
-                ex_co_branch_target <=`SD ex_alu_result_out[FU_BR_IDX];
-                
-                co_branch_valid = ex_co_inst[FU_BR_IDX].inst.valid_inst;
-                co_take_branch_selected = ex_co_take_branch;
-                co_branch_index = ex_co_inst[FU_BR_IDX].br_idx;
-                co_branch_target = ex_co_branch_target;
-              end else begin
-                co_branch_valid = 1'b0;
-                co_take_branch_selected = 1'b0;
-                co_branch_index = {($clog2(`OBQ_SIZE)){1'b0}};
-                co_branch_target = 32'h0;
-              end
+    if (|co_selected) begin
+      for (int i = 0; i < `NUM_FU_TOTAL; ++i) begin
+        if(co_selected[i]) begin
+          if(i == FU_LD_IDX) begin
+            co_lq_load_selected = mem_co_load_out;
+            co_alu_result_selected = mem_co_load_out.alu_result;
+          end else begin
+            co_inst_selected =  ex_co_inst[i];
+            co_alu_result_selected = ex_co_alu_result[i];
+            if(i == FU_BR_IDX) begin // For branch            
+              co_branch_valid = ex_co_inst[FU_BR_IDX].inst.valid_inst;
+              co_take_branch_selected = ex_co_take_branch;
+              co_branch_index = ex_co_inst[FU_BR_IDX].br_idx;
+              co_branch_target = ex_co_branch_target;
             end
-          end         
-        end 
-      end else begin
-          co_NPC_selected             =    0 ;
-          co_IR_selected              =   `NOOP_INST;
-          co_halt_selected            =    0;
-          co_illegal_selected         =    0;
-          co_valid_inst_selected      =    0;
-          co_reg_wr_idx_out           =   `DUMMY_REG;
-          co_alu_result_selected      =    0;
-        	 co_branch_valid = 1'b0;
-        	 co_take_branch_selected = 1'b0;
-        	 co_branch_index = {($clog2(`OBQ_SIZE)){1'b0}};
-        	 co_branch_target = 32'h0;
-
-      end
-    end
-   
+          end
+        end         
+      end 
+    end 
+  end
       
   // For branch 
 
@@ -1344,15 +1266,19 @@ logic tag_in_lq;
   
   assign CDB_enable = psel_enable; 
   //assign CDB_enable = psel_enable & ~co_branch_valid;                                       // check if theres any valid signal in the alu and also if the inst is branch or not 
-  
+  PHYS_REG co_tag_in = (co_selected[FU_LD_IDX])? co_lq_load_selected.dest_reg :
+                                                  co_inst_selected.T;
+  logic co_tag_valid = (co_selected[FU_LD_IDX])? co_lq_load_selected.valid_inst :
+                                                  co_inst_selected.busy;
+
   //Instantiated the CDB
   CDB CDB_0(
     // Inputs
     .clock(clock),    // Clock
     .reset(reset),  // Asynchronous reset active low
     .enable(CDB_enable), // Clock Enable
-    .tag_in(co_reg_wr_idx_out),	// Comes from FU, during commit
-    .ex_valid(co_valid_inst_selected),
+    .tag_in(cdb_tag_in),	// Comes from FU, during commit
+    .ex_valid(cdb_tag_valid),
 
     // Outputs
     .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules
@@ -1374,47 +1300,51 @@ logic tag_in_lq;
   //           COMPLETE/RETIRE Pipeline Register  //
   //                                              //
   //////////////////////////////////////////////////
-  assign co_ret_enable = 1'b1; // always enabled
-  // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if (reset | branch_not_taken) begin
-      co_ret_NPC          <= `SD 64'b0;
-      co_ret_IR           <= `SD `NOOP_INST;
-      co_ret_halt         <= `SD 1'b0;
-      co_ret_illegal      <= `SD 1'b0;
-      co_ret_valid_inst   <= `SD 1'b0;
-      co_ret_dest_reg_idx <= `SD `ZERO_REG;
-      co_ret_take_branch  <= `SD 1'b0;
-      co_ret_result       <= `SD 64'b0;
-      co_ret_branch_valid       <= `SD 1'b0;
-      co_ret_branch_prediction  <= `SD 1'b0;
-    end else if (co_ret_enable) begin
-      // these are forwarded directly from EX/MEM latches
-      co_ret_NPC          <= `SD co_NPC_selected;
-      co_ret_IR           <= `SD co_IR_selected;
-      co_ret_halt         <= `SD co_halt_selected;
-      co_ret_illegal      <= `SD co_illegal_selected;
-      co_ret_valid_inst   <= `SD co_valid_inst_selected;
-      co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
-      co_ret_take_branch  <= `SD co_take_branch_selected;
-      co_ret_result       <= `SD co_alu_result_selected;
-      co_ret_branch_valid      <= `SD co_branch_valid;
-      co_ret_branch_prediction <= `SD co_branch_prediction;
-      // these are results of MEM stage
-      //co_ret_result       <= `SD mem_co_result_out_selected;
-    end // else: !if(reset)
-  end // always
+  // assign co_ret_enable = 1'b1; // always enabled
+  // // synopsys sync_set_reset "reset"
+  // always_ff @(posedge clock) begin
+  //   if (reset | branch_not_taken) begin
+  //     co_ret_NPC          <= `SD 64'b0;
+  //     co_ret_IR           <= `SD `NOOP_INST;
+  //     co_ret_halt         <= `SD 1'b0;
+  //     co_ret_illegal      <= `SD 1'b0;
+  //     co_ret_valid_inst   <= `SD 1'b0;
+  //     co_ret_dest_reg_idx <= `SD `ZERO_REG;
+  //     co_ret_take_branch  <= `SD 1'b0;
+  //     co_ret_result       <= `SD 64'b0;
+  //     co_ret_branch_valid       <= `SD 1'b0;
+  //     co_ret_branch_prediction  <= `SD 1'b0;
+  //   end else if (co_ret_enable) begin
+  //     // these are forwarded directly from EX/MEM latches
+  //     co_ret_NPC          <= `SD co_NPC_selected;
+  //     co_ret_IR           <= `SD co_IR_selected;
+  //     co_ret_halt         <= `SD co_halt_selected;
+  //     co_ret_illegal      <= `SD co_illegal_selected;
+  //     co_ret_valid_inst   <= `SD co_valid_inst_selected;
+  //     co_ret_dest_reg_idx <= `SD co_reg_wr_idx_out;
+  //     co_ret_take_branch  <= `SD co_take_branch_selected;
+  //     co_ret_result       <= `SD co_alu_result_selected;
+  //     co_ret_branch_valid      <= `SD co_branch_valid;
+  //     co_ret_branch_prediction <= `SD co_branch_prediction;
+  //     // these are results of MEM stage
+  //     //co_ret_result       <= `SD mem_co_result_out_selected;
+  //   end // else: !if(reset)
+  // end // always
 
   
   // This should be the same as id_di_branch_inst.en;   
 
 
   // synopsys sync_set_reset "reset"
- always_ff @(posedge clock) begin
+  always_ff @(posedge clock) begin
     if(reset | branch_not_taken) begin
       retire_is_store_next <= `SD 1'b0;
+      rob_retire_out_halt <= `SD 1'b0;
+      rob_retire_out_illegal <= `SD 1'b0;
     end else begin
       retire_is_store_next <= `SD retire_is_store;
+      rob_retire_out_halt <= `SD rob_retire_out.halt;
+      rob_retire_out_illegal <= `SD rob_retire_out.illegal;
     end
   end
   
@@ -1424,90 +1354,86 @@ logic tag_in_lq;
    
   
 
-// retire_reg_wr_idx is physical register
+  // retire_reg_wr_idx is physical register
+  assign pipeline_commit_wr_idx = rob_retire_out.wr_idx;
+  assign pipeline_commit_wr_data = phys_reg[rob_retire_out.T_new[`PHYS_IDX]];
+  assign pipeline_commit_wr_en = rob_retire_out.busy & (rob_retire_out.T_new != `DUMMY_REG);
+  assign pipeline_commit_NPC = rob_retire_out.branch_inst.en ? rob_retire_out.branch_inst.pc : 
+                                                               rob_retire_out.npc-4;
+  assign pipeline_commit_phys_reg = rob_retire_out.T_old;
+  assign pipeline_commit_phys_from_arch = arch_table[rob_retire_out.wr_idx][5:0]; 
 
-  assign pipeline_commit_wr_idx = retire_reg_wr_idx;
-  //assign pipeline_commit_wr_data = phys_reg[retire_reg_phys];
-  assign pipeline_commit_wr_data = phys_reg[arch_table[retire_reg_wr_idx][5:0]];
-  assign pipeline_commit_wr_en = retire_reg_wr_en & (retire_reg_wr_idx != `ZERO_REG) ;
-  assign pipeline_commit_NPC = ret_branch_inst.en ? ret_branch_inst.pc : retire_reg_NPC-4;
-  assign pipeline_commit_phys_reg = retire_reg_phys;
-  assign pipeline_commit_phys_from_arch = arch_table[retire_reg_wr_idx][5:0]; 
-  //assign pipeline_commit_wr_idx = rob_retire_out.T_new;
-  //assign pipeline_commit_wr_en = rob_retire_out.busy & (~(rob_retire_out.T_new == `ZERO_REG));
-  //assign pipeline_commit_NPC = reset ? 64'h4 : 64'h8;
+  // For branch prediction accuracy check
 
-// For branch prediction accuracy check
+  assign pipeline_branch_en = rob_retire_out.branch_inst.en; 
+  assign pipeline_branch_pred_correct = rob_retire_out.branch_inst.en & ret_pred_correct;
 
-  assign pipeline_branch_en = ret_branch_inst.en; 
-  assign pipeline_branch_pred_correct =  ret_branch_inst.en & ret_pred_correct;
-
-logic rob_retire_out_is_store_comb;
-assign rob_retire_out_is_store_comb = rob_retire_out.is_store & rob_retire_out.busy;
+//logic rob_retire_out_is_store_comb;
+//assign rob_retire_out_is_store_comb = rob_retire_out.is_store & rob_retire_out.busy;
 
   
 // FF between complete and retire
 
   // synopsys sync_set_reset "reset"
-always_ff @ (posedge clock) begin
-	if(reset | branch_not_taken) begin
-		retire_inst_busy <= `SD 1'b0;
-		retire_reg_wr_idx <= `SD `ZERO_REG;
-		retire_reg_wr_en <= `SD 1'b0;
-		retire_reg_NPC <= `SD 64'h4;
-		retire_reg_phys <= `SD `DUMMY_REG;
-		rob_retire_out_halt <= `SD 1'b0;
-		rob_retire_out_take_branch <= `SD 1'b0;
-		rob_retire_out_T_new <= `SD `DUMMY_REG;
-		rob_retire_out_T_old <= `SD `DUMMY_REG;
-    rob_retire_opcode <= `SD {32{1'b0}};
+// always_ff @ (posedge clock) begin
+// 	if(reset | branch_not_taken) begin
+// 		retire_inst_busy <= `SD 1'b0;
+// 		retire_reg_wr_idx <= `SD `ZERO_REG;
+// 		retire_reg_wr_en <= `SD 1'b0;
+// 		retire_reg_NPC <= `SD 64'h4;
+// 		retire_reg_phys <= `SD `DUMMY_REG;
+// 		rob_retire_out_halt <= `SD 1'b0;
+// 		rob_retire_out_take_branch <= `SD 1'b0;
+// 		rob_retire_out_T_new <= `SD `DUMMY_REG;
+// 		rob_retire_out_T_old <= `SD `DUMMY_REG;
+//     rob_retire_opcode <= `SD {32{1'b0}};
 	
-	ret_branch_inst.en 		<= `SD 1'b0;
-	ret_branch_inst.cond 		<= `SD 1'b0;
-	ret_branch_inst.direct 	<= `SD 1'b0;
-	ret_branch_inst.ret 	<= `SD 1'b0;
-	ret_branch_inst.pc 		<= `SD 64'h0;
-	ret_branch_inst.pred_pc	<= `SD 64'h0;
-	ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-	ret_branch_inst.prediction 	<= `SD 1'b0;
-	//ret_branch_inst.taken 	<= `SD 0;
+// 	ret_branch_inst.en 		<= `SD 1'b0;
+// 	ret_branch_inst.cond 		<= `SD 1'b0;
+// 	ret_branch_inst.direct 	<= `SD 1'b0;
+// 	ret_branch_inst.ret 	<= `SD 1'b0;
+// 	ret_branch_inst.pc 		<= `SD 64'h0;
+// 	ret_branch_inst.pred_pc	<= `SD 64'h0;
+// 	ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
+// 	ret_branch_inst.prediction 	<= `SD 1'b0;
+// 	//ret_branch_inst.taken 	<= `SD 0;
 
 
-	end else begin 
-    rob_retire_opcode <= `SD rob_retire_out.opcode;
-		retire_inst_busy <= rob_retire_out.busy;
-		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
-		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `DUMMY_REG) & !rob_retire_out.halt);
-		retire_reg_NPC <= `SD rob_retire_out.npc;
-		retire_reg_phys <= `SD rob_retire_out.T_new;
-		rob_retire_out_halt <= `SD rob_retire_out.halt;
-    rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
-		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
-		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
-		rob_retire_out_is_store <= `SD rob_retire_out_is_store_comb;
-		if(rob_retire_out.branch_inst.en) begin // For branch retire
-			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
-			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;
-			ret_branch_inst.direct	<= `SD rob_retire_out.branch_inst.direct;
-			ret_branch_inst.ret	<= `SD rob_retire_out.branch_inst.ret;
-			ret_branch_inst.pc	<= `SD rob_retire_out.branch_inst.pc;
-			ret_branch_inst.pred_pc	<= `SD rob_retire_out.branch_inst.pred_pc;
-			ret_branch_inst.br_idx	<= `SD rob_retire_out.branch_inst.br_idx;
-			ret_branch_inst.prediction <= `SD rob_retire_out.branch_inst.prediction;
-			//ret_branch_inst.taken	<= `SD rob_retire_out.branch_inst.taken;
- 		end else begin
-			ret_branch_inst.en 		<= `SD 1'b0;
-			ret_branch_inst.cond 		<= `SD 1'b0;
-			ret_branch_inst.direct 	<= `SD 1'b0;
-			ret_branch_inst.ret 	<= `SD 1'b0;
-			ret_branch_inst.pc 		<= `SD 64'h0;
-			ret_branch_inst.pred_pc	<= `SD 64'h0;
-			ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
-			ret_branch_inst.prediction 	<= `SD 1'b0;
+// 	end else begin 
+//     rob_retire_opcode <= `SD rob_retire_out.opcode;
+// 		retire_inst_busy <= rob_retire_out.busy;
+// 		retire_reg_wr_idx <= `SD rob_retire_out.wr_idx;
+// 		retire_reg_wr_en <= `SD (rob_retire_out.busy) & (~(rob_retire_out.T_new == `DUMMY_REG) & !rob_retire_out.halt);
+// 		retire_reg_NPC <= `SD rob_retire_out.npc;
+// 		retire_reg_phys <= `SD rob_retire_out.T_new;
+// 		rob_retire_out_halt <= `SD rob_retire_out.halt;
+//     rob_retire_out_take_branch <= `SD rob_retire_out.take_branch;
+// 		rob_retire_out_T_new <= `SD rob_retire_out.T_new;
+// 		rob_retire_out_T_old <= `SD rob_retire_out.T_old;
+// 		rob_retire_out_is_store <= `SD rob_retire_out_is_store_comb;
+// 		if(rob_retire_out.branch_inst.en) begin // For branch retire
+// 			ret_branch_inst.en	<= `SD rob_retire_out.branch_inst.en;
+// 			ret_branch_inst.cond	<= `SD rob_retire_out.branch_inst.cond;
+// 			ret_branch_inst.direct	<= `SD rob_retire_out.branch_inst.direct;
+// 			ret_branch_inst.ret	<= `SD rob_retire_out.branch_inst.ret;
+// 			ret_branch_inst.pc	<= `SD rob_retire_out.branch_inst.pc;
+// 			ret_branch_inst.pred_pc	<= `SD rob_retire_out.branch_inst.pred_pc;
+// 			ret_branch_inst.br_idx	<= `SD rob_retire_out.branch_inst.br_idx;
+// 			ret_branch_inst.prediction <= `SD rob_retire_out.branch_inst.prediction;
+// 			//ret_branch_inst.taken	<= `SD rob_retire_out.branch_inst.taken;
+//  		end else begin
+// 			ret_branch_inst.en 		<= `SD 1'b0;
+// 			ret_branch_inst.cond 		<= `SD 1'b0;
+// 			ret_branch_inst.direct 	<= `SD 1'b0;
+// 			ret_branch_inst.ret 	<= `SD 1'b0;
+// 			ret_branch_inst.pc 		<= `SD 64'h0;
+// 			ret_branch_inst.pred_pc	<= `SD 64'h0;
+// 			ret_branch_inst.br_idx 	<= `SD {($clog2(`OBQ_SIZE)){1'b0}};
+// 			ret_branch_inst.prediction 	<= `SD 1'b0;
 	
-		end
-	end
-  end
+// 		end
+// 	end
+//   end
 
 
 
