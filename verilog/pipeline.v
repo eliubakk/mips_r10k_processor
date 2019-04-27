@@ -998,7 +998,7 @@ module pipeline (
     assign issue_reg_tags[ig][0] = issue_reg[ig].T1[`PHYS_IDX];
     assign issue_reg_tags[ig][1] = issue_reg[ig].T2[`PHYS_IDX];
 	assign issue_reg_npc[ig] = issue_reg[ig].npc;
-	assign issue_reg_inst_opcode[ig] = issue_reg[ig].inst_opcode;
+	assign issue_reg_inst_opcode[ig] = issue_reg[ig].ir;
 	assign issue_reg_inst_valid_inst[ig] = issue_reg[ig].inst.valid_inst;
   end
 
