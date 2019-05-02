@@ -1,5 +1,4 @@
 `include "../../sys_defs.vh"
-//`include "../../cache_defs.vh"
 `define DEBUG
 
 module dcache(clock, reset,
@@ -11,12 +10,8 @@ module dcache(clock, reset,
               Dcache_rd_miss_addr_out, Dcache_rd_miss_data_out, Dcache_rd_miss_valid_out,
               proc2Dmem_command, proc2Dmem_addr, proc2Dmem_data,
               evicted, evicted_valid, sets_out);
-  //parameter NUM_WAYS = 4;
   parameter RD_PORTS = 1;
   parameter WR_PORTS = 1;
-
-  //`define NUM_WAYS NUM_WAYS
-  //`include "../../cache_defs.vh"
   
   input clock, reset;
 
@@ -31,9 +26,9 @@ module dcache(clock, reset,
   input [(WR_PORTS-1):0][63:0] proc2Dcache_wr_data;
 
   //from main memory
-  input [3:0]  Dmem2proc_response;
+  input MEM_TAG_T  Dmem2proc_response;
   input [63:0] Dmem2proc_data;
-  input [3:0]  Dmem2proc_tag;
+  input MEM_TAG_T  Dmem2proc_tag;
 
   ///////////////
   //  OUTPUTS  //
@@ -51,7 +46,7 @@ module dcache(clock, reset,
   output logic Dcache_rd_miss_valid_out; 
 
   //to main memory
-  output logic [1:0]  proc2Dmem_command;
+  output BUS_COMMAND  proc2Dmem_command;
   output logic [63:0] proc2Dmem_addr;
   output logic [63:0] proc2Dmem_data;
 
@@ -71,28 +66,28 @@ module dcache(clock, reset,
   //instantiate cachemem module
   //cache memory inputs    
   logic [(RD_PORTS-1):0] cache_rd_en;
-  logic [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] cache_rd_idx;
-  logic [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] cache_rd_tag;
+  SET_IDX_T [(RD_PORTS-1):0] cache_rd_idx;
+  TAG_T     [(RD_PORTS-1):0] cache_rd_tag;
 
   logic [(WR_PORTS):0] cache_wr_en;
-  logic [(WR_PORTS):0][(`NUM_SET_BITS-1):0] cache_wr_idx;
-  logic [(WR_PORTS):0][(`NUM_TAG_BITS-1):0] cache_wr_tag;
+  SET_IDX_T [(WR_PORTS):0] cache_wr_idx;
+  TAG_T     [(WR_PORTS):0] cache_wr_tag;
   logic [(WR_PORTS):0][63:0] cache_wr_data;
   logic [(WR_PORTS):0] cache_wr_dirty;
 
   //cache memory outputs
   logic [(RD_PORTS-1):0][63:0] cache_rd_data;
   logic [(RD_PORTS-1):0] cache_rd_valid;
-  logic [(RD_PORTS-1):0][(`NUM_SET_BITS-1):0] cache_rd_miss_idx;
-  logic [(RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] cache_rd_miss_tag;
+  SET_IDX_T [(RD_PORTS-1):0] cache_rd_miss_idx;
+  TAG_T     [(RD_PORTS-1):0] cache_rd_miss_tag;
   logic [(RD_PORTS-1):0] cache_rd_miss_valid;
 
-  logic [(WR_PORTS):0][(`NUM_SET_BITS-1):0] cache_wr_miss_idx;
-  logic [(WR_PORTS):0][(`NUM_TAG_BITS-1):0] cache_wr_miss_tag;
+  SET_IDX_T [(WR_PORTS):0] cache_wr_miss_idx;
+  TAG_T     [(WR_PORTS):0] cache_wr_miss_tag;
   logic [(WR_PORTS):0] cache_wr_miss_valid;
 
   //victim cache inputs
-  logic [(WR_PORTS):0][(`NUM_SET_BITS-1):0] victim_idx;
+  SET_IDX_T [(WR_PORTS):0] victim_idx;
   CACHE_LINE_T [(WR_PORTS):0] victim;
   logic [(WR_PORTS):0] victim_valid;
   //logic [(WR_PORTS+RD_PORTS-1):0] vic_rd_en;
@@ -100,11 +95,10 @@ module dcache(clock, reset,
   //logic [(WR_PORTS+RD_PORTS-1):0][(`NUM_TAG_BITS-1):0] vic_rd_tag;
 
   //victim cache outputs
-  VIC_CACHE_T [(WR_PORTS):0] vic_rd_out;
-  logic [(WR_PORTS):0] vic_rd_valid;
+  //VIC_CACHE_T [(WR_PORTS):0] vic_rd_out;
+  //logic [(WR_PORTS):0] vic_rd_valid;
 
   cachemem #(
-    //.NUM_WAYS(NUM_WAYS),
     .RD_PORTS(RD_PORTS),
     .WR_PORTS(WR_PORTS+1)) 
   memory(
@@ -233,10 +227,10 @@ module dcache(clock, reset,
   //wor [(`NUM_FIFO-1):0] update_fifo_fetch_addr;
 
 
-   // Debugging for synth
-   assign send_request_out = send_request;
-   assign unanswered_miss_out = unanswered_miss;
-   logic sendreq_miss;
+  // Debugging for synth
+  assign send_request_out = send_request;
+  assign unanswered_miss_out = unanswered_miss;
+  logic sendreq_miss;
 
 
   //Instantiate CAM to check for rd address in fifo
@@ -531,7 +525,7 @@ module dcache(clock, reset,
       //add rd miss to req_queue
       if(add_rd_to_queue[i] & (mem_req_queue_tail_next < `MEM_BUFFER_SIZE)) begin
         mem_req_queue_next[mem_req_queue_tail_next].req.address = {proc2Dcache_rd_addr[i][63:3], 3'b0};
-        mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = 4'b0;
+        mem_req_queue_next[mem_req_queue_tail_next].req.mem_tag = `EMPTY_MEM_TAG;
         mem_req_queue_next[mem_req_queue_tail_next].req.valid = 1'b1;
         mem_req_queue_next[mem_req_queue_tail_next].req_done = 1'b0;
         mem_req_queue_next[mem_req_queue_tail_next].wr_to_cache = 1'b1;

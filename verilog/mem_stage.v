@@ -12,9 +12,6 @@
 /////////////////////////////////////////////////////////////////////////
 `include "../../sys_defs.vh"
 
-//`define NUM_WAYS 4
-//`include "../../cache_defs.vh"
-
 module mem_stage(
     input         clock,              // system clock
     input         reset,              // system reset
@@ -24,8 +21,8 @@ module mem_stage(
     input  [63:0] wr_addr,
     input  [63:0] wr_data,  // incoming ALU result from EX
     input  [63:0] Dmem2proc_data,
-    input   [3:0] Dmem2proc_tag, Dmem2proc_response,
-    input   [3:0] Rmem2proc_tag, Rmem2proc_response, 
+    input  MEM_TAG_T Dmem2proc_tag, Dmem2proc_response,
+    input  MEM_TAG_T Rmem2proc_tag, Rmem2proc_response, 
     input         sq_data_not_found,   // store addresses in the store queue not calculated
     input         sq_data_valid,       //address not found for forwarding
 
@@ -35,16 +32,16 @@ module mem_stage(
     output logic [63:0] mem_rd_miss_addr_out,
     output logic [63:0] mem_rd_miss_data_out,
     output logic  mem_rd_miss_valid_out,
-    output logic [1:0] proc2Dmem_command,
+    output BUS_COMMAND proc2Dmem_command,
     output logic [63:0] proc2Dmem_addr,      // Address sent to data-memory
     output logic [63:0] proc2Dmem_data,      // Data sent to data-memory
-    output logic [1:0]  proc2Rmem_command,
+    output BUS_COMMAND  proc2Rmem_command,
     output logic [63:0] proc2Rmem_addr,      // Address sent to data-memory
     output logic [63:0] proc2Rmem_data,
 	// signals used for flushing
-	output CACHE_SET_T [(`NUM_SETS - 1):0] sets_out,
+	output CACHE_SET_T [(`NUM_SETS-1):0] sets_out,
 	output VIC_CACHE_T [(`VIC_SIZE-1):0] vic_queue_out,
-	output RETIRE_BUF_T [(`RETIRE_SIZE - 1):0] retire_queue_out,
+	output RETIRE_BUF_T [(`RETIRE_SIZE-1):0] retire_queue_out,
 	output logic [$clog2(`RETIRE_SIZE):0] retire_queue_tail_out
   );
 
@@ -99,9 +96,7 @@ module mem_stage(
     .evicted_valid(evicted_valid)
   );
 
-  retire_buffer #(
-  //.NUM_WAYS(`NUM_WAYS),
-  .WR_PORTS(2))
+  retire_buffer #(.WR_PORTS(2))
   rb0(
     // inputs
     .clock(clock), 

@@ -87,6 +87,7 @@ logic		unanswered_miss_out;
 
   logic		retire_inst_busy;
   logic	[63:0]  retire_reg_NPC;
+  ROB_ROW_T retired_inst;
 
   logic [63:0] if_NPC_out;
   logic [31:0] if_IR_out;
@@ -184,6 +185,7 @@ logic		unanswered_miss_out;
 
     .retire_inst_busy(retire_inst_busy),
     .retire_reg_NPC(retire_reg_NPC),
+    .retired_inst(retired_inst),
 	.dcache_data(dcache_data),
 	//.evicted_data(evicted_data),
 	//.evicted_valid(evicted_valid),
@@ -271,6 +273,34 @@ logic		unanswered_miss_out;
     #(`VERILOG_CLOCK_PERIOD/2.0);
     clock = ~clock;
   end
+
+  task display_ROB_table;
+    begin
+      $display("**********************************************************\n");
+      $display("--------------------- ROB TABLE --------------------------\n");
+      //$display("head = %d, tail = %d", head_out, tail_out);
+      for(integer i = `ROB_SIZE-1; i >= 0; i -= 1) begin
+        $display("Row = %d, busy = %d, halt = %d, T_old = %7.0b, T_new = %7.0b", i, ROB_table_out[i].busy, ROB_table_out[i].halt, ROB_table_out[i].T_old, ROB_table_out[i].T_new);
+      end
+        //$display("ROB full = %b, free_rows_next = %d", full_out, free_rows_next_out);
+        //$display("ready_to_retire_out: %d", ready_to_retire_out[`ROB_SIZE-1]);
+      //for(int i = `SS_SIZE-1; i >= 0; i -= 1) begin
+      //  $display("retire_idx_out[%d]: %d", i, retire_idx_out[i]);
+      //  $display("retire_idx_valid_out[%d]: %d", i, retire_idx_valid_out[i]);
+      //  $display("dispatch_idx_out[%d]: %d", i, dispatch_idx_out[i]);
+      //end
+      //$display("head_next_out: %d", head_next_out);
+      //$display("tail_next_out: %d", tail_next_out);
+      //      $display("**********************************************************\n");
+
+      //      $display("**********************************************************\n");
+      //$display("----------------------- retire_out ----------------------------\n");
+      //for(integer i = `SS_SIZE-1; i >= 0; i -= 1) begin
+      //  $display("Row: %d, halt: %d, T_old: %7.0b, T_new: %7.0b, busy: %b", i, retire_out[i].halt, retire_out[i].T_old, retire_out[i].T_new, retire_out[i].busy);
+      //end
+      $display("**********************************************************\n");
+    end
+  endtask
 
   //Task to desplay input/output
   task show_input_output_port;
@@ -568,12 +598,12 @@ logic		unanswered_miss_out;
             
            // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {31'b0,co_ret_valid_inst});
           
-            print_stage("|", `NOOP_INST, retire_reg_NPC[31:0], {31'b0,retire_inst_busy});
-	end else begin
+            print_stage("|", retired_inst.opcode, retired_inst.npc[31:0], {31'b0,retired_inst.busy});
+	        end else begin
             //print_stage("|", ex_co_IR, ex_co_NPC[31:0], {0});
            // print_stage("|", co_ret_IR, co_ret_NPC[31:0], {0});
 
-            print_stage("|", `NOOP_INST, retire_reg_NPC[31:0], {0});
+            print_stage("|", `NOOP_INST, retired_inst.npc[31:0], {0});
           end
           print_reg(pipeline_commit_wr_data[63:32], pipeline_commit_wr_data[31:0],
                     {27'b0,pipeline_commit_wr_idx}, {31'b0,pipeline_commit_wr_en});

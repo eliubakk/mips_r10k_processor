@@ -18,9 +18,9 @@ module pipeline (
     input         clock,                    // System clock
     input         reset,                    // System reset
     input	        enable,
-    input MEM_TAG   mem2proc_response,        // Tag from memory about current request
+    input MEM_TAG_T   mem2proc_response,        // Tag from memory about current request
     input [63:0]    mem2proc_data,            // Data coming back from memory
-    input MEM_TAG   mem2proc_tag,              // Tag from memory about current reply
+    input MEM_TAG_T   mem2proc_tag,              // Tag from memory about current reply
 
     output BUS_COMMAND  proc2mem_command,    // command sent to memory
     output logic [63:0] proc2mem_addr,      // Address sent to memory
@@ -67,6 +67,7 @@ module pipeline (
 
     output logic	      retire_inst_busy,
     output logic [63:0] retire_reg_NPC,
+    output ROB_ROW_T    retired_inst,
 
     // testing hooks (these must be exported so we can test
     // the synthesized version) data is tested by looking at
@@ -172,7 +173,7 @@ module pipeline (
   INST_Q   id_di_iq_inst;
   GEN_REG  id_di_ra_idx, id_di_rb_idx, id_di_rdest_idx;
   
-  RS_ROW_T id_di_inst;
+  DECODED_INST id_di_inst;
   RS_ROW_T di_inst_in;
 
   logic dispatch_no_hazard;
@@ -291,6 +292,7 @@ module pipeline (
 // Retire signals from ROB
 
   ROB_ROW_T rob_retire_out;
+  //ROB_ROW_T retired_inst;
   logic [$clog2(`ROB_SIZE):0] rob_free_rows_next_out;
   logic							          rob_full_out;
   ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out;
@@ -330,20 +332,20 @@ module pipeline (
   logic stall_struc;
 
   // Outputs from RETIRE-Stage  (These loop back to the register file in ID)
-  logic	       retire_inst_busy;
-  logic [63:0] retire_reg_wr_data;
-  logic [`PHYS_IDX] retire_reg_wr_idx;
-  logic             retire_reg_wr_en;
-  logic [63:0] retire_reg_NPC;
-  logic [`PHYS_IDX] retire_reg_phys;
-	logic head_halt;
-  logic rob_retire_out_halt;
-  logic rob_retire_out_illegal;
-  logic rob_retire_out_take_branch;
-  logic rob_retire_out_T_new; 
-  logic rob_retire_out_T_old; 	
-  logic [31:0] rob_retire_opcode;
-  logic rob_retire_out_is_store;
+  //logic	       retire_inst_busy;
+  //logic [63:0] retire_reg_wr_data;
+  //logic [`PHYS_IDX] retire_reg_wr_idx;
+  //logic             retire_reg_wr_en;
+  //logic [63:0] retire_reg_NPC;
+  //logic [`PHYS_IDX] retire_reg_phys;
+	//logic head_halt;
+  // logic rob_retire_out_halt;
+  // logic rob_retire_out_illegal;
+  // logic rob_retire_out_take_branch;
+  // logic rob_retire_out_T_new; 
+  // logic rob_retire_out_T_old; 	
+  // logic [31:0] rob_retire_opcode;
+  // logic rob_retire_out_is_store;
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
   logic [63:0] proc2Rmem_data, proc2Dmem_data;
@@ -356,9 +358,9 @@ module pipeline (
   logic [63:0] Icache_data_out, proc2Icache_addr;
   logic        Icache_valid_out;
 
-  assign pipeline_completed_insts = {3'b0, retire_inst_busy};
-  assign pipeline_error_status =  rob_retire_out_illegal  ? HALTED_ON_ILLEGAL :
-                                  rob_retire_out_halt ? HALTED_ON_HALT :
+  assign pipeline_completed_insts = {3'b0, retired_inst.busy};
+  assign pipeline_error_status =  retired_inst.illegal  ? HALTED_ON_ILLEGAL :
+                                  retired_inst.halt ? HALTED_ON_HALT :
                                   NO_ERROR;
 
   //---------------------------For synthesis debugging
@@ -499,7 +501,7 @@ module pipeline (
     .ex_data(ex_store_data),
     .ex_data_en(ex_store_data_valid),
 
-    .rt_en(rob_retire_out_is_store),
+    .rt_en(retire_is_store),
 
     .data_rd(sq_data_out),
     .rd_valid(sq_data_valid), // checks for if data that exists is valid
@@ -571,13 +573,13 @@ module pipeline (
     // Inputs
     .clock (clock),
     .reset (reset),
-    .co_ret_valid_inst(rob_retire_out.busy),		// ret_branch_inst.en
+    .co_ret_valid_inst(retired_inst.busy),		// ret_branch_inst.en
     .co_ret_take_branch(branch_not_taken),	// ret_branch_inst.taken
-    .co_ret_target_pc(rob_retire_out.npc),			// 
+    .co_ret_target_pc(retired_inst.npc),			// 
     .Imem2proc_data(Icache_data_out),
     .Imem_valid(Icache_valid_out),
     .dispatch_en(if_stage_dispatch_en),				// if_id_enable vs dispatch_no_hazard : doesn't matter. Imem_valid is the key factor
-    .co_ret_branch_valid(ret_branch_inst.en),
+    .co_ret_branch_valid(retired_inst.branch_inst.en),
     .if_bp_NPC(if2_branch_inst.pred_pc),					// If BP prediction is valid, then next PC is updated pc from BP
     .if_bp_NPC_valid(if2_branch_inst.pred_pc_valid),
 
@@ -592,12 +594,12 @@ module pipeline (
  
 	always_comb begin 
 		ret_pred_correct = 1'b1;
-		if(rob_retire_out.branch_inst.en) begin
-			if(rob_retire_out.branch_inst.cond & rob_retire_out.branch_inst.direct) begin
-				ret_pred_correct = (rob_retire_out.branch_inst.pred_pc == rob_retire_out.npc) & (rob_retire_out.branch_inst.prediction == rob_retire_out.take_branch);
-			end else if (!rob_retire_out.branch_inst.cond) begin
+		if(retired_inst.branch_inst.en) begin
+			if(retired_inst.branch_inst.cond & retired_inst.branch_inst.direct) begin
+				ret_pred_correct = (retired_inst.branch_inst.pred_pc == retired_inst.npc) & (retired_inst.branch_inst.prediction == retired_inst.take_branch);
+			end else if (!retired_inst.branch_inst.cond) begin
 			//	if(!ret_branch_inst.ret) begin
-					ret_pred_correct = (rob_retire_out.branch_inst.pred_pc == rob_retire_out.npc);
+					ret_pred_correct = (retired_inst.branch_inst.pred_pc == retired_inst.npc);
 			//	end else begin
 			//		ret_pred_correct = 1'b1;
 			//	end
@@ -606,7 +608,7 @@ module pipeline (
 	end
 
   //Flushing condition : During the branch retirement, When the prediction is incorrect
-  assign branch_not_taken = rob_retire_out.branch_inst.en & (~ret_pred_correct); //
+  assign branch_not_taken = retired_inst.branch_inst.en & (~ret_pred_correct); //
   //should change this, chk1
   //assign branch_not_taken = ret_branch_inst.en & rob_retire_out_take_branch; 
  
@@ -627,6 +629,7 @@ module pipeline (
   	end
   end
 
+  assign if_NPC_out = if1_if2_fetched_inst.npc;
 	assign if_IR_out = if1_if2_fetched_inst.ir;
 	assign if_valid_inst_out = if1_if2_fetched_inst.valid_inst;
 
@@ -640,8 +643,11 @@ module pipeline (
   // We may divide the branch predictor and fetch stage
 	always_comb begin
 		// Initial value
-    if2_branch_inst = EMPTY_BR_SIG;
-
+    if2_branch_inst.pc = 64'b0;
+    if2_branch_inst.en = 1'b0;
+    if2_branch_inst.cond = 1'b0;
+    if2_branch_inst.direct = 1'b0;
+    if2_branch_inst.ret = 1'b0;
 		if(if1_if2_fetched_inst.valid_inst) begin // 
 			if2_branch_inst.pc = if1_if2_fetched_inst.pc; // Save current PC
 			case (if1_if2_fetched_inst.ir[31:26])
@@ -698,15 +704,15 @@ module pipeline (
 		.if_return_branch(if2_branch_inst.ret), 
 		.if_pc_in(if1_if2_fetched_inst.pc[31:0]),
 
-		.rt_en_branch(rob_retire_out.branch_inst.en),			//Get value from retire_inst_busy
-		.rt_cond_branch(rob_retire_out.branch_inst.cond),			
-		.rt_direct_branch(rob_retire_out.branch_inst.direct),		 
-		.rt_return_branch(rob_retire_out.branch_inst.ret),
-		.rt_pc(rob_retire_out.branch_inst.pc[31:0]),
-		.rt_branch_taken(rob_retire_out.take_branch),		// Get value from ret_branch_inst.taken
+		.rt_en_branch(retired_inst.branch_inst.en),			//Get value from retire_inst_busy
+		.rt_cond_branch(retired_inst.branch_inst.cond),			
+		.rt_direct_branch(retired_inst.branch_inst.direct),		 
+		.rt_return_branch(retired_inst.branch_inst.ret),
+		.rt_pc(retired_inst.branch_inst.pc[31:0]),
+		.rt_branch_taken(retired_inst.take_branch),		// Get value from ret_branch_inst.taken
 		.rt_prediction_correct(ret_pred_correct),
-		.rt_calculated_pc(rob_retire_out.npc[31:0]),			// This is not come from ret_branc_inst 
-		.rt_branch_index(rob_retire_out.branch_inst.br_idx),		
+		.rt_calculated_pc(retired_inst.npc[31:0]),			// This is not come from ret_branc_inst 
+		.rt_branch_index(retired_inst.branch_inst.br_idx),		
 
 		// outputs 
 		`ifdef DEBUG
@@ -759,10 +765,10 @@ module pipeline (
 		.if_inst_out(if_id_inst)
 	);
 
-	assign if_NPC_out = if_id_inst.fetched_inst.npc;
 	assign if_id_NPC = if_id_inst.fetched_inst.npc;
 	assign if_id_IR = if_id_inst.fetched_inst.ir;
 	assign if_id_valid_inst = if_id_inst.fetched_inst.valid_inst;
+
   //////////////////////////////////////////////////
   //                                              //
   //                  ID-Stage                    //
@@ -798,7 +804,7 @@ module pipeline (
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if (reset | branch_not_taken) begin
-      id_di_inst      <= `SD EMPTY_ROW;
+      id_di_inst      <= `SD EMPTY_INST;
       id_di_ra_idx    <= `SD `ZERO_REG;
       id_di_rb_idx    <= `SD `ZERO_REG;
       id_di_rdest_idx <= `SD `ZERO_REG;
@@ -810,6 +816,12 @@ module pipeline (
       id_di_rb_idx    <= `SD id_rb_idx;
       id_di_rdest_idx <= `SD id_rdest_idx;
       id_di_iq_inst   <= `SD if_id_inst;
+    end else if(dispatch_no_hazard & ~id_inst_out.valid_inst) begin
+      id_di_inst      <= `SD EMPTY_INST;
+      id_di_ra_idx    <= `SD `ZERO_REG;
+      id_di_rb_idx    <= `SD `ZERO_REG;
+      id_di_rdest_idx <= `SD `ZERO_REG;
+      id_di_iq_inst   <= `SD EMPTY_INST_Q;
     end
   end
 
@@ -820,8 +832,8 @@ module pipeline (
   //////////////////////////////////////////////////
   
   //Instantiating the freelist
-	assign fr_read_en = (id_di_inst.inst.valid_inst & dispatch_no_hazard); // Should not read during stalling for structural hazard
-	assign fr_wr_en = (& rob_retire_out.T_old[`PHYS_IDX])? 0 : 1; 
+	assign fr_read_en = (id_di_inst.valid_inst & dispatch_no_hazard); // Should not read during stalling for structural hazard
+	assign fr_wr_en = (& retired_inst.T_old[`PHYS_IDX])? 0 : 1; 
 	
 	logic id_no_dest_reg;// Instructions that does not have destination register
 	assign id_no_dest_reg = (id_di_rdest_idx == `ZERO_REG);
@@ -833,8 +845,8 @@ module pipeline (
     .clock(clock),
     .reset(reset),
     .enable(fr_wr_en),// Write enable from ROB during retire
-    .T_old(rob_retire_out.T_old), // Comes from ROB during Retire Stage
-    .T_new(rob_retire_out.T_new),
+    .T_old(retired_inst.T_old), // Comes from ROB during Retire Stage
+    .T_new(retired_inst.T_new),
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
     .id_no_dest_reg(id_no_dest_reg), // enabled when dispatched instruction is branch
     
@@ -856,9 +868,9 @@ module pipeline (
     .clock(clock),
     .reset(reset),
     .enable(fr_read_en),    // Should not read during stalling for structural hazard
-    .reg_a(id_ra_idx),    // Comes from Decode duringmem2proc_data
-    .reg_b(id_rb_idx),    // Comes from Decode duringmem2proc_data
-    .reg_dest(id_rdest_idx),  // Comes from Dmem2proc_data
+    .reg_a(id_di_ra_idx),    // Comes from Decode duringmem2proc_data
+    .reg_b(id_di_rb_idx),    // Comes from Decode duringmem2proc_data
+    .reg_dest(id_di_rdest_idx),  // Comes from Dmem2proc_data
     .free_reg(fr_free_reg_T),   // Comes from Free List durmem2proc_data
     .CDB_tag_in(CDB_tag_out),   // Comes from CDB durinmem2proc_data
     .CDB_en(CDB_enable),      // Comes from CDB during Commitmem2proc_data
@@ -881,7 +893,7 @@ module pipeline (
   // store queue tail assignment
   //assign id_inst_out.sq_idx = sq_tail;
 
-  assign dispatch_is_store = (id_di_inst.inst.fu_name == FU_ST & id_di_inst.inst.valid_inst);
+  assign dispatch_is_store = (id_di_inst.fu_name == FU_ST & id_di_inst.valid_inst);
   assign dispatch_store_addr = 64'b0; 
   assign dispatch_store_addr_ready = 1'b0; 
   assign dispatch_store_data = 64'b0;
@@ -910,16 +922,16 @@ module pipeline (
     .CDB_sq_idx(ex_co_inst[FU_ST_IDX].sq_idx),
     .dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
     .branch_not_taken(branch_not_taken),
-    .halt_in(di_inst_in.inst.halt),
-    .illegal_in          (di_inst_in.inst.illegal),
-    .opcode(di_inst_in.ir),
+    .halt_in(id_di_inst.halt),
+    .illegal_in(id_di_inst.illegal),
+    .opcode(id_di_iq_inst.fetched_inst.ir),
     .take_branch(co_take_branch_selected),
     //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
     .id_branch_inst(id_di_iq_inst.branch_inst), // ***Heewoo added 
     .wr_idx(id_di_rdest_idx),
-    .npc(di_inst_in.npc),
+    .npc(id_di_iq_inst.fetched_inst.npc),
     .is_store(dispatch_is_store),
-    .sq_idx_in(di_inst_in.sq_idx),
+    .sq_idx_in(sq_tail),
     .co_alu_result(co_alu_result_selected),
     
     // OUTPUTS
@@ -1130,6 +1142,12 @@ module pipeline (
     end
   end
 
+  for(genvar i = 0; i < `NUM_FU_TOTAL; i += 1) begin
+    assign ex_co_NPC[i] = ex_co_inst[i].npc;
+    assign ex_co_IR[i] = ex_co_inst[i].ir;
+    assign ex_co_valid_inst[i] = ex_co_inst[i].inst.valid_inst & ex_co_inst[i].busy;
+  end
+
 //   //////////////////////////////////////////////////
 //   //                                              //
 //   //                 MEM-Stage                    //
@@ -1171,7 +1189,7 @@ module pipeline (
      .reset(reset),
      .rd_mem(ex_co_inst[FU_LD_IDX].inst.rd_mem),
      .rd_addr(lq_load_in.alu_result), 
-     .wr_mem(rob_retire_out_is_store),
+     .wr_mem(retire_is_store),
      .wr_addr(sq_head_address),
      .wr_data(sq_head_data),
      .Dmem2proc_data(Dmem2proc_data),
@@ -1305,7 +1323,7 @@ module pipeline (
   PHYS_REG co_tag_in = (co_selected[FU_LD_IDX])? co_lq_load_selected.dest_reg :
                                                   co_inst_selected.T;
   logic co_tag_valid = (co_selected[FU_LD_IDX])? co_lq_load_selected.valid_inst :
-                                                  co_inst_selected.busy;
+                                                  co_inst_selected.inst.valid_inst;
 
   //Instantiated the CDB
   CDB CDB_0(
@@ -1313,8 +1331,8 @@ module pipeline (
     .clock(clock),    // Clock
     .reset(reset),  // Asynchronous reset active low
     .enable(CDB_enable), // Clock Enable
-    .tag_in(cdb_tag_in),	// Comes from FU, during commit
-    .ex_valid(cdb_tag_valid),
+    .tag_in(co_tag_in),	// Comes from FU, during commit
+    .ex_valid(co_tag_valid),
 
     // Outputs
     .CDB_tag_out(CDB_tag_out), // Output for commit, goes to modules
@@ -1374,35 +1392,37 @@ module pipeline (
   // synopsys sync_set_reset "reset"
   always_ff @(posedge clock) begin
     if(reset | branch_not_taken) begin
-      retire_is_store_next <= `SD 1'b0;
-      rob_retire_out_halt <= `SD 1'b0;
-      rob_retire_out_illegal <= `SD 1'b0;
+      retired_inst <= `SD EMPTY_ROB_ROW;
+      retire_is_store <= `SD 1'b0;
+      //rob_retire_out_halt <= `SD 1'b0;
+      //rob_retire_out_illegal <= `SD 1'b0;
     end else begin
-      retire_is_store_next <= `SD retire_is_store;
-      rob_retire_out_halt <= `SD rob_retire_out.halt;
-      rob_retire_out_illegal <= `SD rob_retire_out.illegal;
+      retired_inst <= `SD rob_retire_out;
+      retire_is_store <= `SD rob_retire_out.is_store & rob_retire_out.busy;
+      //rob_retire_out_halt <= `SD rob_retire_out.halt;
+      //rob_retire_out_illegal <= `SD rob_retire_out.illegal;
     end
   end
   
-  assign retire_is_store = rob_retire_out.is_store & rob_retire_out.busy;//(rob_retire_opcode[31:26] == `STQ_INST) ||
+  //(rob_retire_opcode[31:26] == `STQ_INST) ||
                             //(rob_retire_opcode[31:26] == `STQ_C_INST);
 
    
   
 
   // retire_reg_wr_idx is physical register
-  assign pipeline_commit_wr_idx = rob_retire_out.wr_idx;
-  assign pipeline_commit_wr_data = phys_reg[rob_retire_out.T_new[`PHYS_IDX]];
-  assign pipeline_commit_wr_en = rob_retire_out.busy & (rob_retire_out.T_new != `DUMMY_REG);
-  assign pipeline_commit_NPC = rob_retire_out.branch_inst.en ? rob_retire_out.branch_inst.pc : 
-                                                               rob_retire_out.npc-4;
-  assign pipeline_commit_phys_reg = rob_retire_out.T_old;
-  assign pipeline_commit_phys_from_arch = arch_table[rob_retire_out.wr_idx][5:0]; 
+  assign pipeline_commit_wr_idx = retired_inst.wr_idx;
+  assign pipeline_commit_wr_data = phys_reg[retired_inst.T_new[`PHYS_IDX]];
+  assign pipeline_commit_wr_en = retired_inst.busy & (retired_inst.T_new != `DUMMY_REG);
+  assign pipeline_commit_NPC = retired_inst.branch_inst.en ? retired_inst.branch_inst.pc : 
+                                                               retired_inst.npc-4;
+  assign pipeline_commit_phys_reg = retired_inst.T_old;
+  assign pipeline_commit_phys_from_arch = arch_table[retired_inst.wr_idx][5:0]; 
 
   // For branch prediction accuracy check
 
-  assign pipeline_branch_en = rob_retire_out.branch_inst.en; 
-  assign pipeline_branch_pred_correct = rob_retire_out.branch_inst.en & ret_pred_correct;
+  assign pipeline_branch_en = retired_inst.branch_inst.en; 
+  assign pipeline_branch_pred_correct = retired_inst.branch_inst.en & ret_pred_correct;
 
 //logic rob_retire_out_is_store_comb;
 //assign rob_retire_out_is_store_comb = rob_retire_out.is_store & rob_retire_out.busy;
@@ -1476,15 +1496,15 @@ module pipeline (
 
 logic arch_enable;
 //assign arch_enable = rob_retire_out.busy & !rob_retire_out.take_branch;
-assign arch_enable = rob_retire_out.busy & !branch_not_taken; 
+assign arch_enable = retired_inst.busy & !branch_not_taken; 
 // assign arch_enable = rob_retire_out.busy;
   //Intsantiating the arch map
   Arch_Map_Table a0(
   	.clock(clock),
   	.reset(reset),
   	.enable(arch_enable),
-  	.T_new_in(rob_retire_out.T_new), // Comes from ROB during Retire
-    .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
+  	.T_new_in(retired_inst.T_new), // Comes from ROB during Retire
+    .T_old_in(retired_inst.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
   	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
  );

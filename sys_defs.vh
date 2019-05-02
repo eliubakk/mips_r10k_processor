@@ -33,15 +33,17 @@
 
 
 `define NUM_MEM_TAGS           15
-typedef logic [$clog2(`NUM_MEM_TAGS)-1:0] MEM_TAG;
+`define NUM_MEM_TAG_BITS ($clog2(`NUM_MEM_TAGS))
+typedef logic [(`NUM_MEM_TAG_BITS-1):0] MEM_TAG_T;
+`define EMPTY_MEM_TAG {`NUM_MEM_TAG_BITS{1'b0}}
 
 `define MEM_SIZE_IN_BYTES      (64*1024)
 `define MEM_64BIT_LINES        (`MEM_SIZE_IN_BYTES/8)
 `define MEM_ADDR_BITS          ($clog2(`MEM_SIZE_IN_BYTES))
 
 // probably not a good idea to change this second one
-`define VIRTUAL_CLOCK_PERIOD   30.0 // Clock period from dc_shell
-`define VERILOG_CLOCK_PERIOD   9.8 // Clock period from test bench
+`define VIRTUAL_CLOCK_PERIOD   20 // Clock period from dc_shell
+`define VERILOG_CLOCK_PERIOD   20 // Clock period from test bench
 
 //`define MEM_LATENCY_IN_CYCLES 0.001
 `define MEM_LATENCY_IN_CYCLES (100.0/`VERILOG_CLOCK_PERIOD+0.49999)
@@ -53,33 +55,33 @@ typedef logic [$clog2(`NUM_MEM_TAGS)-1:0] MEM_TAG;
 `define NUM_INST_PREFETCH 4
 `define VIC_SIZE 4
 `define RETIRE_SIZE 100
-`define NUM_VIC_BITS $clog2(`VIC_SIZE)
+`define NUM_RETIRE_BITS ($clog2(`RETIRE_SIZE))
+`define NUM_VIC_BITS ($clog2(`VIC_SIZE))
 `define NUM_DCACHE_WAYS 4
-//`define NUM_WAYS 4
-//`define NUM_SETS (32 / `NUM_WAYS)
-//`define NUM_SET_BITS $clog2(`NUM_SETS)
-//`define NUM_TAG_BITS (13 - `NUM_SET_BITS)
 
-//`define NUM_WR_FIFO 4
 `define NUM_FIFO 4
 `define NUM_DATA_PREFETCH 2
 `define FIFO_SIZE 4
-`define NUM_FIFO_BITS $clog2(`NUM_FIFO)
-//`define NUM_RD_FIFO_BITS $clog2(`NUM_RD_FIFO)
-`define NUM_FIFO_SIZE_BITS $clog2(`FIFO_SIZE)
+`define NUM_FIFO_BITS ($clog2(`NUM_FIFO))
+`define NUM_FIFO_SIZE_BITS ($clog2(`FIFO_SIZE))
 `define MEM_BUFFER_SIZE 30
-`define MEM_BUFFER_SIZE_BITS $clog2(`MEM_BUFFER_SIZE)
+`define MEM_BUFFER_SIZE_BITS ($clog2(`MEM_BUFFER_SIZE))
 
 `define NUM_WAYS 4
-//`endif
-
 `define NUM_SETS (32/`NUM_WAYS)
-`define NUM_SET_BITS $clog2(`NUM_SETS)
+`define NUM_WAYS_BITS ($clog2(`NUM_WAYS))
+typedef logic [(`NUM_WAYS_BITS-1):0] WAY_IDX_T;
+`define EMPTY_WAY_IDX {`NUM_WAYS_BITS{1'b0}}
+`define NUM_SET_BITS ($clog2(`NUM_SETS))
+typedef logic [(`NUM_SET_BITS-1):0] SET_IDX_T;
+`define EMPTY_SET_IDX {`NUM_SET_BITS{1'b0}}
 `define NUM_TAG_BITS (`MEM_ADDR_BITS-3-`NUM_SET_BITS)
+typedef logic [(`NUM_TAG_BITS-1):0] TAG_T;
+`define EMPTY_TAG {`NUM_TAG_BITS{1'b0}}
 
 typedef struct packed {
   logic [63:0] data;
-  logic [(`NUM_TAG_BITS-1):0] tag;
+  TAG_T tag;
   logic valid;
   logic dirty;
 } CACHE_LINE_T;
@@ -87,7 +89,7 @@ typedef struct packed {
 const CACHE_LINE_T EMPTY_CACHE_LINE = 
 {
   64'b0,
-  {`NUM_TAG_BITS{1'b0}},
+  `EMPTY_TAG,
   1'b0,
   1'b0
 };
@@ -98,8 +100,8 @@ typedef struct packed {
 
 
 typedef struct packed {
-  logic [`NUM_TAG_BITS-1:0] tag;
-  logic [`NUM_SET_BITS-1:0] idx;
+  TAG_T tag;
+  SET_IDX_T idx;
   logic [63:0] data;
   logic valid;
   logic dirty;
@@ -107,27 +109,28 @@ typedef struct packed {
 
 const DCACHE_FIFO_T EMPTY_DCACHE =
 {
-  {`NUM_TAG_BITS{1'b0}},
-  {`NUM_SET_BITS{1'b0}},
+  `EMPTY_TAG,
+  `EMPTY_SET_IDX,
   64'b0,
+  1'b0,
   1'b0
 };
 
 typedef struct packed {
   CACHE_LINE_T line;
-  logic [(`NUM_SET_BITS-1):0] idx;
+  SET_IDX_T idx;
 } VIC_CACHE_T;
 
 const VIC_CACHE_T EMPTY_VIC_CACHE = 
 {
   EMPTY_CACHE_LINE,
-  {`NUM_SET_BITS{1'b0}}
+  `EMPTY_SET_IDX
 };
 
 typedef struct packed {
   logic [63:0] address;
   logic [63:0] data;
-  logic [3:0] mem_tag;
+  MEM_TAG_T mem_tag;
   logic valid;
 } RETIRE_BUF_T;
 
@@ -135,20 +138,20 @@ const RETIRE_BUF_T EMPTY_RETIRE_BUF =
 {
   64'b0,
   64'b0,
-  4'b0,
+  `EMPTY_MEM_TAG,
   1'b0
 };
 
 typedef struct packed {
   logic [63:0] address;
-  logic [3:0] mem_tag;
+  MEM_TAG_T mem_tag;
   logic valid;
 } MEM_REQ_T;
 
 const MEM_REQ_T EMPTY_MEM_REQ = 
 {
   64'b0,
-  4'b0,
+  `EMPTY_MEM_TAG,
   1'b0
 };
 
@@ -218,14 +221,14 @@ const DCACHE_MEM_REQ_T EMPTY_DCACHE_MEM_REQ =
 //
 //////////////////////////////////////////////
 `define NUM_GEN_REG 32
-typedef logic [$clog2(`NUM_GEN_REG)-1:0]  GEN_REG;
+typedef logic [($clog2(`NUM_GEN_REG)-1):0]  GEN_REG;
 
 `define NUM_PHYS_REG (`ROB_SIZE+`NUM_GEN_REG)
 //`define NUM_PHYS_REG 48
 `define READY_BIT_IDX $clog2(`NUM_PHYS_REG)
 `define PHYS_IDX ($clog2(`NUM_PHYS_REG)-1):0
 
-typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
+typedef logic [($clog2(`NUM_PHYS_REG)):0] PHYS_REG;
 `define DUMMY_REG {1'b1, {$clog2(`NUM_PHYS_REG){1'b1}}}
 
 //////////////////////////////////////////////
@@ -247,12 +250,13 @@ typedef logic [$clog2(`NUM_PHYS_REG):0] PHYS_REG;
 // OBQ Rows
 `define BH_SIZE 4		// Need to change this to 10
 `define OBQ_SIZE 16
+`define NUM_OBQ_BITS ($clog2(`OBQ_SIZE))
 typedef struct packed {
   logic [`BH_SIZE-1:0] branch_history;
 } OBQ_ROW_T;
 
-typedef logic [$clog2(`OBQ_SIZE)-1:0] BR_IDX_REG;
-`define ZERO_BR_IDX {$clog2(`OBQ_SIZE){1'b0}}
+typedef logic [(`NUM_OBQ_BITS-1):0] BR_IDX_REG;
+`define ZERO_BR_IDX {`NUM_OBQ_BITS{1'b0}}
 
 // RAS
 `define RAS_SIZE 2**6
@@ -407,7 +411,7 @@ typedef enum logic [4:0] {
 // the Alpha register file zero register, any read of this register always
 // returns a zero value, and any write to this register is thrown away
 //
-`define ZERO_REG 5'd31
+`define ZERO_REG ({$clog2(`NUM_GEN_REG){1'b1}})
 
 //
 // Memory bus commands control signals
@@ -585,7 +589,7 @@ typedef enum logic [1:0] {
 //                                         0000    0001    0010    0011    0100    0101    0110    0111    1000    1001    1010    1011    1100    1101    1110    1111
 const logic [0:15][2:0] BIT_COUNT_LUT = {3'b000, 3'b001, 3'b001, 3'b010, 3'b001, 3'b010, 3'b010, 3'b011, 3'b001, 3'b010, 3'b010, 3'b011, 3'b010, 3'b011, 3'b011, 3'b100};
 
-typedef logic [`NUM_FU_TOTAL-1:0] FU_REG;
+typedef logic [(`NUM_FU_TOTAL-1):0] FU_REG;
 
 // the number of functional units of each specific type we instantiate.
 const logic [0:(`NUM_TYPE_FU-1)][1:0] GLOBAL_NUM_OF_FU_TYPE = {2'b10,2'b01,2'b01,2'b01};
@@ -617,8 +621,8 @@ typedef struct packed {
 
 // Store Queue
 `define SQ_SIZE 16
-`define SQ_SIZE_BITS $clog2(`SQ_SIZE)
-typedef logic [`SQ_SIZE_BITS-1:0] SQ_INDEX_T;
+`define SQ_SIZE_BITS ($clog2(`SQ_SIZE))
+typedef logic [(`SQ_SIZE_BITS-1):0] SQ_INDEX_T;
 `define NULL_LD_POS {`SQ_SIZE_BITS{1'b1}} 
 
 //ROB_ROWS
@@ -629,8 +633,7 @@ typedef struct packed{
   logic illegal;
   logic halt;
   logic [31:0] opcode;
-  logic take_branch;      
-  //logic branch_valid;     //  Same as branch_inst.valid
+  logic take_branch;
   GEN_REG wr_idx;
   logic [63:0] npc;
   logic is_store;
@@ -669,7 +672,6 @@ typedef struct packed {
   logic [63:0] alu_result;
   logic [63:0] data;
   logic data_valid;
-  // logic [3:0] mem_response;
 } LQ_ROW_T;
 
 const LQ_ROW_T EMPTY_LQ_ROW =
