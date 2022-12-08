@@ -1,0 +1,27 @@
+Chronologic VCS simulator copyright 1991-2017
+Contains Synopsys proprietary information.
+Compiler version N-2017.12-SP2-1_Full64; Runtime version N-2017.12-SP2-1_Full64;  May  2 11:34 2019
+@@
+@@
+@@                     0  Asserting System reset......
+@@
+@@                   200 : System STILL at reset, can't show anything
+@@
+@@
+@@                   400 : System STILL at reset, can't show anything
+@@
+@@
+@@                   600 : System STILL at reset, can't show anything
+@@
+@@
+@@                   800 : System STILL at reset, can't show anything
+@@
+@@                   910  Deasserting System reset......
+@@
+@@
+$finish called from file "../../testbench/pipeline_test.v", line 526.
+$finish at simulation time                21110
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 2111000 ps
+CPU Time:      0.280 seconds;       Data structure size:   0.3Mb
+Thu May  2 11:34:34 2019

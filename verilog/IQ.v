@@ -93,7 +93,7 @@ module IQ(
 			for (int i=0; i< `IQ_SIZE; i=i+1) begin
 				inst_queue[i] <= `SD next_inst_queue[i+1];
 			end
-			inst_queue[`IQ_SIZE-1] <= EMPTY_INST_Q;
+			inst_queue[`IQ_SIZE-1] <= `SD EMPTY_INST_Q;
 			tail			<= `SD next_tail-1;
 			inst_queue_full	<= `SD (next_tail >= `IQ_SIZE-1);
 		end else begin 

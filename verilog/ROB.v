@@ -12,7 +12,7 @@ module ROB(
 		input PHYS_REG [`SS_SIZE-1:0] CDB_tag_in, // Comes from CDB during Commit
 		input		   [`SS_SIZE-1:0] CAM_en, // Comes from CDB during Commit
 		input						  CDB_br_valid, // ** Heewoo added ,need a way to deal with multiple branches
-		input [$clog2(`OBQ_SIZE)-1:0] CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
+		input BR_IDX_REG              CDB_br_idx, // *** Heewoo Comes from CDB during commit, distinguish branch 
 		input 						  CDB_sq_valid,
 		input SQ_INDEX_T			  CDB_sq_idx,
 		input		   [`SS_SIZE-1:0] dispatch_en, // Structural Hazard detection during Dispatch
@@ -34,12 +34,12 @@ module ROB(
 		output wand	full // Used for Dispatch Hazard
 		`ifdef DEBUG 
 			, output ROB_ROW_T [`ROB_SIZE-1:0]	 ROB_table_out,
-			output logic [$clog2(`ROB_SIZE):0] tail_out, head_out,
-			output logic [$clog2(`ROB_SIZE):0] tail_next_out, head_next_out,
-			output logic [`ROB_SIZE-1:0] ready_to_retire_out,
-			output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] retire_idx_out,
-			output logic [`SS_SIZE-1:0] retire_idx_valid_out,
-			output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx_out
+			output logic [$clog2(`ROB_SIZE):0] tail_out, head_out
+			//output logic [$clog2(`ROB_SIZE):0] tail_next_out, head_next_out,
+			//output logic [`ROB_SIZE-1:0] ready_to_retire_out,
+			//output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] retire_idx_out,
+			//output logic [`SS_SIZE-1:0] retire_idx_valid_out,
+			//output logic [`SS_SIZE-1:0][$clog2(`ROB_SIZE):0] dispatch_idx_out
 		`endif
 	);
 
@@ -58,20 +58,20 @@ module ROB(
 
 
 	//CAM VARIABLES
-	logic [(`SS_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_tags_in;
-	logic [(`ROB_SIZE-1):0][($clog2(`NUM_PHYS_REG)-1):0] cam_table_in;
+	logic [(`SS_SIZE-1):0][`PHYS_IDX] cam_tags_in;
+	logic [(`ROB_SIZE-1):0][`PHYS_IDX] cam_table_in;
 	logic [(`ROB_SIZE-1):0][(`SS_SIZE-1):0] cam_hits;	
 
 	`ifdef DEBUG 
 		assign ROB_table_out = ROB_table;
 		assign tail_out = tail;
 		assign head_out = head;
-		assign tail_next_out = tail_next;
-		assign head_next_out = head_next;
-		assign ready_to_retire_out = ready_to_retire;
-		assign retire_idx_out = retire_idx;
-		assign retire_idx_valid_out = retire_idx_valid;
-		assign dispatch_idx_out = dispatch_idx;
+		// assign tail_next_out = tail_next;
+		// assign head_next_out = head_next;
+		// assign ready_to_retire_out = ready_to_retire;
+		// assign retire_idx_out = retire_idx;
+		// assign retire_idx_valid_out = retire_idx_valid;
+		// assign dispatch_idx_out = dispatch_idx;
 	`endif
 
 	genvar ig;
@@ -81,10 +81,10 @@ module ROB(
 
 	//CAM LOGIC
 	for(ig = 0; ig < `ROB_SIZE; ig += 1) begin
-		assign cam_table_in[ig] = ROB_table[ig].T_new[($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_table_in[ig] = ROB_table[ig].T_new[`PHYS_IDX];
 	end
 	for(ig = 0; ig < `SS_SIZE; ig += 1) begin
-		assign cam_tags_in[ig] = CDB_tag_in[ig][($clog2(`NUM_PHYS_REG)-1):0];
+		assign cam_tags_in[ig] = CDB_tag_in[ig][`PHYS_IDX];
 	end
 	//Instantiate CAM module for CBD
 	CAM #(.LENGTH(`ROB_SIZE),
@@ -100,9 +100,9 @@ module ROB(
 	for(ig = 0; ig < `ROB_SIZE; ig += 1) begin
 		// assign ready_to_retire[ig] = (ROB_table[ig].busy) & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig]));
 
-		assign ready_to_retire[ig] =  (ROB_table[ig].branch_inst.en)? (ROB_table[ig].busy & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | ((| cam_hits[ig]) & CDB_br_valid & (CDB_br_idx == ROB_table[ig].branch_inst.br_idx)))) : 
-									 		(ROB_table[ig].is_store)? (ROB_table[ig].busy & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (CDB_sq_valid & (ROB_table[ig].sq_idx == CDB_sq_idx)))) :
-									 								  (ROB_table[ig].busy & (ROB_table[ig].T_new[$clog2(`NUM_PHYS_REG)] | (| cam_hits[ig])));
+		assign ready_to_retire[ig] =  (ROB_table[ig].branch_inst.en)? (ROB_table[ig].busy & (ROB_table[ig].T_new[`READY_BIT_IDX] | ((| cam_hits[ig]) & CDB_br_valid & (CDB_br_idx == ROB_table[ig].branch_inst.br_idx)))) : 
+									 		(ROB_table[ig].is_store)? (ROB_table[ig].busy & (ROB_table[ig].T_new[`READY_BIT_IDX] | (CDB_sq_valid & (ROB_table[ig].sq_idx == CDB_sq_idx)))) :
+									 								  (ROB_table[ig].busy & (ROB_table[ig].T_new[`READY_BIT_IDX] | (| cam_hits[ig])));
 
 		// if(ROB_table[i].branch_inst.en) begin// When branch is broadcasting
 		// 	ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx);
@@ -151,11 +151,11 @@ module ROB(
 		// update tag ready bits from CBD 
 		for (int i = 0; i < `ROB_SIZE; i += 1) begin
 			if(ROB_table[i].branch_inst.en) begin// When branch is broadcasting
-				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]) & CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx);
+				ROB_table_next[i].T_new[`READY_BIT_IDX] |= (| cam_hits[i]) & CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx);
 			end else if(ROB_table[i].is_store) begin
-				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (CDB_sq_valid & (CDB_sq_idx == ROB_table[i].sq_idx));
+				ROB_table_next[i].T_new[`READY_BIT_IDX] |= (CDB_sq_valid & (CDB_sq_idx == ROB_table[i].sq_idx));
 			end else begin
-				ROB_table_next[i].T_new[$clog2(`NUM_PHYS_REG)] |= (| cam_hits[i]);
+				ROB_table_next[i].T_new[`READY_BIT_IDX] |= (| cam_hits[i]);
 			end
 			ROB_table_next[i].take_branch = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx))) ? 1'b1 : ROB_table[i].take_branch; // **** Heewoo changed for multiple branches
 			ROB_table_next[i].npc = (take_branch & ROB_table[i].branch_inst.en & (CDB_br_valid & (CDB_br_idx == ROB_table[i].branch_inst.br_idx))) ? co_alu_result : ROB_table[i].npc; // **** Heewoo changed for multiple branches

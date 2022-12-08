@@ -522,9 +522,9 @@ logic		unanswered_miss_out;
 	end 
 	`SD;
 	display_stages;
-	/* if (clock_count == 100000) begin
-	  $finish;
-	 end*/
+	   if (clock_count == 100) begin
+	     $finish;
+	   end
 	 
 	   end 
 

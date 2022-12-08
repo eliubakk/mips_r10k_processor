@@ -53,12 +53,12 @@ module pipeline (
 	output logic [63:0] id_di_NPC,
 	output logic [31:0] id_di_IR,
 	output logic id_di_valid_inst,
-	output logic [`RS_SIZE - 1:0] [63:0] rs_table_out_npc,
-	output logic [`RS_SIZE - 1:0] [31:0] rs_table_out_inst_opcode,
-	output logic [`RS_SIZE - 1:0] rs_table_out_inst_valid_inst,
-	output logic [`NUM_FU_TOTAL - 1:0] [63:0] issue_reg_npc,
-	output logic [`NUM_FU_TOTAL - 1:0] [31:0] issue_reg_inst_opcode,
-	output logic [`NUM_FU_TOTAL - 1:0] issue_reg_inst_valid_inst,
+	output logic [`RS_SIZE-1:0] [63:0] rs_table_out_npc,
+	output logic [`RS_SIZE-1:0] [31:0] rs_table_out_inst_opcode,
+	output logic [`RS_SIZE-1:0] rs_table_out_inst_valid_inst,
+	output logic [`NUM_FU_TOTAL-1:0] [63:0] issue_reg_npc,
+	output logic [`NUM_FU_TOTAL-1:0] [31:0] issue_reg_inst_opcode,
+	output logic [`NUM_FU_TOTAL-1:0] issue_reg_inst_valid_inst,
     // To record the branch prediction accuracy
 
     output logic	pipeline_branch_en,
@@ -163,8 +163,8 @@ module pipeline (
 
   //outputs from the maptable
   MAP_ROW_T   [`NUM_GEN_REG-1:0]	map_table_out;
-  PHYS_REG 		T1; // Output for Dispatch and goes to RS
-	PHYS_REG 		T2; // Output for Dispatch and goes to RS
+  PHYS_REG 		id_T1; // Output for Dispatch and goes to RS
+	PHYS_REG 		id_T2; // Output for Dispatch and goes to RS
   PHYS_REG    T_old;	// Output for Dispatch and goes to ROB
 
   // --------------------------------Dispatch stage
@@ -173,7 +173,8 @@ module pipeline (
   INST_Q   id_di_iq_inst;
   GEN_REG  id_di_ra_idx, id_di_rb_idx, id_di_rdest_idx;
   
-  DECODED_INST id_di_inst;
+  RS_ROW_T id_di_inst;
+  PHYS_REG id_di_T_old;
   RS_ROW_T di_inst_in;
 
   logic dispatch_no_hazard;
@@ -186,7 +187,7 @@ module pipeline (
   //-----------------------------------Issue stage
 
   // outputs from dispatch stage
-  RS_ROW_T [(`RS_SIZE-1):0]		  rs_table_out;             // for debugging
+  //RS_ROW_T [(`RS_SIZE-1):0]		  rs_table_out;             // for debugging
   logic    [$clog2(`RS_SIZE):0] rs_free_rows_next_out;
   wand  rs_full;
   // RS_ROW_T [`NUM_FU_TOTAL-1:0]			issue_next;
@@ -295,7 +296,7 @@ module pipeline (
   //ROB_ROW_T retired_inst;
   logic [$clog2(`ROB_SIZE):0] rob_free_rows_next_out;
   logic							          rob_full_out;
-  ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out;
+  //ROB_ROW_T [`ROB_SIZE-1:0]		ROB_table_out;
   logic [$clog2(`ROB_SIZE):0] rob_tail_out, rob_head_out;
 
   //Outputs for the free list
@@ -349,10 +350,10 @@ module pipeline (
   // Memory interface/arbiter wires
   logic [63:0] proc2Dmem_addr, proc2Imem_addr, proc2Rmem_addr;
   logic [63:0] proc2Rmem_data, proc2Dmem_data;
-  logic [1:0]  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
-  logic [3:0]  Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
+  BUS_COMMAND  proc2Dmem_command, proc2Imem_command, proc2Rmem_command;
+  MEM_TAG_T    Dmem2proc_response, Imem2proc_response, Rmem2proc_response;
   logic [63:0] Dmem2proc_data, Imem2proc_data;
-  logic [3:0]  Dmem2proc_tag, Imem2proc_tag, Rmem2proc_tag;
+  MEM_TAG_T    Dmem2proc_tag, Imem2proc_tag, Rmem2proc_tag;
   
   // Icache wires
   logic [63:0] Icache_data_out, proc2Icache_addr;
@@ -532,7 +533,7 @@ module pipeline (
     .clock(clock),
     .reset(reset),
     .branch_incorrect(branch_not_taken),
-    .load_in(lq_load_in),
+    .load_in(lq_load_in), 
     .write_en(lq_write_en),
     .pop_en(lq_pop_en),
     .lq_miss_data(lq_miss_data),
@@ -648,6 +649,7 @@ module pipeline (
     if2_branch_inst.cond = 1'b0;
     if2_branch_inst.direct = 1'b0;
     if2_branch_inst.ret = 1'b0;
+    if2_branch_inst.pred_pc[63:32] = 32'b0;
 		if(if1_if2_fetched_inst.valid_inst) begin // 
 			if2_branch_inst.pc = if1_if2_fetched_inst.pc; // Save current PC
 			case (if1_if2_fetched_inst.ir[31:26])
@@ -702,7 +704,7 @@ module pipeline (
 		.if_cond_branch(if2_branch_inst.cond),
 		.if_direct_branch(if2_branch_inst.direct),
 		.if_return_branch(if2_branch_inst.ret), 
-		.if_pc_in(if1_if2_fetched_inst.pc[31:0]),
+		.if_pc_in(if2_branch_inst.pc[31:0]),
 
 		.rt_en_branch(retired_inst.branch_inst.en),			//Get value from retire_inst_busy
 		.rt_cond_branch(retired_inst.branch_inst.cond),			
@@ -730,7 +732,7 @@ module pipeline (
 		`endif
 		.next_pc_valid(if2_branch_inst.pred_pc_valid), // Should add this, chk2
 		.next_pc_index(if2_branch_inst.br_idx),
-		.next_pc(if2_branch_inst.pred_pc),
+		.next_pc(if2_branch_inst.pred_pc[31:0]),
 		.next_pc_prediction(if2_branch_inst.prediction) // Should add this, chk3
 
 	);
@@ -788,55 +790,11 @@ module pipeline (
     .rdest_idx(id_rdest_idx)
   );
 
-  //////////////////////////////////////////////////
-  //                                              //
-  //                  ID/DI-registers             //
-  //                                              //
-  //////////////////////////////////////////////////
-
-  assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0) | (sq_hazard)); 
-  assign dispatch_no_hazard = dispatch_no_hazard_comb; // CHECK THIS CAUSE OF CONFLICT
-	assign id_di_NPC = id_di_iq_inst.fetched_inst.npc;
-	assign id_di_IR = id_di_iq_inst.fetched_inst.ir;
-	assign id_di_valid_inst = id_di_iq_inst.fetched_inst.valid_inst;
-  assign id_di_enable = (id_inst_out.valid_inst & dispatch_no_hazard); 
-  //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
-  // synopsys sync_set_reset "reset"
-  always_ff @(posedge clock) begin
-    if (reset | branch_not_taken) begin
-      id_di_inst      <= `SD EMPTY_INST;
-      id_di_ra_idx    <= `SD `ZERO_REG;
-      id_di_rb_idx    <= `SD `ZERO_REG;
-      id_di_rdest_idx <= `SD `ZERO_REG;
-      id_di_iq_inst   <= `SD EMPTY_INST_Q;
-    end else if(id_di_enable) begin 
-      // Update the value
-      id_di_inst      <= `SD id_inst_out;
-      id_di_ra_idx    <= `SD id_ra_idx;
-      id_di_rb_idx    <= `SD id_rb_idx;
-      id_di_rdest_idx <= `SD id_rdest_idx;
-      id_di_iq_inst   <= `SD if_id_inst;
-    end else if(dispatch_no_hazard & ~id_inst_out.valid_inst) begin
-      id_di_inst      <= `SD EMPTY_INST;
-      id_di_ra_idx    <= `SD `ZERO_REG;
-      id_di_rb_idx    <= `SD `ZERO_REG;
-      id_di_rdest_idx <= `SD `ZERO_REG;
-      id_di_iq_inst   <= `SD EMPTY_INST_Q;
-    end
-  end
-
-  //////////////////////////////////////////////////
-  //                                              //
-  //                  DI-Stage                    //
-  //                                              //
-  //////////////////////////////////////////////////
+  assign fr_read_en = (id_inst_out.valid_inst);// & dispatch_no_hazard); // Should not read during stalling for structural hazard
+  assign fr_wr_en = (& rob_retire_out.T_old[`PHYS_IDX])? 0 : 1; 
   
-  //Instantiating the freelist
-	assign fr_read_en = (id_di_inst.valid_inst & dispatch_no_hazard); // Should not read during stalling for structural hazard
-	assign fr_wr_en = (& retired_inst.T_old[`PHYS_IDX])? 0 : 1; 
-	
-	logic id_no_dest_reg;// Instructions that does not have destination register
-	assign id_no_dest_reg = (id_di_rdest_idx == `ZERO_REG);
+  logic id_no_dest_reg;// Instructions that does not have destination register
+  assign id_no_dest_reg = (id_rdest_idx == `ZERO_REG);
 
   assign free_list_out = fr_rs_rob_T;
 
@@ -845,8 +803,8 @@ module pipeline (
     .clock(clock),
     .reset(reset),
     .enable(fr_wr_en),// Write enable from ROB during retire
-    .T_old(retired_inst.T_old), // Comes from ROB during Retire Stage
-    .T_new(retired_inst.T_new),
+    .T_old(rob_retire_out.T_old), // Comes from ROB during Retire Stage
+    .T_new(rob_retire_out.T_new),
     .dispatch_en(fr_read_en), // Structural Hazard detection during Dispatch
     .id_no_dest_reg(id_no_dest_reg), // enabled when dispatched instruction is branch
     
@@ -868,9 +826,9 @@ module pipeline (
     .clock(clock),
     .reset(reset),
     .enable(fr_read_en),    // Should not read during stalling for structural hazard
-    .reg_a(id_di_ra_idx),    // Comes from Decode duringmem2proc_data
-    .reg_b(id_di_rb_idx),    // Comes from Decode duringmem2proc_data
-    .reg_dest(id_di_rdest_idx),  // Comes from Dmem2proc_data
+    .reg_a(id_ra_idx),    // Comes from Decode duringmem2proc_data
+    .reg_b(id_rb_idx),    // Comes from Decode duringmem2proc_data
+    .reg_dest(id_rdest_idx),  // Comes from Dmem2proc_data
     .free_reg(fr_free_reg_T),   // Comes from Free List durmem2proc_data
     .CDB_tag_in(CDB_tag_out),   // Comes from CDB durinmem2proc_data
     .CDB_en(CDB_enable),      // Comes from CDB during Commitmem2proc_data
@@ -878,22 +836,78 @@ module pipeline (
     .branch_incorrect(branch_not_taken),
     
     .map_table_out(map_table_out),
-    .T1(di_inst_in.T1),    // Output for Dispatch and goes to RS
-    .T2(di_inst_in.T2),    // Output for Dispatch and goes to RS
+    .T1(id_T1),    // Output for Dispatch and goes to RS
+    .T2(id_T2),    // Output for Dispatch and goes to RS
     .T_old(T_old)     // Output for Dispatch and goes to RS and ROB
   );
+
+  //////////////////////////////////////////////////
+  //                                              //
+  //                  ID/DI-registers             //
+  //                                              //
+  //////////////////////////////////////////////////
+
+  assign dispatch_no_hazard_comb =  ~((rs_free_rows_next_out == 0) | fr_empty | (rob_free_rows_next_out == 0) | (sq_hazard)); 
+  assign dispatch_no_hazard = dispatch_no_hazard_comb; // CHECK THIS CAUSE OF CONFLICT
+	assign id_di_NPC = id_di_inst.npc;
+	assign id_di_IR = id_di_inst.ir;
+	assign id_di_valid_inst = id_di_inst.inst.valid_inst;
+  assign id_di_enable = (id_inst_out.valid_inst & dispatch_no_hazard); 
+  //assign id_di_enable = (dispatch_no_hazard && if_valid_inst_out);  // always enabled
+  // synopsys sync_set_reset "reset"
+  always_ff @(posedge clock) begin
+    if (reset | branch_not_taken) begin
+      id_di_inst      <= `SD EMPTY_ROW;
+      id_di_T_old     <= `SD `DUMMY_REG;
+      id_di_ra_idx    <= `SD `ZERO_REG;
+      id_di_rb_idx    <= `SD `ZERO_REG;
+      id_di_rdest_idx <= `SD `ZERO_REG;
+      id_di_iq_inst   <= `SD EMPTY_INST_Q;
+    end else if(id_di_enable) begin 
+      // Update the value
+      id_di_inst.inst   <= `SD id_inst_out;
+      id_di_inst.T      <= `SD fr_free_reg_T;
+      id_di_inst.T1     <= `SD id_T1;
+      id_di_inst.T2     <= `SD id_T2;
+      id_di_inst.ir     <= `SD if_id_inst.fetched_inst.ir;
+      id_di_inst.npc    <= `SD if_id_inst.fetched_inst.npc;
+      id_di_inst.sq_idx <= `SD sq_tail;
+      id_di_inst.br_idx <= `SD if_id_inst.branch_inst.br_idx;
+      id_di_T_old       <= `SD T_old;
+      id_di_ra_idx      <= `SD id_ra_idx;
+      id_di_rb_idx      <= `SD id_rb_idx;
+      id_di_rdest_idx   <= `SD id_rdest_idx;
+      id_di_iq_inst     <= `SD if_id_inst;
+    end else if(dispatch_no_hazard & ~id_inst_out.valid_inst) begin
+      id_di_inst      <= `SD EMPTY_ROW;
+      id_di_T_old     <= `SD `DUMMY_REG;
+      id_di_ra_idx    <= `SD `ZERO_REG;
+      id_di_rb_idx    <= `SD `ZERO_REG;
+      id_di_rdest_idx <= `SD `ZERO_REG;
+      id_di_iq_inst   <= `SD EMPTY_INST_Q;
+    end
+  end
+
+  //////////////////////////////////////////////////
+  //                                              //
+  //                  DI-Stage                    //
+  //                                              //
+  //////////////////////////////////////////////////
   
-  assign di_inst_in.inst = id_di_inst;
-  assign di_inst_in.T = fr_free_reg_T;
-  assign di_inst_in.ir = id_di_iq_inst.fetched_inst.ir;
-  assign di_inst_in.npc = id_di_iq_inst.fetched_inst.npc;
-  assign di_inst_in.br_idx = id_di_iq_inst.branch_inst.br_idx;
-  assign di_inst_in.sq_idx = sq_tail;
+  //Instantiating the freelist
+	
+  
+  //assign di_inst_in.inst = id_di_inst;
+  //assign di_inst_in.T = fr_free_reg_T;
+  //assign di_inst_in.ir = id_di_iq_inst.fetched_inst.ir;
+  //assign di_inst_in.npc = id_di_iq_inst.fetched_inst.npc;
+  //assign di_inst_in.br_idx = id_di_iq_inst.branch_inst.br_idx;
+  //assign di_inst_in.sq_idx = sq_tail;
 
   // store queue tail assignment
   //assign id_inst_out.sq_idx = sq_tail;
 
-  assign dispatch_is_store = (id_di_inst.fu_name == FU_ST & id_di_inst.valid_inst);
+  assign dispatch_is_store = (id_di_inst.inst.fu_name == FU_ST & id_di_inst.inst.valid_inst);
   assign dispatch_store_addr = 64'b0; 
   assign dispatch_store_addr_ready = 1'b0; 
   assign dispatch_store_data = 64'b0;
@@ -901,9 +915,9 @@ module pipeline (
   assign sq_hazard = (dispatch_is_store & sq_full);
 
   assign issue_stall = ~is_ex_enable;
-  assign dispatch_en = (dispatch_no_hazard & di_inst_in.inst.valid_inst); 
-  assign ROB_enable = di_inst_in.inst.valid_inst;
-  assign RS_enable = di_inst_in.inst.valid_inst;
+  assign dispatch_en = (dispatch_no_hazard & id_di_inst.inst.valid_inst); 
+  assign ROB_enable = id_di_inst.inst.valid_inst;
+  assign RS_enable = id_di_inst.inst.valid_inst;
   // INSTANTIATING THE ROB
   //assign branch_valid_disp = (id_inst_out.inst.fu_name == FU_BR) ? 1 : 0;
 
@@ -912,26 +926,27 @@ module pipeline (
     .clock(clock),
     .reset(reset),
     .enable(enable),
-    .T_old_in(T_old), // Comes from Map Table During Dispatch
-    .T_new_in(fr_free_reg_T), // Comes from Free List During Dispatch
+    .T_old_in(id_di_T_old), // Comes from Map Table During Dispatch
+    .T_new_in(id_di_inst.T), // Comes from Free List During Dispatch
+    .halt_in(id_di_inst.inst.halt),
+    .illegal_in(id_di_inst.inst.illegal),
     .CDB_tag_in(CDB_tag_out), // Comes from CDB during Commit
     .CAM_en(CDB_enable), // Comes from CDB during Commit
     .CDB_br_valid(co_branch_valid),// ****Heewoo, branch valid signal
     .CDB_br_idx(co_branch_index), // ******Heewoo, comes from CDB during commit, branch index
-    .CDB_sq_valid(ex_co_inst[FU_ST_IDX].busy),
+    .CDB_sq_valid(ex_co_inst[FU_ST_IDX].inst.valid_inst),
     .CDB_sq_idx(ex_co_inst[FU_ST_IDX].sq_idx),
-    .dispatch_en(dispatch_en), // Structural Hazard detection during Dispatch
+    .dispatch_en(ROB_enable), // Structural Hazard detection during Dispatch
     .branch_not_taken(branch_not_taken),
-    .halt_in(id_di_inst.halt),
-    .illegal_in(id_di_inst.illegal),
-    .opcode(id_di_iq_inst.fetched_inst.ir),
+    
+    .opcode(id_di_inst.ir),
     .take_branch(co_take_branch_selected),
     //.branch_valid(branch_valid_disp), // ***Heewoo Same as id_di_branch_inst.en
     .id_branch_inst(id_di_iq_inst.branch_inst), // ***Heewoo added 
     .wr_idx(id_di_rdest_idx),
-    .npc(id_di_iq_inst.fetched_inst.npc),
+    .npc(id_di_inst.npc),
     .is_store(dispatch_is_store),
-    .sq_idx_in(sq_tail),
+    .sq_idx_in(id_di_inst.sq_idx),
     .co_alu_result(co_alu_result_selected),
     
     // OUTPUTS
@@ -956,7 +971,7 @@ module pipeline (
     .CAM_en(CDB_enable), 
     .CDB_in(CDB_tag_out), 
     .dispatch_valid(dispatch_en),
-    .inst_in(di_inst_in), 
+    .inst_in(id_di_inst), 
     .branch_not_taken(branch_not_taken), 
     .issue_stall(issue_stall),
     
@@ -1416,7 +1431,7 @@ module pipeline (
   assign pipeline_commit_wr_en = retired_inst.busy & (retired_inst.T_new != `DUMMY_REG);
   assign pipeline_commit_NPC = retired_inst.branch_inst.en ? retired_inst.branch_inst.pc : 
                                                                retired_inst.npc-4;
-  assign pipeline_commit_phys_reg = retired_inst.T_old;
+  assign pipeline_commit_phys_reg = retired_inst.T_new;
   assign pipeline_commit_phys_from_arch = arch_table[retired_inst.wr_idx][5:0]; 
 
   // For branch prediction accuracy check
@@ -1496,15 +1511,15 @@ module pipeline (
 
 logic arch_enable;
 //assign arch_enable = rob_retire_out.busy & !rob_retire_out.take_branch;
-assign arch_enable = retired_inst.busy & !branch_not_taken; 
+assign arch_enable = rob_retire_out.busy & !branch_not_taken; 
 // assign arch_enable = rob_retire_out.busy;
   //Intsantiating the arch map
   Arch_Map_Table a0(
   	.clock(clock),
   	.reset(reset),
   	.enable(arch_enable),
-  	.T_new_in(retired_inst.T_new), // Comes from ROB during Retire
-    .T_old_in(retired_inst.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
+  	.T_new_in(rob_retire_out.T_new), // Comes from ROB during Retire
+    .T_old_in(rob_retire_out.T_old), //What heewoo added. It is required to find which entry should I update. Comes from ROB during retire.
 
   	.arch_map_table(arch_table) // Arch table status, what heewoo changed from GEN_REG to PHYS_REG
  );
